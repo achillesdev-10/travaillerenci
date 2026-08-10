@@ -21,7 +21,7 @@
 | `injs` | INJS — Institut National de la Jeunesse et des Sports | `https://concours.injsabidjan.com/` | à vérifier | plateforme ciconcours | annuelle (PC-EPS, filières sportives) | ✅ corrigé le 10/08/2026 (l'ancien `concours.injsabidjan.ci` était mort en DNS) |
 | `cafop` | CAFOP — Ministère de l'Éducation Nationale / DECO | `https://www.men-deco.org` | à vérifier | actualités / résultats | par tour (CAFOP IA) | ✅ actif |
 | `insfs` | INSFS — Institut National Supérieur de Formation Sociale | `https://insfs.ciconcours.com` | ouvert | plateforme ciconcours | annuelle | ✅ actif (timeouts CI transitoires — site répond 200) |
-| `aip` | AIP — Agence Ivoirienne de Presse (veille secondaire) | `https://www.aip.ci/` | ouvert | veille presse | quotidienne (relais des communiqués) | ⚠️ instable (accueil 500 / recherche 301 le 10/08/2026) — à surveiller |
+| `aip` | AIP — Agence Ivoirienne de Presse (veille secondaire) | `https://www.aip.ci/` | ouvert | veille presse | quotidienne (relais des communiqués) | ⏸️ désactivée le 10/08/2026 (accueil 500 / recherche 301) — à réactiver ~24/08/2026 |
 | `servicepublic` | Service Public CI (portail transverse) | `https://servicepublic.gouv.ci/` | ouvert | démarches | ponctuel (complément) | ⏸️ désactivé par défaut |
 
 ### Plateformes de la famille `ciconcours.com`

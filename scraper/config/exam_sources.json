@@ -117,8 +117,8 @@
       "category": "administratif",
       "robots_status": "open",
       "verified_at": "2026-08",
-      "notes": "Source secondaire de veille : relaie les communiqués officiels en texte intégral, souvent avant les sites institutionnels. ⚠️ 10/08/2026 : l'accueil répondait en HTTP 500 et /recherche?q=concours en 301 — site instable ; à surveiller, le scraper journalise les erreurs au lieu d'échouer en silence.",
-      "enabled": true
+      "notes": "Source secondaire de veille : relaie les communiqués officiels en texte intégral. ⏸️ DÉSACTIVÉE le 10/08/2026 (accueil en HTTP 500, /recherche?q=concours en 301 — site instable, faisait perdre du temps CI sans résultat). RAPPEL : vérifier et RÉACTIVER (enabled=true) ~24/08/2026 ou après le prochain redémarrage du site.",
+      "enabled": false
     },
     {
       "id": "servicepublic",
