@@ -98,10 +98,10 @@ const SITE_CONFIG = {
   phone: '',
   address: 'Abidjan, Côte d\'Ivoire',
   social: {
-    facebook: 'https://facebook.com/travaillerenci',
-    twitter: 'https://twitter.com/travaillerenci',
-    linkedin: 'https://linkedin.com/company/travaillerenci',
-    instagram: 'https://instagram.com/travaillerenci',
+    facebook: 'https://web.facebook.com/travaillerenci/',
+    linkedin: 'https://www.linkedin.com/in/travailler-en-ci/',
+    tiktok: 'https://www.tiktok.com/@travaillerenci',
+    whatsapp: 'https://whatsapp.com/channel/0029VbD3xgrCMY0E3eGtOR0U',
   },
   currency: 'FCFA',
 };
