@@ -14,9 +14,13 @@
 const UNSPLASH = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=70`;
 
+const PEXELS = (id: number, w = 1400) =>
+  `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}`;
+
 export const IMAGES = {
-  // Héro — jeune professionnel ivoirien / africain
-  hero: UNSPLASH('photo-1573496359142-b8d87734a5a2', 1400),
+  // Héro — photo Pexels (professionnel africain en tenue de travail),
+  // choisie par l'équipe ; le dégradé de la section hero s'affiche dessus.
+  hero: PEXELS(7793639, 1400),
   // Offres d'emploi / bureau
   jobs: UNSPLASH('photo-1521737711867-e3b97375f902', 1000),
   jobsAlt: UNSPLASH('photo-1497366216548-37526070297c', 1000),

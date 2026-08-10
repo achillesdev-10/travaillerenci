@@ -14,6 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from alert_digest import (
+    _parse_lookback_hours,
     already_sent_today,
     matches_exam,
     matches_job,
@@ -127,6 +128,26 @@ class TestMatchesExam(unittest.TestCase):
         self.assertTrue(matches_exam(EXAM, {"sector": "education-formation"}))
         self.assertFalse(matches_exam(EXAM, {"sector": "sante"}))
         self.assertFalse(matches_exam(EXAM, {"sector": "it-digital"}))
+
+
+class TestParseLookbackHours(unittest.TestCase):
+    """Régression CI : GitHub substitue les `vars.` non configurés par une
+    chaîne vide — `int("")` levait ValueError et faisait échouer l'étape
+    « Notifications alertes candidat » du workflow auto-publish."""
+
+    def test_absent_returns_default(self):
+        self.assertEqual(_parse_lookback_hours(None), 24)
+
+    def test_empty_string_returns_default(self):
+        self.assertEqual(_parse_lookback_hours(""), 24)
+        self.assertEqual(_parse_lookback_hours("   "), 24)
+
+    def test_non_numeric_returns_default(self):
+        self.assertEqual(_parse_lookback_hours("abc"), 24)
+
+    def test_valid_value(self):
+        self.assertEqual(_parse_lookback_hours("48"), 48)
+        self.assertEqual(_parse_lookback_hours(" 6 "), 6)
 
 
 class TestAlreadySentToday(unittest.TestCase):

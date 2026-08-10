@@ -625,8 +625,26 @@ class DataStore:
 # Orchestrateur
 # -----------------------------------------------------------------------------
 
+def _parse_lookback_hours(raw: Optional[str]) -> int:
+    """Heures de la fenêtre de nouveauté — défaut 24 h.
+
+    Robuste en CI : GitHub Actions substitue les `vars.` non configurés par une
+    chaîne VIDE (la variable existe, `getenv` ne retombe pas sur le défaut).
+    Une valeur vide ou non numérique retombe sur 24 h au lieu de lever.
+    """
+    if raw is None:
+        return 24
+    stripped = str(raw).strip()
+    if not stripped:
+        return 24
+    try:
+        return int(stripped)
+    except ValueError:
+        return 24
+
+
 def run_digest() -> Dict[str, Any]:
-    lookback_hours = int(os.getenv("ALERT_DIGEST_LOOKBACK_HOURS", "24"))
+    lookback_hours = _parse_lookback_hours(os.getenv("ALERT_DIGEST_LOOKBACK_HOURS"))
     now = datetime.now(timezone.utc)
     cutoff = (now - timedelta(hours=lookback_hours)).isoformat()
 

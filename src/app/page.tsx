@@ -252,7 +252,7 @@ export default async function HomePage({
       {/* ======================================================================== */}
       {/*   HERO — Mobile-first : texte lisible, peu de padding vertical            */}
       {/* ======================================================================== */}
-      <section className="relative overflow-hidden bg-primary/5 dark:bg-primary/10 pt-8 pb-8 sm:pt-14 sm:pb-10 border-b border-border/40">
+      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-orange-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 pt-8 pb-8 sm:pt-14 sm:pb-10 border-b border-border/40">
         <div className="container mx-auto px-4 relative z-10 max-w-6xl">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Colonne texte */}
@@ -290,7 +290,7 @@ export default async function HomePage({
                   className="w-full max-w-[520px] h-[380px] lg:h-[420px] object-cover"
                   fetchPriority="high"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/40 via-transparent to-transparent" aria-hidden="true" />
+                <div className="absolute inset-0 bg-gradient-to-tr from-emerald-950/70 via-emerald-900/25 to-transparent" aria-hidden="true" />
               </div>
 
               {/* Badge : offres vérifiées */}

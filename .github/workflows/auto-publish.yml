@@ -76,6 +76,8 @@ jobs:
           WHATSAPP_NOTIFY_ENABLED: ${{ vars.WHATSAPP_NOTIFY_ENABLED }}
           WHATSAPP_TOKEN: ${{ secrets.WHATSAPP_TOKEN }}
           WHATSAPP_PHONE_NUMBER_ID: ${{ secrets.WHATSAPP_PHONE_NUMBER_ID }}
-          ALERT_DIGEST_LOOKBACK_HOURS: ${{ vars.ALERT_DIGEST_LOOKBACK_HOURS }}
+          # Défaut 24 h : GitHub substitue les vars. non configurées par une
+          # chaîne vide, et `int('')` levait ValueError (crash de cette étape).
+          ALERT_DIGEST_LOOKBACK_HOURS: ${{ vars.ALERT_DIGEST_LOOKBACK_HOURS || '24' }}
         run: |
           python scraper/alert_digest.py

@@ -54,7 +54,9 @@ export default function SocialLinks({
           className={`${box} ${tone} flex items-center justify-center transition-colors`}
         >
           <svg className={svg} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path d={SOCIAL_ICON_PATHS[social.label]} />
+            {/* Clés du dictionnaire en minuscules (facebook, tiktok…) vs
+                labels affichés en capitales (Facebook…) — normalisation ici. */}
+            <path d={SOCIAL_ICON_PATHS[social.label.toLowerCase()]} />
           </svg>
         </a>
       ))}
