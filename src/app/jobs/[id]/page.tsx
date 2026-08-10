@@ -8,6 +8,8 @@ import SaveButton from '@/components/saved/SaveButton';
 import type { JobOfferSchema } from '@/types';
 import { formatDate, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
+import { jobDefaultImage } from '@/lib/images';
+import CoverImage from '@/components/content/CoverImage';
 
 export const revalidate = 300;
 
@@ -117,6 +119,16 @@ export default async function JobDetailPage({ params }: PageProps) {
       {/* ============= HERO / HEADER DU POSTE ============= */}
       <section className="bg-primary/5 dark:bg-primary/10 border-b border-gray-100 dark:border-slate-800">
         <div className="container mx-auto px-4 pt-4 sm:pt-8 pb-6 max-w-4xl">
+          {/* Bannière photo par défaut selon la catégorie */}
+          <div className="relative h-40 sm:h-56 overflow-hidden rounded-2xl sm:rounded-3xl shadow-lg mb-5 sm:mb-6">
+            <CoverImage
+              src={jobDefaultImage(job.category)}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" aria-hidden="true" />
+          </div>
+
           <nav aria-label="Fil d'Ariane" className="mb-4 sm:mb-6">
             <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] sm:text-sm text-gray-500 dark:text-gray-400">
               <li>

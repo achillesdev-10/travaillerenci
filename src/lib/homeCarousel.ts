@@ -16,6 +16,7 @@ import type { ContentCategory, JobOfferSchema } from '@/types';
 import type { Exam } from '@/types/exam';
 import type { BlogPost } from '@/types/blog';
 import { getSiteHostname } from '@/lib/site';
+import { IMAGES, jobDefaultImage, examDefaultImage } from '@/lib/images';
 
 export interface CarouselSlide {
   id: string;
@@ -178,7 +179,8 @@ export async function buildCarouselSlides(
       subtitle: `${job.company} · ${job.location}`,
       href: `/jobs/${job.id}`,
       type,
-      image: null,
+      // Image par défaut par catégorie (les annonces scrapées n'ont pas d'image)
+      image: jobDefaultImage(job.category),
       sourceUrl: job.source_url || job.apply_link,
       fallback: fallbackFor(job.source_url || job.apply_link, job.title, i),
     });
@@ -191,7 +193,8 @@ export async function buildCarouselSlides(
       subtitle: `${exam.organizer} · Concours ${exam.category}`,
       href: `/concours/${exam.slug || exam.id}`,
       type: 'concours',
-      image: null,
+      // Image par défaut par catégorie de concours
+      image: examDefaultImage(exam.category),
       sourceUrl: exam.source_url,
       fallback: fallbackFor(exam.source_url, exam.title, i + offers.length),
     });
@@ -204,7 +207,7 @@ export async function buildCarouselSlides(
       subtitle: `Blog · ${post.author}`,
       href: `/blog/${post.slug}`,
       type: 'blog',
-      image: post.cover_image || null,
+      image: post.cover_image || IMAGES.blog,
       sourceUrl: null,
       fallback: fallbackFor(null, post.title, i + offers.length + exams.length),
     });
@@ -216,11 +219,12 @@ export async function buildCarouselSlides(
     return { slides: trimmed };
   }
 
-  // Récupération asynchrone des images OpenGraph depuis les sites d'origine
-  // (chaque échec bascule proprement sur la couleur locale + favicon).
+  // Récupération asynchrone des images OpenGraph depuis les sites d'origine.
+  // On tente l'image réelle d'abord ; si elle est absente ou échoue, la slide
+  // garde son image par défaut par catégorie (déjà renseignée).
   const results = await Promise.allSettled(
     trimmed.map((s) =>
-      s.image ? Promise.resolve(s.image) : s.sourceUrl ? fetchOgImage(s.sourceUrl) : Promise.resolve(null),
+      s.sourceUrl ? fetchOgImage(s.sourceUrl) : Promise.resolve(s.image),
     ),
   );
 

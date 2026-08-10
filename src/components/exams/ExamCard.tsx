@@ -9,6 +9,8 @@ import {
 } from '@/lib/examConstants';
 import { formatDate, formatRelativeTime } from '@/lib/utils';
 import SaveButton from '@/components/saved/SaveButton';
+import CoverImage from '@/components/content/CoverImage';
+import { examDefaultImage } from '@/lib/images';
 
 export default function ExamCard({ exam, priority = false }: { exam: Exam; priority?: boolean }) {
   const phase = examPhase(exam);
@@ -18,7 +20,17 @@ export default function ExamCard({ exam, priority = false }: { exam: Exam; prior
 
   return (
     <Link href={examUrl(exam)} className="group block w-full text-left" prefetch={priority}>
-      <article className="relative flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-black/5 transition-all duration-200 hover:border-primary/25 hover:shadow-lg active:scale-[0.99] sm:p-5">
+      <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm shadow-black/5 transition-all duration-200 hover:border-primary/25 hover:shadow-lg active:scale-[0.99]">
+        {/* Bannière photo par défaut selon la catégorie de concours */}
+        <div className="relative h-28 sm:h-32 overflow-hidden bg-gray-100 dark:bg-slate-800">
+          <CoverImage
+            src={examDefaultImage(exam.category)}
+            alt=""
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/35 to-transparent" aria-hidden="true" />
+        </div>
+        <div className="flex flex-1 flex-col p-4 sm:p-5">
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <span
             className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10.5px] font-bold ${EXAM_PHASE_BADGE[phase]}`}
@@ -83,6 +95,7 @@ export default function ExamCard({ exam, priority = false }: { exam: Exam; prior
               <path d="M9 5l7 7-7 7" />
             </svg>
           </span>
+        </div>
         </div>
       </article>
     </Link>

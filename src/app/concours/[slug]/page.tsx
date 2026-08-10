@@ -20,6 +20,8 @@ import {
 import { CATEGORY_SEO } from '@/lib/examSeo';
 import { cn, formatDate, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
+import { examDefaultImage } from '@/lib/images';
+import CoverImage from '@/components/content/CoverImage';
 import type { Exam } from '@/types/exam';
 
 export const revalidate = 300;
@@ -188,6 +190,16 @@ export default async function ConcoursDetailPage({ params }: PageProps) {
       {/* ============================ EN-TÊTE ============================ */}
       <section className="border-b border-gray-100 bg-emerald-500/5 dark:border-slate-800 dark:bg-emerald-500/10">
         <div className="container mx-auto max-w-4xl px-4 pb-6 pt-4 sm:pt-8">
+          {/* Bannière photo par défaut selon la catégorie de concours */}
+          <div className="relative h-40 sm:h-56 overflow-hidden rounded-2xl sm:rounded-3xl shadow-lg mb-5 sm:mb-6">
+            <CoverImage
+              src={examDefaultImage(exam.category)}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" aria-hidden="true" />
+          </div>
+
           <nav aria-label="Fil d'Ariane" className="mb-4 sm:mb-6">
             <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-gray-500 dark:text-gray-400 sm:text-sm">
               <li>

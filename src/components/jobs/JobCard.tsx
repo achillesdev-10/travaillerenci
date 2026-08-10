@@ -2,6 +2,8 @@ import Link from 'next/link';
 import type { JobOfferSchema } from '@/types';
 import { formatRelativeTime } from '@/lib/utils';
 import SaveButton from '@/components/saved/SaveButton';
+import CoverImage from '@/components/content/CoverImage';
+import { jobDefaultImage } from '@/lib/images';
 
 interface JobCardProps {
   job: JobOfferSchema;
@@ -15,7 +17,17 @@ export default function JobCard({ job, priority = false }: JobCardProps) {
       className="group block w-full text-left"
       prefetch={priority}
     >
-      <article className="relative bg-white rounded-xl sm:rounded-2xl border border-gray-100 p-4 sm:p-5 shadow-sm shadow-black/5 transition-all duration-200 active:scale-[0.99] hover:shadow-md hover:border-primary/20">
+      <article className="relative bg-white rounded-xl sm:rounded-2xl border border-gray-100 shadow-sm shadow-black/5 transition-all duration-200 active:scale-[0.99] hover:shadow-md hover:border-primary/20 overflow-hidden">
+        {/* Bannière photo par défaut selon la catégorie */}
+        <div className="relative h-28 sm:h-36 overflow-hidden bg-gray-100 dark:bg-slate-800">
+          <CoverImage
+            src={jobDefaultImage(job.category)}
+            alt=""
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/35 to-transparent" aria-hidden="true" />
+        </div>
+        <div className="p-4 sm:p-5">
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex flex-wrap items-center gap-2 min-w-0">
             {job.is_verified ? (
@@ -106,6 +118,7 @@ export default function JobCard({ job, priority = false }: JobCardProps) {
               <path d="m12 5 7 7-7 7" />
             </svg>
           </span>
+        </div>
         </div>
       </article>
     </Link>

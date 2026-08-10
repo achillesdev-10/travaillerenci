@@ -2,6 +2,8 @@ import Link from 'next/link';
 import type { JobOfferSchema } from '@/types';
 import { formatRelativeTime } from '@/lib/utils';
 import SaveButton from '@/components/saved/SaveButton';
+import CoverImage from '@/components/content/CoverImage';
+import { jobDefaultImage } from '@/lib/images';
 
 function savedType(job: JobOfferSchema): 'job' | 'internship' | 'scholarship' | 'exam' {
   if (job.category === 'internship') return 'internship';
@@ -17,7 +19,17 @@ export default function CompactJobCard({ job }: { job: JobOfferSchema }) {
       className="group block h-full w-full"
       prefetch={false}
     >
-      <article className="relative flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-3.5 sm:p-4 shadow-sm shadow-black/5 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md active:scale-[0.99]">
+      <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm shadow-black/5 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md active:scale-[0.99]">
+        {/* Bannière photo par défaut selon la catégorie (les offres scrapées n'ont pas d'image) */}
+        <div className="relative h-24 sm:h-28 overflow-hidden bg-gray-100 dark:bg-slate-800">
+          <CoverImage
+            src={jobDefaultImage(job.category)}
+            alt=""
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/35 to-transparent" aria-hidden="true" />
+        </div>
+        <div className="flex flex-1 flex-col p-3.5 sm:p-4">
         <div className="mb-2 flex items-center gap-1.5 flex-wrap">
           <span className="inline-flex items-center rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-bold text-accent">
             {job.contract_type}
@@ -59,6 +71,7 @@ export default function CompactJobCard({ job }: { job: JobOfferSchema }) {
               <path d="m12 5 7 7-7 7" />
             </svg>
           </span>
+        </div>
         </div>
       </article>
     </Link>

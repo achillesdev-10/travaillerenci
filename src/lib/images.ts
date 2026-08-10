@@ -42,7 +42,50 @@ export const IMAGES = {
   transport: UNSPLASH('photo-1601584115197-04ecc0da31d7', 800),
   // Communauté / réseaux
   community: UNSPLASH('photo-1529156069898-49953e39b3ac', 1200),
+  // Catégories de concours (administratif, sécurité, militaire, autre…)
+  // NB : santé et enseignement réutilisent IMAGES.sante / IMAGES.education.
+  examAdmin: UNSPLASH('photo-1486406146926-c627a92ad1ab', 1000),
+  examSecurite: UNSPLASH('photo-1557597774-9d273605dfa9', 1000),
+  examMilitaire: UNSPLASH('photo-1529059997568-3d847b1154f0', 1000),
+  examAutre: UNSPLASH('photo-1507679799987-c73779587ccf', 1000),
 } as const;
+
+// -----------------------------------------------------------------------------
+// Images par défaut par catégorie — utilisées quand une annonce n'a pas
+// d'image propre (les offres scrapées n'en ont jamais ; les concours non plus).
+// -----------------------------------------------------------------------------
+
+/** Image par défaut d'une offre d'emploi selon sa catégorie. */
+export function jobDefaultImage(category?: string | null): string {
+  switch (category) {
+    case 'internship':
+      return IMAGES.internship;
+    case 'scholarship':
+      return IMAGES.scholarship;
+    case 'exam':
+      return IMAGES.concours;
+    default:
+      return IMAGES.jobs;
+  }
+}
+
+/** Image par défaut d'un concours selon sa catégorie. */
+export function examDefaultImage(category?: string | null): string {
+  switch (category) {
+    case 'administratif':
+      return IMAGES.examAdmin;
+    case 'sante':
+      return IMAGES.sante;
+    case 'enseignement':
+      return IMAGES.education;
+    case 'securite':
+      return IMAGES.examSecurite;
+    case 'militaire':
+      return IMAGES.examMilitaire;
+    default:
+      return IMAGES.examAutre;
+  }
+}
 
 /**
  * Dégradés de repli aux couleurs de la marque, utilisés en arrière-plan des
