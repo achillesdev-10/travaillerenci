@@ -278,6 +278,7 @@ SUPABASE_SERVICE_ROLE_KEY=xxxx.yyyy.zzzz
 - [ ] Base de données Supabase + migrations SQL
 - [ ] SEO : métadonnées dynamiques, sitemap, OG images
 - [x] Emails transactionnels (Resend : mot de passe oublié, vérification d'email, alertes)
+  — diagnostic & configuration : [`docs/EMAIL_DELIVERY.md`](docs/EMAIL_DELIVERY.md)
 - [ ] Dashboard admin (modération offres + entreprises)
 - [ ] Mode hors-ligne : données mockées `src/services/*`
 

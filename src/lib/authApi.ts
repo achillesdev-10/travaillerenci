@@ -48,10 +48,11 @@ export function apiRegister(input: {
   diploma?: string;
   sectors?: string[];
 }) {
-  return post<{ user: { id: string; email: string; name: string; role: AuthRole } }>(
-    '/api/auth/register',
-    input,
-  );
+  return post<{
+    user: { id: string; email: string; name: string; role: AuthRole };
+    /** Statut réel de l'email de confirmation (config absente / échec d'envoi). */
+    email?: { configured: boolean; sent: boolean; message?: string };
+  }>('/api/auth/register', input);
 }
 
 export function apiVerifyEmail(input: { email: string }) {

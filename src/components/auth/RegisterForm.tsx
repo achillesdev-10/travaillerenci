@@ -30,6 +30,10 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
   const [profileSectors, setProfileSectors] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  // Compte créé mais email de confirmation non envoyé (config absente / échec)
+  // : on le signale au lieu de rediriger silencieusement.
+  const [registered, setRegistered] = useState(false);
+  const [emailWarning, setEmailWarning] = useState<string | null>(null);
 
   function toggleSector(slug: string) {
     setProfileSectors((prev) =>
@@ -90,6 +94,21 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
         return;
       }
 
+      // Email de confirmation : si l'envoi n'a pas eu lieu (clé Resend absente
+      // ou échec SMTP), on l'explique explicitement au lieu de rediriger en
+      // silence — le bandeau du dashboard ne suffit pas à expliquer une
+      // absence d'email (diagnostic « aucun email reçu »).
+      const emailStatus = result.data.email;
+      if (emailStatus && !emailStatus.sent) {
+        setEmailWarning(
+          emailStatus.message ||
+            "Aucun email de confirmation n'a été envoyé. Votre compte fonctionne, " +
+              'mais pensez à confirmer votre adresse depuis votre espace.',
+        );
+        setRegistered(true);
+        return;
+      }
+
       // Succès : la session (cookie httpOnly) a été posée par le serveur.
       redirectToDashboard();
     } catch (err: unknown) {
@@ -120,6 +139,23 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
         </div>
       ) : null}
 
+      {registered ? (
+        <div className="space-y-4 rounded-2xl border border-amber-500/30 bg-amber-50 dark:bg-slate-800/60 p-4 text-xs">
+          <p className="font-bold text-gray-900 dark:text-white">Compte créé ✓</p>
+          <p className="leading-relaxed text-gray-700 dark:text-amber-100/90">
+            {emailWarning}
+          </p>
+          <button
+            type="button"
+            onClick={redirectToDashboard}
+            className="w-full rounded-xl bg-primary py-2.5 text-xs font-bold text-white hover:brightness-110 transition-all shadow-md shadow-primary/20"
+          >
+            Accéder à mon espace
+          </button>
+        </div>
+      ) : null}
+
+      {registered ? null : (
       <div className="space-y-3">
         <label className="block text-xs font-bold text-gray-700 dark:text-slate-400 uppercase tracking-widest">
           Je souhaite :
@@ -156,7 +192,9 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
           </button>
         </div>
       </div>
+      )}
 
+      {registered ? null : (
       <form onSubmit={handleRegister} className="space-y-4 pt-2">
         {role === 'candidate' ? (
           <div>
@@ -299,6 +337,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
           {loading ? 'Création du compte...' : 'S’inscrire'}
         </button>
       </form>
+      )}
 
       {isGoogleAuthVisible() && (
         <>

@@ -78,20 +78,40 @@ export async function POST(request: Request) {
 
     // Email de vérification : envoyé après inscription (non bloquant — le
     // compte est utilisable immédiatement, un bandeau invite à confirmer).
-    if (isEmailConfigured()) {
+    // Le statut RÉEL de l'envoi est renvoyé au client : si l'email ne peut pas
+    // partir (clé Resend absente, domaine d'expéditeur non vérifié…), le
+    // candidat doit le savoir immédiatement au lieu de constater silencieusement
+    // l'absence d'email (cause racine du « aucun email de confirmation reçu »).
+    const emailStatus: { configured: boolean; sent: boolean; message?: string } = {
+      configured: isEmailConfigured(),
+      sent: false,
+    };
+    if (emailStatus.configured) {
       try {
         const token = await createEmailVerificationToken(user.id);
         const verifyUrl = `${getSiteUrl()}/api/auth/verify-email?token=${encodeURIComponent(token)}`;
         await sendVerificationEmail(user.email, verifyUrl);
+        emailStatus.sent = true;
       } catch (err) {
         // L'inscription ne doit JAMAIS échouer à cause de l'email de vérification.
         console.error('POST /api/auth/register sendVerificationEmail error:', err);
+        emailStatus.message =
+          "Échec de l'envoi de l'email de confirmation (détails dans les logs serveur).";
       }
+    } else {
+      // Cause classique du « aucun email reçu » : RESEND_API_KEY absent de
+      // l'environnement. Journalisée BRUYAMMENT (warn) pour le diagnostic.
+      console.warn(
+        `[auth] ⚠️ RESEND_API_KEY absent : aucun email de confirmation envoyé à ${user.email} ` +
+          "(configurer la variable dans l'environnement Vercel — voir docs/EMAIL_DELIVERY.md).",
+      );
+      emailStatus.message =
+        "L'envoi d'emails n'est pas configuré sur cet environnement (clé Resend manquante).";
     }
 
     // Session réelle : jeton HMAC signé dans un cookie httpOnly (30 jours).
     const token = await issueUserSessionToken(user);
-    const response = NextResponse.json({ user }, { status: 201 });
+    const response = NextResponse.json({ user, email: emailStatus }, { status: 201 });
     return attachUserSessionCookie(response, token);
   } catch (err) {
     console.error('POST /api/auth/register error:', err);

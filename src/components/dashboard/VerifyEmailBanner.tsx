@@ -6,11 +6,20 @@ import { apiVerifyEmail } from '@/lib/authApi';
 /** Bandeau « email non vérifié » — permet de renvoyer le lien de confirmation. */
 export default function VerifyEmailBanner({ email }: { email: string }) {
   const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   async function resend() {
     setState('sending');
+    setErrorMsg(null);
     const result = await apiVerifyEmail({ email });
-    setState(result.ok ? 'sent' : 'error');
+    if (result.ok) {
+      setState('sent');
+    } else {
+      // Ex. « L'envoi d'emails n'est pas configuré sur le site pour le moment. »
+      // (503 renvoyé par POST /api/auth/verify-email quand RESEND_API_KEY manque)
+      setState('error');
+      setErrorMsg(result.error);
+    }
   }
 
   return (
@@ -40,14 +49,21 @@ export default function VerifyEmailBanner({ email }: { email: string }) {
             Email envoyé
           </span>
         ) : (
-          <button
-            type="button"
-            onClick={resend}
-            disabled={state === 'sending'}
-            className="rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white px-4 py-2.5 text-xs font-bold transition-all"
-          >
-            {state === 'sending' ? 'Envoi…' : 'Renvoyer le lien'}
-          </button>
+          <div className="flex flex-col items-stretch gap-1.5">
+            <button
+              type="button"
+              onClick={resend}
+              disabled={state === 'sending'}
+              className="rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white px-4 py-2.5 text-xs font-bold transition-all"
+            >
+              {state === 'sending' ? 'Envoi…' : 'Renvoyer le lien'}
+            </button>
+            {errorMsg ? (
+              <p className="max-w-[220px] text-[11px] leading-snug text-rose-600 dark:text-rose-300">
+                {errorMsg}
+              </p>
+            ) : null}
+          </div>
         )}
       </div>
     </div>
