@@ -20,6 +20,17 @@ export function formatDateShort(date: string | Date, locale: string = 'fr-FR'): 
   });
 }
 
+/**
+ * « il y a Xh » — durée écoulée depuis la date passée en paramètre.
+ *
+ * IMPORTANT (sémantique) : dans les cartes d'offres/concours, `date` est
+ * TOUJOURS `created_at` côté TravaillerEnCi = la date de 1ᵉʳ ajout sur la
+ * plateforme (SQLite `datetime('now')` / Supabase timestamptz `NOW()`), posée
+ * à l'insertion et conservée par les mises à jour du scraper. Ce n'est jamais
+ * la date de publication de l'annonce sur le site source — un « il y a 15h »
+ * juste après un scraping frais signifie donc simplement que l'offre existait
+ * déjà au cycle précédent (comportement voulu, pas un signe d'inactivité).
+ */
 export function formatRelativeTime(date: string | Date): string {
   const now = new Date();
   const d = typeof date === 'string' ? new Date(date) : date;

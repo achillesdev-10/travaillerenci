@@ -24,6 +24,8 @@
       python scraper/exams_runner.py --no-ai
       python scraper/exams_runner.py --similarity-threshold 0.3
       python scraper/exams_runner.py --check-sources   # rapport robots.txt (docs)
+      python scraper/exams_runner.py --maintenance-only  # publication ≥ 21 min + purge 5 semaines
+                                                        # (exécuté par le workflow auto-moderation)
 ===============================================================================
 """
 
@@ -223,6 +225,14 @@ def run(
             purged_old = repo.purge_old_exams()
             if purged_old:
                 logger.info(f"🗑  {purged_old} concours supprimé(s) automatiquement (info > 5 semaines).")
+            # Publication AUTOMATIQUE des concours restés en pending depuis ≥ 21
+            # min (même règle que les offres) : le scraping d'un run précédent
+            # ne doit jamais laisser /concours vide faute de modération manuelle.
+            auto_published = repo.auto_publish_pending()
+            if auto_published:
+                logger.info(
+                    f"⚡ {auto_published} concours en attente validés & publiés automatiquement (≥ 21 min)."
+                )
             stats = repo.stats()
     except Exception as exc:
         logger.error(f"❌ Erreur BDD : {exc}", exc_info=True)
@@ -243,6 +253,47 @@ def run(
     return 0
 
 
+def run_maintenance() -> int:
+    """
+    Tâche de maintenance automatique du module concours, SANS scraping :
+      • publication des concours en attente depuis ≥ 21 minutes
+      • suppression des concours dont l'information a plus de 5 semaines
+        (sauf si les inscriptions sont encore ouvertes)
+
+    Utilisée par le workflow GitHub Actions `auto-moderation` (exécution toutes
+    les 15 minutes) pour que la modération automatique des concours fonctionne
+    même quand personne ne se connecte à /admin/exams. Réutilise les fonctions
+    testées de ExamRepository (scraper/tests/test_repository_maintenance.py :
+    `test_auto_publish_after_21_minutes`, `test_purge_old_exams_after_5_weeks`).
+    Les opérations SQLite sont TOUJOURS exécutées, puis répliquées sur Supabase
+    (production) quand SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY sont fournies.
+    """
+    exam_auto_published = 0
+    exam_purged = 0
+    try:
+        with ExamRepository(DB_PATH) as repo:
+            # Publication automatique des concours en attente ≥ 21 min (même
+            # règle que les offres : l'admin garde la main au début).
+            exam_auto_published = repo.auto_publish_pending()
+            exam_purged = repo.purge_old_exams()
+    except Exception as exc:
+        logger.error(f"❌ Maintenance (concours) impossible : {exc}", exc_info=True)
+        return 1
+
+    if exam_auto_published:
+        logger.info(f"⚡ {exam_auto_published} concours en attente publié(s) automatiquement (≥ 21 min).")
+    if exam_purged:
+        logger.info(f"🗑  {exam_purged} concours supprimé(s) automatiquement (info > 5 semaines).")
+    # Ligne de synthèse INCONDITIONNELLE : les logs du workflow doivent toujours
+    # montrer que le traitement de la table `exams` a bien été exécuté, même
+    # quand aucun concours n'était éligible (diagnostic du « 0 concours »).
+    logger.info(
+        f"📋 Maintenance concours terminée : {exam_auto_published} publié(s) automatiquement, "
+        f"{exam_purged} purgé(s)."
+    )
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="TravaillerEnCi — module Concours (table exams)")
     parser.add_argument("--sources", type=str, default="", help="Ids de sources séparés par des virgules (défaut : toutes)")
@@ -256,8 +307,16 @@ def main() -> int:
         # « %% » : échappement printf exigé par argparse dans les chaînes d'aide.
         help=f"Seuil anti-duplication source↔réécriture (défaut : {DEFAULT_SIMILARITY_THRESHOLD * 100:.0f} %%)",
     )
+    parser.add_argument(
+        "--maintenance-only",
+        action="store_true",
+        help="Sans scraping : publie les concours en attente (≥ 21 min), purge les fiches de plus de 5 semaines, puis quitte",
+    )
     parser.add_argument("--check-sources", action="store_true", help="Rapport robots.txt des sources puis quitter")
     args = parser.parse_args()
+
+    if args.maintenance_only:
+        return run_maintenance()
 
     if args.check_sources:
         return report_sources()

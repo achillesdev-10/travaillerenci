@@ -28,9 +28,19 @@ jobs:
             pip install -r scraper/requirements.txt
           fi
 
-      - name: Maintenance automatique (publication ≥ 21 min + purge > 21 jours)
+      - name: Maintenance automatique des offres (publication ≥ 21 min + purge > 21 jours)
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           python scraper/scraper.py --maintenance-only
+
+      - name: Maintenance automatique des concours (publication ≥ 21 min + purge > 5 semaines)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          # Module concours (table exams) : même règle d'auto-publication que les
+          # offres — les concours en pending depuis ≥ 21 min sont publiés pour que
+          # /concours ne reste jamais vide faute de modération manuelle.
+          python scraper/exams_runner.py --maintenance-only

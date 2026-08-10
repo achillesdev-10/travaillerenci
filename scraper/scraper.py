@@ -355,6 +355,14 @@ def run_maintenance() -> int:
         logger.info(f"⚡ {exam_auto_published} concours en attente publié(s) automatiquement (≥ 21 min).")
     if exam_purged:
         logger.info(f"🗑  {exam_purged} concours supprimé(s) automatiquement (info > 5 semaines).")
+    # Synthèse INCONDITIONNELLE (offres + concours) : les logs du workflow doivent
+    # toujours montrer que la table `exams` a été traitée, même quand aucun
+    # concours n'était éligible — c'est le log qui a manqué lors du diagnostic
+    # du « 0 concours recensés » sur /concours.
+    logger.info(
+        f"📋 Maintenance terminée — Offres : {auto_published} publiée(s), {purged_old} purgée(s), "
+        f"{expired} expirée(s) | Concours : {exam_auto_published} publié(s), {exam_purged} purgé(s)."
+    )
     if not (auto_published or purged_old or expired or exam_auto_published or exam_purged):
         logger.info("Maintenance : rien à faire (aucun contenu éligible).")
     return 0

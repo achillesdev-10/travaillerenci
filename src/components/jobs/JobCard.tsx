@@ -37,6 +37,12 @@ export default function JobCard({ job, priority = false }: JobCardProps) {
               {job.contract_type}
             </span>
           </div>
+          {/* « il y a Xh » = durée depuis la 1ᵉʳ intégration de l'offre sur
+              TravaillerEnCi (created_at, UTC — posée à l'insertion, jamais
+              réécrite par les rafraîchissements du scraper). Ce n'est PAS la
+              date de publication sur le site source : une offre « il y a 15h »
+              juste après un scraping frais est une offre ajoutée au cycle
+              précédent et simplement mise à jour — comportement voulu. */}
           <span className="flex-shrink-0 text-[11px] sm:text-xs text-gray-400 font-medium">
             {formatRelativeTime(job.created_at)}
           </span>
