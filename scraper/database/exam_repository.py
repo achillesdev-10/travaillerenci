@@ -21,6 +21,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from scraper.core.similarity_check import is_duplicate_title
 from scraper.models.exam_item import (
     ExamItem,
     compute_min_diploma_level,
@@ -147,7 +148,12 @@ class ExamRepository:
              (intitulés identiques — ex. « CONCOURS ADMINISTRATIFS 2026 ») ;
           3. titre identique + MÊME domaine source, organisateur différent
              (dédup inter-sources : la même annonce scrapée par deux sources ne
-             doit créer qu'une fiche).
+             doit créer qu'une fiche) ;
+          4. titre SIMILAIRE toutes sources confondues (is_duplicate_title,
+             seuil 0.88) — le même concours collecté par deux sources avec des
+             intitulés quasi identiques (« CONCOURS ADMINISTRATIFS 2026 » sur
+             ENA et GUCACI, « Communiqu resultats d admission pro » vs
+             « Resultats d'admission pro »).
 
         NB — compromis assumé : un intitulé identique sur le même domaine est
         considéré comme le même concours. Pour un communiqué multi-filières
@@ -165,7 +171,7 @@ class ExamRepository:
         host = url_hostname(item.source_url)
         # 1) URL exacte.
         cur.execute(
-            "SELECT id, source_url FROM exams WHERE source_url = ? LIMIT 1",
+            "SELECT id, source_url, status FROM exams WHERE source_url = ? LIMIT 1",
             (item.source_url,),
         )
         row = cur.fetchone()
@@ -174,7 +180,7 @@ class ExamRepository:
         # 2) Titre + organisateur + même domaine, insensibles à la casse.
         if host:
             cur.execute(
-                "SELECT id, source_url FROM exams "
+                "SELECT id, source_url, status FROM exams "
                 "WHERE UPPER(TRIM(title)) = ? AND UPPER(TRIM(organizer)) = ? "
                 "LIMIT 50",
                 (title_key, org_key),
@@ -185,12 +191,24 @@ class ExamRepository:
         # 3) Titre identique + même domaine source, organisateur différent.
         if host:
             cur.execute(
-                "SELECT id, source_url FROM exams WHERE UPPER(TRIM(title)) = ? LIMIT 50",
+                "SELECT id, source_url, status FROM exams WHERE UPPER(TRIM(title)) = ? LIMIT 50",
                 (title_key,),
             )
             for cand in cur.fetchall():
                 if url_hostname(cand["source_url"]) == host:
                     return cand, "title_domain"
+        # 4) Titre SIMILAIRE inter-sources (volume faible : parcours complet).
+        #    Le même concours publié par deux sources distinctes (ENA + GUCACI)
+        #    ne doit produire qu'une fiche. NB : les fiches REJETÉES (bruit,
+        #    hors-sujet) sont exclues des cibles — un nouveau concours légitime
+        #    au titre proche d'une fiche rejetée doit être INSÉRÉ, pas absorbé
+        #    (le statut 'rejected' serait préservé et la fiche enterrée).
+        cur.execute(
+            "SELECT id, source_url, status, title FROM exams WHERE status != 'rejected'"
+        )
+        for cand in cur.fetchall():
+            if is_duplicate_title(cand["title"], item.title):
+                return cand, "title_similar"
         return None, ""
 
     def upsert(self, item: ExamItem) -> tuple[str, bool]:
@@ -205,16 +223,42 @@ class ExamRepository:
         cur = self.conn.cursor()
         now = datetime.now().isoformat()
 
-        # Fusion par titre+domaine : la fiche la plus spécifique (URL de détail)
-        # gagne. Si l'existant est DÉJÀ aussi spécifique (ou plus) que le nouvel
-        # item (ex. page d'accueil scrapée par une autre source), on ignore le
-        # doublon : on ne réécrit PAS l'organisateur de la fiche en place avec
-        # celui d'une source tierce (corruption potentielle).
+        # Fusion par titre+domaine (règles 3-4) : la fiche la plus spécifique
+        # (URL de détail) gagne. Si l'existant est DÉJÀ aussi spécifique (ou
+        # plus) que le nouvel item (ex. page d'accueil scrapée par une autre
+        # source), on ignore le doublon : on ne réécrit PAS l'organisateur de
+        # la fiche en place avec celui d'une source tierce (corruption
+        # potentielle).
         source_url = item.source_url
-        if row and match_mode == "title_domain":
+        if row and match_mode in ("title_domain", "title_similar"):
             existing_url = row["source_url"] or ""
             if self._url_specificity(existing_url) >= self._url_specificity(source_url):
                 return row["id"], False
+
+        # Une fiche rejetée (hors-sujet, --cleanup-noise) reste rejetée quand
+        # le scraper la re-collecte : la page source n'ayant pas changé, on ne
+        # la fait pas repasser en pending (elle serait auto-publiée 21 min
+        # plus tard et le bruit reviendrait). La réouverture reste possible
+        # manuellement en modération (/admin/exams).
+        status_value = "rejected" if (row and str(row["status"] or "") == "rejected") else item.status
+
+        # Doublon inter-sources (règles 3-4) : union des documents de la fiche
+        # en place avec ceux du nouvel item (chacune des sources peut référencer
+        # des PDF différents), l'item restant la source de vérité des champs.
+        if row and match_mode in ("title_domain", "title_similar"):
+            try:
+                existing_docs = (
+                    json.loads(row["documents"])
+                    if isinstance(row["documents"], str)
+                    else (row["documents"] or [])
+                )
+            except Exception:
+                existing_docs = []
+            seen = {str(d.get("url")) for d in item.documents if isinstance(d, dict) and d.get("url")}
+            for doc in existing_docs:
+                if isinstance(doc, dict) and doc.get("url") and str(doc["url"]) not in seen:
+                    item.documents.append(doc)
+                    seen.add(str(doc["url"]))
 
         payload = (
             item.title,
@@ -239,7 +283,7 @@ class ExamRepository:
             json.dumps(item.documents, ensure_ascii=False),
             source_url,
             item.source,
-            item.status,
+            status_value,
             item.confidence,
             item.seo_title,
             item.seo_description,
@@ -340,15 +384,45 @@ class ExamRepository:
                             existing = cand
                             match_mode = "title_domain"
                             break
+            # Règle 4 — titre similaire toutes sources confondues (miroir SQLite,
+            # exclut les fiches rejetées : un concours légitime ne doit jamais
+            # être absorbé par une fiche de bruit rejetée).
+            if existing is None:
+                resp = (
+                    table.select("id,status,source_url,title")
+                    .neq("status", "rejected")
+                    .limit(200)  # volume actuel < 50 fiches ; paginer si la table grossit
+                    .execute()
+                )
+                for cand in resp.data or []:
+                    if is_duplicate_title(cand.get("title"), item.title):
+                        existing = cand
+                        match_mode = "title_similar"
+                        break
 
-            # Fusion par titre+domaine : si l'existant est déjà aussi spécifique
-            # (ou plus) que le nouvel item, on ignore le doublon — on ne réécrit
-            # pas l'organisateur de la fiche en place.
+            # Fusion par titre+domaine (règles 3-4) : si l'existant est déjà
+            # aussi spécifique (ou plus) que le nouvel item, on ignore le
+            # doublon — on ne réécrit pas l'organisateur de la fiche en place.
             source_url = item.source_url
-            if existing and match_mode == "title_domain":
+            if existing and match_mode in ("title_domain", "title_similar"):
                 existing_url = existing.get("source_url") or ""
                 if self._url_specificity(existing_url) >= self._url_specificity(source_url):
                     return
+
+            # Même règle que le chemin SQLite : une fiche déjà rejetée reste
+            # rejetée lors d'un re-scrape (sinon elle repasserait en pending
+            # puis serait auto-publiée 21 min plus tard).
+            status_value = "rejected" if (existing and existing.get("status") == "rejected") else item.status
+
+            # Doublon inter-sources : union des documents déjà en base (règle
+            # miroir du chemin SQLite, pour les mêmes motifs de fusion).
+            if existing and match_mode in ("title_domain", "title_similar"):
+                existing_docs = existing.get("documents") or []
+                seen = {str(d.get("url")) for d in item.documents if isinstance(d, dict) and d.get("url")}
+                for doc in existing_docs:
+                    if isinstance(doc, dict) and doc.get("url") and str(doc["url"]) not in seen:
+                        item.documents.append(doc)
+                        seen.add(str(doc["url"]))
 
             payload = {
                 "title": item.title,
@@ -373,7 +447,7 @@ class ExamRepository:
                 "documents": item.documents,
                 "source_url": source_url,
                 "source_website": item.source,
-                "status": item.status,
+                "status": status_value,
                 "confidence": item.confidence,
                 "seo_title": item.seo_title,
                 "seo_description": item.seo_description,
@@ -413,6 +487,132 @@ class ExamRepository:
             (status, added, message, log_id),
         )
         self.conn.commit()
+
+    # ------------------------------------------------------------------
+    def list_all(self) -> List[Dict[str, Any]]:
+        """Toutes les fiches concours (SQLite + Supabase si configuré), colonnes
+        JSON (diplomas/cities/documents) déjà parsées. Ne lève JAMAIS : chaque
+        source est essayée indépendamment, l'union par id fait foi."""
+        rows: Dict[str, Dict[str, Any]] = {}
+        assert self.conn is not None
+        cur = self.conn.execute("SELECT * FROM exams")
+        for r in cur.fetchall():
+            d = dict(r)
+            for key in ("diplomas", "cities", "documents"):
+                if isinstance(d.get(key), str):
+                    try:
+                        d[key] = json.loads(d[key])
+                    except Exception:
+                        d[key] = []
+            rows[str(d.get("id"))] = d
+        if self.supabase is not None:
+            try:
+                resp = self.supabase.table("exams").select("*").execute()
+                for r in resp.data or []:
+                    rows[str(r.get("id"))] = r
+            except Exception as exc:
+                _log_warning(f"Échec lecture Supabase exams (list_all) : {exc}")
+        return list(rows.values())
+
+    # Colonnes modifiables via update_exam (miroir du service Next.js).
+    UPDATE_COLUMNS = frozenset(
+        (
+            "title", "organizer", "category", "exam_type", "description_md",
+            "registration_start", "registration_end", "exam_date", "results_date",
+            "age_min", "age_max", "age_reference_date", "nationality", "diplomas",
+            "positions_count", "registration_fee", "location", "cities", "documents",
+            "source_url", "source_website", "confidence", "seo_title",
+            "seo_description", "seo_keywords", "slug",
+        )
+    )
+    _JSON_LIST_COLUMNS = frozenset(("diplomas", "cities", "documents"))
+
+    def update_exam(self, exam_id: str, patch: Dict[str, Any]) -> bool:
+        """Met à jour les colonnes autorisées d'une fiche (SQLite + Supabase).
+        Les listes (diplomas/cities/documents) sont sérialisées en JSON côté
+        SQLite. Utilisé par --merge-duplicates."""
+        clean = {k: v for k, v in patch.items() if k in self.UPDATE_COLUMNS}
+        if not clean:
+            return False
+        assert self.conn is not None
+        fields = []
+        params: List[Any] = []
+        for key, value in clean.items():
+            fields.append(f"{key} = ?")
+            if key in self._JSON_LIST_COLUMNS and isinstance(value, list):
+                params.append(json.dumps(value, ensure_ascii=False))
+            else:
+                params.append(value)
+        params.append(exam_id)
+        cur = self.conn.execute(
+            f"UPDATE exams SET {', '.join(fields)}, updated_at = datetime('now') WHERE id = ?",
+            params,
+        )
+        self.conn.commit()
+        changed = int(cur.rowcount or 0) > 0
+        if self.supabase is not None:
+            try:
+                self.supabase.table("exams").update(clean).eq("id", exam_id).execute()
+                changed = True
+            except Exception as exc:
+                _log_warning(f"Échec update Supabase exams : {exc}")
+        return changed
+
+    def set_exam_status(self, exam_id: str, status: str) -> bool:
+        """Passe une fiche à un statut donné (SQLite + Supabase). published_at
+        / is_verified sont resynchronisés (uniquement publié = vrai + horodaté)."""
+        if status == "rejected":
+            return self.reject_exam(exam_id)
+        published_at = datetime.now(timezone.utc).isoformat() if status == "published" else None
+        is_verified = 1 if status == "published" else 0
+        assert self.conn is not None
+        cur = self.conn.execute(
+            "UPDATE exams SET status = ?, is_verified = ?, published_at = ?, "
+            "updated_at = datetime('now') WHERE id = ?",
+            (status, is_verified, published_at, exam_id),
+        )
+        self.conn.commit()
+        changed = int(cur.rowcount or 0) > 0
+        if self.supabase is not None:
+            try:
+                self.supabase.table("exams").update(
+                    {
+                        "status": status,
+                        "is_verified": status == "published",
+                        "published_at": published_at,
+                    }
+                ).eq("id", exam_id).execute()
+                changed = True
+            except Exception as exc:
+                _log_warning(f"Échec statut Supabase exams : {exc}")
+        return changed
+
+    def reject_exam(self, exam_id: str) -> bool:
+        """Passe une fiche en status='rejected' (SQLite + Supabase si configuré).
+        L'action est réversible : la fiche reste visible dans /admin/exams
+        (onglet Rejetés) et re-publiable en un clic."""
+        assert self.conn is not None
+        cur = self.conn.execute(
+            "UPDATE exams SET status = 'rejected', is_verified = 0, published_at = NULL, "
+            "updated_at = datetime('now') WHERE id = ?",
+            (exam_id,),
+        )
+        self.conn.commit()
+        changed = int(cur.rowcount or 0) > 0
+        if self.supabase is not None:
+            try:
+                self.supabase.table("exams").update(
+                    {
+                        "status": "rejected",
+                        "is_verified": False,
+                        "published_at": None,
+                        "updated_at": datetime.now(timezone.utc).isoformat(),
+                    }
+                ).eq("id", exam_id).execute()
+                changed = True
+            except Exception as exc:
+                _log_warning(f"Échec rejet Supabase exams : {exc}")
+        return changed
 
     def stats(self) -> Dict[str, Any]:
         assert self.conn is not None

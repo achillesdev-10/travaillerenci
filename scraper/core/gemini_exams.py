@@ -47,7 +47,22 @@ Tu es un rédacteur expert des concours administratifs en Côte d'Ivoire \
 (ENA, INFAS, CAFOP, gendarmerie, fonction publique…). À partir d'un communiqué \
 officiel brut, tu dois le réécrire et en extraire les champs structurés.
 
-RÈGLES STRICTES :
+RÈGLE DE PERTINENCE — AVANT TOUTE EXTRACTION :
+- Décide d'abord si la page décrit un CONCOURS CONCRET ET ACTIONNABLE : une
+  annonce officielle (ouverture / inscriptions / épreuves / résultats liés à un
+  concours précis) avec des informations exploitables pour un candidat
+  (dates, diplômes, âge, nationalité, frais, nombre de postes, documents).
+- REJETTE (is_concours=false) les pages qui ne sont PAS une telle annonce :
+  titres de MENU ou de RUBRIQUE (« Communiqués », « Actualités », « Actu … »,
+  « Archives (des communiqués) », « Note aux usagers », « À l'attention de … »,
+  « Guide d'inscription », « Comment s'inscrire », « Résultats » seul…),
+  pages d'accueil de section, pages institutionnelles génériques (nom de
+  l'école seul, sans annonce), pages d'erreur, ou tout contenu sans rapport
+  avec une annonce de concours précise.
+- Si is_concours=false : remplis is_concours=false, rejection_reason avec une
+  phrase courte justifiant le rejet, et null pour TOUS les autres champs.
+
+RÈGLES STRICTES (quand is_concours=true) :
 - REFORMULATION À 100% : réécris le communiqué dans tes propres mots, en Markdown \
 structuré. JAMAIS de copier-coller, même depuis une source officielle.
 - Ne garde QUE les informations présentes dans le communiqué : n'invente JAMAIS \
@@ -100,6 +115,8 @@ appelant traitera chaque filière séparément.
 _SCHEMA = """\
 SCHÉMA JSON ATTENDU (toutes les clés sont obligatoires, valeurs null si absentes) :
 {
+  "is_concours": "true | false — la page décrit-elle une annonce de concours concrète et actionnable ? (voir RÈGLE DE PERTINENCE)",
+  "rejection_reason": "phrase courte si is_concours=false, sinon null",
   "title": "intitulé normalisé du concours (court, sans le nom du site)",
   "organizer": "organisateur (ministère / institut / école)",
   "category": "administratif | sante | enseignement | securite | militaire | autre",
@@ -230,6 +247,19 @@ class ExamGeminiEnricher:
 
     # ------------------------------------------------------------------
     def _apply_ai(self, item: ExamItem, parsed: Dict[str, Any]) -> None:
+        # Rejet explicite : la page ne décrit pas un concours exploitable
+        # (menu, rubrique, accueil de section…). On marque la fiche et on ne
+        # touche à aucun autre champ — le runner l'écartera.
+        is_concours = parsed.get("is_concours")
+        if isinstance(is_concours, str):
+            is_concours = is_concours.strip().lower() in ("true", "1", "oui", "yes")
+        if is_concours is False:
+            item.rejected = True
+            item.rejection_reason = (
+                str(parsed.get("rejection_reason") or "page jugée hors-sujet par l'IA")[:200]
+            )
+            return
+
         def _date(value: Any):
             if not value or not isinstance(value, str):
                 return None

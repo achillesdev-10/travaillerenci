@@ -41,7 +41,28 @@ robots.txt utilisé pour mettre à jour ce tableau.
    - reformulation à 100% (jamais de copier-coller, même d'une source officielle) ;
    - extraction des champs du schéma `exams` (diplôme, âge, nationalité, dates…) ;
    - `null` explicite quand une info manque (jamais de valeur inventée) ;
-   - champ `confidence` (low/medium/high) pour prioriser la relecture manuelle.
+   - champ `confidence` (low/medium/high) pour prioriser la relecture manuelle ;
+   - **règle de pertinence** : le modèle renvoie `is_concours=false` + `rejection_reason`
+     pour les pages qui ne sont pas une annonce de concours exploitable (menus,
+     rubriques « Communiqués » / « Actu … » / « Archives… », pages institutionnelles).
+3b. **Filtrage qualité post-IA** → `scraper/models/exam_item.py` (`relevance_issues`) :
+    rejet des fiches hors-sujet (titre de rubrique, aucune date ni condition
+    d'éligibilité, rejet explicite Gemini) AVANT insertion — sauf communiqués PDF
+    officiels (texte non extractible mais document exploitable).     Nettoyage des fiches déjà en base : `python scraper/exams_runner.py
+     --cleanup-noise` (aperçu) puis `--cleanup-noise --apply` (rejet réversible,
+     visible dans /admin/exams → Rejetés).
+3c. **Dédup inter-sources par TITRE** (`is_duplicate_title`, seuil 0.88) : le
+    même concours collecté par deux sources avec des intitulés quasi identiques
+    (« CONCOURS ADMINISTRATIFS 2026 » ENA/GUCACI, « Communiqu resultats d
+    admission pro » vs « Resultats d'admission pro ») ne crée qu'UNE fiche.
+    À l'insertion (règle 4 de `_find_existing` : titre similaire toutes sources
+    confondues + union des documents) et sur l'existant via `python
+    scraper/exams_runner.py --merge-duplicates` (aperçu) puis
+    `--merge-duplicates --apply` : la fiche la plus riche est conservée
+    (fusion des documents/dates/description), les autres passent en
+    'archived' (visibles dans /admin/exams → Archivés, réversibles).
+    Seuil calibré sur les données réelles : les vrais doublons atteignent
+    1.00, les concours distincts restent sous 0.85 (calendrier CEPE vs BEPC).
    - **Repli heuristique** : `scraper/core/exam_parser.py` (sans clé IA).
    - **Contrôle anti-duplication** : `scraper/core/similarity_check.py` compare la
      réécriture au texte source (similarité de séquence + Jaccard sur n-grams).

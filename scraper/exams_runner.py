@@ -11,10 +11,17 @@
       3. Scraping brut (exam_sources.py)
       4. Réécriture 100% + extraction structurée via Gemini (gemini_exams.py),
          repli heuristique (exam_parser.py) si pas de clé
+      4a. Filtrage qualité post-IA (relevance_issues) : pages hors-sujet
+          (titres de rubrique/menu, aucune date ni condition, rejet explicite
+          Gemini) écartées AVANT insertion
       4b. Contrôle anti-duplication (similarity_check.py) : si la réécriture est
           trop proche de la source (> seuil, défaut 30%), la fiche est marquée
           'low' et signalée à la modération pour réécriture manuelle.
       5. Validation + enregistrement en 'pending' → modération /admin/exams
+      --cleanup-noise : repasse sur les fiches existantes et rejette les
+          hors-sujet (dry-run par défaut, --apply pour écrire)
+      --merge-duplicates : fusionne les doublons inter-sources détectés par
+          similarité de titre (dry-run par défaut, --apply pour écrire)
 
   Exemples :
       python scraper/exams_runner.py
@@ -24,6 +31,8 @@
       python scraper/exams_runner.py --no-ai
       python scraper/exams_runner.py --similarity-threshold 0.3
       python scraper/exams_runner.py --check-sources   # rapport robots.txt (docs)
+      python scraper/exams_runner.py --cleanup-noise   # aperçu des fiches hors-sujet
+      python scraper/exams_runner.py --cleanup-noise --apply  # les rejeter réellement
       python scraper/exams_runner.py --maintenance-only  # publication ≥ 21 min + purge 5 semaines
                                                         # (exécuté par le workflow auto-moderation)
 ===============================================================================
@@ -64,12 +73,18 @@ from scraper.core.gemini_exams import ExamGeminiEnricher
 from scraper.core.robots_check import check_robots
 from scraper.core.similarity_check import (
     SIMILARITY_THRESHOLD as DEFAULT_SIMILARITY_THRESHOLD,
+    find_duplicate_groups,
     needs_rewrite,
     text_similarity,
 )
 from scraper.database.exam_repository import ExamRepository
 from scraper.exam_sources import get_enabled_sources, build_scraper
-from scraper.models.exam_item import ExamItem
+from scraper.models.exam_item import (
+    ExamItem,
+    merge_exam_rows,
+    pick_keeper,
+    relevance_issues,
+)
 
 logger = setup_logger("exams_runner")
 
@@ -139,6 +154,9 @@ def run(
     robots_report: List[dict] = []
     # Contrôle anti-duplication (§2.6) : fiches trop proches de la source.
     to_rewrite: List[ExamItem] = []
+    # Filtrage qualité post-IA : pages hors-sujet (menus, rubriques, archives…)
+    # rejetées avant insertion — non comptées dans all_items.
+    rejected_noise: List[str] = []
 
     for cfg in enabled:
         source_id = cfg.get("id")
@@ -160,6 +178,14 @@ def run(
                 raw_text = item.description_md
                 # Réécriture 100% + extraction structurée (repli heuristique inclus).
                 enricher.enrich(item)
+                # Filtrage qualité post-IA : la page décrit-elle un concours
+                # exploitable ? (titre de rubrique/menu, aucune date ni
+                # condition, ou rejet explicite de Gemini → écartée).
+                noise_reason = item.relevance_issues()
+                if noise_reason:
+                    rejected_noise.append(f"{item.title[:60]} — {noise_reason}")
+                    logger.warning(f"  🚫 Hors-sujet ({noise_reason}) : {item.title[:60]}")
+                    continue
                 ok, reason = item.is_valid()
                 if not ok:
                     logger.debug(f"  🚫 Rejeté ({reason}) : {item.title[:50]}")
@@ -187,6 +213,8 @@ def run(
     enricher.close()
 
     logger.info(f"\n📊 {len(all_items)} concours bruts valides prêts à l'enregistrement.")
+    if rejected_noise:
+        logger.warning(f"🚫 {len(rejected_noise)} page(s) hors-sujet ignorée(s) — non enregistrées.")
     if to_rewrite:
         logger.warning(
             f"⚠️ {len(to_rewrite)} fiche(s) trop proche(s) de la source "
@@ -198,6 +226,10 @@ def run(
                 f"  {idx}. [{item.category.upper():14}] {item.title[:58]} — {item.organizer[:36]} "
                 f"[{item.source[:24]}] (confiance {item.confidence})"
             )
+        if rejected_noise:
+            print("\n🚫 HORS-SUJET (ignorés, non enregistrés) :")
+            for entry in rejected_noise:
+                print(f"  - {entry}")
         if to_rewrite:
             print("\n⚠️ À RÉÉCRIRE (similarité élevée avec la source) :")
             for idx, item in enumerate(to_rewrite, 1):
@@ -240,6 +272,8 @@ def run(
         return 1
 
     message = f"Concours : {created} nouveau(x), {updated} mis à jour. {stats}"
+    if rejected_noise:
+        message += f" 🚫 {len(rejected_noise)} page(s) hors-sujet ignorée(s)"
     if to_rewrite:
         message += f" ⚠️ {len(to_rewrite)} à réécrire (similarité > {similarity_threshold:.0%})"
     if log_id is not None:
@@ -250,6 +284,111 @@ def run(
             pass
     _write_health("success", created, message)
     logger.info(f"✅ Terminé : {created} nouveau(x), {updated} mis à jour. {stats}")
+    return 0
+
+
+def run_merge_duplicates(dry_run: bool) -> int:
+    """
+    Fusionne les doublons INTER-SOURCES détectés par similarité de titre
+    (is_duplicate_title, seuil 0.88) : le même concours collecté par deux
+    sources avec des intitulés quasi identiques (ex. « CONCOURS ADMINISTRATIFS
+    2026 » sur ENA et GUCACI) ne doit produire qu'UNE fiche.
+
+    Pour chaque groupe de doublons :
+      • la fiche la plus riche (publiée, champs structurés, URL de détail,
+        description la plus longue) est CONSERVÉE et reçoit la fusion
+        (documents en union, champs non nuls, description la plus longue) ;
+      • les autres fiches passent en 'archived' (invisibles côté public,
+        consultables dans /admin/exams → Archivés, réversibles).
+
+    Par défaut simple aperçu (dry-run) — écrire avec `--apply`.
+    """
+    logger.info("🔀 Fusion des doublons inter-sources (similarité de titre)")
+    groups: List[List[dict]] = []
+    try:
+        with ExamRepository(DB_PATH) as repo:
+            rows = [r for r in repo.list_all() if str(r.get("status") or "") != "rejected"]
+            groups = find_duplicate_groups(rows)
+            if not groups:
+                logger.info("Aucun doublon inter-sources détecté.")
+                return 0
+            for group in groups:
+                keeper = pick_keeper(group)
+                merged = merge_exam_rows(group)
+                others = [r for r in group if str(r.get("id")) != str(keeper.get("id"))]
+                titles = " | ".join(str(r.get("title") or "")[:42] for r in group)
+                logger.warning(f"Doublon ({len(group)} fiches) : {titles}")
+                logger.warning(
+                    f"  → conserver {str(keeper.get('id'))[:8]} « {str(keeper.get('title'))[:46]} » "
+                    f"({str(keeper.get('status'))}, {len(keeper.get('documents') or [])} doc(s))"
+                )
+                for other in others:
+                    logger.warning(
+                        f"  → archiver {str(other.get('id'))[:8]} « {str(other.get('title'))[:46]} » "
+                        f"({str(other.get('organizer'))[:36]})"
+                    )
+                if not dry_run:
+                    repo.update_exam(str(keeper["id"]), merged)
+                    for other in others:
+                        repo.set_exam_status(str(other["id"]), "archived")
+    except Exception as exc:
+        logger.error(f"❌ Fusion des doublons impossible : {exc}", exc_info=True)
+        return 1
+
+    action = "à fusionner" if dry_run else "fusionnées"
+    logger.info(f"\n📋 {len(groups)} groupe(s) de doublons {action}.")
+    if dry_run and groups:
+        logger.info("Relancez avec --apply pour appliquer réellement la fusion.")
+    return 0
+
+
+def run_cleanup_noise(dry_run: bool) -> int:
+    """
+    Repasse sur les fiches concours DÉJÀ en base (SQLite + Supabase) et rejette
+    (status='rejected') celles qui ne décrivent pas un concours exploitable :
+      • titres de rubrique/menu (« Communiqués », « Actu … », « Archives… »,
+        « Note aux usagers », « À l'attention de … », nom d'école seul…) ;
+      • aucune information actionnable (dates OU conditions) après enrichissement.
+
+    L'action est RÉVERSIBLE : la fiche reste visible dans /admin/exams (onglet
+    Rejetés) et re-publiable en un clic. Par défaut simple aperçu (dry-run) —
+    écrire avec `--apply`. Les fiches déjà rejetées ne sont pas re-signalées.
+    """
+    logger.info("🧹 Nettoyage des fiches concours hors-sujet")
+    flagged: List[str] = []
+    already = 0
+    try:
+        with ExamRepository(DB_PATH) as repo:
+            for row in repo.list_all():
+                if str(row.get("status") or "") == "rejected":
+                    already += 1
+                    continue
+                reason = relevance_issues(
+                    rejected=bool(row.get("rejected")),
+                    rejection_reason=row.get("rejection_reason"),
+                    title=row.get("title"),
+                    row=row,
+                )
+                if not reason:
+                    continue
+                title = str(row.get("title") or "")[:70]
+                flagged.append(f"{title} — {reason}")
+                if dry_run:
+                    logger.warning(f"  ⏭️  [dry-run] à rejeter : {title} ({reason})")
+                else:
+                    repo.reject_exam(str(row["id"]))
+                    logger.warning(f"  🗑️  rejeté : {title} ({reason})")
+    except Exception as exc:
+        logger.error(f"❌ Nettoyage hors-sujet impossible : {exc}", exc_info=True)
+        return 1
+
+    action = "à rejeter" if dry_run else "rejetées"
+    logger.info(
+        f"\n📋 Nettoyage terminé : {len(flagged)} fiche(s) {action} "
+        f"({already} déjà rejetée(s) ignorée(s))."
+    )
+    if dry_run and flagged:
+        logger.info("Relancez avec --apply pour appliquer réellement le rejet.")
     return 0
 
 
@@ -312,11 +451,32 @@ def main() -> int:
         action="store_true",
         help="Sans scraping : publie les concours en attente (≥ 21 min), purge les fiches de plus de 5 semaines, puis quitte",
     )
+    parser.add_argument(
+        "--cleanup-noise",
+        action="store_true",
+        help="Repasse sur les fiches existantes (SQLite + Supabase) et rejette celles qui ne sont pas des concours exploitables. Aperçu par défaut ; --apply pour écrire",
+    )
+    parser.add_argument(
+        "--merge-duplicates",
+        action="store_true",
+        help="Fusionne les doublons inter-sources (similarité de titre ≥ 0.88). Aperçu par défaut ; --apply pour écrire",
+    )
+    parser.add_argument(
+        "--apply",
+        action="store_true",
+        help="Applique réellement le nettoyage --cleanup-noise / la fusion --merge-duplicates (sans lui, simple aperçu)",
+    )
     parser.add_argument("--check-sources", action="store_true", help="Rapport robots.txt des sources puis quitter")
     args = parser.parse_args()
 
     if args.maintenance_only:
         return run_maintenance()
+
+    if args.cleanup_noise:
+        return run_cleanup_noise(not args.apply)
+
+    if args.merge_duplicates:
+        return run_merge_duplicates(not args.apply)
 
     if args.check_sources:
         return report_sources()

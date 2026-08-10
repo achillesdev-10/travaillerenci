@@ -97,3 +97,78 @@ def text_similarity(source: str, rewritten: str) -> float:
 def needs_rewrite(source: str, rewritten: str, threshold: float = SIMILARITY_THRESHOLD) -> bool:
     """True si la réécriture est trop proche de la source (copie)."""
     return text_similarity(source, rewritten) > threshold
+
+
+# -----------------------------------------------------------------------------
+# Déduplication inter-sources par TITRE (--merge-duplicates / upsert)
+# -----------------------------------------------------------------------------
+# Deux sources collectent parfois la même annonce avec des intitulés quasi
+# identiques (« CONCOURS ADMINISTRATIFS 2026 » sur ENA et GUCACI,
+# « Communiqu resultats d admission pro » vs « Resultats d'admission pro »).
+# Seuil calibré sur les données réelles : les vrais doublons atteignent 1.00
+# (titres normalisés égaux ou sous-ensembles), les concours distincts restent
+# sous 0.85 (ex. calendrier CEPE vs BEPC = 0.82). 0.88 laisse une marge de
+# sécurité : mieux vaut rater une fusion que corrompre deux fiches distinctes.
+#
+# Risque résiduel connu : la métrique `coverage` de text_similarity vaut 1.0
+# pour tout titre SOUS-ENSEMBLE d'un autre — deux concours distincts dont l'un
+# serait inclus dans l'autre (ex. « CONCOURS ENA 2026 » vs « CONCOURS ENA
+# 2026 — cycle supérieur ») seraient détectés comme doublons. Le seuil et la
+# calibration sur les données réelles (faux positifs max observés : 0.82)
+# limitent ce risque ; à surveiller si de tels intitulés apparaissent.
+TITLE_DUPLICATE_THRESHOLD = 0.88
+
+
+def is_duplicate_title(
+    a: str | None,
+    b: str | None,
+    threshold: float = TITLE_DUPLICATE_THRESHOLD,
+) -> bool:
+    """Vrai si deux titres désignent très probablement le même concours :
+    titres normalisés (casse/accents) identiques, ou similarité ≥ seuil
+    (un titre sous-ensemble de l'autre → coverage 1.0 → doublon détecté)."""
+    na, nb = normalize(a or ""), normalize(b or "")
+    if not na or not nb:
+        return False
+    if na == nb:
+        return True
+    return text_similarity(na, nb) >= threshold
+
+
+def find_duplicate_groups(
+    rows: list[dict],
+    title_key: str = "title",
+    threshold: float = TITLE_DUPLICATE_THRESHOLD,
+) -> list[list[dict]]:
+    """Regroupe les lignes (dict) dont les titres sont quasi identiques.
+
+    Union-find simple : deux lignes appartiennent au même groupe si
+    `is_duplicate_title` les relie (directement ou par transitivité).
+    Ne retourne que les groupes de taille > 1, ordre d'apparition conservé.
+    """
+    n = len(rows)
+    if n < 2:
+        return []
+
+    parent = list(range(n))
+
+    def find(x: int) -> int:
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    def union(x: int, y: int) -> None:
+        rx, ry = find(x), find(y)
+        if rx != ry:
+            parent[ry] = rx
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            if is_duplicate_title(rows[i].get(title_key), rows[j].get(title_key), threshold):
+                union(i, j)
+
+    groups: dict[int, list[dict]] = {}
+    for i in range(n):
+        groups.setdefault(find(i), []).append(rows[i])
+    return [g for g in groups.values() if len(g) > 1]

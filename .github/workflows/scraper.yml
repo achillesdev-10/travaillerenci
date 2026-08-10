@@ -57,13 +57,14 @@ jobs:
           # (ex: gucaci,ena,infas). Défaut = toutes les sources activées.
           python scraper/exams_runner.py --max-per-source 10 ${EXAM_SOURCES:+--sources "$EXAM_SOURCES"}
 
-      - name: Run exam unit tests (parser + anti-duplication + repository)
+      - name: Run exam unit tests (parser + anti-duplication + repository + pertinence)
         run: |
           python scraper/tests/test_exam_parser.py
           python scraper/tests/test_similarity_check.py
           python scraper/tests/test_exam_repository.py
           python scraper/tests/test_repository_maintenance.py
           python scraper/tests/test_exam_sources.py
+          python scraper/tests/test_exam_relevance.py
           python scraper/tests/test_alert_digest.py
 
   # ==========================================================================

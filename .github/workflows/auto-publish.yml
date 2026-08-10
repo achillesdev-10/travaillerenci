@@ -45,6 +45,19 @@ jobs:
           # /concours ne reste jamais vide faute de modération manuelle.
           python scraper/exams_runner.py --maintenance-only
 
+      - name: Nettoyage des fiches concours hors-sujet (titres de rubrique / sans info exploitable)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          # Filet de sécurité périodique : rejette (status='rejected', réversible
+          # dans /admin/exams → Rejetés) les fiches concours qui ne décrivent pas
+          # une annonce exploitable — rubriques (« Communiqués », « Actu … »,
+          # « Archives… », « Note aux usagers »…), pages institutionnelles ou
+          # fiches sans date ni condition. Les nouvelles fiches sont déjà filtrées
+          # au scraping (relevance_issues) ; cette étape repasse sur l'existant.
+          python scraper/exams_runner.py --cleanup-noise --apply
+
       # ==========================================================================
       # Alertes candidat : après chaque cycle d'auto-publication, on compare les
       # contenus nouvellement publiés aux alertes actives et on envoie une

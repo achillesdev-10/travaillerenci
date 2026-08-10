@@ -52,6 +52,75 @@ def make_item(source_url: str, title: str, status: str = "pending") -> ExamItem:
     )
 
 
+def test_cross_source_title_similarity_dedup():
+    """Règle 4 : le même intitulé collecté par DEUX domaines différents ne crée
+    qu'une fiche (ex. « CONCOURS ADMINISTRATIFS 2026 » sur ENA et GUCACI)."""
+    with tempfile.TemporaryDirectory() as td:
+        with ExamRepository(Path(td) / "test.sqlite3") as repo:
+            id1, is_new1 = repo.upsert(
+                make_item("https://ena.ci/concours", "CONCOURS ADMINISTRATIFS 2026")
+            )
+            assert is_new1 is True
+            # Même titre, autre domaine (GUCACI), organisateur identique :
+            # ni URL exacte, ni titre+domaine → règle 4 (titre similaire).
+            id2, is_new2 = repo.upsert(
+                make_item("https://gucaci.ciconcours.com/concours-2026", "concours administratifs 2026")
+            )
+            assert is_new2 is False, "le doublon inter-sources doit être absorbé"
+            assert id2 == id1, "l'upsert doit retourner l'id de la fiche existante"
+            count = repo.conn.execute("SELECT COUNT(*) AS c FROM exams").fetchone()["c"]
+            assert count == 1, "une seule fiche doit exister en base"
+
+
+def test_cross_source_rejected_row_not_a_merge_target():
+    """Règle 4 : une fiche REJETÉE (bruit) ne peut PAS absorber un nouveau
+    concours légitime au titre proche — sinon le statut 'rejected' préservé
+    enterrerait la fiche pour toujours."""
+    with tempfile.TemporaryDirectory() as td:
+        with ExamRepository(Path(td) / "test.sqlite3") as repo:
+            id1, _ = repo.upsert(
+                make_item("https://men-deco.org/resultats", "RESULTATS CONCOURS")
+            )
+            repo.conn.execute("UPDATE exams SET status='rejected' WHERE id=?", (id1,))
+            repo.conn.commit()
+            # Nouveau concours légitime, titre proche, AUTRE domaine :
+            # ne doit PAS être absorbé par la fiche rejetée.
+            id2, is_new = repo.upsert(
+                make_item(
+                    "https://ena.ci/resultats",
+                    "Resultats concours",  # titre identique (normalisé) à la fiche rejetée
+                )
+            )
+            assert is_new is True, "un concours légitime doit être INSÉRÉ, pas absorbé"
+            assert id2 != id1
+            row = repo.conn.execute(
+                "SELECT status FROM exams WHERE id=?", (id2,)
+            ).fetchone()
+            assert row["status"] == "pending"
+
+
+def test_cross_source_distinct_titles_not_merged():
+    """Deux concours distincts aux titres proches (CEPE vs BEPC, 0.82) ne sont
+    JAMAIS fusionnés par la règle 4."""
+    with tempfile.TemporaryDirectory() as td:
+        with ExamRepository(Path(td) / "test.sqlite3") as repo:
+            repo.upsert(
+                make_item(
+                    "https://www.men-deco.org/actualite/cepe",
+                    "Calendrier officiel de déroulement des épreuves écrites du CEPE Session 2026",
+                )
+            )
+            _, is_new = repo.upsert(
+                make_item(
+                    "https://www.men-deco.org/actualite/bepc",
+                    "CALENDRIER OFFICIEL DE DÉROULEMENT DES ÉPREUVES ÉCRITES DE BEPC SESSION 2026",
+                )
+            )
+            assert is_new is True, "CEPE et BEPC sont deux concours distincts"
+            count = repo.conn.execute("SELECT COUNT(*) AS c FROM exams").fetchone()["c"]
+            assert count == 2
+
+
 def test_insert_new_exam():
     with tempfile.TemporaryDirectory() as td:
         with ExamRepository(Path(td) / "test.sqlite3") as repo:
