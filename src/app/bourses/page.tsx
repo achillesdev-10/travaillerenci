@@ -3,6 +3,7 @@ import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import type { JobOfferSchema } from '@/types';
 import { formatDate, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
+import SaveButton from '@/components/saved/SaveButton';
 
 export const metadata = {
   title: "Bourses d'études en Côte d'Ivoire",
@@ -126,6 +127,7 @@ function ScholarshipCard({ bourse }: { bourse: JobOfferSchema }) {
             {formatDate(bourse.deadline!)}
           </span>
         )}
+        <SaveButton itemType="scholarship" itemId={bourse.id} variant="icon" />
       </div>
 
       <h3 className="font-bold text-[15px] leading-snug text-gray-900 dark:text-white line-clamp-2 mb-1 group-hover:text-primary dark:group-hover:text-emerald-400 transition-colors">

@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
+import SafetyNotice from '@/components/content/SafetyNotice';
+import SaveButton from '@/components/saved/SaveButton';
 import { formatDate, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
 
@@ -125,6 +127,14 @@ export default async function BourseDetailPage({ params }: PageProps) {
                 <SimpleMarkdown text={bourse.description} />
               </div>
             </div>
+
+            {/* Mention anti-arnaque — candidater à une bourse est gratuit */}
+            <SafetyNotice
+              variant="scholarship"
+              itemLabel={bourse.title}
+              itemUrl={`${getSiteUrl()}/bourses/${bourse.id}`}
+              className="mt-6"
+            />
           </article>
 
           <aside className="lg:col-span-1 space-y-5 lg:sticky lg:top-24 lg:self-start">
@@ -165,6 +175,14 @@ export default async function BourseDetailPage({ params }: PageProps) {
                     Contactez l'organisme via la page d'origine ci-dessous.
                   </p>
                 ) : null}
+              </div>
+              <div className="mt-3">
+                <SaveButton
+                  itemType="scholarship"
+                  itemId={bourse.id}
+                  label="Sauvegarder cette bourse"
+                  className="w-full"
+                />
               </div>
             </div>
 

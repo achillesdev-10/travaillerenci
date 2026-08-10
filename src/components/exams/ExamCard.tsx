@@ -8,6 +8,7 @@ import {
   examUrl,
 } from '@/lib/examConstants';
 import { formatDate, formatRelativeTime } from '@/lib/utils';
+import SaveButton from '@/components/saved/SaveButton';
 
 export default function ExamCard({ exam, priority = false }: { exam: Exam; priority?: boolean }) {
   const phase = examPhase(exam);
@@ -30,6 +31,7 @@ export default function ExamCard({ exam, priority = false }: { exam: Exam; prior
           <span className="ml-auto text-[11px] text-gray-400">
             {formatRelativeTime(exam.created_at)}
           </span>
+          <SaveButton itemType="exam" itemId={exam.id} variant="icon" />
         </div>
 
         <h3 className="mb-1 font-bold text-[15px] leading-snug text-gray-900 line-clamp-2 transition-colors group-hover:text-primary dark:text-white">

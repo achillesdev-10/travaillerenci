@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import PasswordInput from "@/components/auth/PasswordInput";
 import { apiForgotPassword, apiLogin } from "@/lib/authApi";
+import { isGoogleAuthVisible } from "@/lib/config";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -277,29 +278,33 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200 dark:border-slate-800" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white dark:bg-slate-900 px-2 text-gray-500 dark:text-slate-400">
-                  Ou continuer avec
-                </span>
-              </div>
-            </div>
+            {isGoogleAuthVisible() && (
+              <>
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-200 dark:border-slate-800" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white dark:bg-slate-900 px-2 text-gray-500 dark:text-slate-400">
+                      Ou continuer avec
+                    </span>
+                  </div>
+                </div>
 
-            <a
-              href={googleAuthHref()}
-              className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 py-3.5 px-4 text-xs font-bold text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 24 24">
-                <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.9C6.2 7.1 8.9 5 12 5z" />
-                <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z" />
-                <path fill="#FBBC05" d="M5.3 14.7c-.2-.7-.4-1.5-.4-2.7s.2-2 .4-2.7L1.6 6.4C.6 8.4 0 10.1 0 12s.6 3.6 1.6 5.6l3.7-2.9z" />
-                <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5.3L1.6 15.6C3.5 19.4 7.4 23 12 23z" />
-              </svg>
-              Se connecter avec Google
-            </a>
+                <a
+                  href={googleAuthHref()}
+                  className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 py-3.5 px-4 text-xs font-bold text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24">
+                    <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.9C6.2 7.1 8.9 5 12 5z" />
+                    <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z" />
+                    <path fill="#FBBC05" d="M5.3 14.7c-.2-.7-.4-1.5-.4-2.7s.2-2 .4-2.7L1.6 6.4C.6 8.4 0 10.1 0 12s.6 3.6 1.6 5.6l3.7-2.9z" />
+                    <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5.3L1.6 15.6C3.5 19.4 7.4 23 12 23z" />
+                  </svg>
+                  Se connecter avec Google
+                </a>
+              </>
+            )}
 
             <div className="text-center text-xs text-gray-500 dark:text-slate-400">
               Pas encore de compte ?{" "}

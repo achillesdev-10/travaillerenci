@@ -1,6 +1,14 @@
 import Link from 'next/link';
 import type { JobOfferSchema } from '@/types';
 import { formatRelativeTime } from '@/lib/utils';
+import SaveButton from '@/components/saved/SaveButton';
+
+function savedType(job: JobOfferSchema): 'job' | 'internship' | 'scholarship' | 'exam' {
+  if (job.category === 'internship') return 'internship';
+  if (job.category === 'scholarship') return 'scholarship';
+  if (job.category === 'exam') return 'exam';
+  return 'job';
+}
 
 export default function CompactJobCard({ job }: { job: JobOfferSchema }) {
   return (
@@ -26,6 +34,7 @@ export default function CompactJobCard({ job }: { job: JobOfferSchema }) {
           <span className="ml-auto text-[10px] font-medium text-gray-400">
             {formatRelativeTime(job.created_at)}
           </span>
+          <SaveButton itemType={savedType(job)} itemId={job.id} variant="icon" />
         </div>
 
         <h3 className="font-bold text-[13px] sm:text-sm leading-snug text-gray-900 line-clamp-2 transition-colors group-hover:text-primary">

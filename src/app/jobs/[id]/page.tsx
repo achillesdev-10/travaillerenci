@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
+import SafetyNotice from '@/components/content/SafetyNotice';
+import SaveButton from '@/components/saved/SaveButton';
 import type { JobOfferSchema } from '@/types';
 import { formatDate, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
@@ -174,8 +176,8 @@ export default async function JobDetailPage({ params }: PageProps) {
                 </div>
               </div>
 
-              {/* Bouton Partager sur WhatsApp très visible */}
-              <div className="pt-1">
+              {/* Actions : Partager sur WhatsApp + Sauvegarder */}
+              <div className="flex flex-wrap items-center gap-2 pt-1">
                 <a
                   href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`*${job.title}* chez *${job.company}* (${job.location})\n\nConsultez l'offre complète sur TravaillerEnCi : ${getSiteUrl()}/jobs/${job.id}`)}`}
                   target="_blank"
@@ -187,6 +189,11 @@ export default async function JobDetailPage({ params }: PageProps) {
                   </svg>
                   Partager sur WhatsApp
                 </a>
+                <SaveButton
+                  itemType={job.category === 'internship' ? 'internship' : 'job'}
+                  itemId={job.id}
+                  label="Sauvegarder"
+                />
               </div>
             </div>
           </div>
@@ -210,6 +217,14 @@ export default async function JobDetailPage({ params }: PageProps) {
                 <SimpleMarkdown text={job.description} />
               </div>
             </div>
+
+            {/* Mention anti-arnaque — postuler est gratuit */}
+            <SafetyNotice
+              variant="job"
+              itemLabel={`${job.title} — ${job.company}`}
+              itemUrl={`${getSiteUrl()}/jobs/${job.slug || job.id}`}
+              className="mt-6"
+            />
 
             {/* Offres similaires */}
             {similar.length > 0 && (

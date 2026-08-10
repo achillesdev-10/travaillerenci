@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
 import { hashPassword } from '@/lib/password';
-import { createUser } from '@/lib/userRepository';
+import { createUser, createEmailVerificationToken } from '@/lib/userRepository';
 import {
   attachUserSessionCookie,
   issueUserSessionToken,
 } from '@/lib/userSession';
+import { CandidateProfileService } from '@/services/candidateProfileService';
 import { getClientIp, isRateLimited } from '@/lib/rateLimit';
+import { getSiteUrl, isEmailConfigured, sendVerificationEmail } from '@/lib/email';
 
 export const runtime = 'nodejs';
 
@@ -26,6 +28,10 @@ export async function POST(request: Request) {
       name?: string;
       password?: string;
       role?: string;
+      // Mini-profil optionnel (critères d'alertes) — renseigné par les candidats.
+      city?: string;
+      diploma?: string;
+      sectors?: string[];
     };
 
     const email = body.email?.trim() || '';
@@ -58,6 +64,29 @@ export async function POST(request: Request) {
         { error: 'Un compte existe déjà avec cette adresse email.' },
         { status: 409 },
       );
+    }
+
+    // Mini-profil candidat (optionnel) : ville / diplôme / secteurs d'intérêt,
+    // servent aux alertes. Créé une seule fois, complétable depuis /dashboard.
+    if (role === 'candidate' && (body.city || body.diploma || (body.sectors ?? []).length > 0)) {
+      await CandidateProfileService.upsert(user.id, {
+        city: body.city ?? null,
+        diploma: body.diploma ?? null,
+        sectors: body.sectors ?? [],
+      });
+    }
+
+    // Email de vérification : envoyé après inscription (non bloquant — le
+    // compte est utilisable immédiatement, un bandeau invite à confirmer).
+    if (isEmailConfigured()) {
+      try {
+        const token = await createEmailVerificationToken(user.id);
+        const verifyUrl = `${getSiteUrl()}/api/auth/verify-email?token=${encodeURIComponent(token)}`;
+        await sendVerificationEmail(user.email, verifyUrl);
+      } catch (err) {
+        // L'inscription ne doit JAMAIS échouer à cause de l'email de vérification.
+        console.error('POST /api/auth/register sendVerificationEmail error:', err);
+      }
     }
 
     // Session réelle : jeton HMAC signé dans un cookie httpOnly (30 jours).

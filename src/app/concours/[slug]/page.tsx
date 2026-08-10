@@ -5,6 +5,8 @@ import type { Metadata } from 'next';
 import { ExamService } from '@/services/examService';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
+import SafetyNotice from '@/components/content/SafetyNotice';
+import SaveButton from '@/components/saved/SaveButton';
 import ExamViewsTracker from '@/components/exams/ExamViewsTracker';
 import {
   EXAM_CATEGORY_LABEL,
@@ -337,6 +339,9 @@ export default async function ConcoursDetailPage({ params }: PageProps) {
                 S'inscrire aux alertes
               </a>
 
+              {/* Sauvegarder ce concours */}
+              <SaveButton itemType="exam" itemId={exam.id} label="Sauvegarder ce concours" className="w-full" />
+
               {/* Partage WhatsApp / Facebook */}
               <div className="grid grid-cols-2 gap-2.5 pt-1">
                 <a
@@ -388,6 +393,14 @@ export default async function ConcoursDetailPage({ params }: PageProps) {
                 <SimpleMarkdown text={exam.description_md || exam.seo_description || 'Communiqué en cours de rédaction.'} />
               </div>
             </div>
+
+            {/* Mention anti-arnaque — inscriptions via les canaux officiels */}
+            <SafetyNotice
+              variant="exam"
+              itemLabel={exam.title}
+              itemUrl={absoluteUrl}
+              className="mb-6"
+            />
 
             {/* Timeline dates clés */}
             {(regStart || regEnd || examDate || resultsDate) && (

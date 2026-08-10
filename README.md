@@ -206,8 +206,8 @@ SUPABASE_SERVICE_ROLE_KEY=xxxx.yyyy.zzzz
    - `companies`
    - `job_offers`
    - `job_applications`
-   - `saved_jobs`
-   - `job_alerts`
+   - `saved_items` (sauvegardes étoile, 4 verticales)
+   - `alerts` + `alert_digest_log` (alertes candidat, migration 0017)
 
 > La couche d'abstraction dans `src/services/` permet de migrer de SQLite vers Supabase sans toucher aux composants React.
 
@@ -261,7 +261,8 @@ SUPABASE_SERVICE_ROLE_KEY=xxxx.yyyy.zzzz
 - [ ] Profil candidat (CV en ligne + compétences + expériences)
 - [ ] Upload CV (PDF/DOCX)
 - [ ] Recherche avancée + filtres (secteur, ville, type de contrat, salaire, télétravail)
-- [ ] Sauvegarder une offre + alertes email
+- [x] Sauvegarder une offre (étoile) sur les 4 verticales, listées dans /dashboard
+- [x] Alertes personnalisées email / WhatsApp (fréquence immédiate ou quotidienne, désinscription)
 - [ ] Candidature en 1 clic + suivi des statuts
 
 ### Entreprises / Recruteurs
@@ -276,7 +277,7 @@ SUPABASE_SERVICE_ROLE_KEY=xxxx.yyyy.zzzz
 - [ ] Authentification Supabase + Google SSO
 - [ ] Base de données Supabase + migrations SQL
 - [ ] SEO : métadonnées dynamiques, sitemap, OG images
-- [ ] Emails transactionnels (Supabase + Resend/SendGrid)
+- [x] Emails transactionnels (Resend : mot de passe oublié, vérification d'email, alertes)
 - [ ] Dashboard admin (modération offres + entreprises)
 - [ ] Mode hors-ligne : données mockées `src/services/*`
 
@@ -323,7 +324,15 @@ Référence complète : voir `.env.example`.
      - Dev : `http://localhost:3000/api/auth/google/callback`
      - Prod : `https://travaillerenci.ci/api/auth/google/callback`
   3. Appliquez la migration `supabase/migrations/0012_google_oauth.sql` côté Supabase (ou relancez `npm run db:setup` en SQLite).
-- Sans configuration, le bouton Google redirige vers `/login?error=google_not_configured` avec un message clair.
+- **Sans configuration, le bouton Google est MASQUÉ** (le site ne propose jamais une option qui échoue). Il ne s'affiche que lorsque les credentials OAuth SONT définis **et** `NEXT_PUBLIC_GOOGLE_AUTH_ENABLED=1`.
+- En cas d'écart (bouton affiché mais credentials absents), le flux redirige vers `/login?error=google_not_configured` en secours.
+
+### Boucle de rétention candidat (comptes, sauvegardes, alertes)
+- **Authentification réelle** : email + mot de passe (scrypt), sessions httpOnly 30 j, vérification d'email par lien (24 h), OAuth Google. Le dashboard `/dashboard` est protégé par middleware.
+- **Mini-profil candidat** (table `candidate_profiles`) : ville, diplôme, secteurs d'intérêt, téléphone WhatsApp — renseigné optionnellement à l'inscription, complétable depuis `/dashboard/candidate` (migrations 0014 & 0015).
+- **Sauvegardes** (table `saved_items`, migration 0016) : bouton étoile sur les fiches et cartes des 4 verticales ; liste groupée dans le dashboard ; non connecté → redirection `/login?next=…` puis retour à la fiche.
+- **Alertes candidat** (table `alerts` + `alert_digest_log`, migration 0017) : critères (types de contenu, ville, diplôme, secteur), canal (email / WhatsApp / les deux), fréquence (immédiat / quotidien), lien de désinscription unique dans chaque notification.
+- **Digest automatique** : `python scraper/alert_digest.py` tourne dans le workflow `auto-publish.yml` après chaque cycle de publication (toutes les 15 min). Il compare les contenus nouvellement publiés aux alertes actives et envoie une notification **groupée** — déduplication via `alert_digest_log`, 1 envoi/jour max en fréquence quotidienne. Sans `RESEND_API_KEY` ni WhatsApp configurés, le script ne fait que journaliser.
 
 ### Notifications WhatsApp
 - Le scraper `scraper/scraper.py` peut envoyer automatiquement un message formaté quand une **nouvelle offre valide** est créée en base.

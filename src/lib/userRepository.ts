@@ -25,6 +25,9 @@ export type StoredUser = {
   password_hash: string;
   google_sub?: string | null;
   needs_password_reset: boolean;
+  /** Vrai si l'email a été confirmé (lien de vérification cliqué, ou email
+   *  vérifié par Google au moment du SSO). */
+  email_verified: boolean;
   created_at: string;
 };
 
@@ -36,10 +39,13 @@ export type PublicUser = {
   /** Vrai si le compte n'a pas encore de mot de passe défini par l'utilisateur
    *  (comptes migrés depuis localStorage ou créés via Google). */
   needs_password_reset: boolean;
+  /** Vrai si l'email a été confirmé. */
+  email_verified: boolean;
   created_at: string;
 };
 
 const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 heure
+const EMAIL_VERIFY_TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // 24 heures
 
 function hashToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');
@@ -52,6 +58,7 @@ function toPublic(user: StoredUser): PublicUser {
     name: user.name,
     role: user.role,
     needs_password_reset: Boolean(user.needs_password_reset),
+    email_verified: Boolean(user.email_verified),
     created_at: user.created_at,
   };
 }
@@ -110,6 +117,12 @@ function ensureSchema(db: DatabaseSyncInstance) {
       expires_at TEXT NOT NULL,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
+    CREATE TABLE IF NOT EXISTS verify_email_tokens (
+      token_hash TEXT PRIMARY KEY,
+      user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      expires_at TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
   `);
 
   // Migrations défensives pour les bases créées avant l'OAuth Google / la
@@ -122,10 +135,14 @@ function ensureSchema(db: DatabaseSyncInstance) {
   if (!cols.some((c) => c.name === 'needs_password_reset')) {
     db.exec('ALTER TABLE users ADD COLUMN needs_password_reset INTEGER NOT NULL DEFAULT 0');
   }
+  if (!cols.some((c) => c.name === 'email_verified')) {
+    db.exec('ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0');
+  }
 
   db.exec(`CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);`);
   db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_sub ON users (google_sub);`);
   db.exec(`CREATE INDEX IF NOT EXISTS idx_reset_tokens_user ON password_reset_tokens (user_id);`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_verify_email_tokens_user ON verify_email_tokens (user_id);`);
 }
 
 // -----------------------------------------------------------------------------
@@ -140,9 +157,12 @@ export async function createUser(input: {
   passwordHash: string;
   googleSub?: string;
   needsPasswordReset?: boolean;
+  /** Email déjà vérifié (ex. vérifié par Google lors du SSO). */
+  emailVerified?: boolean;
 }): Promise<PublicUser | null> {
   const email = input.email.trim().toLowerCase();
   const needsPasswordReset = Boolean(input.needsPasswordReset);
+  const emailVerified = Boolean(input.emailVerified);
 
   if (isSupabaseConfigured()) {
     const supabase = getSupabaseClient();
@@ -156,8 +176,9 @@ export async function createUser(input: {
         password_hash: input.passwordHash,
         google_sub: input.googleSub ?? null,
         needs_password_reset: needsPasswordReset,
+        email_verified: emailVerified,
       })
-      .select('id,email,name,role,needs_password_reset,created_at')
+      .select('id,email,name,role,needs_password_reset,email_verified,created_at')
       .maybeSingle();
     if (error) {
       // Violation d'unicité (23505) → l'email existe déjà.
@@ -178,8 +199,8 @@ export async function createUser(input: {
   const id = globalThis.crypto?.randomUUID?.() || `user-${Date.now().toString(36)}`;
   try {
     db.prepare(
-      `INSERT INTO users (id, email, name, role, password_hash, google_sub, needs_password_reset, created_at, updated_at)
-       VALUES ($id, $email, $name, $role, $hash, $googleSub, $needsReset, $now, $now)`,
+      `INSERT INTO users (id, email, name, role, password_hash, google_sub, needs_password_reset, email_verified, created_at, updated_at)
+       VALUES ($id, $email, $name, $role, $hash, $googleSub, $needsReset, $emailVerified, $now, $now)`,
     ).run({
       $id: id,
       $email: email,
@@ -188,6 +209,7 @@ export async function createUser(input: {
       $hash: input.passwordHash,
       $googleSub: input.googleSub ?? null,
       $needsReset: needsPasswordReset ? 1 : 0,
+      $emailVerified: emailVerified ? 1 : 0,
       $now: now,
     });
   } catch (err) {
@@ -203,6 +225,7 @@ export async function createUser(input: {
     name: input.name.trim(),
     role: input.role,
     needs_password_reset: needsPasswordReset,
+    email_verified: emailVerified,
     created_at: now,
   };
 }
@@ -253,7 +276,11 @@ export async function findUserByGoogleSub(googleSub: string): Promise<StoredUser
   if (!db) return null;
   const row = db.prepare('SELECT * FROM users WHERE google_sub = $sub').get({ $sub: googleSub });
   if (!row) return null;
-  return { ...(row as StoredUser), needs_password_reset: Boolean(row.needs_password_reset) };
+  return {
+    ...(row as StoredUser),
+    needs_password_reset: Boolean(row.needs_password_reset),
+    email_verified: Boolean(row.email_verified),
+  };
 }
 
 /**
@@ -284,6 +311,10 @@ export async function upsertGoogleUser(input: {
     const byEmail = await findUserByEmail(email);
     if (byEmail) {
       await linkGoogleSub(byEmail.id, input.googleSub);
+      // L'email a été confirmé par Google : on marque le compte vérifié.
+      if (!byEmail.email_verified) {
+        await markEmailVerified(byEmail.id);
+      }
       return toPublic(byEmail);
     }
   }
@@ -300,6 +331,8 @@ export async function upsertGoogleUser(input: {
     passwordHash: hashPassword(randomPassword),
     googleSub: input.googleSub,
     needsPasswordReset: true,
+    // L'email est confirmé par Google → pas de vérification d'email à refaire.
+    emailVerified: input.emailVerified,
   });
   return created;
 }
@@ -343,8 +376,12 @@ export async function findUserByEmail(email: string): Promise<StoredUser | null>
   if (!db) return null;
   const row = db.prepare('SELECT * FROM users WHERE email = $email').get({ $email: normalized });
   if (!row) return null;
-  // SQLite stocke le drapeau en 0/1 → on normalise en booléen.
-  return { ...(row as StoredUser), needs_password_reset: Boolean(row.needs_password_reset) };
+  // SQLite stocke les drapeaux en 0/1 → on normalise en booléens.
+  return {
+    ...(row as StoredUser),
+    needs_password_reset: Boolean(row.needs_password_reset),
+    email_verified: Boolean(row.email_verified),
+  };
 }
 
 /** Met à jour le mot de passe haché d'un utilisateur (lève needs_password_reset). */
@@ -450,6 +487,101 @@ export async function deleteUserResetTokens(userId: string): Promise<void> {
   const db = await getDb();
   if (!db) return;
   db.prepare('DELETE FROM password_reset_tokens WHERE user_id = $userId').run({ $userId: userId });
+}
+
+// -----------------------------------------------------------------------------
+// Vérification d'email (jettons à usage unique, validité 24 h)
+// -----------------------------------------------------------------------------
+
+/**
+ * Crée un jeton de vérification d'email (retourne le jeton EN CLAIR — à
+ * envoyer par email — seul son hash SHA-256 est stocké).
+ */
+export async function createEmailVerificationToken(userId: string): Promise<string> {
+  const token = randomBytes(32).toString('hex');
+  const expiresAt = new Date(Date.now() + EMAIL_VERIFY_TOKEN_TTL_MS).toISOString();
+
+  if (isSupabaseConfigured()) {
+    const supabase = getSupabaseClient();
+    if (!supabase) throw new Error('Supabase non configuré.');
+    await supabase
+      .from('verify_email_tokens')
+      .insert({ token_hash: hashToken(token), user_id: userId, expires_at: expiresAt });
+    return token;
+  }
+
+  const db = await getDb();
+  if (!db) throw new Error('Base de données utilisateurs indisponible.');
+  db.prepare(
+    `INSERT INTO verify_email_tokens (token_hash, user_id, expires_at)
+     VALUES ($hash, $userId, $expiresAt)`,
+  ).run({ $hash: hashToken(token), $userId: userId, $expiresAt: expiresAt });
+  return token;
+}
+
+/** Retourne l'utilisateur associé à un jeton de vérification valide, sinon null. */
+export async function findUserByEmailVerificationToken(
+  token: string,
+): Promise<StoredUser | null> {
+  const tokenHash = hashToken(token);
+  const now = new Date().toISOString();
+
+  if (isSupabaseConfigured()) {
+    const supabase = getSupabaseClient();
+    if (!supabase) return null;
+    // Purge opportuniste des jetons expirés.
+    try {
+      await supabase.from('verify_email_tokens').delete().lt('expires_at', now);
+    } catch {
+      // purge non bloquante
+    }
+    const { data } = await supabase
+      .from('verify_email_tokens')
+      .select('user_id')
+      .eq('token_hash', tokenHash)
+      .gt('expires_at', now)
+      .maybeSingle();
+    if (!data) return null;
+    const { data: user } = await supabase.from('users').select('*').eq('id', data.user_id).maybeSingle();
+    return (user as StoredUser) ?? null;
+  }
+
+  const db = await getDb();
+  if (!db) return null;
+  db.prepare('DELETE FROM verify_email_tokens WHERE expires_at < $now').run({ $now: now });
+  const row = db
+    .prepare(
+      `SELECT u.* FROM verify_email_tokens t
+       JOIN users u ON u.id = t.user_id
+       WHERE t.token_hash = $hash AND t.expires_at > $now`,
+    )
+    .get({ $hash: tokenHash, $now: now });
+  if (!row) return null;
+  return {
+    ...(row as StoredUser),
+    needs_password_reset: Boolean(row.needs_password_reset),
+    email_verified: Boolean(row.email_verified),
+  };
+}
+
+/** Marque l'email d'un utilisateur comme vérifié + purge ses jetons. */
+export async function markEmailVerified(userId: string): Promise<void> {
+  if (isSupabaseConfigured()) {
+    const supabase = getSupabaseClient();
+    if (!supabase) return;
+    await supabase
+      .from('users')
+      .update({ email_verified: true, updated_at: new Date().toISOString() })
+      .eq('id', userId);
+    await supabase.from('verify_email_tokens').delete().eq('user_id', userId);
+    return;
+  }
+  const db = await getDb();
+  if (!db) return;
+  db.prepare(
+    'UPDATE users SET email_verified = 1, updated_at = $now WHERE id = $id',
+  ).run({ $now: new Date().toISOString(), $id: userId });
+  db.prepare('DELETE FROM verify_email_tokens WHERE user_id = $userId').run({ $userId: userId });
 }
 
 export { toPublic };

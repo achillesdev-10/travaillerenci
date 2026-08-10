@@ -65,6 +65,11 @@ const API = `https://api.supabase.com/v1/projects/${projectRef}/database/query`;
 const MIGRATIONS: Array<{ table: string; label: string; file: string }> = [
   { table: 'blog_posts', label: '0009 (blog)', file: 'supabase/migrations/0009_create_blog_posts.sql' },
   { table: 'exams', label: '0010 (concours)', file: 'supabase/APPLY-EXAMS-MIGRATION.sql' },
+  // Rétention candidat : vérification d'email, mini-profil, sauvegardes, alertes.
+  { table: 'verify_email_tokens', label: '0014 (vérification email)', file: 'supabase/migrations/0014_email_verification.sql' },
+  { table: 'candidate_profiles', label: '0015 (profil candidat)', file: 'supabase/migrations/0015_candidate_profiles.sql' },
+  { table: 'saved_items', label: '0016 (sauvegardes)', file: 'supabase/migrations/0016_saved_items.sql' },
+  { table: 'alerts', label: '0017 (alertes candidat)', file: 'supabase/migrations/0017_alerts.sql' },
 ];
 
 async function runSql(query: string): Promise<{ ok: boolean; data?: unknown; error?: string }> {

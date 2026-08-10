@@ -126,3 +126,69 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string): Prom
 
   await sendEmail(to, 'Réinitialisation de votre mot de passe — TravaillerEnCi', html);
 }
+
+/** Email de confirmation d'adresse (HTML français, couleurs du site). */
+export async function sendVerificationEmail(to: string, verifyUrl: string): Promise<void> {
+  const siteUrl = getSiteUrl();
+  const html = `
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="utf-8" /></head>
+<body style="margin:0;padding:0;background:#f4f6f8;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f8;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.08);">
+          <tr>
+            <td style="background:linear-gradient(135deg,#009639,#007a2e);padding:28px 32px;text-align:center;">
+              <p style="margin:0;color:#ffffff;font-size:18px;font-weight:700;letter-spacing:0.3px;">
+                Travailler<span style="color:#ffffff;">En</span>Ci
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:32px 32px 12px;">
+              <h1 style="margin:0 0 12px;color:#111827;font-size:20px;font-weight:700;">
+                Confirmez votre adresse email
+              </h1>
+              <p style="margin:0 0 16px;color:#4b5563;font-size:14px;line-height:1.6;">
+                Bonjour,<br />
+                Vous venez de créer un compte <strong>TravaillerEnCi</strong>.
+                Confirmez votre adresse email pour activer toutes les fonctionnalités
+                (alertes, sauvegarde d'offres…).
+              </p>
+              <p style="margin:0 0 20px;text-align:center;">
+                <a href="${verifyUrl}"
+                   style="display:inline-block;background:#009639;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:14px 28px;border-radius:12px;">
+                  Confirmer mon email
+                </a>
+              </p>
+              <p style="margin:0 0 8px;color:#4b5563;font-size:13px;line-height:1.6;">
+                Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br />
+                <a href="${verifyUrl}" style="color:#009639;word-break:break-all;font-size:12px;">${verifyUrl}</a>
+              </p>
+              <p style="margin:0;color:#9ca3af;font-size:12px;line-height:1.6;">
+                Ce lien est valable <strong>24 heures</strong>. Si vous n'êtes pas à
+                l'origine de cette inscription, vous pouvez ignorer cet email.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:20px 32px 28px;text-align:center;border-top:1px solid #f3f4f6;">
+              <p style="margin:0;color:#9ca3af;font-size:12px;">
+                © ${new Date().getFullYear()} TravaillerEnCi — L'emploi en Côte d'Ivoire
+              </p>
+              <p style="margin:6px 0 0;color:#9ca3af;font-size:11px;">
+                <a href="${siteUrl}" style="color:#6b7280;text-decoration:none;">${siteUrl.replace(/^https?:\/\//, '')}</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+  await sendEmail(to, 'Confirmez votre email — TravaillerEnCi', html);
+}

@@ -43,11 +43,19 @@ export function apiRegister(input: {
   name: string;
   password: string;
   role: AuthRole;
+  /** Mini-profil optionnel (critères d'alertes). */
+  city?: string;
+  diploma?: string;
+  sectors?: string[];
 }) {
   return post<{ user: { id: string; email: string; name: string; role: AuthRole } }>(
     '/api/auth/register',
     input,
   );
+}
+
+export function apiVerifyEmail(input: { email: string }) {
+  return post<{ ok: boolean }>('/api/auth/verify-email', input);
 }
 
 export function apiLogin(input: { email: string; password: string; role: AuthRole }) {

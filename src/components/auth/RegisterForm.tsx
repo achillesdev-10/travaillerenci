@@ -5,6 +5,10 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import PasswordInput from '@/components/auth/PasswordInput';
 import { apiRegister } from '@/lib/authApi';
+import { isGoogleAuthVisible } from '@/lib/config';
+import { REGIONS_CI, SECTORS } from '@/lib/constants';
+import { DIPLOMA_FILTERS } from '@/lib/examConstants';
+import { cn } from '@/lib/utils';
 
 type Role = 'candidate' | 'company';
 
@@ -20,8 +24,18 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [companyName, setCompanyName] = useState('');
+  // Mini-profil optionnel (critères d'alertes) — candidats uniquement.
+  const [profileCity, setProfileCity] = useState('');
+  const [profileDiploma, setProfileDiploma] = useState('');
+  const [profileSectors, setProfileSectors] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  function toggleSector(slug: string) {
+    setProfileSectors((prev) =>
+      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug],
+    );
+  }
 
   /** Validation simple : email bien formé + mot de passe d'au moins 6 caractères. */
   function validate(): string | null {
@@ -62,6 +76,13 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
         name: role === 'candidate' ? name : companyName,
         password,
         role,
+        ...(role === 'candidate'
+          ? {
+              city: profileCity || undefined,
+              diploma: profileDiploma || undefined,
+              sectors: profileSectors.length > 0 ? profileSectors : undefined,
+            }
+          : {}),
       });
 
       if (!result.ok) {
@@ -188,6 +209,88 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
           autoComplete="new-password"
         />
 
+        {/* Mini-profil optionnel — alimente les alertes (voir 3.3) */}
+        {role === 'candidate' && (
+          <details className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50/60 dark:bg-slate-950/50 p-4 group">
+            <summary className="cursor-pointer list-none text-xs font-bold text-gray-700 dark:text-slate-300 flex items-center justify-between">
+              <span className="inline-flex items-center gap-1.5">
+                <svg className="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                </svg>
+                Profil d'alerte (optionnel)
+              </span>
+              <svg className="w-4 h-4 text-gray-400 transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </summary>
+            <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-2 mb-3">
+              Renseignez vos critères pour recevoir des alertes personnalisées
+              (emplois, stages, bourses, concours). Complétable à tout moment
+              depuis votre espace.
+            </p>
+            <div className="space-y-3.5">
+              <div>
+                <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+                  Ville
+                </label>
+                <select
+                  value={profileCity}
+                  onChange={(e) => setProfileCity(e.target.value)}
+                  className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary"
+                >
+                  <option value="">Toutes les villes</option>
+                  {REGIONS_CI.map((r) => (
+                    <option key={r.slug} value={r.name}>
+                      {r.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+                  Diplôme le plus élevé
+                </label>
+                <select
+                  value={profileDiploma}
+                  onChange={(e) => setProfileDiploma(e.target.value)}
+                  className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary"
+                >
+                  <option value="">Sélectionner un diplôme</option>
+                  {DIPLOMA_FILTERS.map((d) => (
+                    <option key={d.value} value={d.value}>
+                      {d.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+                  Secteurs d'intérêt
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {SECTORS.map((s) => (
+                    <button
+                      type="button"
+                      key={s.slug}
+                      onClick={() => toggleSector(s.slug)}
+                      className={cn(
+                        'rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all',
+                        profileSectors.includes(s.slug)
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-gray-200 bg-white text-gray-600 hover:border-primary/40 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300',
+                      )}
+                    >
+                      {s.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </details>
+        )}
+
         <button
           type="submit"
           disabled={loading}
@@ -197,41 +300,45 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
         </button>
       </form>
 
-      <div className="relative my-4">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-200 dark:border-slate-800" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white dark:bg-slate-900 px-2 text-gray-500 dark:text-slate-400">
-            Ou continuer avec
-          </span>
-        </div>
-      </div>
+      {isGoogleAuthVisible() && (
+        <>
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200 dark:border-slate-800" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white dark:bg-slate-900 px-2 text-gray-500 dark:text-slate-400">
+                Ou continuer avec
+              </span>
+            </div>
+          </div>
 
-      <a
-        href={googleAuthHref()}
-        className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 py-3.5 px-4 text-xs font-bold text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm"
-      >
-        <svg className="w-4 h-4" viewBox="0 0 24 24">
-          <path
-            fill="#EA4335"
-            d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.9C6.2 7.1 8.9 5 12 5z"
-          />
-          <path
-            fill="#4285F4"
-            d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"
-          />
-          <path
-            fill="#FBBC05"
-            d="M5.3 14.7c-.2-.7-.4-1.5-.4-2.7s.2-2 .4-2.7L1.6 6.4C.6 8.4 0 10.1 0 12s.6 3.6 1.6 5.6l3.7-2.9z"
-          />
-          <path
-            fill="#34A853"
-            d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5.3L1.6 15.6C3.5 19.4 7.4 23 12 23z"
-          />
-        </svg>
-        S’inscrire avec Google
-      </a>
+          <a
+            href={googleAuthHref()}
+            className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 py-3.5 px-4 text-xs font-bold text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24">
+              <path
+                fill="#EA4335"
+                d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.9C6.2 7.1 8.9 5 12 5z"
+              />
+              <path
+                fill="#4285F4"
+                d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.3 14.7c-.2-.7-.4-1.5-.4-2.7s.2-2 .4-2.7L1.6 6.4C.6 8.4 0 10.1 0 12s.6 3.6 1.6 5.6l3.7-2.9z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5.3L1.6 15.6C3.5 19.4 7.4 23 12 23z"
+              />
+            </svg>
+            S’inscrire avec Google
+          </a>
+        </>
+      )}
 
       <div className="text-center text-xs text-gray-500 dark:text-slate-400">
         Vous avez déjà un compte ?{' '}

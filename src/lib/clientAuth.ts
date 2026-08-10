@@ -17,6 +17,8 @@ export type StoredUser = {
   name: string;
   /** Vrai si le compte migré / Google n'a pas encore de mot de passe défini. */
   needs_password_reset?: boolean;
+  /** Vrai si l'email a été confirmé. */
+  email_verified?: boolean;
 };
 
 /** Récupère l'utilisateur connecté depuis le serveur (cookie httpOnly). */

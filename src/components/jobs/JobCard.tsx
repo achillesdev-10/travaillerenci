@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { JobOfferSchema } from '@/types';
 import { formatRelativeTime } from '@/lib/utils';
+import SaveButton from '@/components/saved/SaveButton';
 
 interface JobCardProps {
   job: JobOfferSchema;
@@ -46,6 +47,11 @@ export default function JobCard({ job, priority = false }: JobCardProps) {
           <span className="flex-shrink-0 text-[11px] sm:text-xs text-gray-400 font-medium">
             {formatRelativeTime(job.created_at)}
           </span>
+          <SaveButton
+            itemType={job.category === 'internship' ? 'internship' : 'job'}
+            itemId={job.id}
+            variant="icon"
+          />
         </div>
 
         <h3 className="font-bold text-[15px] sm:text-base leading-snug text-gray-900 mb-1 line-clamp-2 group-hover:text-primary transition-colors">

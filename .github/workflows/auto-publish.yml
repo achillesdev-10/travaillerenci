@@ -44,3 +44,25 @@ jobs:
           # offres — les concours en pending depuis ≥ 21 min sont publiés pour que
           # /concours ne reste jamais vide faute de modération manuelle.
           python scraper/exams_runner.py --maintenance-only
+
+      # ==========================================================================
+      # Alertes candidat : après chaque cycle d'auto-publication, on compare les
+      # contenus nouvellement publiés aux alertes actives et on envoie une
+      # notification GROUPÉE (email Resend + WhatsApp Meta Cloud API).
+      # Déduplication via alert_digest_log — chaque (alerte, élément) n'est
+      # notifié qu'une seule fois. Sans RESEND_API_KEY ni WhatsApp, le script
+      # ne fait que journaliser (aucun impact sur le cycle de publication).
+      # ==========================================================================
+      - name: Notifications alertes candidat (nouveaux contenus publiés)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          EMAIL_FROM: ${{ vars.EMAIL_FROM }}
+          WHATSAPP_NOTIFY_ENABLED: ${{ vars.WHATSAPP_NOTIFY_ENABLED }}
+          WHATSAPP_TOKEN: ${{ secrets.WHATSAPP_TOKEN }}
+          WHATSAPP_PHONE_NUMBER_ID: ${{ secrets.WHATSAPP_PHONE_NUMBER_ID }}
+          ALERT_DIGEST_LOOKBACK_HOURS: ${{ vars.ALERT_DIGEST_LOOKBACK_HOURS }}
+        run: |
+          python scraper/alert_digest.py
