@@ -10,7 +10,9 @@ import NewsTicker, { type TickerItem } from '@/components/home/NewsTicker';
 import HomeCarousel from '@/components/home/HomeCarousel';
 import PollWidget from '@/components/home/PollWidget';
 import OffersGrid from '@/components/home/OffersGrid';
+import SocialLinks from '@/components/layout/SocialLinks';
 import { buildCarouselSlides } from '@/lib/homeCarousel';
+import { IMAGES } from '@/lib/images';
 import { getSiteUrl } from '@/lib/site';
 
 export const revalidate = 60;
@@ -21,6 +23,7 @@ const QUICK_LINKS = [
     desc: 'CDI, CDD, prestation',
     href: '/jobs',
     color: 'bg-orange-500',
+    image: IMAGES.jobs,
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 sm:h-7 sm:w-7 drop-shadow">
         <rect x="2" y="7" width="20" height="14" rx="2" />
@@ -33,6 +36,7 @@ const QUICK_LINKS = [
     desc: 'Pour étudiants & jeunes diplômés',
     href: '/jobs?contract=Stage',
     color: 'bg-sky-500',
+    image: IMAGES.internship,
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 sm:h-7 sm:w-7 drop-shadow">
         <path d="M22 10 12 5 2 10l10 5 10-5Z" />
@@ -45,6 +49,7 @@ const QUICK_LINKS = [
     desc: 'Étudier en CI & à l\u2019étranger',
     href: '/bourses',
     color: 'bg-emerald-600',
+    image: IMAGES.scholarship,
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 sm:h-7 sm:w-7 drop-shadow">
         <path d="M22 10 12 5 2 10l10 5 10-5Z" />
@@ -58,6 +63,7 @@ const QUICK_LINKS = [
     desc: 'ENA, INFAS, CAFOP\u2026',
     href: '/concours',
     color: 'bg-indigo-600',
+    image: IMAGES.concours,
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 sm:h-7 sm:w-7 drop-shadow">
         <path d="M3 21h18" />
@@ -71,6 +77,7 @@ const QUICK_LINKS = [
     desc: 'Un CV pro avec l\u2019IA',
     href: '/generateur-de-cv',
     color: 'bg-purple-600',
+    image: IMAGES.cv,
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 sm:h-7 sm:w-7 drop-shadow">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
@@ -84,11 +91,53 @@ const QUICK_LINKS = [
     desc: 'Astuces candidature',
     href: '/blog',
     color: 'bg-rose-500',
+    image: IMAGES.blog,
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 sm:h-7 sm:w-7 drop-shadow">
         <path d="M15 12h-5M15 8h-5M8 3h5.6a1 1 0 0 1 .7.3l3.4 3.4a1 1 0 0 1 .3.7V21a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" />
       </svg>
     ),
+  },
+];
+
+// Secteurs populaires mis en avant sur la home (photos + comptage approximatif
+// fourni par le service — basé sur les filtres du moteur de recherche).
+// Secteurs populaires mis en avant sur la home — le mot-clé `q` est celui
+// du moteur de recherche (filtre titre/entreprise/description), d'où des
+// termes réels (développeur, banque…) plutôt que des slugs de catégorie.
+const POPULAR_SECTORS = [
+  { q: 'développeur', name: 'IT / Digital', image: IMAGES.it },
+  { q: 'banque', name: 'Banque / Finance', image: IMAGES.banque },
+  { q: 'infirmier', name: 'Santé', image: IMAGES.sante },
+  { q: 'enseignant', name: 'Éducation / Formation', image: IMAGES.education },
+  { q: 'commercial', name: 'Commerce / Distribution', image: IMAGES.commerce },
+  { q: 'chantier', name: 'BTP / Immobilier', image: IMAGES.btp },
+  { q: 'ingénieur', name: 'Industrie', image: IMAGES.industrie },
+  { q: 'chauffeur', name: 'Transport / Logistique', image: IMAGES.transport },
+];
+
+// Les 3 étapes du parcours candidat, illustrées par des photos.
+const HOW_IT_WORKS = [
+  {
+    title: 'Créez votre CV pro',
+    desc: "Générateur de CV par IA : un CV clair, moderne et adapté au marché ivoirien en quelques minutes.",
+    href: '/generateur-de-cv',
+    cta: 'Générer mon CV',
+    image: IMAGES.cv,
+  },
+  {
+    title: 'Trouvez votre opportunité',
+    desc: 'Offres vérifiées, bourses et concours actualisés chaque jour — filtrez par ville, secteur et contrat.',
+    href: '/jobs',
+    cta: 'Voir les offres',
+    image: IMAGES.jobsAlt,
+  },
+  {
+    title: 'Postulez en 1 clic',
+    desc: "Envoyez votre candidature, activez des alertes et soyez prévenu dès qu'une offre vous correspond.",
+    href: '/register',
+    cta: 'Créer un compte',
+    image: IMAGES.blogAlt,
   },
 ];
 
@@ -229,17 +278,48 @@ export default async function HomePage({
               </p>
             </div>
 
-            {/* Colonne illustration (desktop uniquement) */}
-            <div className="hidden lg:flex justify-center lg:justify-end">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/images/hero-illustration.svg"
-                alt="Recherche d'emploi en Côte d'Ivoire : offres vérifiées, mallette et localisation"
-                width={520}
-                height={445}
-                className="w-full max-w-[520px] h-auto drop-shadow-xl animate-float"
-                fetchPriority="high"
-              />
+            {/* Colonne illustration (desktop uniquement) — vraie photo + badges flottants */}
+            <div className="hidden lg:block relative">
+              <div className="relative overflow-hidden rounded-3xl shadow-2xl shadow-primary/20 ring-1 ring-black/5 animate-float">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={IMAGES.hero}
+                  alt="Jeune professionnel ivoirien en recherche d'emploi"
+                  width={520}
+                  height={445}
+                  className="w-full max-w-[520px] h-[380px] lg:h-[420px] object-cover"
+                  fetchPriority="high"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/40 via-transparent to-transparent" aria-hidden="true" />
+              </div>
+
+              {/* Badge : offres vérifiées */}
+              <div className="absolute -left-5 top-8 flex items-center gap-2.5 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur px-4 py-3 shadow-lg border border-border animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" className="h-4.5 w-4.5" aria-hidden="true">
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                </span>
+                <div>
+                  <div className="text-sm font-extrabold text-gray-900 dark:text-white leading-none">Offres vérifiées</div>
+                  <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Zéro spam, que du sérieux</div>
+                </div>
+              </div>
+
+              {/* Badge : concours & bourses */}
+              <div className="absolute -right-3 bottom-10 flex items-center gap-2.5 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur px-4 py-3 shadow-lg border border-border animate-fade-in-up" style={{ animationDelay: '350ms' }}>
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4.5 w-4.5" aria-hidden="true">
+                    <path d="M3 21h18" />
+                    <path d="M4 21V10l8-6 8 6v11" />
+                    <path d="M9 21v-6h6v6" />
+                  </svg>
+                </span>
+                <div>
+                  <div className="text-sm font-extrabold text-gray-900 dark:text-white leading-none">Concours & bourses</div>
+                  <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">ENA, INFAS, universités…</div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -286,6 +366,63 @@ export default async function HomePage({
       </section>
 
       {/* ======================================================================== */}
+      {/*   CHIFFRES CLÉS — compteurs réels issus de la BDD                      */}
+      {/* ======================================================================== */}
+      <section className="container mx-auto px-4 -mt-2 sm:mt-2 max-w-6xl">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <HomeStat
+            value={totalKnown}
+            suffix="+"
+            label="Offres d'emploi"
+            color="bg-orange-500"
+            icon={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
+                <rect x="2" y="7" width="20" height="14" rx="2" />
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+              </svg>
+            }
+          />
+          <HomeStat
+            value={examRows.total}
+            suffix=""
+            label="Concours suivis"
+            color="bg-indigo-600"
+            icon={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
+                <path d="M3 21h18" />
+                <path d="M4 21V10l8-6 8 6v11" />
+                <path d="M9 21v-6h6v6" />
+              </svg>
+            }
+          />
+          <HomeStat
+            value={bourseRows.total}
+            suffix=""
+            label="Bourses d'études"
+            color="bg-emerald-600"
+            icon={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
+                <path d="M22 10 12 5 2 10l10 5 10-5Z" />
+                <path d="M6 12.5v4.5c0 1.2 2.7 2.5 6 2.5s6-1.3 6-2.5v-4.5" />
+                <path d="M22 10v5" />
+              </svg>
+            }
+          />
+          <HomeStat
+            value={blogRows.total}
+            suffix=""
+            label="Conseils & articles"
+            color="bg-rose-500"
+            icon={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
+                <path d="M15 12h-5M15 8h-5M8 3h5.6a1 1 0 0 1 .7.3l3.4 3.4a1 1 0 0 1 .3.7V21a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" />
+              </svg>
+            }
+          />
+        </div>
+      </section>
+
+      {/* ======================================================================== */}
       {/*   WIDGETS : carrousel (images des sources) + sondage                     */}
       {/* ======================================================================== */}
       <section className="container mx-auto px-4 mt-8 sm:mt-12 max-w-6xl">
@@ -318,8 +455,17 @@ export default async function HomePage({
               className="group relative overflow-hidden rounded-2xl p-4 sm:p-5 text-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl animate-fade-in-up"
               style={{ animationDelay: `${i * 60}ms` }}
             >
-              <div className={`absolute inset-0 ${link.color} opacity-100`} />
-              <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-white/15 transition-transform duration-500 group-hover:scale-150" />
+              {/* Photo de fond + voile sombre (l'image ne charge pas ? la couleur de repli reste visible) */}
+              <div className={`absolute inset-0 ${link.color}`} aria-hidden="true" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={link.image}
+                alt=""
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-cover opacity-90 transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/30 to-slate-900/10" aria-hidden="true" />
+              <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-white/15 transition-transform duration-500 group-hover:scale-150" aria-hidden="true" />
               <div className="relative flex flex-col gap-1.5">
                 <span className="text-2xl sm:text-3xl drop-shadow" aria-hidden="true">
                   {link.icon}
@@ -337,6 +483,45 @@ export default async function HomePage({
                     <path d="m12 5 7 7-7 7" />
                   </svg>
                 </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* ======================================================================== */}
+      {/*   SECTEURS POPULAIRES — grille photos                                    */}
+      {/* ======================================================================== */}
+      <section className="container mx-auto px-4 mt-10 sm:mt-14 max-w-6xl">
+        <SectionHeading
+          kicker="Par secteur"
+          title="Explorez les secteurs qui recrutent"
+          actionHref="/jobs"
+          actionLabel="Toutes les offres"
+        />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+          {POPULAR_SECTORS.map((sector, i) => (
+            <Link
+              key={sector.q}
+              href={`/jobs?q=${encodeURIComponent(sector.q)}`}
+              className="group relative overflow-hidden rounded-2xl aspect-[4/3] shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl animate-fade-in-up"
+              style={{ animationDelay: `${i * 60}ms` }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={sector.image}
+                alt={sector.name}
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/25 to-transparent" aria-hidden="true" />
+              <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-300 bg-white/15 backdrop-blur px-2 py-0.5 rounded-full inline-block mb-1.5">
+                  Voir les offres
+                </span>
+                <div className="font-[var(--font-display)] text-sm sm:text-base font-extrabold text-white leading-tight drop-shadow">
+                  {sector.name}
+                </div>
               </div>
             </Link>
           ))}
@@ -399,6 +584,81 @@ export default async function HomePage({
           </div>
         </section>
       )}
+
+      {/* ======================================================================== */}
+      {/*   COMMENT ÇA MARCHE — 3 étapes illustrées                                */}
+      {/* ======================================================================== */}
+      <section className="container mx-auto px-4 pb-16 sm:pb-24 max-w-6xl">
+        <SectionHeading kicker="Simple & rapide" title="Comment ça marche ?" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+          {HOW_IT_WORKS.map((step, i) => (
+            <div
+              key={step.title}
+              className="group relative overflow-hidden rounded-3xl border border-border bg-white dark:bg-slate-900 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl animate-fade-in-up"
+              style={{ animationDelay: `${i * 90}ms` }}
+            >
+              <div className="relative h-36 sm:h-40 overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={step.image}
+                  alt={step.title}
+                  loading="lazy"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" aria-hidden="true" />
+                <span className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white text-primary font-black font-[var(--font-display)] shadow-lg">
+                  {i + 1}
+                </span>
+              </div>
+              <div className="p-4 sm:p-5">
+                <h3 className="font-[var(--font-display)] text-base sm:text-lg font-extrabold text-gray-900 dark:text-white mb-1.5">
+                  {step.title}
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{step.desc}</p>
+                <Link
+                  href={step.href}
+                  className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:gap-2.5 transition-all"
+                >
+                  {step.cta}
+                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M5 12h14" />
+                    <path d="m12 5 7 7-7 7" />
+                  </svg>
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ======================================================================== */}
+      {/*   SUIVEZ-NOUS — réseaux sociaux du moment                                */}
+      {/* ======================================================================== */}
+      <section className="container mx-auto px-4 pb-16 sm:pb-24 max-w-6xl">
+        <div className="relative overflow-hidden rounded-3xl bg-slate-900 dark:bg-slate-900 text-white shadow-xl">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={IMAGES.community}
+            alt=""
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover opacity-30"
+            aria-hidden="true"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-900/70 to-slate-900/40" aria-hidden="true" />
+          <div className="relative flex flex-col lg:flex-row items-center gap-6 lg:gap-10 px-6 py-10 sm:p-12">
+            <div className="text-center lg:text-left flex-1">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-400 mb-2">Suivez-nous</p>
+              <h2 className="font-[var(--font-display)] text-2xl sm:text-3xl font-extrabold leading-tight">
+                Rejoignez la communauté
+              </h2>
+              <p className="mt-2 text-sm sm:text-base text-white/80 max-w-xl mx-auto lg:mx-0">
+                Nouveaux concours, bourses et offres en avant-première sur nos réseaux sociaux.
+              </p>
+            </div>
+            <SocialLinks size="md" className="gap-3 sm:gap-4 justify-center" />
+          </div>
+        </div>
+      </section>
 
       {/* ======================================================================== */}
       {/*   BANDEAU CTA                                                             */}
@@ -527,6 +787,37 @@ function HomeBlogCard({
         </span>
       </div>
     </Link>
+  );
+}
+
+function HomeStat({
+  value,
+  suffix,
+  label,
+  color,
+  icon,
+}: {
+  value: number;
+  suffix: string;
+  label: string;
+  color: string;
+  icon: ReactNode;
+}) {
+  return (
+    <div className="flex items-center gap-3 sm:gap-4 rounded-2xl border border-border bg-white dark:bg-slate-900 p-3.5 sm:p-5 shadow-sm hover:shadow-md transition-shadow animate-fade-in-up">
+      <span className={`shrink-0 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl ${color} text-white shadow-md`}>
+        <span aria-hidden="true">{icon}</span>
+      </span>
+      <div className="min-w-0">
+        <div className="text-lg sm:text-2xl font-black text-gray-900 dark:text-white font-[var(--font-display)] leading-none tabular-nums">
+          {value.toLocaleString('fr-FR')}
+          {suffix}
+        </div>
+        <div className="mt-1 text-[11px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 truncate">
+          {label}
+        </div>
+      </div>
+    </div>
   );
 }
 

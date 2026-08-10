@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import WhatsAppFloat from '@/components/layout/WhatsAppFloat';
 
 export default function AppShell({
   children,
@@ -21,6 +22,7 @@ export default function AppShell({
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />
+      <WhatsAppFloat />
     </>
   );
 }

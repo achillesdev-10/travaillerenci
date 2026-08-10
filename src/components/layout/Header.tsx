@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useDarkMode } from '@/hooks/useDarkMode';
 import { fetchCurrentUser, logoutCurrentUser, type StoredUser } from '@/lib/clientAuth';
+import SocialLinks from '@/components/layout/SocialLinks';
 
 const NAV_LINKS = [
   { label: 'Accueil', href: '/' },
@@ -105,6 +106,8 @@ export default function Header() {
           </nav>
 
           <div className="hidden lg:flex items-center gap-3">
+            {/* Réseaux sociaux */}
+            <SocialLinks size="sm" className="gap-1.5 mr-1" />
             {/* Bouton Mode Sombre */}
             <button
               onClick={toggleDarkMode}
@@ -215,7 +218,10 @@ export default function Header() {
                 Mon Tableau de Bord
               </Link>
             ) : null}
-            <div className="pt-4 mt-4 border-t border-border space-y-2">
+            <div className="pt-4 mt-4 border-t border-border space-y-3">
+              <SocialLinks size="md" className="justify-center gap-3 pt-1" />
+              <div className="border-t border-border" />
+              <div className="space-y-2">
               {sessionLoading ? (
                 <div className="h-9 rounded-lg bg-gray-100 dark:bg-slate-800 animate-pulse" aria-hidden="true" />
               ) : user ? (
@@ -248,6 +254,7 @@ export default function Header() {
                   </Link>
                 </>
               )}
+              </div>
             </div>
           </div>
         )}
