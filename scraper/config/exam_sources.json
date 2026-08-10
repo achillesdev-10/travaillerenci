@@ -39,20 +39,20 @@
       "robots_status": "ok",
       "verified_at": "2026-08",
       "allowed_domains": ["ena.ci"],
-      "notes": "robots.txt standard, sitemap présent. Concours direct/professionnel (cycles Moyen, Moyen Supérieur, Supérieur), résultats, actualités. Inscriptions via la plateforme unifiée (les liens vers gucaci.ciconcours.com sont ignorés : la fiche est déjà collectée par la source gucaci).",
+      "notes": "robots.txt standard, sitemap présent. ⚠️ Les communiqués de concours d'ENA sont publiés en PDF (/assets/fichiers/communiques/*.pdf) : le scraper crée désormais une fiche par PDF (titre = nom du fichier, lien officiel). Inscriptions via la plateforme unifiée (les liens vers gucaci.ciconcours.com sont ignorés : fiche déjà collectée par gucaci).",
       "enabled": true
     },
     {
       "id": "defense",
       "name": "Ministère de la Défense — concours militaires",
       "type": "ciconcours",
-      "base_url": "https://concours-defense.ciconcours.com",
+      "base_url": "https://defense.ciconcours.net",
       "list_paths": ["/", "/concours-2026/liste-concours"],
       "organizer": "Ministère de la Défense",
       "category": "militaire",
       "robots_status": "à vérifier",
       "verified_at": "2026-08",
-      "notes": "Sous-officiers, AFA Zambakro, ENSOA, gendarmerie. ⚠ Domaine de la plateforme à re-vérifier à chaque build : le sous-domaine change d'une session à l'autre (variantes .com/.net/.gouv.ci). Ajuster base_url ici.",
+      "notes": "Sous-officiers, AFA Zambakro, ENSOA, gendarmerie. ✅ Domaine vérifié le 10/08/2026 : l'ancien concours-defense.ciconcours.com était mort (DNS) — remplacé par defense.ciconcours.net (répond 200). Le sous-domaine change parfois d'une session à l'autre : ajuster base_url ici si besoin.",
       "enabled": true
     },
     {
@@ -72,13 +72,13 @@
       "id": "injs",
       "name": "INJS — Institut National de la Jeunesse et des Sports",
       "type": "ciconcours",
-      "base_url": "https://concours.injsabidjan.ci",
+      "base_url": "https://concours.injsabidjan.com",
       "list_paths": ["/", "/concours-2026/liste-concours"],
       "organizer": "INJS — Institut National de la Jeunesse et des Sports",
       "category": "enseignement",
       "robots_status": "à vérifier",
       "verified_at": "2026-08",
-      "notes": "Concours PC-EPS et filières sportives. ⚠ La plateforme change régulièrement de domaine (.com/.net/.ci) — ajuster base_url ici.",
+      "notes": "Concours PC-EPS et filières sportives. ✅ Domaine vérifié le 10/08/2026 : l'ancien concours.injsabidjan.ci était mort (DNS) — remplacé par concours.injsabidjan.com (répond 200). Site institutionnel : www.injsabidjan.ci.",
       "enabled": true
     },
     {
@@ -117,7 +117,7 @@
       "category": "administratif",
       "robots_status": "open",
       "verified_at": "2026-08",
-      "notes": "Source secondaire de veille : relaie les communiqués officiels en texte intégral, souvent avant les sites institutionnels. Utile quand le scraping direct est bloqué.",
+      "notes": "Source secondaire de veille : relaie les communiqués officiels en texte intégral, souvent avant les sites institutionnels. ⚠️ 10/08/2026 : l'accueil répondait en HTTP 500 et /recherche?q=concours en 301 — site instable ; à surveiller, le scraper journalise les erreurs au lieu d'échouer en silence.",
       "enabled": true
     },
     {

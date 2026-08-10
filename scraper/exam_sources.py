@@ -72,6 +72,69 @@ def _is_generic_title(title: str) -> bool:
     return bool(_GENERIC_TITLE_RE.match(t))
 
 
+# ----------------------------------------------------------------------------
+# Communiqués PDF (ex. ENA) : les institutions publient parfois leurs avis de
+# concours UNIQUEMENT en PDF, sans page HTML associée. Le scraper crée alors une
+# fiche « communiqué officiel » (titre = nom du fichier, lien source = PDF).
+# ----------------------------------------------------------------------------
+# Motifs attendus dans le NOM du fichier pour considérer le PDF comme un
+# communiqué de concours (et pas un document annexe quelconque).
+_PDF_COMMUNIQUE_RE = re.compile(
+    r"(concours|communiqu|arrete|arrêté|avis|inscription|resultat|résultat|ouverture|recrutement)",
+    re.I,
+)
+
+
+def _pdf_filename_title(url: str) -> str:
+    """Titre lisible depuis le nom de fichier d'un PDF (URL-décodé, sans extension)."""
+    from urllib.parse import unquote
+
+    name = unquote((url or "").rsplit("/", 1)[-1])
+    name = re.sub(r"\.pdf(?:\?.*)?$", "", name, flags=re.I)
+    name = re.sub(r"[\_\-\+\(\)]+", " ", name)
+    name = re.sub(r"\s+", " ", name).strip()
+    return name[:200] or ""
+
+
+def _make_pdf_item(
+    link: str,
+    source_config: Dict,
+    organizer: str,
+    category: str,
+    source_label: Optional[str] = None,
+) -> Optional[ExamItem]:
+    """Fiche concours créée directement depuis un PDF de communiqué officiel.
+
+    Sans parseur PDF, le texte n'est pas extractible : on crée une fiche
+    « communiqué officiel » (titre = nom du fichier, lien source = PDF,
+    description courte) qui renvoie vers le document officiel. La réécriture
+    Gemini / l'extraction structurée s'appliquent ensuite comme pour les
+    autres fiches. Retourne None si le nom de fichier ne ressemble pas à un
+    communiqué de concours.
+    """
+    title = _pdf_filename_title(link)
+    if not title or _is_generic_title(title) or not _PDF_COMMUNIQUE_RE.search(title):
+        return None
+    description_md = (
+        f"Communiqué officiel au format PDF publié par {organizer} : « {title} ». "
+        "Consultez le document source (lien ci-dessous) pour les conditions "
+        "d'inscription, les dates et les modalités de candidature."
+    )
+    item = ExamItem(
+        title=title,
+        organizer=organizer,
+        category=category,
+        description_md=description_md,
+        source=source_label or str(source_config.get("name", "web")),
+        source_url=link,
+        documents=[{"name": title, "url": link}],
+        status="pending",
+        confidence="low",
+    )
+    ok, _ = item.is_valid()
+    return item if ok else None
+
+
 def load_sources_config() -> Dict:
     with open(CONFIG_PATH, encoding="utf-8") as fh:
         return json.load(fh)
@@ -129,7 +192,11 @@ def _collect_detail_links(
         href = a.get("href", "")
         if not href or href.startswith(("#", "javascript:", "mailto:")):
             continue
-        if not (_DETAIL_HREF_RE.search(href) or (extra_patterns and any(p in href for p in extra_patterns))):
+        if not (
+            _DETAIL_HREF_RE.search(href)
+            or _PDF_RE.search(href)  # communiqués PDF (ex. ENA) = contenu, pas de la navigation
+            or (extra_patterns and any(p in href for p in extra_patterns))
+        ):
             continue
         link = urljoin(base_url, href)
         if allowed_domains and not is_url_on_domain(link, allowed_domains):
@@ -174,17 +241,30 @@ class CiconcoursPlatformScraper(BaseScraper):
         self.logger.info(f"Scraping {self.source_label} -> {self.base_url}")
         items: List[ExamItem] = []
         links: List[str] = []
+        reachable = False
+        pdf_count = 0
+        organizer = str(self.source_config.get("organizer", self.source_label))
+        category = str(self.source_config.get("category", "administratif"))
 
         for path in self.source_config.get("list_paths", ["/"]):
             soup = self.get_soup(urljoin(f"{self.base_url}/", path.lstrip("/")))
             if soup is None:
                 continue
+            reachable = True
             links.extend(_collect_detail_links(soup, self.base_url, allowed_domains=self.allowed_domains))
         self.logger.info(f"  [ciconcours] {len(links)} liens de fiches cumulés")
 
         for link in links[: max_offers * 3]:
             if len(items) >= max_offers:
                 break
+            # Communiqué PDF (ex. « Communiqué relatif au concours 2026.pdf ») :
+            # fiche créée directement, aucune page HTML à parser.
+            if _PDF_RE.search(link):
+                pdf_item = _make_pdf_item(link, self.source_config, organizer, category, self.source_label)
+                if pdf_item:
+                    items.append(pdf_item)
+                    pdf_count += 1
+                continue
             try:
                 soup = self.get_soup(link)
                 if soup is None:
@@ -201,8 +281,8 @@ class CiconcoursPlatformScraper(BaseScraper):
                     continue
                 item = ExamItem(
                     title=title,
-                    organizer=str(self.source_config.get("organizer", self.source_label)),
-                    category=str(self.source_config.get("category", "administratif")),
+                    organizer=organizer,
+                    category=category,
                     description_md=text[:20000],
                     source=self.source_label,
                     source_url=link,
@@ -218,8 +298,33 @@ class CiconcoursPlatformScraper(BaseScraper):
             except Exception as exc:
                 self.logger.debug(f"Erreur sur lien {link}: {exc}")
 
-        self.logger.info(f"  ✓ {self.source_label} : {len(items)} concours bruts.")
+        CiconcoursPlatformScraper._log_source_outcome(reachable, items, pdf_count, self.source_label)
         return items
+
+    @staticmethod
+    def _log_source_outcome(
+        reachable: bool,
+        items: List[ExamItem],
+        pdf_count: int = 0,
+        label: str = "",
+    ) -> None:
+        """Journalise l'issue de la collecte en distinguant les 3 cas :
+        injoignable / joignable mais 0 résultat / résultats obtenus.
+        (Les trois cas produisaient avant le même message « ✓ 0 communiqués ».)"""
+        logger = setup_logger("exam_sources")
+        prefix = f"  [{label}] " if label else "  "
+        if not reachable:
+            logger.error(
+                f"{prefix}❌ Source injoignable (toutes les pages de liste en erreur — timeout / DNS / blocage)."
+            )
+        elif not items:
+            logger.warning(
+                f"{prefix}⚠️ 0 résultat — site joignable mais aucun lien de concours trouvé "
+                "(structure de page modifiée ou aucun concours en cours)."
+            )
+        else:
+            suffix = f" (dont {pdf_count} communiqués PDF)" if pdf_count else ""
+            logger.info(f"{prefix}✅ {len(items)} concours bruts{suffix}.")
 
 
 class ActualitesScraper(BaseScraper):
@@ -239,16 +344,29 @@ class ActualitesScraper(BaseScraper):
         self.logger.info(f"Scraping {self.source_label} -> {self.base_url}")
         items: List[ExamItem] = []
         links: List[str] = []
+        reachable = False
+        pdf_count = 0
+        organizer = str(self.source_config.get("organizer", self.source_label))
+        category = str(self.source_config.get("category", "administratif"))
 
         for path in self.source_config.get("list_paths", ["/"]):
             soup = self.get_soup(urljoin(f"{self.base_url}/", path.lstrip("/")))
             if soup is None:
                 continue
+            reachable = True
             links.extend(_collect_detail_links(soup, self.base_url, allowed_domains=self.allowed_domains))
 
         for link in links[: max_offers * 3]:
             if len(items) >= max_offers:
                 break
+            # Communiqué PDF : fiche créée directement (le filtre « concours »
+            # s'applique alors au NOM du fichier, pas au texte de la page).
+            if _PDF_RE.search(link):
+                pdf_item = _make_pdf_item(link, self.source_config, organizer, category, self.source_label)
+                if pdf_item:
+                    items.append(pdf_item)
+                    pdf_count += 1
+                continue
             try:
                 soup = self.get_soup(link)
                 if soup is None:
@@ -269,8 +387,8 @@ class ActualitesScraper(BaseScraper):
                 docs = _extract_documents(soup, link)
                 item = ExamItem(
                     title=title,
-                    organizer=str(self.source_config.get("organizer", self.source_label)),
-                    category=str(self.source_config.get("category", "administratif")),
+                    organizer=organizer,
+                    category=category,
                     description_md=text[:20000],
                     source=self.source_label,
                     source_url=link,
@@ -286,7 +404,7 @@ class ActualitesScraper(BaseScraper):
             except Exception as exc:
                 self.logger.debug(f"Erreur sur lien {link}: {exc}")
 
-        self.logger.info(f"  ✓ {self.source_label} : {len(items)} communiqués bruts.")
+        CiconcoursPlatformScraper._log_source_outcome(reachable, items, pdf_count, self.source_label)
         return items
 
 
@@ -307,16 +425,27 @@ class AipScraper(BaseScraper):
         self.logger.info(f"Scraping AIP (veille) -> {self.base_url}")
         items: List[ExamItem] = []
         links: List[str] = []
+        reachable = False
+        pdf_count = 0
+        organizer = str(self.source_config.get("organizer", self.source_label))
+        category = str(self.source_config.get("category", "administratif"))
 
         for path in self.source_config.get("list_paths", ["/recherche?q=concours"]):
             soup = self.get_soup(urljoin(f"{self.base_url}/", path.lstrip("/")))
             if soup is None:
                 continue
+            reachable = True
             links.extend(_collect_detail_links(soup, self.base_url, extra_patterns=["concours"], allowed_domains=self.allowed_domains))
 
         for link in links[: max_offers * 3]:
             if len(items) >= max_offers:
                 break
+            if _PDF_RE.search(link):
+                pdf_item = _make_pdf_item(link, self.source_config, organizer, category, self.source_label)
+                if pdf_item:
+                    items.append(pdf_item)
+                    pdf_count += 1
+                continue
             try:
                 soup = self.get_soup(link)
                 if soup is None:
@@ -334,8 +463,8 @@ class AipScraper(BaseScraper):
                     continue
                 item = ExamItem(
                     title=title,
-                    organizer=str(self.source_config.get("organizer", self.source_label)),
-                    category=str(self.source_config.get("category", "administratif")),
+                    organizer=organizer,
+                    category=category,
                     description_md=text[:20000],
                     source=self.source_label,
                     source_url=link,
@@ -349,7 +478,7 @@ class AipScraper(BaseScraper):
             except Exception as exc:
                 self.logger.debug(f"Erreur sur lien {link}: {exc}")
 
-        self.logger.info(f"  ✓ AIP : {len(items)} communiqués de veille.")
+        CiconcoursPlatformScraper._log_source_outcome(reachable, items, pdf_count, self.source_label)
         return items
 
 

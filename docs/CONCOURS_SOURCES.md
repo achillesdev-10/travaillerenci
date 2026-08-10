@@ -15,13 +15,13 @@
 |----|-------------|-------------|------------|------|--------------------|--------|
 | `gucaci` | GUCACI — Guichet Unique des Concours Administratifs (Fonction Publique) | `https://gucaci.ciconcours.com/` | ouvert | plateforme ciconcours | hebdomadaire en période de concours | ✅ actif |
 | `fonctionpublique` | Ministère de la Fonction Publique et de la Modernisation de l'Administration | `https://www.fonctionpublique.gouv.ci/` | non standard (XML pare-feu `secure.sndi.ci`) | actualités / communiqués | hebdomadaire | ✅ actif |
-| `ena` | École Nationale d'Administration | `https://www.ena.ci/` | standard, sitemap présent | actualités / concours | mensuelle (cycles moyen / moyen supérieur / supérieur) | ✅ actif |
-| `defense` | Ministère de la Défense (Armée, Gendarmerie) | `https://concours-defense.ciconcours.com` | à vérifier | plateforme ciconcours | par session (concours sous-officiers, AFA Zambakro, ENSOA, gendarmerie) | ⚠️ domaine instable — à re-vérifier |
-| `infas` | INFAS — Institut National de Formation des Agents de Santé | `https://infas.ciconcours.com` | à vérifier | plateforme ciconcours | annuelle (sept.–oct.) | ⚠️ domaine à re-vérifier |
-| `injs` | INJS — Institut National de la Jeunesse et des Sports | `https://concours.injsabidjan.ci` | à vérifier | plateforme ciconcours | annuelle (PC-EPS, filières sportives) | ⚠️ domaine instable (variantes .com/.net/.ci) |
+| `ena` | École Nationale d'Administration | `https://www.ena.ci/` | standard, sitemap présent | actualités / concours (**communiqués en PDF**) | mensuelle (cycles moyen / moyen supérieur / supérieur) | ✅ actif (fiches créées depuis les PDF) |
+| `defense` | Ministère de la Défense (Armée, Gendarmerie) | `https://defense.ciconcours.net/` | à vérifier | plateforme ciconcours | par session (concours sous-officiers, AFA Zambakro, ENSOA, gendarmerie) | ✅ corrigé le 10/08/2026 (l'ancien `concours-defense.ciconcours.com` était mort en DNS) |
+| `infas` | INFAS — Institut National de Formation des Agents de Santé | `https://infas.ciconcours.com` | à vérifier | plateforme ciconcours | annuelle (sept.–oct.) | ✅ actif (timeouts CI transitoires — site répond 200) |
+| `injs` | INJS — Institut National de la Jeunesse et des Sports | `https://concours.injsabidjan.com/` | à vérifier | plateforme ciconcours | annuelle (PC-EPS, filières sportives) | ✅ corrigé le 10/08/2026 (l'ancien `concours.injsabidjan.ci` était mort en DNS) |
 | `cafop` | CAFOP — Ministère de l'Éducation Nationale / DECO | `https://www.men-deco.org` | à vérifier | actualités / résultats | par tour (CAFOP IA) | ✅ actif |
-| `insfs` | INSFS — Institut National Supérieur de Formation Sociale | `https://insfs.ciconcours.com` | ouvert | plateforme ciconcours | annuelle | ✅ actif |
-| `aip` | AIP — Agence Ivoirienne de Presse (veille secondaire) | `https://www.aip.ci/` | ouvert | veille presse | quotidienne (relais des communiqués) | ✅ actif |
+| `insfs` | INSFS — Institut National Supérieur de Formation Sociale | `https://insfs.ciconcours.com` | ouvert | plateforme ciconcours | annuelle | ✅ actif (timeouts CI transitoires — site répond 200) |
+| `aip` | AIP — Agence Ivoirienne de Presse (veille secondaire) | `https://www.aip.ci/` | ouvert | veille presse | quotidienne (relais des communiqués) | ⚠️ instable (accueil 500 / recherche 301 le 10/08/2026) — à surveiller |
 | `servicepublic` | Service Public CI (portail transverse) | `https://servicepublic.gouv.ci/` | ouvert | démarches | ponctuel (complément) | ⏸️ désactivé par défaut |
 
 ### Plateformes de la famille `ciconcours.com`
@@ -88,12 +88,26 @@ le prompt d'extraction et les tests unitaires `scraper/tests/test_exam_parser.py
   le site ministériel publie les communiqués (section « À la une »). Le
   `robots.txt` renvoie une réponse XML (pare-feu) — l'exploration en lecture
   simple reste possible et est documentée.
-- **INJS** : la plateforme a connu des variantes `.com` / `.net` / `.ci` selon
-  les années. Ne pas coder l'URL en dur : passer par `exam_sources.json`.
-- **Défense** : le sous-domaine de la plateforme militaire change d'une session
-  à l'autre (ex. « Guichet Unique des Concours Militaires », chaînes WhatsApp
-  officielles citées dans les communiqués). Ces chaînes WhatsApp sont utiles
-  pour la **modération humaine** mais ne sont pas scrapables automatiquement.
+- **INJS** : l'ancien `concours.injsabidjan.ci` était mort en DNS (10/08/2026) ;
+  remplacé par `concours.injsabidjan.com` (répond 200). La plateforme a connu
+  des variantes `.com` / `.net` / `.ci` selon les années : ne pas coder l'URL en
+  dur, passer par `exam_sources.json`.
+- **Défense** : l'ancien `concours-defense.ciconcours.com` était mort en DNS
+  (10/08/2026) ; remplacé par `defense.ciconcours.net` (répond 200). Le
+  sous-domaine de la plateforme militaire change d'une session à l'autre — les
+  chaînes WhatsApp officielles citées dans les communiqués sont utiles pour la
+  **modération humaine** mais ne sont pas scrapables automatiquement.
+- **GUCACI / INFAS / INSFS** (`*.ciconcours.com`) : joignables (HTTP 200, ~1 s)
+  depuis un poste classique ; les timeouts constatés en CI proviennent du
+  réseau GitHub Actions (IP de datacenter throttlée / WAF). Ne pas désactiver
+  ces sources pour autant — vérifier d'abord via `--check-sources`.
+- **ENA** : les avis de concours sont publiés en PDF
+  (`/assets/fichiers/communiques/*.pdf`), sans page HTML associée. Le scraper
+  crée une fiche « communiqué officiel » par PDF (titre = nom du fichier, lien
+  source = PDF).
+- **AIP** : accueil en HTTP 500 et recherche en 301 le 10/08/2026 — site
+  instable ; les erreurs sont journalisées distinctement, la source reste
+  activée (veille secondaire).
 
 ## Vérification périodique
 

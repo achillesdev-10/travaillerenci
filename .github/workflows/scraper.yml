@@ -63,6 +63,7 @@ jobs:
           python scraper/tests/test_similarity_check.py
           python scraper/tests/test_exam_repository.py
           python scraper/tests/test_repository_maintenance.py
+          python scraper/tests/test_exam_sources.py
 
   # ==========================================================================
   # Vérification du code front (Next.js) à chaque push / PR :
