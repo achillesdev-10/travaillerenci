@@ -4,6 +4,8 @@ import type { JobOfferSchema } from '@/types';
 import { formatDate, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
 import SaveButton from '@/components/saved/SaveButton';
+import CoverImage from '@/components/content/CoverImage';
+import { jobDefaultImage } from '@/lib/images';
 
 export const metadata = {
   title: "Bourses d'études en Côte d'Ivoire",
@@ -111,8 +113,18 @@ function ScholarshipCard({ bourse }: { bourse: JobOfferSchema }) {
   return (
     <Link
       href={`/bourses/${bourse.id}`}
-      className="group bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl p-4 sm:p-6 hover:border-primary/30 hover:shadow-lg transition-all flex flex-col"
+      className="group bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-lg transition-all flex flex-col"
     >
+      {/* Bannière photo par défaut (bourse = catégorie scholarship) */}
+      <div className="relative h-24 sm:h-28 overflow-hidden bg-gray-100 dark:bg-slate-800">
+        <CoverImage
+          src={jobDefaultImage('scholarship')}
+          alt=""
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/35 to-transparent" aria-hidden="true" />
+      </div>
+      <div className="flex flex-1 flex-col p-4 sm:p-6">
       <div className="flex items-center justify-between gap-2 mb-3">
         <span className="inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-[10.5px] font-bold text-amber-600 dark:text-amber-400">
           Bourse
@@ -159,6 +171,7 @@ function ScholarshipCard({ bourse }: { bourse: JobOfferSchema }) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
           </svg>
         </span>
+      </div>
       </div>
     </Link>
   );

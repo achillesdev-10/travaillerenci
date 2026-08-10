@@ -754,20 +754,11 @@ function HomeBlogCard({
       style={{ animationDelay: `${index * 70}ms` }}
     >
       <div className="relative h-24 sm:h-32 overflow-hidden bg-gray-100 dark:bg-slate-800">
-        {post.cover_image ? (
-          <CoverImage
-            src={post.cover_image}
-            alt={post.title}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center opacity-60">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8 sm:h-10 sm:w-10" aria-hidden="true">
-              <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
-              <path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6Z" />
-            </svg>
-          </div>
-        )}
+        <CoverImage
+          src={post.cover_image || IMAGES.blog}
+          alt={post.title}
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
       </div>
       <div className="flex flex-1 flex-col p-3 sm:p-4">
         <h3 className="font-bold text-[12.5px] sm:text-sm leading-snug text-gray-900 line-clamp-2 transition-colors group-hover:text-primary">

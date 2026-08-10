@@ -4,6 +4,7 @@ import CoverImage from '@/components/content/CoverImage';
 import type { BlogPost } from '@/types/blog';
 import { formatDateShort } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
+import { IMAGES } from '@/lib/images';
 
 export const dynamic = 'force-dynamic';
 
@@ -124,20 +125,11 @@ function BlogCard({ post }: { post: BlogPost }) {
     >
       {/* Couverture */}
       <div className="relative h-28 overflow-hidden bg-gray-100 dark:bg-slate-800 sm:h-40">
-        {post.cover_image ? (
-          <CoverImage
-            src={post.cover_image}
-            alt={post.title}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10 sm:w-12 sm:h-12 opacity-60 transition-transform duration-300 group-hover:scale-110" aria-hidden="true">
-              <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
-              <path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6Z" />
-            </svg>
-          </div>
-        )}
+        <CoverImage
+          src={post.cover_image || IMAGES.blog}
+          alt={post.title}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
         {tags.length > 0 && (
           <span className="absolute top-3 left-3 inline-flex items-center rounded-full bg-white/90 dark:bg-slate-950/80 backdrop-blur px-2.5 py-1 text-[11px] font-bold text-primary shadow-sm">
             {tags[0]}

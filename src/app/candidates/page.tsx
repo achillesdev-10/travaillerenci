@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import RegisterForm from '@/components/auth/RegisterForm';
+import CoverImage from '@/components/content/CoverImage';
+import { IMAGES } from '@/lib/images';
 
 const BENEFITS = [
   {
@@ -69,16 +71,19 @@ const STEPS = [
     number: '1',
     title: 'Créez votre compte gratuit',
     description: 'Inscrivez-vous en moins de 2 minutes avec votre email ou votre compte Google.',
+    image: IMAGES.internship,
   },
   {
     number: '2',
     title: 'Complétez votre profil',
     description: 'Ajoutez votre CV, vos compétences et vos préférences pour recevoir les bonnes offres.',
+    image: IMAGES.cv,
   },
   {
     number: '3',
     title: 'Postulez en un clic',
     description: 'Parcourez les offres vérifiées et envoyez votre candidature directement aux recruteurs.',
+    image: IMAGES.jobsAlt,
   },
 ];
 
@@ -102,31 +107,57 @@ export default function CandidatesPage() {
             <span className="text-gray-900 dark:text-white font-medium">Candidats</span>
           </nav>
 
-          <div className="max-w-3xl animate-fade-in-up">
-            <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary border border-primary/20 mb-5">
-              La plateforme n°1 de l’emploi en Côte d’Ivoire
-            </span>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black font-[var(--font-display)] tracking-tight mb-6">
-              Votre carrière{' '}
-              <span className="text-secondary">commence ici</span>
-            </h1>
-            <p className="text-lg md:text-xl text-gray-600 dark:text-slate-400 mb-8 max-w-2xl">
-              Rejoignez des milliers de candidats qui trouvent chaque jour un emploi, un stage,
-              une bourse d’études ou un concours administratif en Côte d’Ivoire.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-              <a
-                href="#inscription"
-                className="w-full sm:w-auto bg-primary hover:bg-primary-dark text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 transition-all text-center"
-              >
-                Créer mon compte gratuit
-              </a>
-              <Link
-                href="/jobs"
-                className="w-full sm:w-auto bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 hover:border-primary/50 text-gray-900 dark:text-white px-8 py-4 rounded-2xl font-bold transition-all text-center"
-              >
-                Voir les offres d’emploi
-              </Link>
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+            <div className="max-w-3xl animate-fade-in-up">
+              <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary border border-primary/20 mb-5">
+                La plateforme n°1 de l’emploi en Côte d’Ivoire
+              </span>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-black font-[var(--font-display)] tracking-tight mb-6">
+                Votre carrière{' '}
+                <span className="text-secondary">commence ici</span>
+              </h1>
+              <p className="text-lg md:text-xl text-gray-600 dark:text-slate-400 mb-8 max-w-2xl">
+                Rejoignez des milliers de candidats qui trouvent chaque jour un emploi, un stage,
+                une bourse d’études ou un concours administratif en Côte d’Ivoire.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                <a
+                  href="#inscription"
+                  className="w-full sm:w-auto bg-primary hover:bg-primary-dark text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 transition-all text-center"
+                >
+                  Créer mon compte gratuit
+                </a>
+                <Link
+                  href="/jobs"
+                  className="w-full sm:w-auto bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 hover:border-primary/50 text-gray-900 dark:text-white px-8 py-4 rounded-2xl font-bold transition-all text-center"
+                >
+                  Voir les offres d’emploi
+                </Link>
+              </div>
+            </div>
+
+            {/* Photo : jeune professionnelle ivoirienne */}
+            <div className="relative hidden lg:block">
+              <div className="relative overflow-hidden rounded-3xl shadow-2xl shadow-primary/20 ring-1 ring-black/5 animate-float">
+                <CoverImage
+                  src={IMAGES.hero}
+                  alt="Jeune professionnelle ivoirienne qui consulte des offres d'emploi"
+                  className="w-full h-[380px] xl:h-[430px] object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/40 via-transparent to-transparent" aria-hidden="true" />
+              </div>
+              {/* Badge flottant : offres chaque jour */}
+              <div className="absolute -left-6 top-8 flex items-center gap-2.5 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur px-4 py-3 shadow-lg border border-border animate-fade-in-up" style={{ animationDelay: '250ms' }}>
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
+                    <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z" />
+                  </svg>
+                </span>
+                <div>
+                  <div className="text-sm font-extrabold text-gray-900 dark:text-white leading-none">Offres chaque jour</div>
+                  <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Vérifiées par notre équipe</div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -191,14 +222,27 @@ export default function CandidatesPage() {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {STEPS.map((step) => (
-              <div key={step.number} className="relative text-center md:text-left">
-                <div className="w-12 h-12 rounded-2xl bg-orange-500 text-white font-black text-xl flex items-center justify-center font-[var(--font-display)] mb-5 mx-auto md:mx-0">
-                  {step.number}
+              <div
+                key={step.number}
+                className="group relative overflow-hidden rounded-3xl border border-border bg-white dark:bg-slate-900 shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all duration-200"
+              >
+                <div className="relative h-32 sm:h-36 overflow-hidden">
+                  <CoverImage
+                    src={step.image}
+                    alt={step.title}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" aria-hidden="true" />
+                  <div className="absolute left-4 top-4 w-10 h-10 rounded-2xl bg-orange-500 text-white font-black text-lg flex items-center justify-center font-[var(--font-display)] shadow-lg">
+                    {step.number}
+                  </div>
                 </div>
-                <h3 className="font-bold text-lg mb-2">{step.title}</h3>
-                <p className="text-sm text-gray-600 dark:text-slate-400 leading-relaxed">
-                  {step.description}
-                </p>
+                <div className="p-5">
+                  <h3 className="font-bold text-lg mb-2">{step.title}</h3>
+                  <p className="text-sm text-gray-600 dark:text-slate-400 leading-relaxed">
+                    {step.description}
+                  </p>
+                </div>
               </div>
             ))}
           </div>

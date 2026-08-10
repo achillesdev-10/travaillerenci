@@ -5,6 +5,7 @@ import SimpleMarkdown from '@/components/content/SimpleMarkdown';
 import CoverImage from '@/components/content/CoverImage';
 import { BlogService } from '@/services/blogService';
 import { SITE_CONFIG } from '@/lib/constants';
+import { IMAGES } from '@/lib/images';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,19 +60,14 @@ export default async function BlogArticlePage({
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-slate-950">
       {/* ===== Couverture ===== */}
-      {post.cover_image ? (
-        <div className="relative h-56 sm:h-80 lg:h-96 w-full overflow-hidden bg-slate-100 dark:bg-slate-900">
-          <CoverImage src={post.cover_image} alt={post.title} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-        </div>
-      ) : (
-        <div className="relative h-40 sm:h-56 w-full overflow-hidden bg-gray-100 dark:bg-slate-800 flex items-center justify-center">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-16 h-16 sm:w-20 sm:h-20 opacity-50 text-primary" aria-hidden="true">
-            <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
-            <path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6Z" />
-          </svg>
-        </div>
-      )}
+      <div className="relative h-56 sm:h-80 lg:h-96 w-full overflow-hidden bg-slate-100 dark:bg-slate-900">
+        <CoverImage
+          src={post.cover_image || IMAGES.blog}
+          alt={post.title}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+      </div>
 
       {/* ===== Article ===== */}
       <div className="container mx-auto px-4 -mt-10 sm:-mt-14 relative z-10 max-w-3xl">

@@ -7,6 +7,8 @@ import SafetyNotice from '@/components/content/SafetyNotice';
 import SaveButton from '@/components/saved/SaveButton';
 import { formatDate, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
+import { jobDefaultImage } from '@/lib/images';
+import CoverImage from '@/components/content/CoverImage';
 
 export const revalidate = 300;
 
@@ -59,6 +61,16 @@ export default async function BourseDetailPage({ params }: PageProps) {
     <main className="flex-1 min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors">
       <section className="bg-amber-500/5 dark:bg-amber-500/10 border-b border-gray-100 dark:border-slate-800">
         <div className="container mx-auto px-4 pt-4 sm:pt-8 pb-6 max-w-4xl">
+          {/* Bannière photo par défaut (bourse = catégorie scholarship) */}
+          <div className="relative h-40 sm:h-56 overflow-hidden rounded-2xl sm:rounded-3xl shadow-lg mb-5 sm:mb-6">
+            <CoverImage
+              src={jobDefaultImage('scholarship')}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" aria-hidden="true" />
+          </div>
+
           <nav aria-label="Fil d'Ariane" className="mb-4 sm:mb-6">
             <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] sm:text-sm text-gray-500 dark:text-gray-400">
               <li>
