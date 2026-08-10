@@ -5,6 +5,8 @@
  *  MANAGEMENT API (exécution SQL directe — indépendant du cache PostgREST) :
  *    • 0009 : table `blog_posts` (supabase/migrations/0009_create_blog_posts.sql)
  *    • 0010 : table `exams`     (supabase/APPLY-EXAMS-MIGRATION.sql)
+ *    • 0014–0018 : vérification email, profil candidat, sauvegardes, alertes,
+ *      signalements (rétention candidat).
  *
  *  Prérequis :
  *    - Personal Access Token Supabase dans .env.local : SUPABASE_ACCESS_TOKEN
@@ -70,6 +72,7 @@ const MIGRATIONS: Array<{ table: string; label: string; file: string }> = [
   { table: 'candidate_profiles', label: '0015 (profil candidat)', file: 'supabase/migrations/0015_candidate_profiles.sql' },
   { table: 'saved_items', label: '0016 (sauvegardes)', file: 'supabase/migrations/0016_saved_items.sql' },
   { table: 'alerts', label: '0017 (alertes candidat)', file: 'supabase/migrations/0017_alerts.sql' },
+  { table: 'reports', label: '0018 (signalements)', file: 'supabase/migrations/0018_reports.sql' },
 ];
 
 async function runSql(query: string): Promise<{ ok: boolean; data?: unknown; error?: string }> {

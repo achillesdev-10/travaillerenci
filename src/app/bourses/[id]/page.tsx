@@ -131,8 +131,9 @@ export default async function BourseDetailPage({ params }: PageProps) {
             {/* Mention anti-arnaque — candidater à une bourse est gratuit */}
             <SafetyNotice
               variant="scholarship"
+              itemType="scholarship"
+              itemId={bourse.id}
               itemLabel={bourse.title}
-              itemUrl={`${getSiteUrl()}/bourses/${bourse.id}`}
               className="mt-6"
             />
           </article>

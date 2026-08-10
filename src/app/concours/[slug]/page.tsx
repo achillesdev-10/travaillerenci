@@ -397,8 +397,9 @@ export default async function ConcoursDetailPage({ params }: PageProps) {
             {/* Mention anti-arnaque — inscriptions via les canaux officiels */}
             <SafetyNotice
               variant="exam"
+              itemType="exam"
+              itemId={exam.id}
               itemLabel={exam.title}
-              itemUrl={absoluteUrl}
               className="mb-6"
             />
 

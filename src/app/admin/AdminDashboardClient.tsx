@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import type {
   AdminDashboardData,
   BulkAction,
@@ -9,10 +10,21 @@ import type {
   ScraperHealth,
 } from "../../lib/admin-dashboard";
 import type { JobOffersActivityPoint } from "@/services/jobOfferSchemaService";
+import type { Report, ReportStatus } from "@/services/reportService";
+import type { ResolvedContentItem } from "@/lib/itemResolver";
+import {
+  REPORT_REASON_LABELS,
+  REPORT_TYPE_BADGES,
+  formatReportDate,
+} from "@/lib/reportLabels";
+
+type DashboardReport = Report & { content: ResolvedContentItem | null };
 
 type AdminDashboardClientProps = {
   initialData: AdminDashboardData;
   activity: JobOffersActivityPoint[];
+  reportCounts: Record<ReportStatus, number>;
+  latestReports: DashboardReport[];
 };
 
 const STATUS_OPTIONS = ["Toutes", "En attente", "Vérifiées", "Expirées"] as const;
@@ -40,23 +52,6 @@ const BULK_ACTIONS: Array<{
     tone: "bg-slate-800/60 text-slate-200 border border-white/10 hover:bg-slate-700/60",
   },
 ];
-
-function formatDate(date: string | null) {
-  if (!date) {
-    return "Date inconnue";
-  }
-
-  const parsed = new Date(date);
-
-  if (Number.isNaN(parsed.getTime())) {
-    return date;
-  }
-
-  return new Intl.DateTimeFormat("fr-FR", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(parsed);
-}
 
 function formatShortDate(date: string | null) {
   if (!date) return "—";
@@ -189,8 +184,8 @@ function exportCsv(offers: DashboardOffer[]) {
     csvCell(offer.company),
     csvCell(offer.city),
     csvCell(offer.status),
-    offer.createdAt ? csvCell(formatDate(offer.createdAt)) : csvCell(""),
-    offer.deadline ? csvCell(formatDate(offer.deadline)) : csvCell(""),
+    offer.createdAt ? csvCell(formatReportDate(offer.createdAt)) : csvCell(""),
+    offer.deadline ? csvCell(formatReportDate(offer.deadline)) : csvCell(""),
     String(offer.clicks),
     csvCell(offer.sourceUrl || ""),
   ]);
@@ -210,6 +205,8 @@ function exportCsv(offers: DashboardOffer[]) {
 export default function AdminDashboardClient({
   initialData,
   activity,
+  reportCounts,
+  latestReports,
 }: AdminDashboardClientProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -388,6 +385,8 @@ export default function AdminDashboardClient({
     hint: string;
     icon: React.ReactNode;
     accent: string;
+    /** Si renseigné, la carte devient un lien. */
+    href?: string;
   }> = [
     {
       label: "Offres actives",
@@ -437,6 +436,20 @@ export default function AdminDashboardClient({
           <circle cx="12" cy="12" r="9" />
           <path d="M3 12h18" />
           <path d="M12 3a14.5 14.5 0 0 1 0 18 14.5 14.5 0 0 1 0-18Z" />
+        </svg>
+      ),
+    },
+    {
+      label: "Signalements en attente",
+      value: reportCounts.pending,
+      hint: "File de modération à traiter",
+      accent: "from-rose-500 to-red-600",
+      href: "/admin/reports",
+      icon: (
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+          <path d="M12 9v4" />
+          <path d="M12 17h.01" />
         </svg>
       ),
     },
@@ -508,26 +521,141 @@ export default function AdminDashboardClient({
       </section>
 
       {/* ===== Stats ===== */}
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {statCards.map((card) => (
-          <article
-            key={card.label}
-            className="hover-lift rounded-3xl border border-white/[0.06] bg-slate-900/60 p-5 shadow-lg shadow-black/20 backdrop-blur"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <p className="text-sm text-slate-400">{card.label}</p>
-              <span
-                className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-lg ${card.accent}`}
-              >
-                {card.icon}
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        {statCards.map((card) => {
+          const inner = (
+            <>
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-sm text-slate-400">{card.label}</p>
+                <span
+                  className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-lg ${card.accent}`}
+                >
+                  {card.icon}
+                </span>
+              </div>
+              <p className="mt-4 font-[var(--font-display)] text-4xl font-black tracking-tight text-white">
+                {card.value}
+              </p>
+              <p className="mt-2 text-xs text-slate-500">{card.hint}</p>
+            </>
+          );
+
+          return card.href ? (
+            <Link
+              key={card.label}
+              href={card.href}
+              className="hover-lift group block rounded-3xl border border-white/[0.06] bg-slate-900/60 p-5 shadow-lg shadow-black/20 backdrop-blur transition"
+            >
+              {inner}
+              <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 transition group-hover:text-emerald-300">
+                Voir la file →
               </span>
-            </div>
-            <p className="mt-4 font-[var(--font-display)] text-4xl font-black tracking-tight text-white">
-              {card.value}
+            </Link>
+          ) : (
+            <article
+              key={card.label}
+              className="hover-lift rounded-3xl border border-white/[0.06] bg-slate-900/60 p-5 shadow-lg shadow-black/20 backdrop-blur"
+            >
+              {inner}
+            </article>
+          );
+        })}
+      </section>
+
+      {/* ===== Derniers signalements ===== */}
+      <section className="rounded-3xl border border-white/[0.06] bg-slate-900/60 p-5 shadow-lg shadow-black/20 backdrop-blur">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-[var(--font-display)] text-lg font-bold text-white">
+              Derniers signalements
+            </h2>
+            <p className="mt-1 text-sm text-slate-400">
+              {reportCounts.pending > 0
+                ? `${reportCounts.pending} signalement${reportCounts.pending > 1 ? "s" : ""} en attente de modération.`
+                : "Aucun signalement en attente — la file de modération est à jour."}
             </p>
-            <p className="mt-2 text-xs text-slate-500">{card.hint}</p>
-          </article>
-        ))}
+          </div>
+          <Link
+            href="/admin/reports"
+            className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-emerald-400 transition hover:text-emerald-300"
+          >
+            Ouvrir la file de modération
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14" />
+              <path d="m13 6 6 6-6 6" />
+            </svg>
+          </Link>
+        </div>
+
+        {latestReports.length === 0 ? (
+          <div className="mt-5 flex items-center gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.06] px-4 py-6">
+            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500/15">
+              <svg className="h-5 w-5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <path d="m9 11 3 3L22 4" />
+              </svg>
+            </span>
+            <div>
+              <p className="text-sm font-semibold text-emerald-300">Tout est en ordre</p>
+              <p className="text-xs text-slate-500">
+                Aucun contenu signalé en attente pour le moment.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <ul className="mt-4 divide-y divide-white/[0.06]">
+            {latestReports.map((report) => {
+              const typeBadge = REPORT_TYPE_BADGES[report.item_type];
+              const reasonBadge = REPORT_REASON_LABELS[report.reason];
+              return (
+                <li
+                  key={report.id}
+                  className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="flex min-w-0 items-start gap-3">
+                    <span
+                      className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold ${typeBadge.className}`}
+                    >
+                      {typeBadge.label}
+                    </span>
+                    <div className="min-w-0">
+                      {report.content ? (
+                        <a
+                          href={report.content.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={report.content.title}
+                          className="block truncate font-medium text-white transition hover:text-emerald-300"
+                        >
+                          {report.content.title}
+                        </a>
+                      ) : (
+                        <p className="truncate italic text-slate-500">
+                          Contenu supprimé (id : {report.item_id.slice(0, 8)})
+                        </p>
+                      )}
+                      {report.content && (
+                        <p className="truncate text-xs text-slate-500">
+                          {report.content.subtitle}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 pl-12 sm:pl-0">
+                    <span
+                      className={`rounded-full border px-2.5 py-1 text-[10px] font-bold ${reasonBadge.className}`}
+                    >
+                      {reasonBadge.label}
+                    </span>
+                    <span className="text-xs text-slate-500">
+                      {report.reporter_email || "Anonyme"} · {formatReportDate(report.created_at)}
+                    </span>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </section>
 
       {/* ===== Santé du scraper + activité ===== */}

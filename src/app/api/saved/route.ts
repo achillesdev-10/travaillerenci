@@ -6,9 +6,9 @@ import {
   SAVED_ITEM_TYPES,
   type SavedItemType,
 } from '@/services/savedItemsService';
+import { resolveContentItem } from '@/lib/itemResolver';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import { ExamService } from '@/services/examService';
-import { examUrl } from '@/lib/examConstants';
 
 export const runtime = 'nodejs';
 
@@ -25,42 +25,6 @@ export interface ResolvedSavedItem {
   url: string;
 }
 
-/** Enrichit un élément sauvegardé avec ses métadonnées (titre, lien…). */
-async function resolveItem(item: {
-  item_type: SavedItemType;
-  item_id: string;
-  created_at: string;
-}): Promise<ResolvedSavedItem | null> {
-  const { item_type, item_id, created_at } = item;
-
-  if (item_type === 'exam') {
-    const exam = await ExamService.getById(item_id);
-    if (!exam) return null;
-    return {
-      item_type,
-      item_id,
-      saved_at: created_at,
-      title: exam.title,
-      subtitle: exam.organizer,
-      url: examUrl(exam),
-    };
-  }
-
-  const job = await JobOfferSchemaService.getById(item_id);
-  if (!job) return null;
-  return {
-    item_type,
-    item_id,
-    saved_at: created_at,
-    title: job.title,
-    subtitle: `${job.company} — ${job.location}`,
-    url:
-      item_type === 'scholarship'
-        ? `/bourses/${job.id}`
-        : `/jobs/${job.slug || job.id}`,
-  };
-}
-
 /** GET /api/saved — liste les sauvegardes du candidat connecté (enrichies). */
 export async function GET() {
   const user = await getCurrentUser();
@@ -71,7 +35,9 @@ export async function GET() {
   const saved = await SavedItemsService.list(user.id);
   const resolved = await Promise.all(
     saved.map((s) =>
-      resolveItem({ item_type: s.item_type, item_id: s.item_id, created_at: s.created_at }),
+      resolveContentItem(s.item_type, s.item_id).then((r) =>
+        r ? { ...r, saved_at: s.created_at } : null,
+      ),
     ),
   );
 

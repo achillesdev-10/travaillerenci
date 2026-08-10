@@ -1,12 +1,12 @@
-import { SITE_CONFIG } from '@/lib/constants';
+import ReportButton from '@/components/reports/ReportButton';
 
 /**
  *  TravaillerEnCi — Mention anti-arnaque (fiches de détail)
  *
  *  Un avertissement INFORMATIF et rassurant, pas alarmiste : encadré discret,
  *  icône bouclier, ton positif. Rappelle que postuler / s'inscrire est
- *  gratuit et permet de signaler un abus par email (mécanisme léger en
- *  attendant un vrai module de signalement).
+ *  gratuit et permet de signaler un abus via le module de signalement
+ *  (modal → POST /api/reports → file de modération /admin/reports).
  *
  *  Variantes :
  *    • job         — emploi & stages (frais de dossier, formation, kit…)
@@ -15,25 +15,20 @@ import { SITE_CONFIG } from '@/lib/constants';
  */
 export default function SafetyNotice({
   variant = 'job',
+  itemType,
+  itemId,
   itemLabel = 'cette offre',
-  itemUrl = '',
   className = '',
 }: {
   variant?: 'job' | 'scholarship' | 'exam';
-  /** Libellé de la cible pour le mail de signalement (titre de l'annonce…). */
+  /** Type de contenu signalé : job | internship | scholarship | exam. */
+  itemType: 'job' | 'internship' | 'scholarship' | 'exam';
+  /** Identifiant de la fiche signalée (id de job_offers ou exams). */
+  itemId: string;
+  /** Libellé de la cible affiché dans le modal de signalement. */
   itemLabel?: string;
-  /** URL publique de la fiche, incluse dans le mail de signalement. */
-  itemUrl?: string;
   className?: string;
 }) {
-  const reportSubject = encodeURIComponent(
-    `Signalement d'un abus — ${itemLabel} (TravaillerEnCi)`,
-  );
-  const reportBody = encodeURIComponent(
-    `Bonjour,\n\nJe souhaite signaler un contenu suspect sur TravaillerEnCi :\n- Lien : ${itemUrl}\n- Motif : (frais demandés / contenu frauduleux / autre)\n\nMerci.`,
-  );
-  const reportHref = `mailto:${SITE_CONFIG.supportEmail}?subject=${reportSubject}&body=${reportBody}`;
-
   const content: Record<
     'job' | 'scholarship' | 'exam',
     { title: string; text: string; report: string }
@@ -85,30 +80,18 @@ export default function SafetyNotice({
           <p className="mt-0.5 text-emerald-900/80 dark:text-emerald-200/80">
             {c.text}
           </p>
-          <a
-            href={reportHref}
-            className="mt-2 inline-flex items-center gap-1.5 text-[13px] font-bold text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-300"
-          >
-            <svg
-              className="h-3.5 w-3.5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M12 9v4" />
-              <path d="M12 17h.01" />
-              <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
-            </svg>
-            {c.report}
-          </a>
+          <div className="mt-2">
+            <ReportButton
+              itemType={itemType}
+              itemId={itemId}
+              itemLabel={itemLabel}
+              label={c.report}
+            />
+          </div>
         </div>
       </div>
       <p className="mt-2 text-[11px] text-emerald-700/60 dark:text-emerald-300/50">
-        Un doute sur une annonce ? Écrivez-nous, notre équipe la vérifie
+        Un doute sur une annonce ? Signalez-la, notre équipe la vérifie
         rapidement.
       </p>
     </aside>

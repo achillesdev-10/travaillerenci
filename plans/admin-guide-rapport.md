@@ -46,6 +46,12 @@ Le tableau de bord administrateur sous [`src/app/admin`](src/app/admin/layout.ts
   - **Filtres & Recherche** : Recherche textuelle instantanée (titre, entreprise, lieu) et filtres par statut (`Vérifiée` / `En attente`) et type de contrat (`CDI`, `CDD`, `Stage`, etc.).
   - **Bascule de statut (1 clic)** : Permet de basculer instantanément `is_verified` (validé/en attente) de manière optimiste avec synchronisation serveur.
   - **Édition & Suppression** : Modale complète d'édition de fiche de poste et suppression sécurisée avec confirmation.
+- **Signalements (`/admin/reports/page.tsx` & [`ReportsAdminClient.tsx`](src/app/admin/reports/ReportsAdminClient.tsx))** :
+  - **File de modération** : liste des signalements d'abus soumis depuis les fiches — frais demandés, contenu frauduleux, informations inexactes, contenu inapproprié, autre motif (candidat connecté ou anonyme).
+  - **Onglets par statut** : `En attente` / `Résolus` / `Classés` avec compteurs en temps réel, plus une vue `Tous`.
+  - **Traitement en 1 clic** : `Résoudre` (contenu modéré), `Classer` (sans suite) ou `Rouvrir` — l'email de l'admin est horodaté (`resolved_by` / `resolved_at`).
+  - **Lien direct** vers la fiche signalée (ouverture dans un nouvel onglet pour la modérer) ; si le contenu a été supprimé depuis, la ligne l'indique.
+  - **Base de données** : table `reports` créée par la migration [`supabase/migrations/0018_reports.sql`](supabase/migrations/0018_reports.sql) — RLS fermée : écriture via `POST /api/reports` (anonyme autorisé, rate-limit), modération via `/api/admin/reports` (session admin).
 - **Pilote du Scraper (`/admin/scraper/page.tsx`)** :
   - État du service, sources configurées (Jobberman CI, Emploi.ci, mode Démo) et instructions d'exécution.
 - **Paramètres (`/admin/settings/page.tsx`)** :

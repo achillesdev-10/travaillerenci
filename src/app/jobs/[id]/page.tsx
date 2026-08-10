@@ -221,8 +221,9 @@ export default async function JobDetailPage({ params }: PageProps) {
             {/* Mention anti-arnaque — postuler est gratuit */}
             <SafetyNotice
               variant="job"
+              itemType={job.category === 'internship' ? 'internship' : 'job'}
+              itemId={job.id}
               itemLabel={`${job.title} — ${job.company}`}
-              itemUrl={`${getSiteUrl()}/jobs/${job.slug || job.id}`}
               className="mt-6"
             />
 
