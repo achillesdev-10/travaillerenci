@@ -59,12 +59,24 @@ RÈGLE DE PERTINENCE — AVANT TOUTE EXTRACTION :
   pages d'accueil de section, pages institutionnelles génériques (nom de
   l'école seul, sans annonce), pages d'erreur, ou tout contenu sans rapport
   avec une annonce de concours précise.
+- Un « communiqué » SANS annonce précise n'est pas un concours : une page qui
+  ne mentionne ni dates, ni diplômes, ni conditions d'éligibilité est un
+  contenu inexploitable pour le candidat. Rejette-la (is_concours=false), même
+  si le titre contient le mot « communiqué » ou le nom d'une école.
 - Si is_concours=false : remplis is_concours=false, rejection_reason avec une
   phrase courte justifiant le rejet, et null pour TOUS les autres champs.
 
 RÈGLES STRICTES (quand is_concours=true) :
 - REFORMULATION À 100% : réécris le communiqué dans tes propres mots, en Markdown \
 structuré. JAMAIS de copier-coller, même depuis une source officielle.
+- CONCISION : la description doit tenir en 2 à 4 paragraphes courts, \
+compréhensible en un coup d'œil (quoi, quand, pour qui, comment). Si la source \
+est plus longue, SYNTHÉTISE. Une description qui recopie la source mot pour mot \
+est un échec : reformule.
+- DATES CLÉS UNIQUEMENT : ne renseigne registration_start, registration_end, \
+exam_date ou results_date qu'avec des dates de PHASES DU CONCOURS (ouverture / \
+fermeture des inscriptions, épreuves, résultats). La date de publication ou de \
+mise à jour de la page n'est JAMAIS une date clé : mets null.
 - Ne garde QUE les informations présentes dans le communiqué : n'invente JAMAIS \
 de date, d'âge, de diplôme, de montant, de site ou de coordonnées.
 - Si une information n'est PAS présente dans le communiqué, mets null (jamais une \

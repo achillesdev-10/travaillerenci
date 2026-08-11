@@ -177,6 +177,8 @@ def _norm_title(title: str) -> str:
 # ancrés (début ET fin) sauf mention contraire.
 _GENERIC_RUBRIQUE_PATTERNS = [
     r"^communiqu[ée]s?$",                       # « Communiqués » (menu)
+    r"^communiqu[ée]s?\s+de\s+presse$",        # « Communiqué de presse »
+    r"^communiqu[ée]s?\s+(?:20\d\d|\d{4})$",   # « COMMUNIQUE 2026 » (page générique sans annonce)
     r"^archives?(?:\s+des\s+communiqu[ée]s?)?$",  # « ARCHIVES DES COMMUNIQUES »
     r"^actu(?:alit[ée]s?)?(?:\s|$)",            # « Actu DECO », « Actualités »
     r"^note\s+aux\s+usagers?$",                # « NOTE AUX USAGERS »
