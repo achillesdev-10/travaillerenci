@@ -1,12 +1,17 @@
 import { NextResponse } from 'next/server';
 import { hashPassword } from '@/lib/password';
-import { createUser } from '@/lib/userRepository';
+import {
+  createEmailVerificationToken,
+  createUser,
+} from '@/lib/userRepository';
+import { sendVerificationEmail, getSiteUrl } from '@/lib/email';
 import {
   attachUserSessionCookie,
   issueUserSessionToken,
 } from '@/lib/userSession';
 import { CandidateProfileService } from '@/services/candidateProfileService';
 import { getClientIp, isRateLimited } from '@/lib/rateLimit';
+import { isEmailVerificationEnabled } from '@/lib/config';
 
 export const runtime = 'nodejs';
 
@@ -51,16 +56,19 @@ export async function POST(request: Request) {
       );
     }
 
+    // Vérification d'email : contrôlée par EMAIL_VERIFICATION_ENABLED.
+    //  • désactivée (défaut) → compte créé directement vérifié, utilisable
+    //    immédiatement, aucun appel à Resend (domaine Vercel actuel) ;
+    //  • activée → compte créé non vérifié + email de confirmation envoyé
+    //    (échec d'envoi NON bloquant : le compte reste utilisable).
+    const emailVerificationEnabled = isEmailVerificationEnabled();
+
     const user = await createUser({
       email,
       name,
       role,
       passwordHash: hashPassword(password),
-      // Vérification d'email désactivée pour le moment : le compte est créé
-      // directement vérifié. La livraison d'un email de confirmation exige un
-      // domaine d'expéditeur vérifié chez Resend — indisponible tant que le
-      // site tourne sur le domaine Vercel (voir docs/EMAIL_DELIVERY.md).
-      emailVerified: true,
+      emailVerified: !emailVerificationEnabled,
     });
 
     if (!user) {
@@ -78,6 +86,20 @@ export async function POST(request: Request) {
         diploma: body.diploma ?? null,
         sectors: body.sectors ?? [],
       });
+    }
+
+    // Vérification d'email ACTIVÉE : générer le jeton et envoyer le lien.
+    // L'échec d'envoi (Resend non configuré, domaine de test…) ne bloque JAMAIS
+    // la création : l'utilisateur garde un compte fonctionnel.
+    if (emailVerificationEnabled) {
+      try {
+        const token = await createEmailVerificationToken(user.id);
+        const verifyUrl = `${getSiteUrl()}/api/auth/verify-email?token=${token}`;
+        await sendVerificationEmail(user.email, verifyUrl);
+        console.log('[auth] email de confirmation envoyé à', user.email);
+      } catch (err) {
+        console.error('[auth] sendVerificationEmail error (non bloquant):', err);
+      }
     }
 
     // Session réelle : jeton HMAC signé dans un cookie httpOnly (30 jours).

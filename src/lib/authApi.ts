@@ -49,10 +49,20 @@ export function apiRegister(input: {
   sectors?: string[];
 }) {
   return post<{
-    user: { id: string; email: string; name: string; role: AuthRole };
-    /** Statut réel de l'email de confirmation (config absente / échec d'envoi). */
-    email?: { configured: boolean; sent: boolean; message?: string };
+    user: {
+      id: string;
+      email: string;
+      name: string;
+      role: AuthRole;
+      /** Faux quand la vérification d'email est ACTIVÉE (compte créé non vérifié). */
+      email_verified: boolean;
+    };
   }>('/api/auth/register', input);
+}
+
+/** Renvoie le lien de confirmation d'email à l'utilisateur connecté. */
+export function apiResendVerification() {
+  return post<{ ok: boolean; message?: string }>('/api/auth/resend-verification', {});
 }
 
 export function apiLogin(input: { email: string; password: string; role: AuthRole }) {

@@ -564,6 +564,21 @@ export async function findUserByEmailVerificationToken(
   };
 }
 
+/** Supprime tous les jetons de vérification d'email d'un utilisateur (après
+ * échec d'envoi, pour ne pas laisser de lien mort — même convention que
+ * deleteUserResetTokens). */
+export async function deleteUserVerifyTokens(userId: string): Promise<void> {
+  if (isSupabaseConfigured()) {
+    const supabase = getSupabaseClient();
+    if (!supabase) return;
+    await supabase.from('verify_email_tokens').delete().eq('user_id', userId);
+    return;
+  }
+  const db = await getDb();
+  if (!db) return;
+  db.prepare('DELETE FROM verify_email_tokens WHERE user_id = $userId').run({ $userId: userId });
+}
+
 /** Marque l'email d'un utilisateur comme vérifié + purge ses jetons. */
 export async function markEmailVerified(userId: string): Promise<void> {
   if (isSupabaseConfigured()) {

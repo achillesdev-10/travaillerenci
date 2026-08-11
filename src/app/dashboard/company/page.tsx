@@ -1,8 +1,12 @@
+import EmailVerificationBanner from '@/components/dashboard/EmailVerificationBanner';
+
 export const dynamic = "force-dynamic";
 
 export default function CompanyDashboardPage() {
   return (
     <div className="space-y-8 max-w-7xl mx-auto px-4 py-8 text-gray-900 dark:text-slate-50 transition-colors">
+      {/* Email non confirmé (vérification ACTIVÉE) → bannière + renvoi du lien */}
+      <EmailVerificationBanner />
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <span className="inline-flex rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 mb-2">

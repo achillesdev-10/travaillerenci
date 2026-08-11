@@ -16,29 +16,41 @@
   (Authentication → Settings → SMTP Settings / Email Templates) **ne sont pas
   utilisés** par ce site. Ne pas y chercher la cause.
 
+### 1bis. La vérification d'email est OPT-IN (depuis le 11/08/2026)
+
+**Par défaut, aucun email de confirmation n'est envoyé** :
+
+- `EMAIL_VERIFICATION_ENABLED` absent ou ≠ `true` → le compte est créé
+  **directement vérifié** (`email_verified=true`), utilisable immédiatement,
+  aucun appel à Resend. C'est le comportement actuel de la production.
+- `EMAIL_VERIFICATION_ENABLED=true` → le compte est créé **non vérifié**, un
+  jeton 24 h est généré (`createEmailVerificationToken`) et un email avec lien
+  de confirmation est envoyé. **L'échec d'envoi ne bloque JAMAIS la création**
+  (le compte reste fonctionnel) — voir § 4.
+
+La bascule se fait dans Vercel → Settings → Environment Variables (et
+`.env.local` en dev), sans redéploiement. Réactiver **uniquement** après la
+vérification du domaine dans Resend (§ Cause 2).
+
 ## 2. Causes racines probables du « aucun email de confirmation reçu »
 
 Par ordre de probabilité, sur une inscription `/candidates` ou `/register` :
 
 | # | Cause | Symptôme | Vérification |
 |---|-------|----------|--------------|
-| 1 | **`RESEND_API_KEY` absent de l'environnement** (Vercel) | Aucun email, aucune erreur visible | `POST /api/auth/register` renvoie désormais `email.sent=false` + message. Log : `[auth] ⚠️ RESEND_API_KEY absent…` (warn) |
-| 2 | **Domaine d'expéditeur non vérifié dans Resend** | L'API Resend répond 403/422 (« domain not verified ») | Logs Vercel : `POST /api/auth/register sendVerificationEmail error: Resend a répondu 403…` |
+| 0 | **`EMAIL_VERIFICATION_ENABLED` absent ou ≠ true** (le plus fréquent aujourd'hui) | Aucun email — **c'est le comportement voulu** : compte créé directement vérifié | Vérifier la valeur de la variable dans Vercel / `.env.local` |
+| 1 | **`RESEND_API_KEY` absent de l'environnement** (Vercel) alors que la vérification est activée | Compte créé mais aucun email, aucune erreur bloquante | Logs Vercel : `[auth] sendVerificationEmail error (non bloquant)…` (voir § 4) |
+| 2 | **Domaine d'expéditeur non vérifié dans Resend** | L'API Resend répond 403/422 (« domain not verified ») | Logs Vercel : `sendVerificationEmail error: Resend a répondu 403…` |
 | 3 | **Lien de confirmation vers la mauvaise URL** | Email reçu mais lien mort/redirige mal | `NEXT_PUBLIC_SITE_URL` doit pointer vers le domaine réellement servi |
 | 4 | Email en spam | Rien côté code | Vérifier le dossier spam |
 
-### Cause 1 — `RESEND_API_KEY`
+### Cause 1 — `RESEND_API_KEY` (uniquement si la vérification est ACTIVÉE)
 
-Le code d'inscription saute l'envoi en silence quand la clé manque :
+Quand `EMAIL_VERIFICATION_ENABLED=true`, l'envoi se fait via `src/lib/email.ts`
+(sans SDK, API REST Resend) :
 
-```ts
-// src/lib/email.ts
-export function isEmailConfigured(): boolean {
-  return Boolean(process.env.RESEND_API_KEY);
-}
-```
-
-- **Local** (`.env.local`) : la clé n'est PAS définie → aucun email en dev.
+- **Local** (`.env.local`) : la clé n'est PAS définie → l'envoi échoue mais le
+  compte est quand même créé (échec non bloquant, § 4).
 - **Production** : la clé doit être définie dans les variables d'environnement
   **du projet Vercel** (Settings → Environment Variables), PAS uniquement dans
   les secrets GitHub Actions (ceux-ci servent au workflow `auto-publish.yml`
@@ -103,8 +115,8 @@ Le lien de confirmation est construit avec `getSiteUrl()` (`src/lib/site.ts`) :
 
 ## 3. Test d'inscription complet (critère de validation)
 
-1. Lancer `npm run dev` (ou déployer) avec `RESEND_API_KEY` + `EMAIL_FROM`
-   configurés.
+1. Lancer `npm run dev` (ou déployer) avec `EMAIL_VERIFICATION_ENABLED=true`
+   **+** `RESEND_API_KEY` + `EMAIL_FROM` configurés.
 2. S'inscrire sur `/candidates` avec une vraie adresse email.
 3. L'email « Confirmez votre adresse email — TravaillerEnCi » doit arriver en
    **moins de 2 minutes** (vérifier aussi le spam).
@@ -112,23 +124,70 @@ Le lien de confirmation est construit avec `getSiteUrl()` (`src/lib/site.ts`) :
    afficher « Email confirmé ».
 5. En cas d'échec : regarder les logs de la fonction Vercel
    (`POST /api/auth/register`) — l'erreur Resend y est journalisée
-   (`Resend a répondu <status> : <body>`).
+   (`Resend a répondu <status> : <body>`) mais **ne bloque pas** la création
+   du compte.
+
+> Sans `EMAIL_VERIFICATION_ENABLED=true`, aucune étape de ce test n'est
+> pertinente : le compte est créé vérifié et aucun email n'est attendu.
+
+## 3bis. Checklist de bascule — réactiver `EMAIL_VERIFICATION_ENABLED=true`
+
+À exécuter **après** la vérification du domaine `travaillerenci.ci` dans Resend
+(§ Cause 2) et le test complet de l'étape 3 :
+
+1. **Vercel → Settings → Environment Variables** (production) :
+   - `EMAIL_FROM=TravaillerEnCi <noreply@travaillerenci.ci>` (domaine vérifié) ;
+   - `RESEND_API_KEY` = clé Resend (déjà présente si le mot de passe oublié
+     fonctionne) ;
+   - `EMAIL_VERIFICATION_ENABLED=true` ;
+   - `NEXT_PUBLIC_SITE_URL` pointe vers le domaine réel (les liens de
+     confirmation sont construits avec `getSiteUrl()`).
+2. **`.env.local`** (dev) : mêmes valeurs pour tester en local.
+3. Redéployer (Vercel lit les variables au déploiement).
+4. Tester le parcours complet : inscription → email « Confirmez votre adresse
+   email » (≤ 2 min, vérifier spam) → clic → page « Email confirmé » →
+   bannière « Email non confirmé » disparaît du tableau de bord.
+5. Tester le renvoi : depuis la bannière du tableau de bord, « Renvoyer le
+   lien » → nouvel email reçu (1 envoi/minute max).
+6. Tester les cas limites : compte Google (email vérifié par Google → aucune
+   bannière), utilisateur déjà inscrit avant la bascule (déjà `email_verified`
+   → rien ne change).
+
+> Si `EMAIL_VERIFICATION_ENABLED=true` est défini SANS `RESEND_API_KEY` valide
+> ni domaine vérifié : l'inscription crée quand même le compte (non bloquant),
+> mais aucun email ne part — l'utilisateur reste coincé sur « Vérifiez votre
+> boîte mail ». La bascule ne doit donc intervenir qu'une fois la livraison
+> confirmée (étape 3).
 
 ## 4. Ce que le code renvoie / journalise désormais
 
-- `POST /api/auth/register` → `{ user, email: { configured, sent, message? } }`
-  (`src/app/api/auth/register/route.ts`) :
-  - `configured=false` → **warn** explicite dans les logs serveur ;
-  - `sent=false` → message visible dans le formulaire d'inscription.
-- `POST /api/auth/verify-email` (bouton « Renvoyer le lien ») → renvoie 503
-  avec « L'envoi d'emails n'est pas configuré… » quand la clé manque
-  (affiché dans le bandeau du dashboard).
+- `POST /api/auth/register` → `{ user }` **uniquement** (plus de champ
+  `email: { configured, sent }`). Le statut de la vérification est contrôlé par
+  `isEmailVerificationEnabled()` (`src/lib/config.ts`) :
+  - désactivé (défaut) → `emailVerified: true` à la création, **aucun appel à
+    Resend** ;
+  - activé → `emailVerified: false` + jeton 24 h (`createEmailVerificationToken`,
+    table `verify_email_tokens`) + `sendVerificationEmail`. **Tout échec d'envoi
+    est catché et journalisé** (`[auth] sendVerificationEmail error (non
+    bloquant): …`) : le compte reste utilisable.
+- `GET /api/auth/verify-email?token=…` → page HTML de confirmation (« Email
+  confirmé » / « Lien invalide ou expiré »), puis `markEmailVerified` + purge
+  des jetons.
+- `POST /api/auth/resend-verification` → renvoie le lien de confirmation à
+  l'utilisateur connecté dont l'email n'est **pas** encore vérifié (nouveau
+  jeton 24 h, cooldown 1 envoi/minute, erreurs explicites : 401 sans session,
+  400 déjà vérifié, 503 Resend non configuré, 429 trop fréquent). Accessible
+  depuis la bannière « Email non confirmé » des tableaux de bord et l'écran
+  « Vérifiez votre boîte mail » de l'inscription.
+- `POST /api/auth/forgot-password` → utilise `isEmailConfigured()`
+  (`src/lib/email.ts`) : sans `RESEND_API_KEY`, renvoie une erreur explicite
+  (mot de passe oublié ne fonctionne pas sans Resend).
 - `src/lib/email.ts` : lève une erreur détaillée sur échec Resend
   (`Resend a répondu <status> : <body>`) — visible dans les logs serveur.
-- `src/lib/email.ts` (`getEmailConfigStatus`) : expose l'état réel de
-  l'expéditeur (clé présente, domaine d'expéditeur, domaine de test Resend) —
-  les routes `/api/auth/register` et `/api/auth/verify-email` l'utilisent pour
-  journaliser un warn explicite et renvoyer un message d'action précis.
+- `src/lib/email.ts` (`getEmailConfigStatus`) : utilitaire de diagnostic
+  exposant l'état réel de l'expéditeur (clé présente, domaine d'expéditeur,
+  domaine de test `@resend.dev`). Non branché sur une route aujourd'hui —
+  utilisable dans les logs/admin si besoin.
 
 ## 5. Logs du diagnostic (11/08/2026) — cause racine confirmée
 

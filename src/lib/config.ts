@@ -8,6 +8,24 @@ export function getDatabaseConfig(): DatabaseConfig {
 }
 
 /**
+ * Vérification d'email par lien (envoi via Resend).
+ *
+ * DÉSACTIVÉE par défaut (EMAIL_VERIFICATION_ENABLED absent ou ≠ true) : le
+ * compte est créé directement vérifié et utilisable immédiatement — aucune
+ * dépendance à Resend, compatible avec le domaine Vercel actuel.
+ *
+ * RÉACTIVATION FUTURE : une fois le domaine personnalisé acheté et Resend
+ * configuré (voir docs/EMAIL_DELIVERY.md), définir
+ * `EMAIL_VERIFICATION_ENABLED=true` dans Vercel → Settings → Environment
+ * Variables. L'inscription renverra alors un lien de confirmation par email
+ * (createEmailVerificationToken + sendVerificationEmail dans /api/auth/register).
+ */
+export function isEmailVerificationEnabled(): boolean {
+  const v = process.env.EMAIL_VERIFICATION_ENABLED;
+  return v === 'true' || v === '1';
+}
+
+/**
  * Visibilité du bouton « Se connecter avec Google » côté UI.
  *
  * Le SSO Google est entièrement implémenté côté serveur (src/lib/googleOAuth.ts)

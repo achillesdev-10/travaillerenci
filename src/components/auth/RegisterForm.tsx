@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import PasswordInput from '@/components/auth/PasswordInput';
-import { apiRegister } from '@/lib/authApi';
+import { apiRegister, apiResendVerification } from '@/lib/authApi';
 import { isGoogleAuthVisible } from '@/lib/config';
 import { REGIONS_CI, SECTORS } from '@/lib/constants';
 import { DIPLOMA_FILTERS } from '@/lib/examConstants';
@@ -22,6 +22,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
   const [role, setRole] = useState<Role>(defaultRole);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
   const [companyName, setCompanyName] = useState('');
   // Mini-profil optionnel (critères d'alertes) — candidats uniquement.
@@ -30,6 +31,12 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
   const [profileSectors, setProfileSectors] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  // Vérification d'email ACTIVÉE : après l'inscription, l'email du compte n'est
+  // pas confirmé → on affiche un écran « Vérifiez votre boîte mail » (au lieu
+  // de rediriger vers le tableau de bord) avec option de renvoi du lien.
+  const [verificationPending, setVerificationPending] = useState<string | null>(null);
+  const [resendStatus, setResendStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [resendFeedback, setResendFeedback] = useState<string | null>(null);
 
   function toggleSector(slug: string) {
     setProfileSectors((prev) =>
@@ -46,11 +53,45 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
     if (password.length < 6) {
       return 'Le mot de passe doit contenir au moins 6 caractères.';
     }
+    if (!confirmPassword) {
+      return 'Veuillez confirmer votre mot de passe.';
+    }
+    if (confirmPassword !== password) {
+      return 'Les deux mots de passe ne correspondent pas.';
+    }
     return null;
+  }
+
+  /** Robustesse du mot de passe : 0-4 (longueur + variété). */
+  function passwordStrength(value: string): number {
+    if (!value) return 0;
+    let score = 0;
+    if (value.length >= 6) score += 1;
+    if (value.length >= 10) score += 1;
+    if (/[A-Z]/.test(value) && /[a-z]/.test(value)) score += 1;
+    if (/\d/.test(value) || /[^A-Za-z0-9]/.test(value)) score += 1;
+    return Math.min(score, 4);
   }
 
   function redirectToDashboard() {
     router.push(role === 'candidate' ? '/dashboard/candidate' : '/dashboard/company');
+  }
+
+  /** Renvoie le lien de confirmation (écran « vérifiez votre email »). */
+  async function handleResendVerification() {
+    if (resendStatus === 'sending') return;
+    setResendStatus('sending');
+    setResendFeedback(null);
+    const result = await apiResendVerification();
+    if (result.ok) {
+      setResendStatus('sent');
+      setResendFeedback(
+        result.data.message || 'Un nouveau lien vient de vous être envoyé.',
+      );
+    } else {
+      setResendStatus('error');
+      setResendFeedback(result.error);
+    }
   }
 
   function googleAuthHref(): string {
@@ -91,12 +132,91 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
       }
 
       // Succès : la session (cookie httpOnly) a été posée par le serveur.
+      // Vérification d'email ACTIVÉE → le compte est créé non vérifié : on
+      // redirige vers un écran « vérifiez votre email » au lieu du dashboard.
+      if (result.data.user.email_verified === false) {
+        setVerificationPending(result.data.user.email);
+        return;
+      }
       redirectToDashboard();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erreur lors de l’inscription');
     } finally {
       setLoading(false);
     }
+  }
+
+  // Écran de succès quand la vérification d'email est ACTIVÉE : le compte est
+  // créé mais l'email doit être confirmé avant de profiter de l'espace.
+  if (verificationPending) {
+    return (
+      <div className="w-full max-w-md space-y-6 rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 shadow-2xl text-center">
+        <Link
+          href="/"
+          className="inline-block text-2xl font-black text-primary font-[var(--font-display)]"
+        >
+          Travailleren<span className="text-gray-900 dark:text-white">Ci</span>
+        </Link>
+
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+            />
+          </svg>
+        </div>
+
+        <div className="space-y-2">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+            Vérifiez votre boîte mail
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-slate-400 leading-relaxed">
+            Nous avons envoyé un lien de confirmation à{' '}
+            <strong className="text-gray-900 dark:text-white break-all">{verificationPending}</strong>.
+            Cliquez sur ce lien (valable 24 h) pour activer votre compte.
+          </p>
+        </div>
+
+        {resendFeedback ? (
+          <p
+            className={`text-xs font-semibold ${
+              resendStatus === 'error'
+                ? 'text-rose-600 dark:text-rose-400'
+                : 'text-emerald-600 dark:text-emerald-400'
+            }`}
+          >
+            {resendFeedback}
+          </p>
+        ) : null}
+
+        <div className="space-y-3">
+          <button
+            type="button"
+            onClick={handleResendVerification}
+            disabled={resendStatus === 'sending'}
+            className="w-full rounded-2xl bg-primary py-3.5 text-xs font-bold text-white hover:brightness-110 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
+          >
+            {resendStatus === 'sending'
+              ? 'Envoi du lien…'
+              : resendStatus === 'sent'
+                ? 'Lien renvoyé ✓'
+                : 'Renvoyer le lien'}
+          </button>
+          <Link
+            href={role === 'candidate' ? '/dashboard/candidate' : '/dashboard/company'}
+            className="block w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 py-3.5 text-xs font-bold text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 transition-all"
+          >
+            Accéder à mon espace
+          </Link>
+          <p className="text-[11px] text-gray-400 dark:text-slate-500">
+            Pas reçu ? Vérifiez vos spams ou réessayez dans une minute.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -202,12 +322,55 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
           />
         </div>
 
+        <div>
+          <PasswordInput
+            label="Mot de passe"
+            value={password}
+            onChange={setPassword}
+            autoComplete="new-password"
+          />
+          {password && (
+            <div className="mt-2 px-1">
+              <div className="flex gap-1.5">
+                {[1, 2, 3, 4].map((level) => (
+                  <div
+                    key={level}
+                    className={`h-1.5 flex-1 rounded-full transition-colors ${
+                      level <= passwordStrength(password)
+                        ? passwordStrength(password) <= 2
+                          ? 'bg-amber-500'
+                          : 'bg-emerald-500'
+                        : 'bg-gray-200 dark:bg-slate-800'
+                    }`}
+                  />
+                ))}
+              </div>
+              <p
+                className={`mt-1 text-[10px] font-semibold ${
+                  passwordStrength(password) <= 2
+                    ? 'text-amber-600 dark:text-amber-400'
+                    : 'text-emerald-600 dark:text-emerald-400'
+                }`}
+              >
+                {passwordStrength(password) <= 2
+                  ? 'Mot de passe faible — ajoutez au moins 10 caractères et mélangez lettres, chiffres et symboles.'
+                  : 'Mot de passe solide ✓'}
+              </p>
+            </div>
+          )}
+        </div>
+
         <PasswordInput
-          label="Mot de passe"
-          value={password}
-          onChange={setPassword}
+          label="Confirmer le mot de passe"
+          value={confirmPassword}
+          onChange={setConfirmPassword}
           autoComplete="new-password"
         />
+        {confirmPassword && confirmPassword !== password ? (
+          <p className="-mt-2 ml-1 text-[11px] font-semibold text-rose-500">
+            Les mots de passe ne correspondent pas.
+          </p>
+        ) : null}
 
         {/* Mini-profil optionnel — alimente les alertes (voir 3.3) */}
         {role === 'candidate' && (
