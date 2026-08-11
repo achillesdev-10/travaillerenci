@@ -1,22 +1,12 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import {
-  createEmailVerificationToken,
-  findUserByEmail,
   findUserByEmailVerificationToken,
   markEmailVerified,
 } from '@/lib/userRepository';
-import {
-  getEmailConfigStatus,
-  getSiteUrl,
-  isEmailConfigured,
-  sendVerificationEmail,
-} from '@/lib/email';
-import { getClientIp, isRateLimited } from '@/lib/rateLimit';
+import { getSiteUrl } from '@/lib/email';
 
 export const runtime = 'nodejs';
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 /** Page HTML de confirmation (statut + lien retour). */
 function confirmationPage({ ok, message, ctaHref, ctaLabel }: {
@@ -96,67 +86,3 @@ export async function GET(request: NextRequest) {
   );
 }
 
-/**
- * POST /api/auth/verify-email { email } — renvoie un lien de vérification.
- * (Utilisé par le bandeau « email non vérifié » du dashboard.)
- */
-export async function POST(request: Request) {
-  try {
-    if (isRateLimited(`verify-email:${getClientIp(request)}`)) {
-      return NextResponse.json(
-        { error: 'Trop de demandes. Réessayez dans quelques minutes.' },
-        { status: 429 },
-      );
-    }
-
-    if (!isEmailConfigured()) {
-      return NextResponse.json(
-        { error: "L'envoi d'emails n'est pas configuré sur le site pour le moment." },
-        { status: 503 },
-      );
-    }
-
-    // Domaine de TEST Resend (@resend.dev) : l'envoi "réussit" mais n'est livré
-    // qu'au propriétaire du compte Resend — le renvoi de lien échouerait
-    // silencieusement pour les candidats. Journalisé bruyamment.
-    const emailConfig = getEmailConfigStatus();
-    if (emailConfig.usingTestDomain) {
-      console.warn(
-        `[auth] ⚠️ Renvoi de lien : EMAIL_FROM utilise le domaine de TEST Resend ` +
-          `(${emailConfig.senderDomain}) — l'email n'est livré qu'au propriétaire du compte. ` +
-          'Vérifier le domaine travaillerenci.ci dans Resend (docs/EMAIL_DELIVERY.md).',
-      );
-    }
-
-    const body = (await request.json()) as { email?: string };
-    const email = body.email?.trim().toLowerCase() || '';
-
-    // Réponse volontairement neutre : on ne révèle pas si le compte existe.
-    if (!EMAIL_REGEX.test(email)) {
-      return NextResponse.json({ ok: true });
-    }
-
-    const user = await findUserByEmail(email);
-    if (user && !user.email_verified) {
-      const token = await createEmailVerificationToken(user.id);
-      const verifyUrl = `${getSiteUrl()}/api/auth/verify-email?token=${encodeURIComponent(token)}`;
-      try {
-        await sendVerificationEmail(user.email, verifyUrl);
-      } catch (err) {
-        console.error('POST /api/auth/verify-email send error:', err);
-        return NextResponse.json(
-          { error: "Impossible d'envoyer l'email pour le moment. Réessayez plus tard." },
-          { status: 500 },
-        );
-      }
-    }
-
-    return NextResponse.json({ ok: true });
-  } catch (err) {
-    console.error('POST /api/auth/verify-email error:', err);
-    return NextResponse.json(
-      { error: 'Une erreur est survenue.' },
-      { status: 500 },
-    );
-  }
-}

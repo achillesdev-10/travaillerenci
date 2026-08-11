@@ -14,7 +14,7 @@ const NAV_LINKS = [
   { label: 'Candidats', href: '/candidates' },
   { label: 'Bourses d\'études', href: '/bourses' },
   { label: 'Concours admin.', href: '/concours' },
-  { label: 'Générateur CV', href: '/generateur-de-cv', isCV: true },
+  { label: 'Générateur CV', href: '/generateur-de-cv' },
 ];
 
 export default function Header() {
@@ -80,25 +80,20 @@ export default function Header() {
             </div>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-8">
+          <nav className="hidden lg:flex items-center gap-1.5">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary transition-colors flex items-center"
+                className="px-3.5 py-2 rounded-full text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-primary/10 dark:hover:bg-slate-800 transition-colors"
               >
                 {link.label}
-                {(link as any).isCV && (
-                  <span className="bg-emerald-100 text-emerald-800 text-xs px-2 py-0.5 rounded-full font-semibold ml-1.5">
-                    IA
-                  </span>
-                )}
               </Link>
             ))}
             {user ? (
               <Link
                 href={dashboardHref}
-                className="text-sm font-medium text-primary hover:underline"
+                className="px-3.5 py-2 rounded-full text-sm font-semibold text-primary hover:bg-primary/10 dark:hover:bg-slate-800 transition-colors"
               >
                 Mon Tableau de Bord
               </Link>
@@ -193,27 +188,22 @@ export default function Header() {
         </div>
 
         {open && (
-          <div className="lg:hidden border-t border-border py-4 space-y-1">
+          <div className="lg:hidden border-t border-border py-4 space-y-1.5">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="block px-2 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-800 dark:text-gray-200 flex items-center"
+                className="block px-3 py-2.5 rounded-xl border border-border/60 bg-gray-50/60 dark:bg-slate-800/40 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-800"
               >
                 {link.label}
-                {(link as any).isCV && (
-                  <span className="bg-emerald-100 text-emerald-800 text-xs px-2 py-0.5 rounded-full font-semibold ml-1.5">
-                    IA
-                  </span>
-                )}
               </Link>
             ))}
             {user ? (
               <Link
                 href={dashboardHref}
                 onClick={() => setOpen(false)}
-                className="block px-2 py-3 rounded-lg text-sm font-medium text-primary hover:bg-gray-50 dark:hover:bg-slate-800"
+                className="block px-3 py-2.5 rounded-xl border border-border/60 bg-primary/5 text-sm font-semibold text-primary hover:bg-primary/10"
               >
                 Mon Tableau de Bord
               </Link>

@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { fetchCurrentUser, type StoredUser } from '@/lib/clientAuth';
 import SetPasswordForm from '@/components/auth/SetPasswordForm';
-import VerifyEmailBanner from '@/components/dashboard/VerifyEmailBanner';
 import ProfileSection from '@/components/dashboard/ProfileSection';
 import SavedItemsSection from '@/components/dashboard/SavedItemsSection';
 import AlertsSection from '@/components/dashboard/AlertsSection';
@@ -117,13 +116,6 @@ export default function CandidateDashboardPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-8 text-gray-900 dark:text-slate-50 transition-colors">
-      {/* Alerte : email non vérifié → confirmer son adresse.
-          NB : masqué si le compte doit d'abord définir un mot de passe (la
-          carte orange de sécurisation est prioritaire — éviter deux bandeaux). */}
-      {user && user.email_verified === false && !user.needs_password_reset ? (
-        <VerifyEmailBanner email={user.email} />
-      ) : null}
-
       {/* Alerte : compte migré sans mot de passe → définir un mot de passe */}
       {user?.needs_password_reset ? (
         <div className="rounded-3xl border border-orange-500/40 bg-orange-50 dark:bg-slate-900 dark:border-orange-500/30 p-6 lg:p-8 shadow-xl flex flex-col lg:flex-row gap-8">
