@@ -6,7 +6,12 @@ import {
   findUserByEmailVerificationToken,
   markEmailVerified,
 } from '@/lib/userRepository';
-import { getSiteUrl, isEmailConfigured, sendVerificationEmail } from '@/lib/email';
+import {
+  getEmailConfigStatus,
+  getSiteUrl,
+  isEmailConfigured,
+  sendVerificationEmail,
+} from '@/lib/email';
 import { getClientIp, isRateLimited } from '@/lib/rateLimit';
 
 export const runtime = 'nodejs';
@@ -108,6 +113,18 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "L'envoi d'emails n'est pas configuré sur le site pour le moment." },
         { status: 503 },
+      );
+    }
+
+    // Domaine de TEST Resend (@resend.dev) : l'envoi "réussit" mais n'est livré
+    // qu'au propriétaire du compte Resend — le renvoi de lien échouerait
+    // silencieusement pour les candidats. Journalisé bruyamment.
+    const emailConfig = getEmailConfigStatus();
+    if (emailConfig.usingTestDomain) {
+      console.warn(
+        `[auth] ⚠️ Renvoi de lien : EMAIL_FROM utilise le domaine de TEST Resend ` +
+          `(${emailConfig.senderDomain}) — l'email n'est livré qu'au propriétaire du compte. ` +
+          'Vérifier le domaine travaillerenci.ci dans Resend (docs/EMAIL_DELIVERY.md).',
       );
     }
 

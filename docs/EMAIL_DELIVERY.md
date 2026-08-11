@@ -46,17 +46,49 @@ export function isEmailConfigured(): boolean {
 
 ### Cause 2 — domaine d'expéditeur Resend
 
-`EMAIL_FROM` par défaut : `TravaillerEnCi <noreply@travaillerenci.ci>`.
-Resend **exige que le domaine d'expéditeur soit vérifié** (SPF/DKIM) :
+**Cause racine CONFIRMÉE (diagnostic du 11/08/2026).** L'environnement de prod
+utilise `EMAIL_FROM=TravaillerEnCi <onboarding@resend.dev>` — le **domaine de
+TEST partagé de Resend**. Ce domaine ne livre **que vers l'adresse du compte
+Resend** (`achillesdev10@gmail.com`) : tout candidat qui s'inscrit avec une
+autre adresse ne reçoit rien (Resend répond 403 — voir les logs en bas de
+page). Le domaine prévu pour la prod, `travaillerenci.ci`, n'est **pas encore
+vérifié** sur Resend.
 
-1. Créer un compte sur https://resend.com (si ce n'est pas déjà fait).
-2. **Domaines** → Ajouter `travaillerenci.ci` (ou le domaine personnalisé actif)
-   → ajouter les enregistrements DNS SPF/DKIM/DMARC chez le registrar.
-3. Tant que le domaine n'est pas vérifié : utiliser le domaine de test Resend
-   (`onboarding@resend.dev`) en `EMAIL_FROM` pour valider la boucle, puis
-   basculer.
-4. `Settings → API Keys` → créer une clé → la coller dans Vercel
-   (`RESEND_API_KEY`) et dans `.env.local` pour le dev.
+Vérification en 1 commande :
+
+```bash
+# OK pour l'adresse du compte Resend uniquement :
+RESEND_API_KEY=re_xxx python scripts/test-resend-connection.py --to achillesdev10@gmail.com
+# ❌ 403 pour toute autre adresse (domaine de test) :
+RESEND_API_KEY=re_xxx python scripts/test-resend-connection.py --to candidat@exemple.ci
+# ❌ 403 « domain not verified » tant que travaillerenci.ci n'est pas vérifié :
+RESEND_API_KEY=re_xxx python scripts/test-resend-connection.py --to candidat@exemple.ci --from "TravaillerEnCi <noreply@travaillerenci.ci>"
+```
+
+**Correction (à faire sur le compte Resend + DNS du domaine) :**
+
+1. Créer un compte sur https://resend.com (fait).
+2. **Resend → Domains → Add Domain** → ajouter `travaillerenci.ci`.
+3. Chez le registrar du domaine (`.ci`), ajouter les enregistrements DNS
+   fournis par Resend :
+   - **SPF** : `v=spf1 include:amazonses.com ~all` (TXT) — Resend utilise
+     Amazon SES ; l'enregistrement exact est affiché dans Resend.
+   - **DKIM** : 3 enregistrements TXT `resend._domainkey.travaillerenci.ci`
+     (valeurs fournies dans le dashboard Resend).
+   - **DMARC** (recommandé) : `v=DMARC1; p=quarantine; rua=mailto:…`.
+   - Optionnel : enregistrement **MX** `feedback-smtp.us-east-1.amazonses.com`
+     + enregistrement TXT de conformité pour recevoir les bounce.
+   - **Maison d'enregistrement** : l'utilisateur doit avoir accès aux DNS de
+     `travaillerenci.ci`.
+4. Attendre la vérification par Resend (SPF/DKIM/DMARC verts), puis :
+   - **Vercel → Settings → Environment Variables** (et `.env.local` en dev) :
+     `EMAIL_FROM=TravaillerEnCi <noreply@travaillerenci.ci>`
+   - Conserver `RESEND_API_KEY` telle quelle (clé restreinte à l'envoi, OK).
+5. Refaire le test d'inscription complet (critère §3).
+
+> NB : tant que le domaine n'est pas vérifié, il est possible de valider la
+> boucle en envoyant vers l'adresse du compte Resend via `onboarding@resend.dev`
+> — mais NE PAS lancer en prod avec cet expéditeur.
 
 ### Cause 3 — Site URL du lien de confirmation
 
@@ -93,3 +125,36 @@ Le lien de confirmation est construit avec `getSiteUrl()` (`src/lib/site.ts`) :
   (affiché dans le bandeau du dashboard).
 - `src/lib/email.ts` : lève une erreur détaillée sur échec Resend
   (`Resend a répondu <status> : <body>`) — visible dans les logs serveur.
+- `src/lib/email.ts` (`getEmailConfigStatus`) : expose l'état réel de
+  l'expéditeur (clé présente, domaine d'expéditeur, domaine de test Resend) —
+  les routes `/api/auth/register` et `/api/auth/verify-email` l'utilisent pour
+  journaliser un warn explicite et renvoyer un message d'action précis.
+
+## 5. Logs du diagnostic (11/08/2026) — cause racine confirmée
+
+Test réel de l'API Resend avec la clé de l'environnement de prod :
+
+```
+# 1. Clé API : valide mais RESTREINTE À L'ENVOI (ne permet pas de lister les domaines)
+GET https://api.resend.com/domains → 401
+{"statusCode":401,"message":"This API key is restricted to only send emails","name":"restricted_api_key"}
+
+# 2. Envoi vers l'adresse du compte Resend → 200 (domaine de test ok pour le propriétaire)
+POST /emails (from onboarding@resend.dev → achillesdev10@gmail.com) → 200
+
+# 3. Envoi vers une AUTRE adresse → 403 : le domaine de test ne livre QUE au propriétaire
+POST /emails (from onboarding@resend.dev → test@hotmail.fr) → 403
+{"statusCode":403,"name":"validation_error","message":"You can only send testing emails to
+your own email address (achillesdev10@gmail.com). To send emails to other recipients, please
+verify a domain at resend.com/domains, and change the `from` address to an email using this domain."}
+
+# 4. Envoi depuis le domaine prévu pour la prod → 403 : travaillerenci.ci NON vérifié
+POST /emails (from noreply@travaillerenci.ci → test@hotmail.fr) → 403
+{"statusCode":403,"message":"The travaillerenci.ci domain is not verified. Please, add and
+verify your domain on https://resend.com/domains","name":"validation_error"}
+```
+
+**Conclusion** : toute inscription d'un candidat réel (`/candidates`, `/register`)
+échoue à la livraison de l'email de confirmation — l'email n'est envoyé qu'au
+propriétaire du compte Resend. Action requise : vérifier `travaillerenci.ci`
+dans Resend (§ Cause 2) puis mettre `EMAIL_FROM` à jour dans Vercel.

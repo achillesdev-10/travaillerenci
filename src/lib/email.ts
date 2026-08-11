@@ -19,6 +19,66 @@ export function isEmailConfigured(): boolean {
   return Boolean(process.env.RESEND_API_KEY);
 }
 
+/** Domaine de test partagé Resend : il ne livre QUE vers l'adresse du compte
+ * Resend (impossible d'envoyer aux candidats). Détecté pour ne jamais laisser
+ * l'absence d'email de confirmation passer silencieusement. */
+const RESEND_TEST_DOMAIN = 'resend.dev';
+
+export type EmailConfigStatus = {
+  configured: boolean;
+  sender: string | null;
+  senderDomain: string | null;
+  /** Vrai si l'expéditeur utilise le domaine de test Resend (`@resend.dev`). */
+  usingTestDomain: boolean;
+  /** Message d'action clair pour l'utilisateur / les logs, null si tout va bien. */
+  message: string | null;
+};
+
+/** État réel de l'expéditeur d'emails : clé présente + domaine d'expéditeur.
+ * Permet de signaler avec précision la cause racine « aucun email reçu »
+ * (clé absente OU domaine de test Resend qui ne livre qu'au propriétaire du
+ * compte). */
+export function getEmailConfigStatus(): EmailConfigStatus {
+  const from = process.env.EMAIL_FROM || 'TravaillerEnCi <noreply@travaillerenci.ci>';
+  const match = from.match(/<([^>]+)>/);
+  const senderEmail = match ? match[1] : from;
+  const senderDomain = senderEmail.includes('@')
+    ? senderEmail.split('@')[1].toLowerCase()
+    : null;
+  const usingTestDomain = senderDomain === RESEND_TEST_DOMAIN;
+
+  if (!process.env.RESEND_API_KEY) {
+    return {
+      configured: false,
+      sender: null,
+      senderDomain: null,
+      usingTestDomain: false,
+      message:
+        "L'envoi d'emails n'est pas configuré : RESEND_API_KEY est absente de " +
+        "l'environnement. À définir dans Vercel → Settings → Environment Variables.",
+    };
+  }
+  if (usingTestDomain) {
+    return {
+      configured: true,
+      sender: from,
+      senderDomain,
+      usingTestDomain: true,
+      message:
+        "L'email part du domaine de TEST Resend (onboarding@resend.dev) : il n'est " +
+        'livré qu\'à l\'adresse du compte Resend, jamais aux candidats. Vérifiez le ' +
+        'domaine travaillerenci.ci dans Resend (SPF/DKIM) puis mettez à jour EMAIL_FROM.',
+    };
+  }
+  return {
+    configured: true,
+    sender: from,
+    senderDomain,
+    usingTestDomain: false,
+    message: null,
+  };
+}
+
 interface ResendPayload {
   from: string;
   to: string;

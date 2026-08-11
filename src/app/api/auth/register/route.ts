@@ -7,7 +7,11 @@ import {
 } from '@/lib/userSession';
 import { CandidateProfileService } from '@/services/candidateProfileService';
 import { getClientIp, isRateLimited } from '@/lib/rateLimit';
-import { getSiteUrl, isEmailConfigured, sendVerificationEmail } from '@/lib/email';
+import {
+  getEmailConfigStatus,
+  getSiteUrl,
+  sendVerificationEmail,
+} from '@/lib/email';
 
 export const runtime = 'nodejs';
 
@@ -82,21 +86,41 @@ export async function POST(request: Request) {
     // partir (clé Resend absente, domaine d'expéditeur non vérifié…), le
     // candidat doit le savoir immédiatement au lieu de constater silencieusement
     // l'absence d'email (cause racine du « aucun email de confirmation reçu »).
-    const emailStatus: { configured: boolean; sent: boolean; message?: string } = {
-      configured: isEmailConfigured(),
+    const emailConfig = getEmailConfigStatus();
+    const emailStatus: {
+      configured: boolean;
+      sent: boolean;
+      message?: string;
+      testDomain?: boolean;
+    } = {
+      configured: emailConfig.configured,
       sent: false,
     };
-    if (emailStatus.configured) {
+    if (emailConfig.configured) {
       try {
         const token = await createEmailVerificationToken(user.id);
         const verifyUrl = `${getSiteUrl()}/api/auth/verify-email?token=${encodeURIComponent(token)}`;
         await sendVerificationEmail(user.email, verifyUrl);
         emailStatus.sent = true;
+        if (emailConfig.usingTestDomain) {
+          // Domaine de TEST Resend (@resend.dev) : l'envoi "réussit" mais
+          // l'email n'est livré QU'à l'adresse du compte Resend. Cause racine
+          // du « aucun email reçu » — journalisée bruyamment.
+          console.warn(
+            `[auth] ⚠️ EMAIL_FROM utilise le domaine de TEST Resend (${emailConfig.senderDomain}) : ` +
+              `l'email de confirmation pour ${user.email} n'est livré qu'au propriétaire du ` +
+              'compte Resend, pas au candidat. Vérifier le domaine travaillerenci.ci dans ' +
+              'Resend (voir docs/EMAIL_DELIVERY.md).',
+          );
+          emailStatus.testDomain = true;
+          emailStatus.message = emailConfig.message!;
+        }
       } catch (err) {
         // L'inscription ne doit JAMAIS échouer à cause de l'email de vérification.
         console.error('POST /api/auth/register sendVerificationEmail error:', err);
-        emailStatus.message =
-          "Échec de l'envoi de l'email de confirmation (détails dans les logs serveur).";
+        emailStatus.message = emailConfig.usingTestDomain
+          ? emailConfig.message!
+          : "Échec de l'envoi de l'email de confirmation (détails dans les logs serveur).";
       }
     } else {
       // Cause classique du « aucun email reçu » : RESEND_API_KEY absent de
@@ -105,8 +129,7 @@ export async function POST(request: Request) {
         `[auth] ⚠️ RESEND_API_KEY absent : aucun email de confirmation envoyé à ${user.email} ` +
           "(configurer la variable dans l'environnement Vercel — voir docs/EMAIL_DELIVERY.md).",
       );
-      emailStatus.message =
-        "L'envoi d'emails n'est pas configuré sur cet environnement (clé Resend manquante).";
+      emailStatus.message = emailConfig.message!;
     }
 
     // Session réelle : jeton HMAC signé dans un cookie httpOnly (30 jours).
