@@ -184,7 +184,12 @@ _GENERIC_RUBRIQUE_PATTERNS = [
     r"^note\s+aux\s+usagers?$",                # « NOTE AUX USAGERS »
     r"^[aà]\s+l'attention\s+(?:des|de|du)",    # « À L'ATTENTION DES DRENAET… »
     r"^annonces?$",
-    r"^r[ée]sultats?$",                         # page « Résultats » sans contexte
+    r"^r[ée]sultats?(?:\s|$)",                  # « Résultats » seul, « RÉSULTATS DU DIAS 2026 », « Resultats d'admission pro »
+    r"^calendrier(?:\s|$)",                     # « Calendrier officiel de déroulement… », « Calendrier des Examens »
+    r"^c[ée]r[ée]monie(?:\s|$)",                # « CÉRÉMONIE DE LANCEMENT OFFICIEL DES EXAMENS »
+    r"^convocations?(?:\s|$)",                  # « CONVOCATIONS CAFOP 2026 », « Convocation des candidats »
+    r"^les?\s+convocations?(?:\s|$)",           # « LES CONVOCATIONS AUX ÉPREUVES ORALES… »
+    r"^ouverture\s+de\s+la\s+plateforme(?:\s|$)",  # « OUVERTURE DE LA PLATEFORME AGCEPE » (annonce de plateforme, pas un concours)
     r"^(accueil|bienvenue|home|page\s+d'accueil)$",
     r"^(contact|mentions?\s+l[ée]gales?|plan\s+du\s+site|sitemap|faq|foire\s+aux\s+questions)$",
     r"^(documents|t[ée]l[ée]chargements?|m[ée]diath[èe]que|galerie|liens\s+utiles)$",

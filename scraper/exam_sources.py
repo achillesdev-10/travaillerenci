@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import json
 import re
+from io import BytesIO
 from pathlib import Path
 from typing import Dict, List, Optional, Type
 from urllib.parse import urljoin
@@ -96,30 +97,70 @@ def _pdf_filename_title(url: str) -> str:
     return name[:200] or ""
 
 
+def _extract_pdf_text(http_client, url: str, max_chars: int = 20000) -> str:
+    """Télécharge un PDF et en extrait le texte réel (pypdf, optionnel).
+
+    Retourne "" si pypdf n'est pas installé, si le téléchargement échoue ou si
+    le PDF est scanné (aucune couche texte extractible). La fiche « communiqué
+    officiel » sert alors de repli.
+    """
+    try:
+        from pypdf import PdfReader  # import tardif : dépendance optionnelle
+    except Exception:
+        return ""
+    try:
+        resp = http_client.get(url)
+        if resp.status_code != 200:
+            return ""
+        reader = PdfReader(BytesIO(resp.content))
+        parts = []
+        for page in reader.pages:
+            try:
+                parts.append(page.extract_text() or "")
+            except Exception:
+                parts.append("")
+        text = "\n".join(parts)
+        text = re.sub(r"[ \t\u00a0]+", " ", text)
+        text = re.sub(r"\n{3,}", "\n\n", text)
+        text = re.sub(r"(\n\s*){2,}", "\n\n", text).strip()
+        return text[:max_chars]
+    except Exception as exc:
+        logger.debug(f"Extraction PDF impossible pour {url} : {exc}")
+        return ""
+
+
 def _make_pdf_item(
     link: str,
     source_config: Dict,
     organizer: str,
     category: str,
     source_label: Optional[str] = None,
+    http_client: Optional[object] = None,
 ) -> Optional[ExamItem]:
-    """Fiche concours créée directement depuis un PDF de communiqué officiel.
+    """Fiche concours créée depuis un PDF de communiqué officiel.
 
-    Sans parseur PDF, le texte n'est pas extractible : on crée une fiche
-    « communiqué officiel » (titre = nom du fichier, lien source = PDF,
-    description courte) qui renvoie vers le document officiel. La réécriture
-    Gemini / l'extraction structurée s'appliquent ensuite comme pour les
-    autres fiches. Retourne None si le nom de fichier ne ressemble pas à un
+    Depuis un PDF, on tente d'abord d'extraire le texte réel (pypdf) : si
+    l'extraction réussit, la description contient le contenu du communiqué et
+    l'enrichissement Gemini l'exploite. Sinon (PDF scanné sans couche texte,
+    erreur réseau…), on retombe sur la fiche « communiqué officiel » (titre =
+    nom du fichier, lien source = PDF, description courte) qui renvoie vers le
+    document officiel. Retourne None si le nom de fichier ne ressemble pas à un
     communiqué de concours.
     """
     title = _pdf_filename_title(link)
     if not title or _is_generic_title(title) or not _PDF_COMMUNIQUE_RE.search(title):
         return None
-    description_md = (
-        f"Communiqué officiel au format PDF publié par {organizer} : « {title} ». "
-        "Consultez le document source (lien ci-dessous) pour les conditions "
-        "d'inscription, les dates et les modalités de candidature."
-    )
+    extracted = ""
+    if http_client is not None:
+        extracted = _extract_pdf_text(http_client, link)
+    if extracted:
+        description_md = extracted
+    else:
+        description_md = (
+            f"Communiqué officiel au format PDF publié par {organizer} : « {title} ». "
+            "Consultez le document source (lien ci-dessous) pour les conditions "
+            "d'inscription, les dates et les modalités de candidature."
+        )
     item = ExamItem(
         title=title,
         organizer=organizer,
@@ -260,7 +301,7 @@ class CiconcoursPlatformScraper(BaseScraper):
             # Communiqué PDF (ex. « Communiqué relatif au concours 2026.pdf ») :
             # fiche créée directement, aucune page HTML à parser.
             if _PDF_RE.search(link):
-                pdf_item = _make_pdf_item(link, self.source_config, organizer, category, self.source_label)
+                pdf_item = _make_pdf_item(link, self.source_config, organizer, category, self.source_label, self.http_client)
                 if pdf_item:
                     items.append(pdf_item)
                     pdf_count += 1
@@ -362,7 +403,7 @@ class ActualitesScraper(BaseScraper):
             # Communiqué PDF : fiche créée directement (le filtre « concours »
             # s'applique alors au NOM du fichier, pas au texte de la page).
             if _PDF_RE.search(link):
-                pdf_item = _make_pdf_item(link, self.source_config, organizer, category, self.source_label)
+                pdf_item = _make_pdf_item(link, self.source_config, organizer, category, self.source_label, self.http_client)
                 if pdf_item:
                     items.append(pdf_item)
                     pdf_count += 1
@@ -441,7 +482,7 @@ class AipScraper(BaseScraper):
             if len(items) >= max_offers:
                 break
             if _PDF_RE.search(link):
-                pdf_item = _make_pdf_item(link, self.source_config, organizer, category, self.source_label)
+                pdf_item = _make_pdf_item(link, self.source_config, organizer, category, self.source_label, self.http_client)
                 if pdf_item:
                     items.append(pdf_item)
                     pdf_count += 1
