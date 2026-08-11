@@ -41,6 +41,10 @@ jobs:
           # Clé Google AI Studio (https://aistudio.google.com/apikey) :
           # classification + réécriture Markdown des contenus via Gemini.
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # Repli IA (https://console.groq.com/keys) : si Gemini échoue (quota,
+          # timeout, JSON invalide, réponse inexploitable), Groq prend le relais
+          # avant les heuristiques locales. Optionnel mais fortement recommandé.
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           SCRAPER_SITES: ${{ vars.SCRAPER_SITES }}
         run: |
           # SCRAPER_SITES (variable de repo) est optionnelle : défaut = educarriere,emploici,boursedetude
@@ -51,13 +55,17 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # Repli IA (https://console.groq.com/keys) : même rôle que pour le
+          # scraper de contenus — Gemini d'abord, Groq si échec, heuristiques
+          # locales en dernier recours.
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           EXAM_SOURCES: ${{ vars.EXAM_SOURCES }}
         run: |
           # EXAM_SOURCES (variable de repo) optionnelle : filtre les sources
           # (ex: gucaci,ena,infas). Défaut = toutes les sources activées.
           python scraper/exams_runner.py --max-per-source 10 ${EXAM_SOURCES:+--sources "$EXAM_SOURCES"}
 
-      - name: Run exam unit tests (parser + anti-duplication + repository + pertinence)
+      - name: Run exam unit tests (parser + anti-duplication + repository + pertinence + fallback IA)
         run: |
           python scraper/tests/test_exam_parser.py
           python scraper/tests/test_similarity_check.py
@@ -66,6 +74,7 @@ jobs:
           python scraper/tests/test_exam_sources.py
           python scraper/tests/test_exam_relevance.py
           python scraper/tests/test_alert_digest.py
+          python scraper/tests/test_ai_fallback.py
 
   # ==========================================================================
   # Vérification du code front (Next.js) à chaque push / PR :

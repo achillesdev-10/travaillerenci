@@ -45,6 +45,19 @@ robots.txt utilisé pour mettre à jour ce tableau.
    - **règle de pertinence** : le modèle renvoie `is_concours=false` + `rejection_reason`
      pour les pages qui ne sont pas une annonce de concours exploitable (menus,
      rubriques « Communiqués » / « Actu … » / « Archives… », pages institutionnelles).
+   - **chaîne de repli IA — Gemini → Groq → heuristiques** (`groq_client.py`) :
+     Gemini d'abord ; s'il échoue (quota, timeout, réponse vide, JSON invalide,
+     résultat inexploitable : titre vide ou = nom de fichier, description non
+     rédigée), Groq prend le relais automatiquement (`GROQ_API_KEY`, modèle
+     `llama-3.3-70b-versatile` par défaut) ; sans IA, les heuristiques locales
+     (`exam_parser.py`) restent le dernier filet. Le rejet explicite
+     (`is_concours=false`) est conservé sans redemander à Groq (pas de gaspillage
+     d'appel pour un non-sujet). Les logs précisent toujours le fournisseur
+     (`provider=gemini` / `provider=groq`) et la raison du repli.
+   - **nettoyage des titres bruts** (`clean_exam_title` dans `exam_parser.py`) :
+     les titres issus de noms de fichiers PDF/DOC (« communiqué_2026.pdf ») sont
+     normalisés (« Communiqué 2026 ») — appliqué sur les titres IA et heuristiques
+     (garde-fou final : jamais de nom de fichier en titre publié).
 3b. **Filtrage qualité post-IA** → `scraper/models/exam_item.py` (`relevance_issues`) :
     rejet des fiches hors-sujet (titre de rubrique, aucune date ni condition
     d'éligibilité, rejet explicite Gemini) AVANT insertion — sauf communiqués PDF

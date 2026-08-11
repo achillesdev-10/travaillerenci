@@ -69,6 +69,50 @@ _DATE_TOKEN_RE = re.compile(
 _DATE_NUM_RE = re.compile(r"\b(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})\b")
 
 
+# Noms de fichiers PDF / documents collés comme titres (ex. « communiqué 2026.pdf »).
+_FILE_EXT_RE = re.compile(r"\.(pdf|docx?|rtf|odt|txt|xlsx?|pptx?)$", re.I)
+# Préfixes génériques qui, SANS sujet, produisent des titres illisibles
+# (« Communiqué 2e Étape Direct », « Arrete Ouverture 2027 »…). On ne retire
+# PAS le préfixe seul : on normalise l'ensemble (voir clean_exam_title).
+
+
+def clean_exam_title(title: str) -> str:
+    """Normalise un titre de concours brut pour le rendre lisible par un visiteur.
+
+    Corrige notamment :
+      • noms de fichiers collés ("communiqué_concours_2026.pdf" → "Communiqué concours 2026") ;
+      • extensions traînantes (.pdf, .docx…) ;
+      • séparateurs de fichiers (underscores, tirets multiples, parenthèses) ;
+      • accent manquant sur la première lettre (« communique » → « Communique »,
+        l'IA/la source reste responsable du contenu).
+
+    Ne corrige PAS le fond : un titre vide ou sans sujet reste tel quel (il sera
+    traité par la pertinence/la modération).
+    """
+    from urllib.parse import unquote
+
+    t = (title or "").strip()
+    if not t:
+        return t
+    # URL-décodé (noms de fichiers encodés type %20).
+    t = unquote(t)
+    # Extension de fichier traînante.
+    t = _FILE_EXT_RE.sub(" ", t).strip()
+    # Séparateurs de fichiers → espaces (conserve les tirets de mots composés
+    # comme « Sous-officier »).
+    t = re.sub(r"[_\u00a0]+", " ", t)
+    # Tirets longs espacés (« — », « – ») → tiret simple entouré d'espaces.
+    t = re.sub(r"\s+[-–—]+\s+", " - ", t)
+    # Suites de tirets multiples → un seul ; retire les tirets en bordure.
+    t = re.sub(r"[-–—]{2,}", "-", t).strip("-")
+    t = re.sub(r"[()\[\]]+", " ", t)
+    t = re.sub(r"\s+", " ", t).strip()
+    # Première lettre en majuscule (les fichiers sont souvent en minuscules).
+    if t:
+        t = t[0].upper() + t[1:]
+    return t[:200]
+
+
 def parse_french_date(text: str) -> Optional[datetime]:
     """Parse une date française (« 15 août 2026 », « 15/08/2026 »)."""
     m = _DATE_TOKEN_RE.search(text)

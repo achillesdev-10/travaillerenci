@@ -34,6 +34,7 @@ from scraper.models.content_item import (
     SQL_CONTRACT_TYPES,
     NEUTRAL_CONTRACT,
 )
+from scraper.core.groq_client import GroqClient
 from scraper.core.logger import setup_logger
 from scraper.core.utils import classify_content
 
@@ -103,33 +104,73 @@ class GeminiEnricher:
         self.api_key = api_key or os.getenv("GEMINI_API_KEY")
         self.model = model or GEMINI_MODEL
         self.enabled = bool(self.api_key)
+        # Fallback Gemini → Groq (GROQ_API_KEY) : utilisé si Gemini échoue
+        # (quota, timeout, erreur API, réponse vide ou JSON invalide).
+        self.groq = GroqClient()
         self.session = httpx.Client(timeout=60, follow_redirects=True)
-        if self.enabled:
-            logger.info(f"🤖 Enrichissement IA activé (modèle {self.model})")
+        if self.enabled or self.groq.enabled:
+            providers = "Gemini + repli Groq" if (self.enabled and self.groq.enabled) else (
+                "Gemini" if self.enabled else "Groq (Gemini absent)"
+            )
+            logger.info(f"🤖 Enrichissement IA activé ({providers})")
         else:
-            logger.warning("⚠️ GEMINI_API_KEY absente — classification & réécriture heuristiques.")
+            logger.warning("⚠️ GEMINI_API_KEY et GROQ_API_KEY absentes — classification & réécriture heuristiques.")
 
     def close(self) -> None:
         try:
             self.session.close()
+            self.groq.close()
         except Exception:
             pass
 
     # ------------------------------------------------------------------
     def enrich(self, item: ContentItem) -> ContentItem:
-        """Classifie + réécrit un item. Ne lève JAMAIS : fallback heuristique."""
-        if not self.enabled:
-            return self._apply_heuristics(item)
+        """Classifie + réécrit un item. Ne lève JAMAIS : fallback heuristique.
 
+        Ordre : Gemini → (échec : timeout, quota, erreur, vide, JSON invalide,
+        résultat inexploitable) → Groq → (échec) → heuristiques locales.
+        Les logs précisent le fournisseur (provider=gemini / provider=groq)
+        et la raison du repli.
+        """
         prompt = self._build_prompt(item)
-        try:
-            raw = self._call_gemini(prompt)
-            parsed = self._parse_json(raw)
-            self._apply_ai(item, parsed)
-        except Exception as exc:
-            logger.debug(f"Fallback heuristique pour « {item.title[:50]} » : {exc}")
-            self._apply_heuristics(item)
-        return item
+
+        # --- 1) Gemini (fournisseur principal) ---
+        if self.enabled:
+            try:
+                raw = self._call_gemini(prompt)
+                parsed = self._parse_json(raw)
+                self._validate_ai_result(parsed, item)
+                self._apply_ai(item, parsed)
+                logger.info(f"✅ Réécriture IA OK : « {item.title[:50]} » (provider=gemini)")
+                return item
+            except Exception as exc:
+                logger.warning(
+                    f"⚠️ Échec Gemini pour « {item.title[:50]} » (provider=gemini, raison : {exc}) — tentative Groq…"
+                )
+
+        # --- 2) Groq (repli automatique) ---
+        if self.groq.enabled:
+            try:
+                raw = self.groq.complete(SYSTEM_PROMPT, prompt)
+                parsed = self._parse_json(raw)
+                self._validate_ai_result(parsed, item)
+                self._apply_ai(item, parsed)
+                reason = "repli après échec Gemini" if self.enabled else "Gemini indisponible (non configuré)"
+                logger.warning(
+                    f"↪️ Réécriture via Groq : « {item.title[:50]} » (provider=groq, {reason})"
+                )
+                return item
+            except Exception as exc:
+                logger.warning(
+                    f"⚠️ Échec Groq pour « {item.title[:50]} » (provider=groq, raison : {exc})"
+                )
+
+        # --- 3) Heuristiques locales (dernier filet) ---
+        logger.warning(
+            f"⚠️ IA indisponible pour « {item.title[:50]} » (gemini={'oui' if self.enabled else 'non'}, "
+            f"groq={'oui' if self.groq.enabled else 'non'}) — repli heuristique."
+        )
+        return self._apply_heuristics(item)
 
     # ------------------------------------------------------------------
     def _build_prompt(self, item: ContentItem) -> str:
@@ -206,6 +247,22 @@ class GeminiEnricher:
             except json.JSONDecodeError:
                 pass
         raise ValueError("JSON IA illisible")
+
+    # ------------------------------------------------------------------
+    def _validate_ai_result(self, parsed: Dict[str, Any], item: ContentItem) -> None:
+        """Valide une réponse IA AVANT application. Lève ValueError si le
+        résultat est inexploitable (l'appelant bascule alors sur Groq puis
+        sur l'heuristique)."""
+        title = str(parsed.get("title") or "").strip()
+        description = str(parsed.get("description_markdown") or "").strip()
+        if not title:
+            raise ValueError("titre vide renvoyé par l'IA")
+        if re.match(r"^https?://", title, re.I):
+            raise ValueError("titre = URL brute")
+        if len(description) < 40:
+            raise ValueError("description vide ou trop courte (non informative)")
+        if re.match(r"^https?://\S+$", description, re.I):
+            raise ValueError("description = lien brut, non rédigée")
 
     # ------------------------------------------------------------------
     def _apply_ai(self, item: ContentItem, parsed: Dict[str, Any]) -> None:

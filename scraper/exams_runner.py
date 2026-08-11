@@ -67,6 +67,12 @@ HEALTH_JSON = DATA_DIR / "admin-exams-health.json"
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+# Secrets locaux (.env.local gitignoré) : GROQ_API_KEY, GEMINI_API_KEY…
+# Ne remplace JAMAIS une variable déjà présente (CI/Vercel gardent la priorité).
+from scraper.core.env_loader import load_env_file
+
+load_env_file()
+
 from scraper.core.http_client import HttpClient
 from scraper.core.logger import setup_logger
 from scraper.core.gemini_exams import ExamGeminiEnricher

@@ -34,7 +34,12 @@ from typing import Any, Dict, Optional
 import httpx
 
 from scraper.models.exam_item import ExamItem, normalize_diplomas
-from scraper.core.exam_parser import confidence_from_gaps, parse_communique
+from scraper.core.exam_parser import (
+    clean_exam_title,
+    confidence_from_gaps,
+    parse_communique,
+)
+from scraper.core.groq_client import GroqClient
 from scraper.core.logger import setup_logger
 
 logger = setup_logger("gemini_exams")
@@ -180,40 +185,85 @@ class ExamGeminiEnricher:
         self.model = model or GEMINI_MODEL
         self.fallback_models = list(GEMINI_MODEL_FALLBACKS)
         self.enabled = bool(self.api_key)
+        # Fallback Gemini → Groq (GROQ_API_KEY) : utilisé si Gemini échoue
+        # (quota, timeout, erreur API, réponse vide ou JSON invalide).
+        self.groq = GroqClient()
         self.session = httpx.Client(timeout=60, follow_redirects=True)
-        if self.enabled:
-            logger.info(f"🤖 Enrichissement concours IA activé (modèle {self.model})")
+        if self.enabled or self.groq.enabled:
+            providers = "Gemini + repli Groq" if (self.enabled and self.groq.enabled) else (
+                "Gemini" if self.enabled else "Groq (Gemini absent)"
+            )
+            logger.info(f"🤖 Enrichissement concours IA activé ({providers})")
         else:
-            logger.warning("⚠️ GEMINI_API_KEY absente — extraction heuristique des concours.")
+            logger.warning("⚠️ GEMINI_API_KEY et GROQ_API_KEY absentes — extraction heuristique des concours.")
 
     def close(self) -> None:
         try:
             self.session.close()
+            self.groq.close()
         except Exception:
             pass
 
     # ------------------------------------------------------------------
     def enrich(self, item: ExamItem) -> ExamItem:
-        """Réécrit + extrait les champs. Ne lève JAMAIS : fallback heuristique."""
-        if not self.enabled:
-            return self._apply_heuristics(item)
-        try:
-            raw = self._call_gemini(self._build_prompt(item))
-            parsed = self._parse_json(raw)
-            self._apply_ai(item, parsed)
-            if item.rejected:
+        """Réécrit + extrait les champs. Ne lève JAMAIS : fallback heuristique.
+
+        Ordre : Gemini → (échec : timeout, quota, erreur, vide, JSON invalide,
+        résultat inexploitable) → Groq → (échec) → heuristiques locales.
+        Les logs permettent toujours de savoir quel fournisseur a servi
+        (provider=gemini / provider=groq) et pourquoi le repli a eu lieu.
+        """
+        prompt = self._build_prompt(item)
+
+        # --- 1) Gemini (fournisseur principal) ---
+        if self.enabled:
+            try:
+                raw = self._call_gemini(prompt)
+                parsed = self._parse_json(raw)
+                self._validate_ai_result(parsed, item)
+                self._apply_ai(item, parsed)
+                if item.rejected:
+                    logger.warning(
+                        f"🚫 IA rejette « {item.title[:50]} » : {item.rejection_reason} (provider=gemini)"
+                    )
+                else:
+                    logger.info(
+                        f"✅ Réécriture IA OK : « {item.title[:50]} » (confiance {item.confidence}, provider=gemini)"
+                    )
+                return item
+            except Exception as exc:
                 logger.warning(
-                    f"🚫 IA rejette « {item.title[:50]} » : {item.rejection_reason}"
+                    f"⚠️ Échec Gemini pour « {item.title[:50]} » (provider=gemini, raison : {exc}) — tentative Groq…"
                 )
-            else:
-                logger.info(f"✅ Réécriture IA OK : « {item.title[:50]} » (confiance {item.confidence})")
-        except Exception as exc:
-            logger.warning(
-                f"⚠️ Enrichissement IA ÉCHOUÉ pour « {item.title[:50]} » "
-                f"(modèle {self.model}) — repli heuristique : {exc}"
-            )
-            self._apply_heuristics(item)
-        return item
+
+        # --- 2) Groq (repli automatique) ---
+        if self.groq.enabled:
+            try:
+                raw = self.groq.complete(SYSTEM_PROMPT, prompt)
+                parsed = self._parse_json(raw)
+                self._validate_ai_result(parsed, item)
+                self._apply_ai(item, parsed)
+                if item.rejected:
+                    logger.warning(
+                        f"🚫 IA rejette « {item.title[:50]} » : {item.rejection_reason} (provider=groq)"
+                    )
+                else:
+                    reason = "repli après échec Gemini" if self.enabled else "Gemini indisponible (non configuré)"
+                    logger.warning(
+                        f"↪️ Réécriture via Groq : « {item.title[:50]} » (provider=groq, {reason})"
+                    )
+                return item
+            except Exception as exc:
+                logger.warning(
+                    f"⚠️ Échec Groq pour « {item.title[:50]} » (provider=groq, raison : {exc})"
+                )
+
+        # --- 3) Heuristiques locales (dernier filet) ---
+        logger.warning(
+            f"⚠️ IA indisponible pour « {item.title[:50]} » (gemini={'oui' if self.enabled else 'non'}, "
+            f"groq={'oui' if self.groq.enabled else 'non'}) — repli heuristique."
+        )
+        return self._apply_heuristics(item)
 
     # ------------------------------------------------------------------
     def _build_prompt(self, item: ExamItem) -> str:
@@ -340,6 +390,42 @@ class ExamGeminiEnricher:
         )
 
     # ------------------------------------------------------------------
+    def _validate_ai_result(self, parsed: Dict[str, Any], item: ExamItem) -> None:
+        """Valide une réponse IA AVANT application (titre & description exploitables).
+
+        Lève ValueError si le résultat est inexploitable — l'appelant bascule
+        alors sur le fournisseur suivant (Groq) puis sur l'heuristique.
+        Cas traités :
+          • rejet explicite (is_concours=false) → réponse VALIDE (on garde le
+            rejet, aucun autre champ n'est requis) ;
+          • titre vide ;
+          • titre = nom de fichier PDF/DOC brut (la source permet mieux) ;
+          • description vide ou trop courte pour être informative ;
+          • description non rédigée (URL seule, texte brut sans structure).
+        """
+        is_concours = parsed.get("is_concours")
+        if isinstance(is_concours, str):
+            is_concours = is_concours.strip().lower() in ("true", "1", "oui", "yes")
+        if is_concours is False:
+            return
+
+        title = str(parsed.get("title") or "").strip()
+        description = str(parsed.get("description_md") or "").strip()
+        if not title:
+            raise ValueError("titre vide renvoyé par l'IA")
+        # Titre manifestement brut : nom de fichier collé, URL, « http »…
+        if re.search(r"\.(pdf|docx?|rtf|txt)$", title, re.I) or re.match(
+            r"^[\w.\- _%]{2,60}\.pdf$", title, re.I
+        ):
+            raise ValueError(f"titre = nom de fichier brut (« {title[:60]} »)")
+        if re.match(r"^https?://", title, re.I):
+            raise ValueError("titre = URL brute")
+        if len(description) < 40:
+            raise ValueError("description vide ou trop courte (non informative)")
+        if re.match(r"^https?://\S+$", description, re.I):
+            raise ValueError("description = lien brut, non rédigée")
+
+    # ------------------------------------------------------------------
     def _apply_ai(self, item: ExamItem, parsed: Dict[str, Any]) -> None:
         # Rejet explicite : la page ne décrit pas un concours exploitable
         # (menu, rubrique, accueil de section…). On marque la fiche et on ne
@@ -396,7 +482,8 @@ class ExamGeminiEnricher:
         if confidence not in ("low", "medium", "high"):
             confidence = "medium"
 
-        item.title = title[:200]
+        # Garde-fou final : le titre ne doit jamais rester un nom de fichier brut.
+        item.title = clean_exam_title(title)[:200]
         item.organizer = organizer[:160] or item.organizer
         item.description_md = description[:20000]
         item.category = str(parsed.get("category") or item.category).lower()
@@ -428,6 +515,7 @@ class ExamGeminiEnricher:
     # ------------------------------------------------------------------
     def _apply_heuristics(self, item: ExamItem) -> ExamItem:
         """Extraction locale sans IA (exam_parser.py)."""
+        item.title = clean_exam_title(item.title)
         fields = parse_communique(
             item.description_md,
             default_organizer=item.organizer,
