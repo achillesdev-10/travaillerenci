@@ -10,6 +10,10 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './e2e',
+  // La spec production (chatbot.prod.spec.ts) a sa propre config
+  // (playwright.prod.config.ts) : elle ne doit jamais tourner contre le
+  // serveur de dev local ni contre l'API mockée.
+  testIgnore: /prod\.spec\.ts/,
   timeout: 60_000,
   expect: { timeout: 10_000 },
   // Un seul worker : les lancements Chrome parallèles sont instables sous
