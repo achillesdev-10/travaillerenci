@@ -1037,6 +1037,36 @@ async function getAdminDashboardDataFromSupabase(
 
   const totalClicks = offers.reduce((sum, offer) => sum + offer.clicks, 0);
 
+  // Visites réelles (table site_visits, migration 0006) : comptées depuis
+  // Supabase comme pour la page /admin/analytics. Retourne 0 uniquement si
+  // la table est absente (migration non appliquée) — jamais de valeurs fictives.
+  let totalVisits = 0;
+  let visitsToday = 0;
+  let visitsThisWeek = 0;
+  try {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const weekStart = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    const [{ count: total }, { count: today }, { count: week }] = await Promise.all([
+      supabase.from("site_visits").select("id", { count: "exact", head: true }),
+      supabase
+        .from("site_visits")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", todayStart.toISOString()),
+      supabase
+        .from("site_visits")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", weekStart.toISOString()),
+    ]);
+
+    totalVisits = numberFromUnknown(total);
+    visitsToday = numberFromUnknown(today);
+    visitsThisWeek = numberFromUnknown(week);
+  } catch {
+    // Table site_visits absente (migration 0006 non appliquée) : valeurs à 0.
+  }
+
   const stats: DashboardStats = {
     totalActiveOffers: offers.filter((offer) => offer.status !== "Expirées").length,
     newOffersThisWeek: offers.filter((offer) => {
@@ -1045,10 +1075,9 @@ async function getAdminDashboardDataFromSupabase(
       return Number.isFinite(parsed) && parsed >= oneWeekAgo;
     }).length,
     totalClicks,
-    // Pas de table de visites côté Supabase : valeurs honnêtes à 0.
-    totalVisits: 0,
-    visitsToday: 0,
-    visitsThisWeek: 0,
+    totalVisits,
+    visitsToday,
+    visitsThisWeek,
   };
 
   const { data: log } = await supabase

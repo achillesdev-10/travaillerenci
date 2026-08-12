@@ -8,7 +8,7 @@ import type {
   BulkAction,
   DashboardOffer,
   ScraperHealth,
-} from "../../lib/admin-dashboard";
+} from "../../../lib/admin-dashboard";
 import type { JobOffersActivityPoint } from "@/services/jobOfferSchemaService";
 import type { Report, ReportStatus } from "@/services/reportService";
 import type { ResolvedContentItem } from "@/lib/itemResolver";

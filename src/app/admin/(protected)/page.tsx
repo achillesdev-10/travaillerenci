@@ -1,5 +1,5 @@
 import AdminDashboardClient from "./AdminDashboardClient";
-import { getAdminDashboardData } from "../../lib/admin-dashboard";
+import { getAdminDashboardData } from "../../../lib/admin-dashboard";
 import { JobOfferSchemaService } from "@/services/jobOfferSchemaService";
 import { ReportService } from "@/services/reportService";
 import { resolveContentItem } from "@/lib/itemResolver";
