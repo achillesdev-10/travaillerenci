@@ -36,6 +36,25 @@ async function gotoHome(page: Page): Promise<void> {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
 }
 
+/**
+ * Smoke d'une page de listing sur mobile : h1 visible + aucun débordement
+ * horizontal (grilles 2 colonnes, hero, etc.).
+ */
+async function expectListingRenders(
+  page: Page,
+  path: string,
+  heading: RegExp,
+): Promise<void> {
+  await page.goto(path, { waitUntil: 'domcontentloaded' });
+  await expect(
+    page.getByRole('heading', { level: 1, name: heading }),
+  ).toBeVisible({ timeout: 30_000 });
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - window.innerWidth,
+  );
+  expect(overflow).toBeLessThanOrEqual(0);
+}
+
 test.describe('Chatbot mobile — production', () => {
   test.describe('Portrait 390×844 (smartphone standard)', () => {
     test.skip(
@@ -115,18 +134,27 @@ test.describe('Chatbot mobile — production', () => {
     });
 
     test('la page /stages se rend sans débordement horizontal', async ({ page }) => {
-      await page.goto('/stages', { waitUntil: 'domcontentloaded' });
-      await expect(
-        page.getByRole('heading', {
-          level: 1,
-          name: /Offres de stage en Côte d'Ivoire/,
-        }),
-      ).toBeVisible({ timeout: 30_000 });
-      // Pas de débordement horizontal (grille 2 colonnes sur mobile).
-      const overflow = await page.evaluate(
-        () => document.documentElement.scrollWidth - window.innerWidth,
+      await expectListingRenders(
+        page,
+        '/stages',
+        /Offres de stage en Côte d'Ivoire/,
       );
-      expect(overflow).toBeLessThanOrEqual(0);
+    });
+
+    test('la page /bourses se rend sans débordement horizontal', async ({ page }) => {
+      await expectListingRenders(
+        page,
+        '/bourses',
+        /Bourses d'études en Côte d'Ivoire/,
+      );
+    });
+
+    test('la page /concours se rend sans débordement horizontal', async ({ page }) => {
+      await expectListingRenders(
+        page,
+        '/concours',
+        /Concours administratifs en Côte d'Ivoire/,
+      );
     });
   });
 
