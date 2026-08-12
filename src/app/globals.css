@@ -135,11 +135,16 @@ html.dark body {
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .animate-marquee,
-    .animate-float,
-    .animate-float-slow,
-    .animate-ticker-pulse {
-      animation: none !important;
+    /* Kill switch global : désactive TOUTES les animations, transitions et
+       le scroll fluide pour les utilisateurs sensibles au mouvement
+       (couvre le chatbot, les cartes, le marquee, les indicateurs…). */
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
     }
   }
 

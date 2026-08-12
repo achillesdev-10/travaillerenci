@@ -47,3 +47,8 @@ __pycache__/
 # Scraper runtime state (réécrits à chaque exécution)
 data/admin-scraper-health.json
 data/scraper-last-run.log
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/

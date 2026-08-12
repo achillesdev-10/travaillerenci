@@ -36,10 +36,35 @@ const SUGGESTIONS: Suggestion[] = [
 /** Nombre max de messages d'historique envoyés au serveur (contexte léger). */
 const MAX_SENT_HISTORY = 10;
 
+/** Persistance de l'historique côté client (survit au rechargement). */
+const STORAGE_KEY = 'travaillerenci:assistant:messages:v1';
+const MAX_STORED_MESSAGES = 50;
+
 let messageSeq = 0;
 function nextId(): string {
   messageSeq += 1;
   return `m${Date.now()}-${messageSeq}`;
+}
+
+/** Restaure l'historique sauvegardé ; localStorage peut être indisponible. */
+function loadStoredMessages(): ChatMessage[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((m): m is ChatMessage => {
+      if (!m || typeof m !== 'object') return false;
+      const msg = m as Partial<ChatMessage>;
+      return (
+        (msg.role === 'user' || msg.role === 'assistant') &&
+        typeof msg.text === 'string'
+      );
+    });
+  } catch {
+    return [];
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -125,7 +150,10 @@ function ResultCard({ result }: { result: AssistantResult }) {
 export default function AssistantFloat() {
   const [open, setOpen] = useState(false);
   const [visible, setVisible] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [footerVisible, setFooterVisible] = useState(false);
+  const [headerOverlap, setHeaderOverlap] = useState(false);
+  // Historique restauré depuis localStorage (survit au rechargement).
+  const [messages, setMessages] = useState<ChatMessage[]>(loadStoredMessages);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -144,6 +172,50 @@ export default function AssistantFloat() {
     };
   }, []);
 
+  // Le widget (bouton + panneau) se masque dès que le footer entre à l'écran
+  // afin de ne jamais recouvrir le bas de page. Il réapparaît en remontant.
+  useEffect(() => {
+    const footer = document.querySelector('footer');
+    if (!footer) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setFooterVisible(entry.isIntersecting),
+      { threshold: 0 },
+    );
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
+
+  // Le header est sticky (toujours en haut du viewport). Sur les écrans bas
+  // (ex. mobile en paysage) le bouton/panneau, ancré en bas à droite, pourrait
+  // remonter sous le header : on masque alors le widget pour éviter qu'il ne
+  // recouvre la barre de navigation.
+  useEffect(() => {
+    const header = document.querySelector('header');
+    if (!header) return;
+
+    const update = () => {
+      const headerBottom = header.getBoundingClientRect().bottom;
+      // Hauteur effective du panneau — miroir du style inline (clamp 65vh).
+      const panelHeight = Math.min(Math.max(window.innerHeight * 0.65, 320), 540);
+      const widgetTop = open
+        ? window.innerHeight - 84 - panelHeight // bottom: 5.25rem (84px)
+        : window.innerHeight - 20 - 56; // bottom-5 (20px) + h-14 (56px)
+      setHeaderOverlap(widgetTop < headerBottom);
+    };
+
+    update();
+    window.addEventListener('resize', update);
+    window.addEventListener('scroll', update, { passive: true });
+    // Le menu mobile fait varier la hauteur du header → re-mesure.
+    const ro = new ResizeObserver(update);
+    ro.observe(header);
+    return () => {
+      window.removeEventListener('resize', update);
+      window.removeEventListener('scroll', update);
+      ro.disconnect();
+    };
+  }, [open]);
+
   // Message d'accueil à la première ouverture.
   useEffect(() => {
     if (open && !initialized.current) {
@@ -160,6 +232,30 @@ export default function AssistantFloat() {
       ]);
     }
   }, [open]);
+
+  // Si un historique a été restauré, la session est déjà initialisée :
+  // on ne ré-affichera pas le message d'accueil au prochain passage.
+  useEffect(() => {
+    initialized.current = messages.length > 0;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Sauvegarde l'historique à chaque changement → conversation intacte après
+  // rechargement. Historique borné pour rester dans le quota localStorage.
+  useEffect(() => {
+    try {
+      if (messages.length === 0) {
+        window.localStorage.removeItem(STORAGE_KEY);
+      } else {
+        window.localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify(messages.slice(-MAX_STORED_MESSAGES)),
+        );
+      }
+    } catch {
+      // localStorage indisponible (navigation privée, quota) — on ignore.
+    }
+  }, [messages]);
 
   // Fermeture avec la touche Échap.
   useEffect(() => {
@@ -255,15 +351,18 @@ export default function AssistantFloat() {
 
   return (
     <>
-      {/* ===================== BOUTON FLOTTANT ===================== */}
+      {/* ===================== BOUTON FLOTTANT (icône IA uniquement) ===================== */}
       <button
         type="button"
         onClick={handleToggle}
+        aria-expanded={open}
         aria-label={open ? "Fermer l'assistant" : "Ouvrir l'assistant TravaillerenCi"}
-        title="Assistant TravaillerenCi"
+        title="Assistant IA TravaillerenCi"
         className={cn(
-          'group fixed bottom-5 right-5 z-50 flex items-center gap-2.5 rounded-full bg-gradient-to-br from-primary to-primary-dark pl-3.5 pr-4 py-3 text-white shadow-xl shadow-primary/30 transition-all duration-300 hover:scale-105 hover:shadow-primary/50',
-          visible ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0',
+          'group fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-white shadow-xl shadow-primary/30 transition-all duration-300 hover:scale-105 hover:shadow-primary/50 active:scale-95',
+          visible && !footerVisible && !headerOverlap
+            ? 'translate-y-0 opacity-100'
+            : 'invisible translate-y-16 opacity-0 pointer-events-none',
         )}
       >
         {open ? (
@@ -271,31 +370,34 @@ export default function AssistantFloat() {
             <path d="M6 18L18 6M6 6l12 12" />
           </svg>
         ) : (
-          <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <rect x="3" y="11" width="18" height="10" rx="2" />
-            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-          </svg>
+          <>
+            <svg className="h-7 w-7 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="3" y="11" width="18" height="10" rx="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              <path d="M12 7h.01" />
+            </svg>
+            {/* Indicateur « en ligne » discret */}
+            <span className="absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5" aria-hidden="true">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-50" />
+              <span className="relative inline-flex h-3.5 w-3.5 rounded-full border-2 border-white dark:border-slate-900 bg-emerald-500" />
+            </span>
+          </>
         )}
-        <span className="text-sm font-bold leading-tight">
-          {open ? (
-            'Fermer'
-          ) : (
-            <>
-              Assistant
-              <br />
-              TravaillerenCi
-            </>
-          )}
-        </span>
       </button>
 
-      {/* ===================== FENÊTRE DE CHAT ===================== */}
-      {open && (
-        <div className="fixed z-50 flex flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl shadow-black/25 animate-pop"
+      {/* ===================== FENÊTRE DE CHAT (compacte & responsive) ===================== */}
+      {open && !footerVisible && !headerOverlap && (
+        <div
+          className="fixed z-50 flex flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl shadow-black/25 animate-pop"
           style={{
-            // Mobile : occupe presque tout l'écran ; desktop : largeur fixe.
-            inset: 'auto 0.75rem 5.5rem 0.75rem',
-            height: 'min(72vh, 640px)',
+            // Ancrage en bas à droite, au-dessus du bouton : largeur plafonnée
+            // (mobile pleine largeur moins les marges, desktop 400px) et
+            // hauteur limitée pour rester compacte sur tous les écrans.
+            right: '1.25rem',
+            bottom: '5.25rem',
+            width: 'min(calc(100vw - 2.5rem), 400px)',
+            // Hauteur plafonnée mais jamais sous 320px (écrans paysage courts).
+            height: 'clamp(320px, 65vh, 540px)',
           }}
           role="dialog"
           aria-label="Assistant TravaillerenCi"
@@ -311,6 +413,21 @@ export default function AssistantFloat() {
                 Je peux vous aider à trouver une opportunité.
               </div>
             </div>
+            <button
+              type="button"
+              onClick={() => setMessages([])}
+              disabled={messages.length === 0}
+              aria-label="Effacer la discussion"
+              title="Effacer la discussion"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M3 6h18" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                <path d="M10 11v6M14 11v6" />
+              </svg>
+            </button>
             <button
               type="button"
               onClick={() => setOpen(false)}
