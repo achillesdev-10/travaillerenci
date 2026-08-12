@@ -312,6 +312,31 @@ export class JobOfferSchemaService {
     return row ? rowToSchema(row) : null;
   }
 
+  /**
+   * Résolution d'une offre par slug SEO descriptif.
+   *
+   * Nécessaire pour les URLs legacy `…/jobs/{slug}` encore référencées par
+   * d'anciens canonicals et par les emails d'alertes : la route `/jobs/[id]`
+   * résout le slug puis redirige en 301 vers l'URL canonique `/jobs/{id}`.
+   */
+  static async getBySlug(slug: string): Promise<JobOfferSchema | null> {
+    if (isSupabaseConfigured()) {
+      const supabase = getSupabaseClient();
+      if (!supabase) return null;
+      const { data, error } = await supabase
+        .from('job_offers')
+        .select('*')
+        .eq('slug', slug)
+        .maybeSingle();
+      if (error || !data) return null;
+      return rowToSchemaFromSupabase(data);
+    }
+    const db = await getDb();
+    if (!db) return null;
+    const row = db.prepare('SELECT * FROM job_offers WHERE slug = $slug').get({ $slug: slug });
+    return row ? rowToSchema(row) : null;
+  }
+
   static async getAdminStats(days: number = 7): Promise<JobOffersAdminStats> {
     if (isSupabaseConfigured()) return this.getAdminStatsSupabase(days);
     const db = await getDb();
@@ -489,24 +514,25 @@ export class JobOfferSchemaService {
 
   /**
    * Détection de doublons : offres partageant le même (titre + entreprise)
-   * normalisé (minuscules, espaces trimés). Retourne la liste des ids
-   * concernés avec leur clé de groupe, pour l'affichage d'un badge de
-   * modération « doublon probable ».
+   * normalisé (minuscules, accents retirés, espaces trimés). Retourne la
+   * liste des ids concernés avec leur clé de groupe, pour l'affichage d'un
+   * badge de modération « doublon probable ».
    */
   static async findDuplicates(): Promise<Array<{ id: string; group: string }>> {
     if (isSupabaseConfigured()) return this.findDuplicatesSupabase();
     const db = await getDb();
     if (!db) return [];
     const rows = db
-      .prepare(
-        `SELECT id, lower(trim(title)) || '||' || lower(trim(company)) AS key FROM job_offers`
-      )
-      .all() as Array<{ id: string; key: string }>;
+      .prepare(`SELECT id, title, company FROM job_offers`)
+      .all() as Array<{ id: string; title: string; company: string }>;
     const counts = new Map<string, number>();
-    rows.forEach((r) => counts.set(r.key, (counts.get(r.key) || 0) + 1));
+    rows.forEach((r) => {
+      const key = dupKey(r.title, r.company);
+      counts.set(key, (counts.get(key) || 0) + 1);
+    });
     return rows
-      .filter((r) => (counts.get(r.key) || 0) > 1)
-      .map((r) => ({ id: r.id, group: r.key }));
+      .filter((r) => (counts.get(dupKey(r.title, r.company)) || 0) > 1)
+      .map((r) => ({ id: r.id, group: dupKey(r.title, r.company) }));
   }
 
   static async addScraperLog(status: 'success' | 'error' | 'running', offers_added: number, message: string): Promise<number> {
@@ -814,17 +840,17 @@ export class JobOfferSchemaService {
 
     const counts = new Map<string, number>();
     data.forEach((r) => {
-      const key = `${String(r.title || '').trim().toLowerCase()}||${String(r.company || '').trim().toLowerCase()}`;
+      const key = dupKey(String(r.title || ''), String(r.company || ''));
       counts.set(key, (counts.get(key) || 0) + 1);
     });
     return data
       .filter((r) => {
-        const key = `${String(r.title || '').trim().toLowerCase()}||${String(r.company || '').trim().toLowerCase()}`;
+        const key = dupKey(String(r.title || ''), String(r.company || ''));
         return (counts.get(key) || 0) > 1;
       })
       .map((r) => ({
         id: String(r.id),
-        group: `${String(r.title || '').trim().toLowerCase()}||${String(r.company || '').trim().toLowerCase()}`,
+        group: dupKey(String(r.title || ''), String(r.company || '')),
       }));
   }
 
@@ -850,4 +876,23 @@ export class JobOfferSchemaService {
   }
 }
 
-export const __forTesting = { FALLBACK_OFFERS };
+/**
+ * Clé de déduplication : titre + entreprise normalisés (minuscules, accents
+ * retirés, espaces condensés). « Technicien Supérieur » et « Technicien
+ * superieur » forment ainsi la même clé, quelle que soit la source.
+ */
+function dupKey(title: string, company: string): string {
+  const norm = (s: string) =>
+    s
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[œ]/g, 'oe')
+      .replace(/[æ]/g, 'ae')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim()
+      .replace(/\s+/g, ' ');
+  return `${norm(title)}||${norm(company)}`;
+}
+
+export const __forTesting = { FALLBACK_OFFERS, dupKey };

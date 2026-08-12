@@ -15,6 +15,7 @@ const BASE_URL = getSiteUrl();
 const STATIC_ROUTES = [
   '',
   '/jobs',
+  '/stages',
   '/concours',
   '/bourses',
   '/blog',
@@ -36,7 +37,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${BASE_URL}${route}`,
     lastModified: now,
     changeFrequency: route === '' ? 'daily' : 'weekly',
-    priority: route === '' ? 1 : route === '/jobs' || route === '/concours' ? 0.9 : 0.6,
+    priority:
+      route === ''
+        ? 1
+        : route === '/jobs' || route === '/stages' || route === '/concours'
+          ? 0.9
+          : 0.6,
   }));
 
   // Portes d'entrée SEO concours : pages catégorie + diplôme (contenu unique).

@@ -46,14 +46,35 @@ GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:ge
 SYSTEM_PROMPT = (
     "Tu es un rédacteur expert du marché de l'emploi, des stages, des bourses "
     "d'études et des concours administratifs en Côte d'Ivoire.\n"
-    "À partir d'un contenu brut (scrapé d'un site web), tu dois le classer et le réécrire.\n\n"
+    "À partir d'un contenu brut (scrapé d'un site web), tu dois le classer et le réécrire "
+    "en contenu éditorial propre, structuré et utile pour un candidat ivoirien.\n\n"
     "Règles STRICTES :\n"
     "- Ne garde QUE les informations présentes dans le texte source : n'invente JAMAIS de "
-    "missions, d'exigences, de salaire, de date limite ou de coordonnées.\n"
+    "missions, d'exigences, de salaire, de date limite, d'âge ou de coordonnées.\n"
     "- Retire tout le bruit : navigation, publicités, compteurs, listes d'autres annonces, liens sociaux.\n"
-    "- Convertis les listes en puces '- ' ; conserve les emails de candidature.\n"
+    "- Structure la description en Markdown propre avec des sections '## ' adaptées à la catégorie :\n"
+    "    • emploi : ## Présentation de l'offre, ## Missions principales, ## Profil recherché, "
+    "## Conditions, ## Comment postuler (uniquement les sections que le texte permet de remplir) ;\n"
+    "    • stage : ## Présentation du stage, ## Missions, ## Profil recherché, ## Durée du stage, "
+    "## Localisation, ## Comment postuler ;\n"
+    "    • bourse : ## Présentation, ## Conditions d'éligibilité, ## Ce que couvre la bourse, "
+    "## Documents nécessaires, ## Comment candidater, ## Date limite.\n"
+    "- Une information absente de la source ne doit JAMAIS être inventée : omets la section, "
+    "ne comble pas les trous avec des généralités vides.\n"
+    "- Convertis les listes en puces '- ' ; conserve les emails de candidature et les liens utiles.\n"
     "- Français correct, phrases concises, aucun commentaire méta.\n"
     "- Réponds UNIQUEMENT au format JSON valide, sans aucun texte autour.\n"
+)
+
+
+# Catégories → sections éditoriales (rappel interne, calibre le modèle).
+_EDITORIAL_SECTIONS = (
+    "job : ## Présentation de l'offre / ## Missions principales / ## Profil recherché / "
+    "## Conditions / ## Comment postuler — "
+    "internship : ## Présentation du stage / ## Missions / ## Profil recherché / "
+    "## Durée du stage / ## Localisation / ## Comment postuler — "
+    "scholarship : ## Présentation / ## Conditions d'éligibilité / ## Ce que couvre la bourse / "
+    "## Documents nécessaires / ## Comment candidater / ## Date limite"
 )
 
 # Champs attendus du JSON renvoyé par le modèle.
@@ -66,6 +87,9 @@ _JSON_FIELDS = {
     "deadline": None,          # "YYYY-MM-DD" ou null
     "eligibility": "",
     "description_markdown": "",
+    "seo_title": "",
+    "seo_description": "",
+    "seo_keywords": "",
 }
 
 
@@ -175,7 +199,8 @@ class GeminiEnricher:
     # ------------------------------------------------------------------
     def _build_prompt(self, item: ContentItem) -> str:
         return (
-            f"{SYSTEM_PROMPT}\n"
+            f"{SYSTEM_PROMPT}\n\n"
+            f"Sections éditoriales par catégorie : {_EDITORIAL_SECTIONS}\n\n"
             "Schéma JSON attendu :\n"
             '{\n'
             '  "category": "job | internship | scholarship | exam",\n'
@@ -185,7 +210,10 @@ class GeminiEnricher:
             '  "location": "ville / pays",\n'
             '  "deadline": "date limite au format YYYY-MM-DD ou null",\n'
             '  "eligibility": "critères d\'éligibilité en une phrase ou null",\n'
-            '  "description_markdown": "description réécrite en Markdown structuré"\n'
+            '  "description_markdown": "description réécrite en Markdown structuré (sections ##)",\n'
+            '  "seo_title": "titre SEO naturel et descriptif, ≤ 60 caractères, sans nom du site",\n'
+            '  "seo_description": "résumé SEO 155 caractères max : poste + entreprise + lieu",\n'
+            '  "seo_keywords": "mots-clés séparés par des virgules, intention de recherche ivoirienne"\n'
             '}\n\n'
             "--- Contenu brut ---\n"
             f"Titre brut : {item.title}\n"
@@ -280,6 +308,19 @@ class GeminiEnricher:
         item.contract_type = contract
         item.description = description[:12000]
 
+        # Champs SEO : on privilégie les valeurs naturelles renvoyées par l'IA
+        # (jamais du bourrage de mots-clés), avec repli calculé localement.
+        # Garde-fou : un titre/description contenant une URL ou le nom du site
+        # est écarté (repli local) — l'IA ne doit jamais injecter de bruit SEO.
+        seo_title = str(parsed.get("seo_title") or "").strip()[:70]
+        seo_desc = str(parsed.get("seo_description") or "").strip()[:175]
+        item.seo_title = _clean_seo_field(seo_title, _build_seo_title(title))
+        item.seo_description = _clean_seo_field(
+            seo_desc, _build_seo_description(item, title)
+        )
+        keywords = str(parsed.get("seo_keywords") or "").strip()[:300]
+        item.seo_keywords = keywords or None
+
         deadline = parsed.get("deadline")
         if deadline and isinstance(deadline, str):
             from datetime import datetime as _dt
@@ -299,4 +340,51 @@ class GeminiEnricher:
         elif item.category == "exam":
             item.contract_type = NEUTRAL_CONTRACT
         item.contract_type = item.contract_type_sql()
+        # SEO calculé localement (même qualité que le repli du runner).
+        if not item.seo_title:
+            item.seo_title = _build_seo_title(item.title)
+        if not item.seo_description:
+            item.seo_description = _build_seo_description(item, item.title)
+        if not item.seo_keywords:
+            item.seo_keywords = None
         return item
+
+
+# ---------------------------------------------------------------------------
+# Helpers SEO (repli local quand l'IA ne renvoie pas ces champs)
+# ---------------------------------------------------------------------------
+
+def _build_seo_title(title: str) -> str:
+    """Titre SEO naturel : intitulé réel + marque (sans invention)."""
+    clean = re.sub(r"\s+", " ", title).strip()
+    return f"{clean[:58].rstrip(' -–—|')} | TravaillerEnCi"[:75]
+
+
+def _build_seo_description(item: ContentItem, title: str) -> str:
+    """Résumé SEO 155-175 caractères à partir des champs réels du contenu.
+    Construit uniquement avec des informations présentes dans l'annonce
+    (jamais de salaire, date ou condition inventés)."""
+    label = {
+        "job": "Offre d'emploi",
+        "internship": "Offre de stage",
+        "scholarship": "Bourse d'études",
+        "exam": "Concours",
+    }.get(item.category, "Opportunité")
+    text = f"{label} : {title} — {item.company} ({item.location})."
+    if item.category in ("job", "internship") and item.contract_type not in (NEUTRAL_CONTRACT, ""):
+        text += f" Contrat {item.contract_type}."
+    text += " Missions, profil recherché et procédure de candidature sur TravaillerEnCi."
+    return text[:175]
+
+
+def _clean_seo_field(value: str, fallback: str) -> str:
+    """Écarte une valeur SEO IA polluée (URL brute, nom du site, ligne vide)
+    et retombe sur la valeur calculée localement."""
+    low = value.strip().lower()
+    if not low:
+        return fallback
+    if re.search(r"https?://|www\.", low) or "travaillerenci" in low:
+        return fallback
+    if len(value) < 8:
+        return fallback
+    return value.strip()

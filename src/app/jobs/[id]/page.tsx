@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { Metadata } from 'next';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
@@ -17,9 +17,36 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+/**
+ * Résolution de la fiche : l'ID d'abord, puis repli sur le slug SEO (URLs
+ * legacy référencées par d'anciens canonicals et les emails d'alertes) pour
+ * rediriger en 301 vers l'URL canonique `/jobs/{id}` — qui est l'URL
+ * réellement indexée (sitemap + liens internes).
+ */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+async function findJob(param: string): Promise<JobOfferSchema | null> {
+  // Un paramètre qui a la forme d'un UUID est un ID : on évite une requête
+  // inutile par slug. Sinon (slug SEO legacy), on résout puis on redirige.
+  if (UUID_RE.test(param)) {
+    return JobOfferSchemaService.getById(param);
+  }
+  return JobOfferSchemaService.getBySlug(param);
+}
+
+/** Valeurs schema.org valides — miroir de la norme JobPosting. */
+const EMPLOYMENT_TYPE_MAP: Record<string, string> = {
+  CDI: 'FULL_TIME',
+  CDD: 'TEMPORARY',
+  Stage: 'INTERN',
+  Alternance: 'INTERN',
+  Freelance: 'CONTRACTOR',
+  Prestation: 'CONTRACTOR',
+};
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const job = await JobOfferSchemaService.getById(id);
+  const job = await findJob(id);
   if (!job) {
     return {
       title: 'Offre introuvable',
@@ -30,7 +57,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     (job.seo_description || job.description).replace(/\*\*/g, '').replace(/\n/g, ' '),
     170
   );
-  const canonicalUrl = `${getSiteUrl()}/jobs/${job.slug || job.id}`;
+  // URL canonique = URL réellement servie et indexée (l'ID). Les slugs legacy
+  // redirigent en 301 vers cette URL (voir findJob + permanentRedirect).
+  const canonicalUrl = `${getSiteUrl()}/jobs/${job.id}`;
+  const ogImage = jobDefaultImage(job.category);
   return {
     title: job.seo_title || `${job.title} — ${job.company} | TravaillerEnCi`,
     description: desc,
@@ -45,23 +75,41 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: `${job.title} chez ${job.company}`,
       description: desc,
       locale: 'fr_CI',
+      images: [{ url: ogImage, width: 1200, height: 800, alt: job.title }],
       tags: [job.contract_type, job.company, job.location],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${job.title} chez ${job.company}`,
       description: desc,
+      images: [ogImage],
     },
   };
 }
 
 export default async function JobDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const job = await JobOfferSchemaService.getById(id);
+  const job = await findJob(id);
 
   if (!job) {
     notFound();
   }
+
+  // URLs legacy par slug → redirection permanente vers l'URL canonique par ID.
+  if (id !== job.id) {
+    permanentRedirect(`/jobs/${job.id}`);
+  }
+
+  const deadline = job.deadline ? new Date(job.deadline) : null;
+  const isExpired =
+    job.is_expired ||
+    (deadline !== null &&
+      !Number.isNaN(deadline.getTime()) &&
+      deadline.getTime() < Date.now());
+  const hasApplyLink = Boolean(job.apply_link);
+  const hasApplyEmail = Boolean(job.apply_email);
+  // Ville « propre » pour le lien de maillage interne (avant la virgule / le tiret).
+  const jobCity = (job.location || '').split(',')[0].split(' - ')[0].trim();
 
   // Suggestions : 3 offres de la même localisation ou du même type de contrat
   const [similarByType, similarByLocation] = await Promise.all([
@@ -76,31 +124,41 @@ export default async function JobDetailPage({ params }: PageProps) {
     return true;
   }).slice(0, 3);
 
-  const jobPostingJsonLd = {
+  // JobPosting — valeurs 100 % issues des données réelles : `validThrough`
+  // n'est renseigné QUE si une date limite existe dans l'annonce (jamais
+  // inventée), et `employmentType` reflète le type de contrat réel.
+  // Normalisation ISO 8601 de la date de publication : le format SQLite
+  // « YYYY-MM-DD HH:MM:SS » n'est pas accepté par Google pour `datePosted`.
+  const posted = new Date(job.created_at);
+  const datePostedIso =
+    !Number.isNaN(posted.getTime()) && job.created_at.includes('T')
+      ? job.created_at
+      : !Number.isNaN(posted.getTime())
+        ? posted.toISOString()
+        : undefined;
+
+  const jobPostingJsonLd: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'JobPosting',
     title: job.title,
-    description: job.description,
+    description: (job.seo_description || job.description).replace(/\*\*/g, '').replace(/#/g, ' '),
     identifier: {
       '@type': 'PropertyValue',
       name: job.company,
       value: job.id,
     },
-    datePosted: job.created_at,
-    validThrough: new Date(new Date(job.created_at).getTime() + 90 * 86400000).toISOString(),
-    employmentType: job.contract_type === 'CDI' ? 'FULL_TIME' : job.contract_type === 'CDD' ? 'FULL_TIME' : job.contract_type === 'Stage' ? 'INTERN' : 'OTHER',
+    ...(datePostedIso ? { datePosted: datePostedIso } : {}),
+    employmentType: EMPLOYMENT_TYPE_MAP[job.contract_type] || 'OTHER',
     hiringOrganization: {
       '@type': 'Organization',
       name: job.company,
-      sameAs: job.source_url || getSiteUrl(),
+      ...(job.source_url ? { sameAs: job.source_url } : {}),
     },
     jobLocation: {
       '@type': 'Place',
       address: {
         '@type': 'PostalAddress',
-        streetAddress: job.location,
         addressLocality: job.location,
-        addressRegion: 'Abidjan',
         addressCountry: 'CI',
       },
     },
@@ -109,6 +167,19 @@ export default async function JobDetailPage({ params }: PageProps) {
       name: 'Côte d\'Ivoire',
     },
   };
+  if (deadline && !Number.isNaN(deadline.getTime())) {
+    jobPostingJsonLd.validThrough = deadline.toISOString();
+  }
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Accueil', item: `${getSiteUrl()}/` },
+      { '@type': 'ListItem', position: 2, name: 'Offres d\'emploi', item: `${getSiteUrl()}/jobs` },
+      { '@type': 'ListItem', position: 3, name: job.title, item: `${getSiteUrl()}/jobs/${job.id}` },
+    ],
+  };
 
   return (
     <main className="flex-1 min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors">
@@ -116,6 +187,23 @@ export default async function JobDetailPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPostingJsonLd) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+
+      {/* Bannière « offre expirée » — la date limite de candidature est dépassée */}
+      {isExpired && (
+        <div className="bg-rose-600 text-white">
+          <div className="container mx-auto max-w-4xl px-4 py-3 flex items-center gap-3 text-sm font-semibold">
+            <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M12 8v4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+            Offre expirée
+            {deadline ? ` — la date limite de candidature (${formatDate(job.deadline!)}) est dépassée.` : ' — la date limite de candidature est dépassée.'}
+          </div>
+        </div>
+      )}
       {/* ============= HERO / HEADER DU POSTE ============= */}
       <section className="bg-primary/5 dark:bg-primary/10 border-b border-gray-100 dark:border-slate-800">
         <div className="container mx-auto px-4 pt-4 sm:pt-8 pb-6 max-w-4xl">
@@ -138,8 +226,11 @@ export default async function JobDetailPage({ params }: PageProps) {
               </li>
               <li aria-hidden="true">/</li>
               <li>
-                <Link href="/jobs" className="hover:text-primary hover:underline">
-                  Offres
+                <Link
+                  href={job.category === 'internship' ? '/stages' : '/jobs'}
+                  className="hover:text-primary hover:underline"
+                >
+                  {job.category === 'internship' ? 'Stages' : "Offres d'emploi"}
                 </Link>
               </li>
               <li aria-hidden="true">/</li>
@@ -230,6 +321,60 @@ export default async function JobDetailPage({ params }: PageProps) {
               </div>
             </div>
 
+            {/* Comment postuler — procédure visible dans le corps de l'article */}
+            {(hasApplyLink || hasApplyEmail) && (
+              <div className="mt-6 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm shadow-black/5 p-5 sm:p-8">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 font-[var(--font-display)]">
+                  Comment postuler ?
+                </h2>
+                <ol className="space-y-3 text-sm sm:text-base text-gray-700 dark:text-gray-300">
+                  {hasApplyEmail && (
+                    <li className="flex gap-3">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:text-emerald-400 text-xs font-black">1</span>
+                      <span>
+                        Envoyez votre candidature par email à{' '}
+                        <a
+                          href={`mailto:${job.apply_email}?subject=${encodeURIComponent(`Candidature : ${job.title} (TravaillerEnCi)`)}`}
+                          className="font-semibold text-primary dark:text-emerald-400 hover:underline"
+                        >
+                          {job.apply_email}
+                        </a>{' '}
+                        en précisant l'intitulé du poste dans l'objet du message.
+                      </span>
+                    </li>
+                  )}
+                  {hasApplyLink && (
+                    <li className="flex gap-3">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:text-emerald-400 text-xs font-black">
+                        {hasApplyEmail ? 2 : 1}
+                      </span>
+                      <span>
+                        Postulez directement en ligne via le{' '}
+                        <a
+                          href={job.apply_link!}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-semibold text-primary dark:text-emerald-400 hover:underline"
+                        >
+                          lien officiel de l'annonce
+                        </a>
+                        . Suivez les instructions du recruteur jusqu'à la confirmation de votre candidature.
+                      </span>
+                    </li>
+                  )}
+                  <li className="flex gap-3">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:text-emerald-400 text-xs font-black">
+                      {hasApplyLink && hasApplyEmail ? 3 : 2}
+                    </span>
+                    <span>
+                      La candidature est <strong>gratuite</strong> : TravaillerEnCi ne perçoit jamais de
+                      frais pour postuler à une offre. Méfiez-vous de toute demande de paiement.
+                    </span>
+                  </li>
+                </ol>
+              </div>
+            )}
+
             {/* Mention anti-arnaque — postuler est gratuit */}
             <SafetyNotice
               variant="job"
@@ -254,6 +399,60 @@ export default async function JobDetailPage({ params }: PageProps) {
                 </ul>
               </div>
             )}
+
+            {/* Maillage interne — catégories principales + localisation */}
+            <nav aria-label="Liens complémentaires" className="mt-8 sm:mt-10">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 font-[var(--font-display)]">
+                Explorer davantage
+              </h2>
+              <ul className="flex flex-wrap gap-2.5 list-none m-0 p-0">
+                {jobCity && (
+                  <li>
+                    <Link
+                      href={`/jobs?city=${encodeURIComponent(jobCity)}`}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                    >
+                      Offres à {jobCity}
+                    </Link>
+                  </li>
+                )}
+                {job.category === 'internship' ? (
+                  <li>
+                    <Link
+                      href="/stages"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                    >
+                      Tous les stages
+                    </Link>
+                  </li>
+                ) : (
+                  <li>
+                    <Link
+                      href="/jobs"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                    >
+                      Toutes les offres d'emploi
+                    </Link>
+                  </li>
+                )}
+                <li>
+                  <Link
+                    href="/concours"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                  >
+                    Concours administratifs
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/bourses"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                  >
+                    Bourses d'études
+                  </Link>
+                </li>
+              </ul>
+            </nav>
           </article>
 
           {/* Colonne droite — CTA desktop + méta */}
@@ -271,6 +470,13 @@ export default async function JobDetailPage({ params }: PageProps) {
                 <MetaRow label="Entreprise" value={job.company} />
                 <MetaRow label="Ville" value={job.location} />
                 <MetaRow label="Contrat" value={job.contract_type} />
+                {job.deadline && (
+                  <MetaRow
+                    label="Date limite"
+                    value={formatDate(job.deadline)}
+                    tone={isExpired ? 'danger' : 'normal'}
+                  />
+                )}
                 <MetaRow
                   label="Vérifié"
                   value={job.is_verified ? 'Oui — par TravaillerEnCi' : 'En cours'}
@@ -437,11 +643,13 @@ function MetaRow({
   value,
   href,
   external,
+  tone = 'normal',
 }: {
   label: string;
   value: string;
   href?: string;
   external?: boolean;
+  tone?: 'normal' | 'danger';
 }) {
   const ValueComp = href ? (
     <a
@@ -459,7 +667,11 @@ function MetaRow({
       )}
     </a>
   ) : (
-    <span className="font-medium text-gray-800 dark:text-gray-200">{value}</span>
+    <span
+      className={`font-medium ${tone === 'danger' ? 'text-rose-500' : 'text-gray-800 dark:text-gray-200'}`}
+    >
+      {value}
+    </span>
   );
   return (
     <div className="flex items-start justify-between gap-4">

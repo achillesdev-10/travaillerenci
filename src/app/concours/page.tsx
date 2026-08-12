@@ -32,6 +32,9 @@ export const metadata: Metadata = {
     'gendarmerie',
     'recrutement',
   ],
+  alternates: {
+    canonical: `${getSiteUrl()}/concours`,
+  },
   openGraph: {
     type: 'website',
     locale: 'fr_CI',

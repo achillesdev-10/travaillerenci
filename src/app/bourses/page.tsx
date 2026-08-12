@@ -11,6 +11,9 @@ export const metadata = {
   title: "Bourses d'études en Côte d'Ivoire",
   description:
     "Découvrez les bourses d'études disponibles en Côte d'Ivoire et à l'international pour financer votre parcours académique. Programme de bourses, aides financières, universités partenaires.",
+  alternates: {
+    canonical: `${getSiteUrl()}/bourses`,
+  },
   openGraph: {
     type: 'website',
     locale: 'fr_CI',
@@ -34,6 +37,9 @@ export default async function BoursesPage() {
   const { rows: bourses, total } = await JobOfferSchemaService.list({
     category: 'scholarship',
     status: 'published',
+    // Les bourses dont la date limite est dépassée ne doivent plus être
+    // présentées comme des opportunités actives.
+    is_expired: false,
     limit: 100,
     order_by: 'created_at',
     order_dir: 'desc',

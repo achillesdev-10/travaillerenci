@@ -215,9 +215,12 @@ def run_scraping_pipeline(
                 if not item.seo_title:
                     item.seo_title = f"{item.title} | TravaillerEnCi"
                 if not item.seo_description:
+                    label = CATEGORY_LABELS.get(item.category_sql(), "Opportunité")
+                    base = f"{label} : {item.title} — {item.company} ({item.location})."
+                    if item.category_sql() in ("job", "internship") and item.contract_type != "CDI":
+                        base += f" Contrat {item.contract_type}."
                     item.seo_description = (
-                        f"{item.category} : {item.title} — {item.company} ({item.location}). "
-                        "Découvrez l'opportunité complète sur TravaillerEnCi."
+                        base + " Missions, profil recherché et procédure de candidature sur TravaillerEnCi."
                     )[:180]
 
                 per_category[item.category_sql()] = per_category.get(item.category_sql(), 0) + 1

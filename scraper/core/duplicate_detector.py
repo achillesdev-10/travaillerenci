@@ -15,6 +15,19 @@ from typing import Set
 from scraper.models.content_item import ContentItem
 
 
+_ACCENTS = str.maketrans(
+    "àâäéèêëîïôöùûüçÀÂÄÉÈÊËÎÏÔÖÙÜÛÇ",
+    "aaaeeeeiioouuucAAAEEEEIIOOUUUC",
+)
+
+
+def _norm(value: str) -> str:
+    """Minuscules + accents retirés (tolérant aux variantes de source)."""
+    s = (value or "").strip().lower()
+    s = s.replace("œ", "oe").replace("æ", "ae")
+    return s.translate(_ACCENTS)
+
+
 class DuplicateDetector:
     def __init__(self):
         self.seen_hashes: Set[str] = set()
@@ -22,8 +35,8 @@ class DuplicateDetector:
 
     def compute_hash(self, item: ContentItem) -> str:
         corpus = (
-            f"{item.title.lower().strip()}|{item.company.lower().strip()}|"
-            f"{item.location.lower().strip()}"
+            f"{_norm(item.title)}|{_norm(item.company)}|"
+            f"{_norm(item.location)}"
         )
         return hashlib.sha256(corpus.encode("utf-8")).hexdigest()
 

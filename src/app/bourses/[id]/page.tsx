@@ -5,6 +5,7 @@ import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
 import SafetyNotice from '@/components/content/SafetyNotice';
 import SaveButton from '@/components/saved/SaveButton';
+import type { JobOfferSchema } from '@/types';
 import { formatDate, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
 import { jobDefaultImage } from '@/lib/images';
@@ -26,18 +27,30 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     (bourse.seo_description || bourse.description || '').replace(/\*\*/g, '').replace(/#/g, ' '),
     170,
   );
+  const canonicalUrl = `${getSiteUrl()}/bourses/${bourse.id}`;
+  const ogImage = jobDefaultImage('scholarship');
   return {
     title: bourse.seo_title || `${bourse.title} | TravaillerEnCi`,
     description: desc,
     keywords: bourse.seo_keywords || undefined,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
       type: 'article',
       title: bourse.title,
       description: desc,
       locale: 'fr_CI',
-      url: `${getSiteUrl()}/bourses/${bourse.id}`,
+      url: canonicalUrl,
       siteName: 'TravaillerenCi',
-      tags: ['bourse', "bourse d'études", bourse.location!],
+      images: [{ url: ogImage, width: 1200, height: 800, alt: bourse.title }],
+      tags: ['bourse', "bourse d'études", bourse.location || 'International'],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: bourse.title,
+      description: desc,
+      images: [ogImage],
     },
   };
 }
@@ -57,8 +70,48 @@ export default async function BourseDetailPage({ params }: PageProps) {
   const hasLink = Boolean(bourse.apply_link);
   const hasEmail = Boolean(bourse.apply_email);
 
+  // Bourses similaires : même pays/lieu d'abord, puis les plus récentes.
+  const [byLocation, latest] = await Promise.all([
+    JobOfferSchemaService.list({
+      category: 'scholarship',
+      status: 'published',
+      location: bourse.location ? bourse.location.split(',')[0].split(' - ')[0] : undefined,
+      limit: 4,
+    }),
+    JobOfferSchemaService.list({
+      category: 'scholarship',
+      status: 'published',
+      limit: 4,
+      order_by: 'created_at',
+      order_dir: 'desc',
+    }),
+  ]);
+  const seen = new Set<string>([bourse.id]);
+  const related = [...byLocation.rows, ...latest.rows]
+    .filter((b) => {
+      if (seen.has(b.id)) return false;
+      seen.add(b.id);
+      return true;
+    })
+    .slice(0, 3);
+
+  const canonicalUrl = `${getSiteUrl()}/bourses/${bourse.id}`;
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Accueil', item: `${getSiteUrl()}/` },
+      { '@type': 'ListItem', position: 2, name: "Bourses d'études", item: `${getSiteUrl()}/bourses` },
+      { '@type': 'ListItem', position: 3, name: bourse.title, item: canonicalUrl },
+    ],
+  };
+
   return (
     <main className="flex-1 min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <section className="bg-amber-500/5 dark:bg-amber-500/10 border-b border-gray-100 dark:border-slate-800">
         <div className="container mx-auto px-4 pt-4 sm:pt-8 pb-6 max-w-4xl">
           {/* Bannière photo par défaut (bourse = catégorie scholarship) */}
@@ -148,6 +201,67 @@ export default async function BourseDetailPage({ params }: PageProps) {
               itemLabel={bourse.title}
               className="mt-6"
             />
+
+            {/* Bourses similaires — maillage interne */}
+            {related.length > 0 && (
+              <div className="mt-8 sm:mt-10">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-5 font-[var(--font-display)]">
+                  Autres bourses à découvrir
+                </h2>
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 list-none m-0 p-0">
+                  {related.map((b) => (
+                    <li key={b.id}>
+                      <MiniBourseCard bourse={b as JobOfferSchema} />
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-4">
+                  <Link
+                    href="/bourses"
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+                  >
+                    Voir toutes les bourses d'études
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M5 12h14" />
+                      <path d="m12 5 7 7-7 7" />
+                    </svg>
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {/* Maillage interne — catégories principales */}
+            <nav aria-label="Liens complémentaires" className="mt-8 sm:mt-10">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 font-[var(--font-display)]">
+                Explorer davantage
+              </h2>
+              <ul className="flex flex-wrap gap-2.5 list-none m-0 p-0">
+                <li>
+                  <Link
+                    href="/jobs"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                  >
+                    Offres d'emploi
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/stages"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                  >
+                    Stages
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/concours"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                  >
+                    Concours administratifs
+                  </Link>
+                </li>
+              </ul>
+            </nav>
           </article>
 
           <aside className="lg:col-span-1 space-y-5 lg:sticky lg:top-24 lg:self-start">
@@ -270,5 +384,41 @@ function MetaRow({
       <dt className="text-gray-500 dark:text-gray-400 shrink-0">{label}</dt>
       <dd className="text-right break-words">{ValueComp}</dd>
     </div>
+  );
+}
+
+function MiniBourseCard({ bourse }: { bourse: JobOfferSchema }) {
+  const deadline = bourse.deadline ? new Date(bourse.deadline) : null;
+  const deadlinePassed =
+    deadline && !Number.isNaN(deadline.getTime()) && deadline.getTime() < Date.now();
+
+  return (
+    <Link
+      href={`/bourses/${bourse.id}`}
+      className="group block bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800 hover:border-primary/25 hover:shadow-md p-4 transition-all"
+    >
+      <div className="flex flex-wrap items-center gap-1.5 mb-2">
+        <span className="inline-flex items-center bg-amber-500/10 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-full text-[10.5px] font-bold">
+          Bourse
+        </span>
+        {deadline && (
+          <span
+            className={`text-[11px] font-semibold ${deadlinePassed ? 'text-rose-500' : 'text-gray-500 dark:text-gray-400'}`}
+          >
+            {deadlinePassed ? 'Clôturée le ' : 'Limite : '}
+            {formatDate(bourse.deadline!)}
+          </span>
+        )}
+      </div>
+      <h3 className="font-bold text-[14px] leading-snug text-gray-900 dark:text-white line-clamp-2 mb-1 group-hover:text-primary dark:group-hover:text-emerald-400 transition-colors">
+        {bourse.title}
+      </h3>
+      <div className="text-[13px] text-primary dark:text-emerald-400 font-semibold mb-0.5 truncate">
+        {bourse.company}
+      </div>
+      <div className="text-[12px] text-gray-500 dark:text-gray-400 truncate">
+        {bourse.location || 'International'}
+      </div>
+    </Link>
   );
 }

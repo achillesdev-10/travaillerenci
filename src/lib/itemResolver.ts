@@ -49,6 +49,6 @@ export async function resolveContentItem(
     url:
       itemType === 'scholarship'
         ? `/bourses/${job.id}`
-        : `/jobs/${job.slug || job.id}`,
+        : `/jobs/${job.id}`,
   };
 }
