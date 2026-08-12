@@ -233,7 +233,7 @@ def _site_url() -> str:
 
 def _job_url(job: Dict[str, Any]) -> str:
     # URL canonique par ID : la route /jobs/[id] est la seule servie et indexée
-    # (les anciens liens /jobs/{slug} redirigent en 301 vers celle-ci).
+    # (les anciens liens /jobs/{slug} redirigent en 308 vers celle-ci).
     return f"{_site_url()}/jobs/{job.get('id')}"
 
 

@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
 
     revalidatePath('/admin/exams');
     revalidatePath('/concours');
-    // URL SEO (slug) — les URLs legacy par ID redirigent en 301 vers le slug.
+    // URL SEO (slug) — les URLs legacy par ID redirigent en 308 vers le slug.
     revalidatePath(`/concours/${created.slug || created.id}`);
 
     return NextResponse.json({ ok: true, exam: created }, { status: 201 });

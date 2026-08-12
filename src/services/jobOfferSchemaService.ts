@@ -317,7 +317,7 @@ export class JobOfferSchemaService {
    *
    * Nécessaire pour les URLs legacy `…/jobs/{slug}` encore référencées par
    * d'anciens canonicals et par les emails d'alertes : la route `/jobs/[id]`
-   * résout le slug puis redirige en 301 vers l'URL canonique `/jobs/{id}`.
+   * résout le slug puis redirige en 308 (permanentRedirect) vers l'URL canonique `/jobs/{id}`.
    */
   static async getBySlug(slug: string): Promise<JobOfferSchema | null> {
     if (isSupabaseConfigured()) {

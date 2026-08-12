@@ -8,7 +8,7 @@ import { notifyExamPublished } from '@/services/whatsappNotify';
 function revalidateExamPages(exam: { id: string; slug?: string | null }) {
   revalidatePath('/admin/exams');
   revalidatePath('/concours');
-  // URL SEO (slug) — les URLs legacy par ID redirigent en 301 vers le slug.
+  // URL SEO (slug) — les URLs legacy par ID redirigent en 308 vers le slug.
   revalidatePath(`/concours/${exam.slug || exam.id}`);
 }
 

@@ -70,7 +70,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const examEntries: MetadataRoute.Sitemap =
     examRes.status === 'fulfilled'
       ? examRes.value.rows.map((exam) => ({
-          // URL SEO descriptive (slug) — les URLs legacy par ID redirigent en 301.
+          // URL SEO descriptive (slug) — les URLs legacy par ID redirigent en 308.
           url: `${BASE_URL}/concours/${exam.slug || exam.id}`,
           lastModified: new Date(exam.updated_at || exam.created_at),
           changeFrequency: 'daily',

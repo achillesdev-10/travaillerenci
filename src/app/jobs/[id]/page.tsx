@@ -20,7 +20,7 @@ interface PageProps {
 /**
  * Résolution de la fiche : l'ID d'abord, puis repli sur le slug SEO (URLs
  * legacy référencées par d'anciens canonicals et les emails d'alertes) pour
- * rediriger en 301 vers l'URL canonique `/jobs/{id}` — qui est l'URL
+ * rediriger en 308 (permanentRedirect) vers l'URL canonique `/jobs/{id}` — qui est l'URL
  * réellement indexée (sitemap + liens internes).
  */
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -58,7 +58,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     170
   );
   // URL canonique = URL réellement servie et indexée (l'ID). Les slugs legacy
-  // redirigent en 301 vers cette URL (voir findJob + permanentRedirect).
+  // redirigent en 308 vers cette URL (voir findJob + permanentRedirect).
   const canonicalUrl = `${getSiteUrl()}/jobs/${job.id}`;
   const ogImage = jobDefaultImage(job.category);
   return {

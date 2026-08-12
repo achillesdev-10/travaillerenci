@@ -45,7 +45,7 @@ const CATEGORY_JOB_KEYWORDS: Record<string, string[]> = {
 
 /**
  * Résolution de la fiche : le slug SEO d'abord, puis repli sur l'ID (URLs
- * legacy indexées avant la migration vers les slugs) pour rediriger en 301.
+ * legacy indexées avant la migration vers les slugs) pour rediriger en 308.
  */
 async function findExam(param: string): Promise<Exam | null> {
   return (await ExamService.getBySlug(param)) || (await ExamService.getById(param));
