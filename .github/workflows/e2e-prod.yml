@@ -1,0 +1,44 @@
+name: E2E Production (Playwright mobile)
+
+on:
+  # Exécution MANUELLE uniquement (onglet Actions → « Run workflow ») : la
+  # suite tape le site réellement déployé et consomme une requête IA réelle
+  # (Gemini/Groq). Pas de run automatique pour ne pas solliciter la prod ni
+  # épuiser le quota IA (5 requêtes/min/IP).
+  workflow_dispatch:
+
+jobs:
+  # ==========================================================================
+  # Smoke E2E contre la PRODUCTION (Playwright, viewports mobiles : 390×844 et
+  # 844×390) — chatbot + pages clés (/stages, /bourses, /concours).
+  #
+  # Le runner GitHub `ubuntu-latest` dispose déjà de Chrome système : la config
+  # `channel: 'chrome'` fonctionne sans télécharger de navigateur Playwright.
+  # ==========================================================================
+  e2e-prod:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run production smoke suite (Playwright, mobile)
+        run: npm run test:e2e:prod
+
+      - name: Upload failure traces (test-results)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: test-results/
+          retention-days: 7
