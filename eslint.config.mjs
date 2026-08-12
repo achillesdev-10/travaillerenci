@@ -6,6 +6,7 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import reactHooks from "eslint-plugin-react-hooks";
 
 export default defineConfig([
   // Configs officielles Next.js (équivalent de l'ancien
@@ -29,6 +30,9 @@ export default defineConfig([
 
   // Règles projet (préserver les conventions existantes)
   {
+    plugins: {
+      "react-hooks": reactHooks,
+    },
     rules: {
       // Typographie française : les apostrophes et guillemets bruts sont
       // omniprésents dans les textes du site et sont correctement échappés

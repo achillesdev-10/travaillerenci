@@ -302,6 +302,14 @@ Référence complète : voir `.env.example`.
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | 🟡 | Abonnements entreprise (optionnel MVP) |
 | `STRIPE_SECRET_KEY` | 🟡 | Secret Stripe serveur |
 | `NEXT_PUBLIC_GA_ID` | 🟡 | Google Analytics 4 Measurement ID |
+| `ASSISTANT_RATE_LIMIT_PER_MINUTE` | 🟡 | Assistant : max messages/minute/IP (défaut 10) |
+| `ASSISTANT_RATE_LIMIT_PER_HOUR` | 🟡 | Assistant : max messages/heure/IP (défaut 30) |
+| `ASSISTANT_RATE_LIMIT_PER_DAY` | 🟡 | Assistant : max messages/jour/IP (défaut 100) |
+| `ASSISTANT_AI_RATE_LIMIT_PER_MINUTE` | 🟡 | Assistant : max requêtes IA/minute/IP (défaut 5) |
+| `ASSISTANT_AI_RATE_LIMIT_PER_HOUR` | 🟡 | Assistant : max requêtes IA/heure/IP (défaut 20) |
+| `ASSISTANT_MAX_MESSAGE_LENGTH` | 🟡 | Assistant : longueur max d'un message (défaut 500) |
+| `ASSISTANT_GEMINI_MODEL` | 🟡 | Assistant : modèle Gemini (défaut `gemini-2.0-flash`) |
+| `ASSISTANT_GROQ_MODEL` | 🟡 | Assistant : modèle Groq fallback (défaut `llama-3.3-70b-versatile`) |
 | `WHATSAPP_WEBHOOK_URL` | 🟡 | Webhook sortant appelé à chaque nouvelle offre insérée pour diffusion WhatsApp |
 | `WHATSAPP_META_ACCESS_TOKEN` | 🟡 | Token Meta WhatsApp Cloud API si vous envoyez directement sans webhook |
 | `WHATSAPP_META_PHONE_NUMBER_ID` | 🟡 | Identifiant du numéro WhatsApp Business Meta |
@@ -314,6 +322,14 @@ Référence complète : voir `.env.example`.
 - L'admin modère dans `/admin/jobs` (éditer, valider → publier, rejeter, supprimer) ; les contenus publiés alimentent `/jobs`, `/bourses` et `/concours`.
 - **Automatisation** : le workflow GitHub `scraper.yml` tourne **2× par jour** (06:00 & 18:00 UTC) et est déclenchable à la main ; le dashboard admin (`/admin/scraper`) peut aussi lancer une extraction.
 - **Déclenchement manuel en production (Vercel)** : Vercel n'a pas de Python. Le bouton du dashboard appelle en priorité `SCRAPER_AUTOMATION_URL` si elle est définie (n8n, Make, Google Cloud Scheduler…). En local, il lance directement `python scraper/scraper.py`.
+
+### Assistant TravaillerenCi 🤖
+- Le bouton WhatsApp flottant a été remplacé par l'**Assistant TravaillerenCi** (`src/components/assistant/AssistantFloat.tsx`) : un chat flottant qui aide les visiteurs à trouver un emploi, un stage, une bourse ou un concours.
+- **La base de données est la source de vérité** : les demandes simples (catégorie, ville, domaine) sont traitées par recherche directe dans `job_offers` + `exams` (`src/services/assistant/searchService.ts`), sans appel IA.
+- Le pipeline (`src/app/api/assistant/route.ts`) : détection d'intention déterministe (`intentDetector.ts`) → FAQ (`faqService.ts`) → recherche DB → IA uniquement si nécessaire (`aiService.ts` : **Gemini d'abord, Groq en fallback**).
+- L'IA **ne crée jamais** d'offre, de date, d'URL ou d'information absente de la base ; les liens pointent toujours vers les vraies pages du site.
+- Limites anti-abus configurables (par IP) — voir variables ci-dessous (`ASSISTANT_*`).
+- Tests : `npm run test:assistant` (`scripts/test-assistant.ts`).
 
 ### Connexion Google (OAuth 2.0 + PKCE)
 - Le bouton « Se connecter / S'inscrire avec Google » redirige vers `/api/auth/google`, qui démarre le flux OAuth (code d'autorisation + PKCE S256, `state` anti-CSRF en cookie httpOnly).

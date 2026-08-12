@@ -19,7 +19,8 @@
     "db:apply-migrations": "tsx scripts/apply-content-migrations.ts",
     "db:sync-exams": "tsx scripts/sync-all-to-supabase.ts --tables=exam",
     "db:sync-all": "tsx scripts/sync-all-to-supabase.ts",
-    "test:exam-phase": "tsx scripts/test-exam-phase.ts"
+    "test:exam-phase": "tsx scripts/test-exam-phase.ts",
+    "test:assistant": "node --require ./scripts/__stubs/server-only-stub.cjs --import tsx scripts/test-assistant.ts"
   },
   "keywords": [
     "emploi",

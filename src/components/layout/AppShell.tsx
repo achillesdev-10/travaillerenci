@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import WhatsAppFloat from '@/components/layout/WhatsAppFloat';
+import AssistantFloat from '@/components/assistant/AssistantFloat';
 
 export default function AppShell({
   children,
@@ -22,7 +22,7 @@ export default function AppShell({
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />
-      <WhatsAppFloat />
+      <AssistantFloat />
     </>
   );
 }
