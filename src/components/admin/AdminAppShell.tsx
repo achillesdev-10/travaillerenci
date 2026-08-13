@@ -12,7 +12,6 @@ const PAGE_TITLES: Array<{ prefix: string; title: string; subtitle: string }> = 
   { prefix: "/admin/reports", title: "Signalements", subtitle: "File de modération des contenus signalés" },
   { prefix: "/admin/blog", title: "Gestion du blog", subtitle: "Articles et publications" },
   { prefix: "/admin/scraper", title: "Scraper", subtitle: "Pilote des sources d'offres" },
-  { prefix: "/admin/social", title: "Réseaux sociaux", subtitle: "Distribution Facebook & LinkedIn" },
   { prefix: "/admin/settings", title: "Paramètres", subtitle: "Configuration de la plateforme" },
 ];
 
