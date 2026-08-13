@@ -78,6 +78,22 @@ const NAV_ITEMS = [
     ),
   },
   {
+    href: '/admin/social',
+    label: 'Réseaux sociaux',
+    description: 'Distribution Facebook & LinkedIn',
+    icon: (
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M8 12h8" />
+        <path d="M12 8v8" />
+        <circle cx="12" cy="12" r="9" />
+        <circle cx="7" cy="7" r="0.5" fill="currentColor" />
+        <circle cx="17" cy="17" r="0.5" fill="currentColor" />
+        <circle cx="7" cy="17" r="0.5" fill="currentColor" />
+        <circle cx="17" cy="7" r="0.5" fill="currentColor" />
+      </svg>
+    ),
+  },
+  {
     href: '/admin/blog',
     label: 'Blog',
     description: 'Articles & publications',

@@ -5,6 +5,7 @@ import AppShell from '@/components/layout/AppShell';
 import AnalyticsTracker from '@/components/analytics/AnalyticsTracker';
 import LegacyAccountMigrator from '@/components/auth/LegacyAccountMigrator';
 import { getSiteUrl } from '@/lib/site';
+import { LOCAL_IMAGES } from '@/lib/images';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -54,11 +55,13 @@ export const metadata: Metadata = {
     siteName: 'TravaillerenCi',
     title: 'TravaillerenCi - Offres d\'emploi en Côte d\'Ivoire',
     description: 'Trouvez votre emploi de rêve en Côte d\'Ivoire.',
+    images: [{ url: LOCAL_IMAGES.ogImage, width: 1200, height: 630, alt: 'TravaillerenCi — Offres d\'emploi, stages, bourses et concours en Côte d\'Ivoire' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'TravaillerenCi - Offres d\'emploi en Côte d\'Ivoire',
     description: 'Trouvez votre emploi de rêve en Côte d\'Ivoire.',
+    images: [LOCAL_IMAGES.ogImage],
   },
 };
 

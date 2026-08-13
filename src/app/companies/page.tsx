@@ -1,5 +1,7 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import SiteLogo from '@/components/companies/SiteLogo';
+import { LOCAL_IMAGES } from '@/lib/images';
 
 export const metadata = {
   title: 'Entreprises — Sites officiels de l’emploi en Côte d’Ivoire | TravaillerEnCi',
@@ -180,20 +182,42 @@ export default function CompaniesPage() {
         );
       })}
 
-      <div className="rounded-2xl border border-border bg-white dark:bg-slate-900 p-8 text-center mt-12">
-        <h2 className="text-xl font-bold mb-2 font-[var(--font-display)] text-gray-900 dark:text-white">
-          Vous êtes une entreprise ou un recruteur ?
-        </h2>
-        <p className="text-gray-600 dark:text-slate-400 mb-6 max-w-xl mx-auto text-sm">
-          TravaillerEnCi regroupe ici les meilleures opportunités de la Côte d’Ivoire.
-          Publiez vos offres et touchez des milliers de candidats qualifiés.
-        </p>
-        <Link
-          href="/register"
-          className="inline-block bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-xl font-semibold shadow-md shadow-primary/20 transition-all"
-        >
-          Publier une offre
-        </Link>
+      <div className="relative overflow-hidden rounded-3xl border border-border bg-white dark:bg-slate-900 mt-12">
+        <div className="grid lg:grid-cols-2 items-stretch">
+          {/* Visuel — bannière locale optimisée (mobile : bandeau discret) */}
+          <div className="relative h-48 lg:h-auto overflow-hidden">
+            <Image
+              src={LOCAL_IMAGES.recruiterSection}
+              alt="Entreprise et recruteur — publier une offre d'emploi sur TravaillerEnCi"
+              fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:to-white/20 dark:lg:to-slate-900/20" aria-hidden="true" />
+          </div>
+          <div className="p-8 lg:p-12 text-center lg:text-left flex flex-col items-center lg:items-start justify-center">
+            <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary dark:text-emerald-400 border border-primary/20 mb-4">
+              Espace Recruteur
+            </span>
+            <h2 className="text-xl lg:text-2xl font-bold font-[var(--font-display)] text-gray-900 dark:text-white">
+              Vous êtes une entreprise ou un recruteur ?
+            </h2>
+            <p className="text-gray-600 dark:text-slate-400 mt-2 mb-6 max-w-xl text-sm leading-relaxed">
+              TravaillerEnCi regroupe ici les meilleures opportunités de la Côte d’Ivoire.
+              Publiez vos offres et touchez des milliers de candidats qualifiés.
+            </p>
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-xl font-semibold shadow-md shadow-primary/20 transition-all"
+            >
+              Publier une offre
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

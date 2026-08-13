@@ -1,4 +1,10 @@
 {
+  "crons": [
+    {
+      "path": "/api/cron/social-publisher",
+      "schedule": "*/30 * * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/sw.js",

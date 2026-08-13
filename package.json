@@ -20,6 +20,7 @@
     "db:sync-exams": "tsx scripts/sync-all-to-supabase.ts --tables=exam",
     "db:sync-all": "tsx scripts/sync-all-to-supabase.ts",
     "test:exam-phase": "tsx scripts/test-exam-phase.ts",
+    "test:social": "node --require ./scripts/__stubs/server-only-stub.cjs --import tsx --test tests/social/*.test.ts",
     "test:assistant": "node --require ./scripts/__stubs/server-only-stub.cjs --import tsx scripts/test-assistant.ts",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
@@ -39,6 +40,7 @@
     "@supabase/supabase-js": "^2.112.0",
     "html2pdf.js": "^0.14.0",
     "next": "^16.2.12",
+    "sharp": "^0.34.5",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "server-only": "^0.0.1"

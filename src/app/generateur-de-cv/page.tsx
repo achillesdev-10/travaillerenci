@@ -1,6 +1,8 @@
 'use client';
 
+import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
+import { LOCAL_IMAGES } from '@/lib/images';
 import type { CVData } from '@/types/cv';
 import { createEmptyCV, createEmptyExperience, createEmptyEducation } from '@/types/cv';
 import dynamic from 'next/dynamic';
@@ -168,7 +170,7 @@ export default function CVGeneratorPage() {
       // avec CORS, la mise en cache évite les images manquantes.
       if (cvData.photoUrl) {
         await new Promise<void>((resolve) => {
-          const img = new Image();
+          const img = new window.Image();
           img.onload = () => resolve();
           img.onerror = () => resolve();
           img.crossOrigin = 'anonymous';
@@ -211,8 +213,9 @@ export default function CVGeneratorPage() {
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <section className="relative overflow-hidden border-b border-gray-100 dark:border-slate-800 bg-primary/5 dark:bg-primary/10">
         <div className="container mx-auto px-4 py-10 md:py-14 relative">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
-            <div className="max-w-2xl">
+          <div className="grid lg:grid-cols-[1fr_420px] lg:items-center gap-8">
+            <div>
+              <div className="max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs font-bold mb-4 border border-emerald-200/60 dark:border-emerald-800/40">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
                   <path d="M9 3h6M10 3v4a2 2 0 0 1-2 2H4M14 3v4a2 2 0 0 0 2 2h4M5 3h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2ZM19 11h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2ZM12 13a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM8 19c0-1.5 1.8-3 4-3s4 1.5 4 3" />
@@ -227,6 +230,7 @@ export default function CVGeneratorPage() {
                 Créez un CV professionnel en quelques minutes. Optimisez votre contenu avec l'IA
                 pour maximiser vos chances auprès des recruteurs ivoiriens.
               </p>
+              </div>
               <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 dark:bg-slate-800/70 border border-gray-200 dark:border-slate-700 shadow-sm">
                 {saveState === 'saving' ? (
                   <>
@@ -253,10 +257,9 @@ export default function CVGeneratorPage() {
                   </>
                 )}
               </div>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <button
-                onClick={resetCV}
+              <div className="flex flex-wrap gap-3 mt-6">
+                <button
+                  onClick={resetCV}
                 className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all shadow-sm inline-flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -286,6 +289,18 @@ export default function CVGeneratorPage() {
                   </>
                 )}
               </button>
+              </div>
+            </div>
+            {/* Illustration — bannière locale optimisée (desktop) */}
+            <div className="hidden lg:block relative h-72 rounded-3xl overflow-hidden shadow-2xl ring-1 ring-black/5">
+              <Image
+                src={LOCAL_IMAGES.cvGenerator}
+                alt="Générateur de CV IA - travaillerenci"
+                fill
+                sizes="(min-width: 1024px) 420px, 100vw"
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-tr from-emerald-950/60 via-transparent to-transparent" aria-hidden="true" />
             </div>
           </div>
         </div>

@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { Suspense, type ReactNode } from 'react';
 import CoverImage from '@/components/content/CoverImage';
@@ -12,7 +13,7 @@ import PollWidget from '@/components/home/PollWidget';
 import OffersGrid from '@/components/home/OffersGrid';
 import SocialLinks from '@/components/layout/SocialLinks';
 import { buildCarouselSlides } from '@/lib/homeCarousel';
-import { IMAGES } from '@/lib/images';
+import { IMAGES, LOCAL_IMAGES } from '@/lib/images';
 import { getSiteUrl } from '@/lib/site';
 
 export const revalidate = 60;
@@ -105,15 +106,18 @@ const QUICK_LINKS = [
 // Secteurs populaires mis en avant sur la home — le mot-clé `q` est celui
 // du moteur de recherche (filtre titre/entreprise/description), d'où des
 // termes réels (développeur, banque…) plutôt que des slugs de catégorie.
+// Secteurs populaires mis en avant sur la home — les 4 secteurs « cartes
+// filtres » (tech, commercial, logistique, BTP/ingénierie) utilisent les
+// nouvelles images locales optimisées via next/image.
 const POPULAR_SECTORS = [
-  { q: 'développeur', name: 'IT / Digital', image: IMAGES.it },
+  { q: 'développeur', name: 'IT / Digital', image: LOCAL_IMAGES.categoryTech },
   { q: 'banque', name: 'Banque / Finance', image: IMAGES.banque },
   { q: 'infirmier', name: 'Santé', image: IMAGES.sante },
   { q: 'enseignant', name: 'Éducation / Formation', image: IMAGES.education },
-  { q: 'commercial', name: 'Commerce / Distribution', image: IMAGES.commerce },
-  { q: 'chantier', name: 'BTP / Immobilier', image: IMAGES.btp },
+  { q: 'commercial', name: 'Commerce / Distribution', image: LOCAL_IMAGES.categoryCommercial },
+  { q: 'chantier', name: 'BTP / Immobilier', image: LOCAL_IMAGES.categoryEngineering },
   { q: 'ingénieur', name: 'Industrie', image: IMAGES.industrie },
-  { q: 'chauffeur', name: 'Transport / Logistique', image: IMAGES.transport },
+  { q: 'chauffeur', name: 'Transport / Logistique', image: LOCAL_IMAGES.categoryLogistics },
 ];
 
 // Les 3 étapes du parcours candidat, illustrées par des photos.
@@ -278,17 +282,16 @@ export default async function HomePage({
               </p>
             </div>
 
-            {/* Colonne illustration (desktop uniquement) — vraie photo + badges flottants */}
+            {/* Colonne illustration (desktop uniquement) — bannière locale + badges flottants */}
             <div className="hidden lg:block relative">
-              <div className="relative overflow-hidden rounded-3xl shadow-2xl shadow-primary/20 ring-1 ring-black/5 animate-float">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={IMAGES.hero}
+              <div className="relative h-[380px] lg:h-[420px] overflow-hidden rounded-3xl shadow-2xl shadow-primary/20 ring-1 ring-black/5 animate-float">
+                <Image
+                  src={LOCAL_IMAGES.heroBanner}
                   alt="Jeune professionnel ivoirien en recherche d'emploi"
-                  width={520}
-                  height={445}
-                  className="w-full max-w-[520px] h-[380px] lg:h-[420px] object-cover"
-                  fetchPriority="high"
+                  fill
+                  priority
+                  sizes="(min-width: 1024px) 520px, 100vw"
+                  className="object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-tr from-emerald-950/70 via-emerald-900/25 to-transparent" aria-hidden="true" />
               </div>
@@ -507,12 +510,12 @@ export default async function HomePage({
               className="group relative overflow-hidden rounded-2xl aspect-[4/3] shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl animate-fade-in-up"
               style={{ animationDelay: `${i * 60}ms` }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={sector.image}
                 alt={sector.name}
-                loading="lazy"
-                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                fill
+                sizes="(min-width: 1024px) 25vw, 50vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/25 to-transparent" aria-hidden="true" />
               <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4">

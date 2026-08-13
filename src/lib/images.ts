@@ -52,6 +52,20 @@ export const IMAGES = {
 } as const;
 
 // -----------------------------------------------------------------------------
+// Nouvelles images locales (dossier public/images) — intégrées avec next/image.
+// -----------------------------------------------------------------------------
+export const LOCAL_IMAGES = {
+  heroBanner: '/images/hero-banner.jpg',
+  cvGenerator: '/images/cv-generator-banner.jpg',
+  recruiterSection: '/images/recruiter-section.jpg',
+  ogImage: '/images/og-image.jpg',
+  categoryTech: '/images/category-tech.jpg',
+  categoryCommercial: '/images/category-commercial.jpg',
+  categoryLogistics: '/images/category-logistics.jpg',
+  categoryEngineering: '/images/category-engineering.jpg',
+} as const;
+
+// -----------------------------------------------------------------------------
 // Images par défaut par catégorie — utilisées quand une annonce n'a pas
 // d'image propre (les offres scrapées n'en ont jamais ; les concours non plus).
 // -----------------------------------------------------------------------------
