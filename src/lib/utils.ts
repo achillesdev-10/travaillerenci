@@ -139,15 +139,54 @@ export function generateId(prefix: string = ''): string {
   return prefix ? `${prefix}_${id}` : id;
 }
 
-export function debounce<T extends (...args: Parameters<T>) => void>(
-  fn: T,
-  delay: number = 300
-): (...args: Parameters<T>) => void {
-  let timer: NodeJS.Timeout;
-  return (...args: Parameters<T>) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), delay);
+export interface DebouncedFn<Args extends unknown[]> {
+  (...args: Args): void;
+  /** Exécute immédiatement l'appel en attente (s'il existe). */
+  flush(): void;
+  /** Annule l'appel en attente. */
+  cancel(): void;
+}
+
+/**
+ * Debounce classique — retarde l'exécution de `fn` de `delay` ms.
+ * Les appels intermédiaires réinitialisent le timer.
+ * Expose `flush()` (exécute immédiatement) et `cancel()` (annule).
+ */
+export function debounce<Args extends unknown[]>(
+  fn: (...args: Args) => void,
+  delay: number = 300,
+): DebouncedFn<Args> {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  let lastArgs: Args | null = null;
+
+  const debounced = (...args: Args) => {
+    lastArgs = args;
+    if (timer !== null) clearTimeout(timer);
+    timer = setTimeout(() => {
+      fn(...args);
+      lastArgs = null;
+      timer = null;
+    }, delay);
   };
+
+  debounced.flush = () => {
+    if (timer !== null && lastArgs) {
+      clearTimeout(timer);
+      fn(...lastArgs);
+      lastArgs = null;
+      timer = null;
+    }
+  };
+
+  debounced.cancel = () => {
+    if (timer !== null) {
+      clearTimeout(timer);
+      lastArgs = null;
+      timer = null;
+    }
+  };
+
+  return debounced;
 }
 
 export function groupBy<T, K extends keyof T>(arr: T[], key: K): Record<string, T[]> {

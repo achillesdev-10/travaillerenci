@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import SearchBar from '@/components/jobs/SearchBar';
@@ -129,7 +130,9 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
 
         {/* Barre de recherche */}
         <div className="mb-8">
-          <SearchBar initialKeyword={keyword} initialLocation={city} />
+          <Suspense fallback={<SearchBarSkeleton />}>
+            <SearchBar initialKeyword={keyword} initialLocation={city} />
+          </Suspense>
         </div>
 
         <div className="mb-6 flex items-center justify-between">
@@ -256,5 +259,20 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
         </section>
       </div>
     </main>
+  );
+}
+
+function SearchBarSkeleton() {
+  return (
+    <div className="w-full bg-white dark:bg-slate-900 border border-border rounded-2xl shadow-md shadow-black/5 p-4 sm:p-6 animate-pulse">
+      <div className="grid gap-3 grid-cols-1 md:grid-cols-12">
+        <div className="md:col-span-6 h-[52px] bg-gray-100 dark:bg-slate-800 rounded-xl" />
+        <div className="md:col-span-4 grid grid-cols-2 gap-3">
+          <div className="h-[52px] bg-gray-100 dark:bg-slate-800 rounded-xl" />
+          <div className="h-[52px] bg-gray-100 dark:bg-slate-800 rounded-xl" />
+        </div>
+        <div className="md:col-span-2 h-[52px] bg-gray-100 dark:bg-slate-800 rounded-xl" />
+      </div>
+    </div>
   );
 }
