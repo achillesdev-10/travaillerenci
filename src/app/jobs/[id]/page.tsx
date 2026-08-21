@@ -5,6 +5,7 @@ import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
 import SafetyNotice from '@/components/content/SafetyNotice';
 import SaveButton from '@/components/saved/SaveButton';
+import PWAInstallCTA from '@/components/concours/PWAInstallCTA';
 import type { JobOfferSchema } from '@/types';
 import { formatDate, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
@@ -492,6 +493,9 @@ export default async function JobDetailPage({ params }: PageProps) {
                 )}
               </dl>
             </div>
+
+            {/* PWA CTA : sous le bouton de postulation */}
+            <PWAInstallCTA variant="default" />
           </aside>
         </div>
       </section>

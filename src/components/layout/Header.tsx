@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { useDarkMode } from '@/hooks/useDarkMode';
 import { fetchCurrentUser, logoutCurrentUser, type StoredUser } from '@/lib/clientAuth';
 import SocialLinks from '@/components/layout/SocialLinks';
+import InstallPrompt from '@/components/layout/InstallPrompt';
 
 const NAV_LINKS = [
   { label: 'Accueil', href: '/' },
@@ -101,6 +102,8 @@ export default function Header() {
           </nav>
 
           <div className="hidden lg:flex items-center gap-3">
+            {/* PWA : installation de l'application */}
+            <InstallPrompt />
             {/* Réseaux sociaux */}
             <SocialLinks size="sm" className="gap-1.5 mr-1" />
             {/* Bouton Mode Sombre */}
@@ -156,6 +159,8 @@ export default function Header() {
           </div>
 
           <div className="flex items-center gap-2 lg:hidden">
+            {/* PWA : installation de l'application (compact sur mobile) */}
+            <InstallPrompt compact />
             <button
               onClick={toggleDarkMode}
               aria-label="Basculer le mode sombre"

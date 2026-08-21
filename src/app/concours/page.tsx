@@ -2,9 +2,12 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { ExamService } from '@/services/examService';
 import ExamCard from '@/components/exams/ExamCard';
-import ExamSearchBar from '@/components/exams/ExamSearchBar';
 import CategoryIcon from '@/components/exams/CategoryIcon';
 import PhaseSection, { groupExamsByPhase, SECTION_LIMIT } from '@/components/exams/PhaseSection';
+import ConcoursTicker from '@/components/concours/ConcoursTicker';
+import ConcoursFilters from '@/components/concours/ConcoursFilters';
+import ConcoursTabSection from './_components/ConcoursTabSection';
+import PWAInstallCTA from '@/components/concours/PWAInstallCTA';
 import {
   DIPLOMA_FILTERS,
   EXAM_CATEGORIES,
@@ -18,13 +21,13 @@ import type { ExamPhase } from '@/types/exam';
 import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
-  title: 'Concours administratifs en Côte d’Ivoire',
+  title: 'Concours administratifs en Côte d\'Ivoire',
   description:
-    'Consultez les derniers concours administratifs, examens professionnels et recrutements de la fonction publique ivoirienne : dates, conditions d’éligibilité et modalités de candidature, directement depuis les sources officielles.',
+    'Consultez les derniers concours administratifs, examens professionnels et recrutements de la fonction publique ivoirienne : dates, conditions d\'éligibilité et modalités de candidature.',
   keywords: [
     'concours',
     'concours administratifs',
-    'côte d’ivoire',
+    'côte d\'ivoire',
     'fonction publique',
     'ENA',
     'INFAS',
@@ -40,9 +43,9 @@ export const metadata: Metadata = {
     locale: 'fr_CI',
     url: `${getSiteUrl()}/concours`,
     siteName: 'TravaillerenCi',
-    title: 'Concours administratifs en Côte d’Ivoire | TravaillerEnCi',
+    title: 'Concours administratifs en Côte d\'Ivoire | TravaillerEnCi',
     description:
-      'Tous les concours de la fonction publique ivoirienne centralisés : dates d’inscription, conditions d’éligibilité et liens officiels.',
+      'Tous les concours de la fonction publique ivoirienne centralisés : dates d\'inscription, conditions d\'éligibilité et liens officiels.',
   },
 };
 
@@ -85,6 +88,7 @@ interface ConcoursPageProps {
     diploma?: string;
     phase?: string;
     page?: string;
+    tab?: string;
   }>;
 }
 
@@ -96,6 +100,7 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
   const diploma = sp.diploma || '';
   const rawPhase = sp.phase || '';
   const phase = (VALID_PHASES.has(rawPhase) ? rawPhase : '') as PhaseFilter;
+  const activeTab = sp.tab || 'concours';
   const page = Math.max(1, Number(sp.page) || 1);
 
   const [organizers, all] = await Promise.all([
@@ -108,24 +113,16 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
       status: 'published',
       order_by: 'created_at',
       order_dir: 'desc',
-      // Phase « métier » dérivée des dates : on charge un lot généreux puis on
-      // filtre en mémoire (le volume de concours publiés reste modeste).
       limit: phase ? 500 : 200,
     }),
   ]);
 
   let rows = all.rows;
   let total = all.total;
-  // Total réel (non filtré) pour les statistiques du héros.
   const totalRecensed = all.total;
 
-  // Vue par défaut (sans filtre de phase) : on regroupe les concours en
-  // « En cours » (inscriptions ouvertes / épreuves), « À venir » (annoncés,
-  // inscriptions pas encore ouvertes) et « Clos & résultats ». Un filtre de
-  // phase sélectionné → grille unique + pagination (comportement classique).
   const grouped = groupExamsByPhase(rows);
   if (phase) {
-    // Un filtre « groupé » (current/past) couvre plusieurs phases ; sinon filtre simple.
     const phases = PHASE_GROUPS[phase as keyof typeof PHASE_GROUPS] ?? [phase as ExamPhase];
     rows = rows.filter((e) => phases.includes(examPhase(e)));
     total = rows.length;
@@ -136,6 +133,13 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
   const pagedRows = phase
     ? rows.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE)
     : [];
+
+  // Counts for tabs
+  const concoursCount = totalRecensed;
+  // Communiqués = concours avec results ou closed
+  const communiquesCount = grouped.past.length;
+  // Actus = guides (simulate — would come from articles in production)
+  const actusCount = 0;
 
   function filterHref(params: Record<string, string | undefined>) {
     const url = new URLSearchParams();
@@ -152,22 +156,13 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
     <main className="flex-1 min-h-screen bg-gray-50 py-8 transition-colors dark:bg-slate-950 sm:py-12">
       <div className="container mx-auto max-w-6xl px-4">
         {/* ===================== HÉRO ===================== */}
-        <section className="relative overflow-hidden mb-8 rounded-3xl bg-primary text-white shadow-2xl shadow-primary/20">
-          {/* Décor : halos + formes flottantes */}
+        <section className="relative overflow-hidden mb-6 rounded-3xl bg-primary text-white shadow-2xl shadow-primary/20">
           <div
             className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-orange-400/30 blur-3xl"
             aria-hidden="true"
           />
           <div
             className="pointer-events-none absolute -bottom-32 -left-16 h-80 w-80 rounded-full bg-emerald-300/20 blur-3xl"
-            aria-hidden="true"
-          />
-          <div
-            className="pointer-events-none absolute top-8 right-1/3 hidden h-3 w-3 rounded-full bg-orange-300/70 md:block"
-            aria-hidden="true"
-          />
-          <div
-            className="pointer-events-none absolute bottom-10 left-1/4 hidden h-2 w-2 rounded-full bg-white/50 md:block"
             aria-hidden="true"
           />
 
@@ -177,12 +172,8 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
                 aria-label="Fil d'Ariane"
                 className="mb-5 text-sm text-white/70"
               >
-                <Link href="/" className="hover:text-white">
-                  Accueil
-                </Link>
-                <span className="mx-2" aria-hidden="true">
-                  /
-                </span>
+                <Link href="/" className="hover:text-white">Accueil</Link>
+                <span className="mx-2" aria-hidden="true">/</span>
                 <span className="font-medium text-white">Concours administratifs</span>
               </nav>
 
@@ -202,36 +193,27 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
               </div>
 
               <h1 className="mb-4 font-[var(--font-display)] text-3xl font-extrabold leading-tight sm:text-4xl lg:text-5xl">
-                Concours administratifs en Côte d'Ivoire
+                Concours administratifs en Côte d&apos;Ivoire
               </h1>
               <p className="max-w-xl text-base text-white/85 sm:text-lg">
                 Retrouvez les concours <strong className="text-white">en cours</strong> et{' '}
                 <strong className="text-white">à venir</strong> de la fonction publique et des
                 grandes écoles ivoiriennes (ENA, INFAS, CAFOP, gendarmerie…), alimentés
-                directement depuis les sources officielles — dates d'inscription, conditions
-                et liens officiels.
+                directement depuis les sources officielles.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3">
                 <div>
-                  <div className="font-[var(--font-display)] text-2xl font-black">
-                    {totalRecensed}
-                  </div>
-                  <div className="text-[11px] uppercase tracking-widest text-white/70">
-                    concours recensés
-                  </div>
+                  <div className="font-[var(--font-display)] text-2xl font-black">{totalRecensed}</div>
+                  <div className="text-[11px] uppercase tracking-widest text-white/70">concours recensés</div>
                 </div>
                 <div>
                   <div className="font-[var(--font-display)] text-2xl font-black">10+</div>
-                  <div className="text-[11px] uppercase tracking-widest text-white/70">
-                    sources officielles
-                  </div>
+                  <div className="text-[11px] uppercase tracking-widest text-white/70">sources officielles</div>
                 </div>
                 <div>
                   <div className="font-[var(--font-display)] text-2xl font-black">100 %</div>
-                  <div className="text-[11px] uppercase tracking-widest text-white/70">
-                    relu avant publication
-                  </div>
+                  <div className="text-[11px] uppercase tracking-widest text-white/70">relu avant publication</div>
                 </div>
               </div>
             </div>
@@ -241,268 +223,317 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
           </div>
         </section>
 
-        {/* Barre de recherche + filtres organisateur/catégorie */}
-        <div className="mb-5">
-          <ExamSearchBar
-            organizers={organizers}
-            initialKeyword={keyword}
-            initialOrganizer={organizer}
+        {/* ===================== TICKER / ALERTE DÉFILANTE ===================== */}
+        <div className="mb-6">
+          <ConcoursTicker exams={all.rows} />
+        </div>
+
+        {/* ===================== FILTRES DYNAMIQUES (Selects) ===================== */}
+        <div className="mb-6 rounded-2xl border border-gray-100 bg-white p-4 shadow-md shadow-black/5 dark:border-slate-800 dark:bg-slate-900 sm:p-5">
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <svg className="h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+            </svg>
+            <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+              Filtrer les concours
+            </span>
+          </div>
+          <ConcoursFilters
+            initialDiploma={diploma}
             initialCategory={category}
+            initialPhase={rawPhase}
           />
         </div>
 
-        {/* Pills : diplômes acceptés */}
-        <section aria-label="Filtrer par diplôme" className="mb-4">
-          <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-gray-400">
-            Je dispose d'un diplôme
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href={filterHref({ diploma: undefined })}
-              className={cn(
-                'rounded-full border px-3.5 py-1.5 text-[12.5px] font-bold transition-all',
-                !diploma
-                  ? 'border-primary bg-primary text-white shadow-md shadow-primary/20'
-                  : 'border-gray-200 bg-white text-gray-600 hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300',
-              )}
-            >
-              Tous les niveaux
-            </Link>
-            {DIPLOMA_FILTERS.map((d) => (
-              <Link
-                key={d.value}
-                href={filterHref({ diploma: d.value })}
-                className={cn(
-                  'rounded-full border px-3.5 py-1.5 text-[12.5px] font-bold transition-all',
-                  diploma === d.value
-                    ? 'border-primary bg-primary text-white shadow-md shadow-primary/20'
-                    : 'border-gray-200 bg-white text-gray-600 hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300',
-                )}
-              >
-                {d.label}
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        {/* Pills : statut (phase métier) */}
-        <section aria-label="Filtrer par statut" className="mb-4">
-          <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-gray-400">
-            Statut
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {PHASE_OPTIONS.map((p) => (
-              <Link
-                key={p.value || 'all'}
-                href={filterHref({ phase: p.value || undefined, page: undefined })}
-                className={cn(
-                  'rounded-full border px-3.5 py-1.5 text-[12.5px] font-semibold transition-all',
-                  phase === p.value
-                    ? 'border-gray-900 bg-gray-900 text-white dark:border-white dark:bg-white dark:text-gray-900'
-                    : 'border-gray-200 bg-white text-gray-600 hover:border-gray-400 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300',
-                )}
-              >
-                {p.label}
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        {/* Pills : catégories */}
-        <section aria-label="Filtrer par catégorie" className="mb-6">
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href={filterHref({ category: undefined })}
-              className={cn(
-                'inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-[12.5px] font-semibold transition-all',
-                !category
-                  ? 'border-primary/30 bg-primary/10 text-primary'
-                  : 'border-gray-200 bg-white text-gray-600 hover:border-primary/40 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300',
-              )}
-            >
-              Toutes catégories
-            </Link>
-            {EXAM_CATEGORIES.map((c) => (
-              <Link
-                key={c.value}
-                href={filterHref({ category: c.value })}
-                className={cn(
-                  'inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-[12.5px] font-semibold transition-all',
-                  category === c.value
-                    ? 'border-primary/30 bg-primary/10 text-primary'
-                    : 'border-gray-200 bg-white text-gray-600 hover:border-primary/40 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300',
-                )}
-              >
-                <CategoryIcon category={c.value} className="h-3.5 w-3.5" />
-                {c.label}
-              </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Explorer par catégorie / par diplôme — pages SEO (maillage interne) */}
-      <section aria-label="Explorer par catégorie ou par diplôme" className="mb-6">
-        <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-gray-400">
-          Explorer par catégorie
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {EXAM_CATEGORIES.map((c) => (
-            <Link
-              key={c.value}
-              href={`/concours/categorie/${c.value}`}
-              className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:bg-primary/5 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
-            >
-              <CategoryIcon category={c.value} className="h-3.5 w-3.5" />
-              {c.label}
-            </Link>
-          ))}
-          </div>
-          <p className="mb-2 mt-4 text-[11px] font-bold uppercase tracking-widest text-gray-400">
-            Par diplôme
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {DIPLOMA_SEO.map((d) => (
-              <Link
-                key={d.slug}
-                href={`/concours/diplome/${d.slug}`}
-                className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3 py-1.5 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:bg-primary/5 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
-              >
-                {d.label}
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        {/* Compteur */}
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="font-[var(--font-display)] text-xl font-bold text-gray-900 dark:text-white">
-            {total} concours recensé{total > 1 ? 's' : ''}
-            {keyword || organizer || category || diploma || phase ? ' (filtrés)' : ''}
-          </h2>
-          {category && (
-            <span className="text-sm text-gray-500 dark:text-gray-400">
-              Catégorie : {EXAM_CATEGORY_LABEL[category as keyof typeof EXAM_CATEGORY_LABEL] ?? category}
-              {phase
-                ? ` · ${PHASE_GROUP_LABEL[phase as keyof typeof PHASE_GROUP_LABEL] ?? EXAM_PHASE_LABEL[phase as ExamPhase]}`
-                : ''}
-            </span>
-          )}
+        {/* ===================== PWA CTA — Bannière ===================== */}
+        <div className="mb-6">
+          <PWAInstallCTA variant="banner" />
         </div>
 
-        {/* Résultats */}
-        {phase ? (
-          <>
-            {pagedRows.length > 0 ? (
-              <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
-                {pagedRows.map((exam) => (
-                  <ExamCard key={exam.id} exam={exam} priority={safePage === 1} />
-                ))}
+        {/* ===================== SYSTÈME D'ONGLETS ===================== */}
+        <ConcoursTabSection
+          activeTab={activeTab}
+          counts={{ concours: concoursCount, communiques: communiquesCount, actualites: actusCount }}
+        >
+          {/* ===================== ONGLET 1 : CONCOURS ===================== */}
+          {activeTab === 'concours' && (
+            <>
+              {/* Explorer par catégorie / par diplôme — pages SEO (maillage interne) */}
+              <section aria-label="Explorer par catégorie ou par diplôme" className="mb-6">
+                <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-gray-400">
+                  Explorer par catégorie
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {EXAM_CATEGORIES.map((c) => (
+                    <Link
+                      key={c.value}
+                      href={`/concours/categorie/${c.value}`}
+                      className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:bg-primary/5 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                    >
+                      <CategoryIcon category={c.value} className="h-3.5 w-3.5" />
+                      {c.label}
+                    </Link>
+                  ))}
+                </div>
+                <p className="mb-2 mt-4 text-[11px] font-bold uppercase tracking-widest text-gray-400">
+                  Par diplôme
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {DIPLOMA_SEO.map((d) => (
+                    <Link
+                      key={d.slug}
+                      href={`/concours/diplome/${d.slug}`}
+                      className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3 py-1.5 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:bg-primary/5 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                    >
+                      {d.label}
+                    </Link>
+                  ))}
+                </div>
+              </section>
+
+              {/* Compteur */}
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
+                <h2 className="font-[var(--font-display)] text-xl font-bold text-gray-900 dark:text-white">
+                  {total} concours recensé{total > 1 ? 's' : ''}
+                  {keyword || organizer || category || diploma || phase ? ' (filtrés)' : ''}
+                </h2>
+                {category && (
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    Catégorie : {EXAM_CATEGORY_LABEL[category as keyof typeof EXAM_CATEGORY_LABEL] ?? category}
+                    {phase
+                      ? ` · ${PHASE_GROUP_LABEL[phase as keyof typeof PHASE_GROUP_LABEL] ?? EXAM_PHASE_LABEL[phase as ExamPhase]}`
+                      : ''}
+                  </span>
+                )}
               </div>
-            ) : (
-              <ConcoursEmptyState />
-            )}
 
-            {/* Pagination (vue filtrée par phase uniquement) */}
-            {totalPages > 1 && (
-              <nav aria-label="Pagination" className="mt-10 flex flex-wrap items-center justify-center gap-2">
-                {safePage > 1 && (
-                  <Link
-                    href={filterHref({ page: String(safePage - 1) })}
-                    className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-600 transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
-                  >
-                    ← Précédent
-                  </Link>
-                )}
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter((p) => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
-                  .reduce<number[]>((acc, p) => {
-                    if (acc.length && p - acc[acc.length - 1] > 1) acc.push(-1);
-                    acc.push(p);
-                    return acc;
-                  }, [])
-                  .map((p, i) =>
-                    p === -1 ? (
-                      <span key={`gap-${i}`} className="px-1 text-gray-400">
-                        …
-                      </span>
-                    ) : (
-                      <Link
-                        key={p}
-                        href={filterHref({ page: String(p) })}
-                        aria-current={p === safePage ? 'page' : undefined}
-                        className={cn(
-                          'rounded-xl px-4 py-2 text-sm font-semibold transition-colors',
-                          p === safePage
-                            ? 'bg-primary text-white shadow-md shadow-primary/20'
-                            : 'border border-gray-200 bg-white text-gray-600 hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300',
-                        )}
-                      >
-                        {p}
-                      </Link>
-                    ),
+              {/* Résultats */}
+              {phase ? (
+                <>
+                  {pagedRows.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
+                      {pagedRows.map((exam) => (
+                        <ExamCard key={exam.id} exam={exam} priority={safePage === 1} />
+                      ))}
+                    </div>
+                  ) : (
+                    <ConcoursEmptyState />
                   )}
-                {safePage < totalPages && (
-                  <Link
-                    href={filterHref({ page: String(safePage + 1) })}
-                    className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-600 transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
-                  >
-                    Suivant →
-                  </Link>
-                )}
-              </nav>
-            )}
-          </>
-        ) : (
-          <>
-            {/* Section 1 — concours en cours (inscriptions ouvertes / épreuves) */}
-            <PhaseSection
-              title="Concours en cours"
-              subtitle="Inscriptions ouvertes ou épreuves en cours"
-              accent="emerald"
-              exams={grouped.current}
-              limit={SECTION_LIMIT}
-              viewAllHref={filterHref({ phase: 'current', page: undefined })}
-              viewAllLabel="Voir tout"
-            />
-            {/* Section 2 — concours à venir (annoncés) */}
-            <PhaseSection
-              title="Concours à venir"
-              subtitle="Annoncés — inscriptions pas encore ouvertes"
-              accent="indigo"
-              exams={grouped.upcoming}
-              limit={SECTION_LIMIT}
-              viewAllHref={filterHref({ phase: 'upcoming', page: undefined })}
-              viewAllLabel="Voir tout"
-            />
-            {/* Section 3 — archives */}
-            <PhaseSection
-              title="Concours clos & résultats"
-              subtitle="Archives des sessions passées"
-              accent="slate"
-              exams={grouped.past}
-              limit={SECTION_LIMIT}
-              viewAllHref={filterHref({ phase: 'past', page: undefined })}
-              viewAllLabel="Voir tout"
-            />
-            {grouped.current.length === 0 &&
-              grouped.upcoming.length === 0 &&
-              grouped.past.length === 0 && <ConcoursEmptyState />}
-          </>
-        )}
 
-        {/* Bloc sources officielles (crédibilité + SEO) */}
-        <section className="mt-12 rounded-2xl border border-gray-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
-          <h2 className="mb-3 font-[var(--font-display)] text-lg font-bold text-gray-900 dark:text-white">
-            Des informations vérifiées, directement à la source
-          </h2>
-          <p className="max-w-3xl text-sm leading-relaxed text-gray-600 dark:text-gray-300">
-            Chaque concours est collecté auprès des institutions officielles ivoiriennes
-            (Ministère de la Fonction Publique, ENA, Ministère de la Défense, INFAS, INJS,
-            CAFOP/DECO, INSFS…) puis relu par notre équipe avant publication. La fiche de
-            chaque concours renvoie toujours vers le communiqué officiel d'origine, pour
-            une information transparente et fiable.
-          </p>
-        </section>
+                  {/* Pagination (vue filtrée par phase uniquement) */}
+                  {totalPages > 1 && (
+                    <nav aria-label="Pagination" className="mt-10 flex flex-wrap items-center justify-center gap-2">
+                      {safePage > 1 && (
+                        <Link
+                          href={filterHref({ page: String(safePage - 1) })}
+                          className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-600 transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                        >
+                          ← Précédent
+                        </Link>
+                      )}
+                      {Array.from({ length: totalPages }, (_, i) => i + 1)
+                        .filter((p) => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
+                        .reduce<number[]>((acc, p) => {
+                          if (acc.length && p - acc[acc.length - 1] > 1) acc.push(-1);
+                          acc.push(p);
+                          return acc;
+                        }, [])
+                        .map((p, i) =>
+                          p === -1 ? (
+                            <span key={`gap-${i}`} className="px-1 text-gray-400">…</span>
+                          ) : (
+                            <Link
+                              key={p}
+                              href={filterHref({ page: String(p) })}
+                              aria-current={p === safePage ? 'page' : undefined}
+                              className={cn(
+                                'rounded-xl px-4 py-2 text-sm font-semibold transition-colors',
+                                p === safePage
+                                  ? 'bg-primary text-white shadow-md shadow-primary/20'
+                                  : 'border border-gray-200 bg-white text-gray-600 hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300',
+                              )}
+                            >
+                              {p}
+                            </Link>
+                          ),
+                        )}
+                      {safePage < totalPages && (
+                        <Link
+                          href={filterHref({ page: String(safePage + 1) })}
+                          className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-600 transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                        >
+                          Suivant →
+                        </Link>
+                      )}
+                    </nav>
+                  )}
+                </>
+              ) : (
+                <>
+                  <PhaseSection
+                    title="Concours en cours"
+                    subtitle="Inscriptions ouvertes ou épreuves en cours"
+                    accent="emerald"
+                    exams={grouped.current}
+                    limit={SECTION_LIMIT}
+                    viewAllHref={filterHref({ phase: 'current', page: undefined })}
+                    viewAllLabel="Voir tout"
+                  />
+                  <PhaseSection
+                    title="Concours à venir"
+                    subtitle="Annoncés — inscriptions pas encore ouvertes"
+                    accent="indigo"
+                    exams={grouped.upcoming}
+                    limit={SECTION_LIMIT}
+                    viewAllHref={filterHref({ phase: 'upcoming', page: undefined })}
+                    viewAllLabel="Voir tout"
+                  />
+                  <PhaseSection
+                    title="Concours clos & résultats"
+                    subtitle="Archives des sessions passées"
+                    accent="slate"
+                    exams={grouped.past}
+                    limit={SECTION_LIMIT}
+                    viewAllHref={filterHref({ phase: 'past', page: undefined })}
+                    viewAllLabel="Voir tout"
+                  />
+                  {grouped.current.length === 0 &&
+                    grouped.upcoming.length === 0 &&
+                    grouped.past.length === 0 && <ConcoursEmptyState />}
+                </>
+              )}
+            </>
+          )}
+
+          {/* ===================== ONGLET 2 : COMMUNIQUÉS ===================== */}
+          {activeTab === 'communiques' && (
+            <section>
+              <div className="mb-6 rounded-2xl border border-gray-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+                <h2 className="mb-3 font-[var(--font-display)] text-lg font-bold text-gray-900 dark:text-white">
+                  Communiqués officiels &amp; Résultats
+                </h2>
+                <p className="max-w-3xl text-sm leading-relaxed text-gray-600 dark:text-gray-300 mb-6">
+                  Retrouvez ici les communiqués officiels des institutions publiant des
+                  concours, ainsi que les résultats des sessions récentes.
+                </p>
+
+                {/* Concours avec résultats publiés */}
+                {grouped.past.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
+                    {grouped.past.slice(0, SECTION_LIMIT).map((exam) => (
+                      <ExamCard key={exam.id} exam={exam} priority={false} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/50 p-8 text-center dark:border-slate-700 dark:bg-slate-800/50">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Aucun communiqué ou résultat disponible pour le moment.
+                    </p>
+                  </div>
+                )}
+
+                {/* Lien « Voir tous les concours clos & résultats » */}
+                {grouped.past.length > SECTION_LIMIT && (
+                  <div className="mt-6 text-center">
+                    <Link
+                      href={filterHref({ phase: 'past', page: undefined })}
+                      className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                    >
+                      Voir tous les résultats
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5 12h14" />
+                        <path d="m12 5 7 7-7 7" />
+                      </svg>
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              {/* Source officielle */}
+              <div className="rounded-2xl border border-gray-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+                <h2 className="mb-3 font-[var(--font-display)] text-lg font-bold text-gray-900 dark:text-white">
+                  Des informations vérifiées, directement à la source
+                </h2>
+                <p className="max-w-3xl text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+                  Chaque concours est collecté auprès des institutions officielles ivoiriennes
+                  (Ministère de la Fonction Publique, ENA, Ministère de la Défense, INFAS, INJS,
+                  CAFOP/DECO, INSFS…) puis relu par notre équipe avant publication.
+                </p>
+              </div>
+            </section>
+          )}
+
+          {/* ===================== ONGLET 3 : ACTUALITÉS & GUIDES ===================== */}
+          {activeTab === 'actualites' && (
+            <section>
+              <div className="mb-6 rounded-2xl border border-gray-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+                <h2 className="mb-3 font-[var(--font-display)] text-lg font-bold text-gray-900 dark:text-white">
+                  Actualités &amp; Guides de préparation
+                </h2>
+                <p className="max-w-3xl text-sm leading-relaxed text-gray-600 dark:text-gray-300 mb-6">
+                  Conseils, méthodes de préparation et actualités du marché de
+                  l&apos;emploi en Côte d&apos;Ivoire.
+                </p>
+
+                {/* Placeholder cards */}
+                <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
+                  <GuideCard
+                    title="Comment préparer le concours de l'ENA"
+                    excerpt="Guide complet pour réussir les épreuves d'admission à l'École Nationale d'Administration."
+                    category="Guide"
+                  />
+                  <GuideCard
+                    title="Les métiers porteurs en 2025 en Côte d'Ivoire"
+                    excerpt="Découvrez les secteurs qui recrutent massivement et les compétences recherchées."
+                    category="Actualité"
+                  />
+                  <GuideCard
+                    title="CV parfait pour un concours administratif"
+                    excerpt="Modèle et conseils pour un CV qui retient l'attention du jury."
+                    category="Guide"
+                  />
+                </div>
+
+                <div className="mt-6 text-center">
+                  <Link
+                    href="/actualites"
+                    className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                  >
+                    Voir toutes les actualités
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 12h14" />
+                      <path d="m12 5 7 7-7 7" />
+                    </svg>
+                  </Link>
+                </div>
+              </div>
+
+              {/* PWA CTA intégré dans les guides */}
+              <PWAInstallCTA variant="default" className="mt-6" />
+            </section>
+          )}
+        </ConcoursTabSection>
+
+        {/* ===================== PWA CTA — Fin de page ===================== */}
+        <div className="mt-8">
+          <PWAInstallCTA variant="default" />
+        </div>
+
+        {/* Bloc sources officielles (crédibilité + SEO) — seulement si pas dans onglet communiqués */}
+        {activeTab !== 'communiques' && (
+          <section className="mt-12 rounded-2xl border border-gray-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+            <h2 className="mb-3 font-[var(--font-display)] text-lg font-bold text-gray-900 dark:text-white">
+              Des informations vérifiées, directement à la source
+            </h2>
+            <p className="max-w-3xl text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+              Chaque concours est collecté auprès des institutions officielles ivoiriennes
+              (Ministère de la Fonction Publique, ENA, Ministère de la Défense, INFAS, INJS,
+              CAFOP/DECO, INSFS…) puis relu par notre équipe avant publication. La fiche de
+              chaque concours renvoie toujours vers le communiqué officiel d&apos;origine, pour
+              une information transparente et fiable.
+            </p>
+          </section>
+        )}
       </div>
     </main>
   );
@@ -532,17 +563,13 @@ function ConcoursHeroIllustration() {
           </linearGradient>
         </defs>
 
-        {/* Halo arrière */}
         <circle cx="230" cy="170" r="150" fill="#ffffff" opacity="0.12" />
         <circle cx="230" cy="170" r="110" fill="#ffffff" opacity="0.10" />
 
         {/* Toque de diplômé (orange) */}
         <g transform="translate(300 40)">
           <ellipse cx="62" cy="70" rx="58" ry="16" fill="#d97706" opacity="0.35" />
-          <path
-            d="M8 52 L62 18 L116 52 L62 86 Z"
-            fill="url(#concours-cap)"
-          />
+          <path d="M8 52 L62 18 L116 52 L62 86 Z" fill="url(#concours-cap)" />
           <path d="M8 52 L62 86 L116 52" fill="none" stroke="#ea580c" strokeWidth="3" />
           <path d="M116 52 L116 92 L62 112 L8 92 L8 52" fill="none" stroke="#ea580c" strokeWidth="3" />
           <path d="M62 18 L62 30" stroke="#ea580c" strokeWidth="3" />
@@ -559,12 +586,10 @@ function ConcoursHeroIllustration() {
           <rect x="18" y="94" width="176" height="10" rx="5" fill="#e2e8f0" />
           <rect x="18" y="120" width="204" height="10" rx="5" fill="#e2e8f0" />
           <rect x="18" y="136" width="160" height="10" rx="5" fill="#e2e8f0" />
-          {/* Tampon de validation */}
           <g transform="translate(178 138)">
             <circle cx="22" cy="22" r="22" fill="url(#concours-doc)" />
             <path d="M13 22l7 7 14-16" fill="none" stroke="#ffffff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
           </g>
-          {/* Punaise */}
           <circle cx="120" cy="-6" r="8" fill="#ef4444" />
           <circle cx="120" cy="-6" r="3" fill="#fecaca" />
         </g>
@@ -576,14 +601,11 @@ function ConcoursHeroIllustration() {
           <rect x="0" y="16" width="96" height="14" fill="#003087" />
           <circle cx="24" cy="16" r="4" fill="#ffffff" opacity="0.5" />
           <circle cx="72" cy="16" r="4" fill="#ffffff" opacity="0.5" />
-          <text x="48" y="74" textAnchor="middle" fontSize="34" fontWeight="800" fill="#003087" fontFamily="Poppins, sans-serif">
-            08
-          </text>
+          <text x="48" y="74" textAnchor="middle" fontSize="34" fontWeight="800" fill="#003087" fontFamily="Poppins, sans-serif">08</text>
           <rect x="16" y="86" width="64" height="8" rx="4" fill="#93c5fd" />
           <path d="M14 -8 L14 12 M82 -8 L82 12" stroke="#003087" strokeWidth="5" strokeLinecap="round" />
         </g>
 
-        {/* Pastilles décoratives */}
         <circle cx="96" cy="70" r="7" fill="#fbbf24" />
         <circle cx="420" cy="120" r="6" fill="#34d399" />
         <circle cx="40" cy="300" r="8" fill="#fbbf24" opacity="0.8" />
@@ -614,6 +636,46 @@ function ConcoursEmptyState() {
       >
         Voir tous les concours
       </Link>
+    </div>
+  );
+}
+
+/** Carte de guide (placeholder pour onglet Actualités). */
+function GuideCard({
+  title,
+  excerpt,
+  category,
+}: {
+  title: string;
+  excerpt: string;
+  category: string;
+}) {
+  return (
+    <div className="flex flex-col bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-1 hover:border-primary/30 transition-all duration-200 cursor-pointer">
+      <div className="h-28 bg-gradient-to-br from-primary/5 to-emerald-500/5 dark:from-primary/10 dark:to-emerald-500/10 flex items-center justify-center">
+        <svg className="h-12 w-12 text-primary/30 dark:text-emerald-400/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
+          <path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6Z" />
+        </svg>
+      </div>
+      <div className="flex flex-col flex-1 p-4">
+        <span className="inline-flex items-center rounded-full bg-primary/10 text-primary dark:text-emerald-400 px-2 py-0.5 text-[10.5px] font-bold w-fit mb-2">
+          {category}
+        </span>
+        <h3 className="text-[13px] sm:text-[15px] font-bold text-gray-900 dark:text-white leading-snug mb-1 line-clamp-2">
+          {title}
+        </h3>
+        <p className="text-[12px] text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-3 flex-1">
+          {excerpt}
+        </p>
+        <div className="mt-3 inline-flex items-center gap-1 text-[12px] font-semibold text-primary">
+          Lire
+          <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12h14" />
+            <path d="m12 5 7 7-7 7" />
+          </svg>
+        </div>
+      </div>
     </div>
   );
 }

@@ -20,33 +20,45 @@ const poppins = Poppins({
   display: 'swap',
 });
 
-// Couleurs du thème pour la barre d'adresse mobile + PWA (manifest.ts).
+// Viewport mobile + PWA : désactive le zoom intempestif sur mobile.
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  maximumScale: 1,
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#00a83f' },
+    { media: '(prefers-color-scheme: light)', color: '#059669' },
     { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
   ],
 };
 
 export const metadata: Metadata = {
   title: {
-    default: 'TravaillerenCi - Offres d\'emploi en Côte d\'Ivoire',
-    template: '%s | TravaillerenCi',
+    default: "travaillerenci - Emploi & CV IA",
+    template: '%s | travaillerenci',
   },
-  description: 'Trouvez votre emploi de rêve en Côte d\'Ivoire. Découvrez des milliers d\'offres d\'emploi, des stages et des opportunités professionnelles.',
-  keywords: ['emploi', 'côte d\'ivoire', 'jobs', 'offres d\'emploi', 'travail', 'abidjan', 'carrière', 'recrutement'],
+  description: "Trouvez un emploi en Côte d'Ivoire et créez votre CV optimisé par l'IA.",
+  keywords: ['emploi', 'côte d\'ivoire', 'jobs', 'offres d\'emploi', 'travail', 'abidjan', 'carrière', 'recrutement', 'cv', 'ia'],
   authors: [{ name: 'TravaillerenCi Team' }],
+  // PWA : manifeste Web App (installable sur mobile via Chrome/Android, Edge, iOS).
+  manifest: '/manifest.webmanifest',
   // Base des URLs absolues (og:url, canonical, sitemap…) — domaine actuel,
   // remplaçable via NEXT_PUBLIC_SITE_URL le jour où travaillerenci.ci sera actif.
   metadataBase: new URL(getSiteUrl()),
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'travaillerenci',
+  },
+  formatDetection: {
+    telephone: false,
+  },
   icons: {
     icon: [
-      { url: '/icon.png', sizes: '512x512', type: 'image/png' },
-      { url: '/favicon.ico', sizes: '48x48', type: 'image/x-icon' },
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+      { url: '/favicon.svg', sizes: 'any', type: 'image/svg+xml' },
     ],
-    apple: [{ url: '/apple-icon.png', sizes: '180x180' }],
+    apple: [{ url: '/icons/icon-192x192.png', sizes: '180x180' }],
   },
   openGraph: {
     type: 'website',

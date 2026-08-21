@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import SocialLinks from '@/components/layout/SocialLinks';
+import PWAInstallCTA from '@/components/concours/PWAInstallCTA';
 
 const NAV_LINKS = [
   { label: 'Offres d’emploi', href: '/jobs' },
@@ -42,10 +43,16 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 mt-6 pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
-          <p>
-            © {new Date().getFullYear()} TravaillerenCi — Tous droits réservés.
-          </p>
-          <SocialLinks size="sm" variant="dark" className="gap-2" />
+          <div className="flex items-center gap-4">
+            <p>
+              © {new Date().getFullYear()} TravaillerenCi — Tous droits réservés.
+            </p>
+            <PWAInstallCTA variant="compact" className="border-gray-700 bg-gray-800 text-gray-300 hover:bg-gray-700" />
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="hidden sm:inline text-[11px]">Télécharger l'App 📱</span>
+            <SocialLinks size="sm" variant="dark" className="gap-2" />
+          </div>
         </div>
       </div>
     </footer>
