@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { ExamService } from '@/services/examService';
 import ExamCard from '@/components/exams/ExamCard';
@@ -238,11 +239,13 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
               Filtrer les concours
             </span>
           </div>
-          <ConcoursFilters
-            initialDiploma={diploma}
-            initialCategory={category}
-            initialPhase={rawPhase}
-          />
+          <Suspense fallback={<ConcoursFiltersSkeleton />}>
+            <ConcoursFilters
+              initialDiploma={diploma}
+              initialCategory={category}
+              initialPhase={rawPhase}
+            />
+          </Suspense>
         </div>
 
         {/* ===================== PWA CTA — Bannière ===================== */}
@@ -676,6 +679,20 @@ function GuideCard({
           </svg>
         </div>
       </div>
+    </div>
+  );
+}
+
+/** Skeleton pour les filtres concours (fallback Suspense). */
+function ConcoursFiltersSkeleton() {
+  return (
+    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 animate-pulse">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="flex-1 min-w-0">
+          <div className="mb-1 h-3 w-20 rounded bg-gray-100 dark:bg-slate-800" />
+          <div className="h-10 rounded-xl bg-gray-100 dark:bg-slate-800" />
+        </div>
+      ))}
     </div>
   );
 }
