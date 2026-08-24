@@ -185,6 +185,21 @@ export default function CVGeneratorPage() {
       const element = document.getElementById('cv-preview');
       if (!element) throw new Error('Aperçu CV introuvable.');
 
+      // Sur mobile, le CV preview peut être masqué (hidden) — on le rend
+      // temporairement visible pour html2canvas puis on restaure l'état.
+      const parentHidden = element.closest('[class*="hidden"]') as HTMLElement | null;
+      let previousDisplay = '';
+      let previousParentDisplay = '';
+      if (element.style.display === 'none') {
+        previousDisplay = element.style.display;
+        element.style.display = '';
+      }
+      if (parentHidden) {
+        previousParentDisplay = parentHidden.style.display;
+        parentHidden.style.display = 'block';
+        parentHidden.classList.remove('hidden');
+      }
+
       const opt = {
         margin: 0 as any,
         filename: `CV_${cvData.fullName.replace(/\s+/g, '_') || 'travaillerenci'}.pdf`,
@@ -192,7 +207,16 @@ export default function CVGeneratorPage() {
         html2canvas: { scale: 2, useCORS: true, letterRendering: true },
         jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const },
       };
-      await html2pdf().set(opt as any).from(element).save();
+      try {
+        await html2pdf().set(opt as any).from(element).save();
+      } finally {
+        // Restaurer l'état d'origine.
+        if (previousDisplay) element.style.display = previousDisplay;
+        if (parentHidden && previousParentDisplay !== undefined) {
+          parentHidden.style.display = previousParentDisplay;
+          parentHidden.classList.add('hidden');
+        }
+      }
     } catch (err) {
       console.error(err);
       alert('Erreur lors de l\'export PDF. Veuillez réessayer.');

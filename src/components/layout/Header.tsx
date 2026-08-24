@@ -81,12 +81,12 @@ export default function Header() {
             </div>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-1.5">
+          <nav className="hidden lg:flex items-center gap-0.5">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="px-3.5 py-2 rounded-full text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-primary/10 dark:hover:bg-slate-800 transition-colors"
+                className="px-3 py-2 rounded-xl text-[13px] font-semibold text-gray-600 dark:text-gray-300 hover:text-primary hover:bg-primary/8 dark:hover:bg-slate-800/80 transition-all duration-200"
               >
                 {link.label}
               </Link>
@@ -94,14 +94,14 @@ export default function Header() {
             {user ? (
               <Link
                 href={dashboardHref}
-                className="px-3.5 py-2 rounded-full text-sm font-semibold text-primary hover:bg-primary/10 dark:hover:bg-slate-800 transition-colors"
+                className="px-3 py-2 rounded-xl text-[13px] font-bold text-primary hover:bg-primary/8 dark:hover:bg-slate-800/80 transition-all duration-200"
               >
                 Mon Tableau de Bord
               </Link>
             ) : null}
           </nav>
 
-          <div className="hidden lg:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-2">
             {/* PWA : installation de l'application */}
             <InstallPrompt />
             {/* Réseaux sociaux */}
@@ -110,7 +110,7 @@ export default function Header() {
             <button
               onClick={toggleDarkMode}
               aria-label="Basculer le mode sombre"
-              className="p-2.5 rounded-xl border border-border bg-gray-50 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+              className="p-2 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 hover:border-gray-300 dark:hover:border-slate-600 transition-all duration-200"
             >
               {isDarkMode ? (
                 <svg className="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,13 +129,13 @@ export default function Header() {
               <>
                 <Link
                   href={dashboardHref}
-                  className="text-sm font-bold text-gray-900 dark:text-white px-3 py-2 bg-gray-100 dark:bg-slate-800 rounded-xl"
+                  className="text-[13px] font-bold text-gray-800 dark:text-white px-3 py-2 bg-gray-100 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700"
                 >
                   {user.name || user.email} ({user.role === 'company' ? 'Entreprise' : 'Candidat'})
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 rounded-xl border border-border text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+                  className="px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-[13px] font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-red-500 dark:hover:text-red-400 transition-all duration-200"
                 >
                   Déconnexion
                 </button>
@@ -144,13 +144,13 @@ export default function Header() {
               <>
                 <Link
                   href="/login"
-                  className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary px-4 py-2"
+                  className="text-[13px] font-semibold text-gray-600 dark:text-gray-300 hover:text-primary px-4 py-2 rounded-xl hover:bg-primary/5 transition-all duration-200"
                 >
                   Connexion
                 </Link>
                 <Link
                   href="/register"
-                  className="px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:brightness-110 shadow-md shadow-primary/20 transition-all"
+                  className="px-5 py-2.5 rounded-xl bg-primary text-white text-[13px] font-bold hover:bg-primary-dark hover:shadow-lg hover:shadow-primary/20 active:scale-[0.98] transition-all duration-200"
                 >
                   S'inscrire
                 </Link>
@@ -193,13 +193,13 @@ export default function Header() {
         </div>
 
         {open && (
-          <div className="lg:hidden border-t border-border py-4 space-y-1.5">
+          <div className="lg:hidden border-t border-gray-200 dark:border-slate-700 py-4 space-y-1.5">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="block px-3 py-2.5 rounded-xl border border-border/60 bg-gray-50/60 dark:bg-slate-800/40 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-800"
+                className="block px-4 py-3 rounded-xl text-[13px] font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
               >
                 {link.label}
               </Link>
@@ -208,17 +208,17 @@ export default function Header() {
               <Link
                 href={dashboardHref}
                 onClick={() => setOpen(false)}
-                className="block px-3 py-2.5 rounded-xl border border-border/60 bg-primary/5 text-sm font-semibold text-primary hover:bg-primary/10"
+                className="block px-4 py-3 rounded-xl bg-primary/5 text-[13px] font-bold text-primary hover:bg-primary/10 transition-colors"
               >
                 Mon Tableau de Bord
               </Link>
             ) : null}
-            <div className="pt-4 mt-4 border-t border-border space-y-3">
+            <div className="pt-4 mt-4 border-t border-gray-200 dark:border-slate-700 space-y-3">
               <SocialLinks size="md" className="justify-center gap-3 pt-1" />
-              <div className="border-t border-border" />
+              <div className="border-t border-gray-200 dark:border-slate-700" />
               <div className="space-y-2">
               {sessionLoading ? (
-                <div className="h-9 rounded-lg bg-gray-100 dark:bg-slate-800 animate-pulse" aria-hidden="true" />
+                <div className="h-10 rounded-xl bg-gray-100 dark:bg-slate-800 animate-pulse" aria-hidden="true" />
               ) : user ? (
                 <>
                   <button
@@ -226,7 +226,7 @@ export default function Header() {
                       handleLogout();
                       setOpen(false);
                     }}
-                    className="w-full text-left px-2 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-800 dark:text-gray-200"
+                    className="w-full text-left px-4 py-3 rounded-xl text-[13px] font-semibold text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 transition-colors"
                   >
                     Déconnexion
                   </button>
@@ -236,14 +236,14 @@ export default function Header() {
                   <Link
                     href="/login"
                     onClick={() => setOpen(false)}
-                    className="block px-2 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-800 dark:text-gray-200"
+                    className="block px-4 py-3 rounded-xl text-[13px] font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
                   >
                     Connexion
                   </Link>
                   <Link
                     href="/register"
                     onClick={() => setOpen(false)}
-                    className="block px-2 py-3 rounded-lg bg-primary text-white text-sm font-semibold text-center"
+                    className="block px-4 py-3 rounded-xl bg-primary text-white text-[13px] font-bold text-center shadow-md shadow-primary/20 active:scale-[0.98] transition-all"
                   >
                     Créer un compte
                   </Link>
