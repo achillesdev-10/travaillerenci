@@ -167,9 +167,7 @@ export default function CVGeneratorPage() {
   const exportPDF = async () => {
     setIsExporting(true);
     try {
-      // Précharger la photo de profil (URL publique Supabase) pour garantir
-      // son rendu dans le PDF — html2canvas re-déclenche le téléchargement
-      // avec CORS, la mise en cache évite les images manquantes.
+      // Précharger la photo de profil
       if (cvData.photoUrl) {
         await new Promise<void>((resolve) => {
           const img = new window.Image();
@@ -180,39 +178,21 @@ export default function CVGeneratorPage() {
         });
       }
 
+      // Sur mobile, l'onglet Éditer est actif par défaut et le CV preview
+      // est masqué via `hidden`. Pour garantir la capture, on bascule
+      // temporairement sur l'onglet Aperçu, on attend le rendu, puis on
+      // restaure l'état d'origine dans un finally.
+      const wasOnEdit = activeTab === 'edit';
+      if (wasOnEdit) {
+        setActiveTab('preview');
+        // Attendre 2 frames pour que React rende l'aperçu et le navigateur peigne
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      }
+
       const html2pdfModule = await import('html2pdf.js');
       const html2pdf = html2pdfModule.default;
       const element = document.getElementById('cv-preview');
       if (!element) throw new Error('Aperçu CV introuvable.');
-
-      // Sur mobile, le CV preview peut être masqué (hidden) — on le rend
-      // temporairement visible pour html2canvas puis on restaure l'état.
-      // On remonte le DOM pour trouver l'ancêtre qui contient la classe "hidden"
-      // exacte (pas un sous-ensemble comme "overflow-hidden").
-      let hiddenAncestor: HTMLElement | null = null;
-      let cursor: HTMLElement | null = element.parentElement;
-      while (cursor) {
-        if (
-          cursor.classList.contains('hidden') ||
-          cursor.className.split(/\s+/).some((c) => c === 'hidden')
-        ) {
-          hiddenAncestor = cursor;
-          break;
-        }
-        cursor = cursor.parentElement;
-      }
-      let previousAncestorClass = '';
-      if (hiddenAncestor) {
-        previousAncestorClass = hiddenAncestor.className;
-        hiddenAncestor.classList.remove('hidden');
-        // Forcer display:block pour contrer le display:none de .hidden
-        hiddenAncestor.style.display = '';
-        hiddenAncestor.offsetHeight; // force reflow
-      }
-
-      // Attendre un frame pour que le navigateur peigne l'élément rendu
-      // avant la capture html2canvas.
-      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
 
       const opt = {
         margin: 0 as any,
@@ -224,11 +204,8 @@ export default function CVGeneratorPage() {
       try {
         await html2pdf().set(opt as any).from(element).save();
       } finally {
-        // Restaurer l'état d'origine.
-        if (hiddenAncestor) {
-          hiddenAncestor.className = previousAncestorClass;
-          hiddenAncestor.style.display = '';
-        }
+        // Toujours restaurer l'onglet Éditer, même si save() échoue ou ne se résout pas.
+        if (wasOnEdit) setActiveTab('edit');
       }
     } catch (err) {
       console.error(err);
