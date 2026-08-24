@@ -40,9 +40,11 @@ export default defineConfig([
       "react/no-unescaped-entities": "off",
       // Nouvelles règles react-hooks v6 (React 19) très agressives : les
       // motifs existants (hydratation depuis localStorage, réponse à un
-      // changement de route) sont volontaires — signalés en warning, non bloquants.
+      // changement de route, debounce avec ref) sont volontaires — signalés
+      // en warning, non bloquants.
       "react-hooks/set-state-in-effect": "warn",
       "react-hooks/purity": "warn",
+      "react-hooks/refs": "warn",
       "@typescript-eslint/no-explicit-any": "off",
     },
   },

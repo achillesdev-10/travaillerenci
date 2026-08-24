@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useTransition, useMemo } from 'react';
+import { useState, useRef, useEffect, useTransition, useMemo } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { REGIONS_CI, JOB_TYPES } from '@/lib/constants';
 import { cn, debounce } from '@/lib/utils';
@@ -41,36 +41,31 @@ export default function SearchBar({
   const [contract, setContract] = useState(initialContract);
   const [isPending, startTransition] = useTransition();
 
-  // ── Refs for values captured in the debounced callback ──────────────────
-  // Les refs garantissent que le callback debounced a toujours accès aux
-  // valeurs les plus récentes sans recréer la fonction (et donc sans casser
-  // le timer du debounce à chaque render).
-  const searchParamsRef = useRef(searchParams);
-  searchParamsRef.current = searchParams;
-  const pathnameRef = useRef(pathname);
-  pathnameRef.current = pathname;
-  const compactRef = useRef(compact);
-  compactRef.current = compact;
-  const onSearchRef = useRef(onSearch);
-  onSearchRef.current = onSearch;
+  // ── Latest-values ref for the debounced callback ───────────────────────
+  // On stocke les valeurs "fraîches" dans un seul ref, mis à jour via
+  // useEffect (jamais pendant le render). Le debounce ne lit le ref que
+  // lorsqu'il se déclenche (setTimeout), donc hors render.
+  const latestRef = useRef({ searchParams, pathname, compact, onSearch });
+  useEffect(() => {
+    latestRef.current = { searchParams, pathname, compact, onSearch };
+  });
 
   // ── Debounced navigation — créé UNE SEULE FOIS ─────────────────────────
-  // Sans useMemo, debounce() serait rappelé à chaque render : chaque render
-  // créerait un nouveau timer, rendant le debounce totalement inefficace
-  // (inondation de router.push au lieu d'un seul appel après 350ms).
+  // Sans debounce, chaque keystroke déclencherait un router.push immédiat.
+  // Le debounce attend 350ms d'inactivité avant de naviguer.
   const pushFilters = useMemo(
     () =>
       debounce((q: string, c: string, ct: string) => {
-        const params = new URLSearchParams(searchParamsRef.current.toString());
+        const { searchParams: sp, pathname: pn, compact: cp, onSearch: os } = latestRef.current;
+        const params = new URLSearchParams(sp.toString());
         if (q) params.set('q', q); else params.delete('q');
         if (c) params.set('city', c); else params.delete('city');
         if (ct) params.set('contract', ct); else params.delete('contract');
         params.delete('page');
-        const next = `${pathnameRef.current}${params.toString() ? `?${params.toString()}` : ''}`;
-        startTransition(() => router.push(next, { scroll: compactRef.current ? false : true }));
-        if (onSearchRef.current) onSearchRef.current({ q, city: c, contract: ct });
+        const next = `${pn}${params.toString() ? `?${params.toString()}` : ''}`;
+        startTransition(() => router.push(next, { scroll: cp ? false : true }));
+        if (os) os({ q, city: c, contract: ct });
       }, 350),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [router, startTransition],
   );
 
