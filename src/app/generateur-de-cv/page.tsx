@@ -199,8 +199,11 @@ export default function CVGeneratorPage() {
         });
       }
 
-      const html2pdfModule = await import('html2pdf.js');
-      const html2pdf = html2pdfModule.default;
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import('html2canvas-pro'),
+        import('jspdf'),
+      ]);
+
       const element = document.getElementById('cv-preview');
       if (!element) throw new Error('Aperçu CV introuvable.');
 
@@ -211,15 +214,17 @@ export default function CVGeneratorPage() {
       element.style.transform = 'none';
       element.style.transformOrigin = 'top left';
 
-      const opt = {
-        margin: 0 as any,
-        filename: `CV_${cvData.fullName.replace(/\s+/g, '_') || 'travaillerenci'}.pdf`,
-        image: { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-        jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const },
-      };
       try {
-        await html2pdf().set(opt as any).from(element).save();
+        const canvas = await html2canvas(element, {
+          scale: 2,
+          useCORS: true,
+        });
+        const imgData = canvas.toDataURL('image/jpeg', 0.98);
+        const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`CV_${cvData.fullName.replace(/\s+/g, '_') || 'travaillerenci'}.pdf`);
       } finally {
         // Restaurer le transform scale d'origine
         element.style.transform = originalTransform;

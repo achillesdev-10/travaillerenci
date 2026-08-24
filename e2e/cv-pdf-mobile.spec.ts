@@ -67,7 +67,7 @@ test.describe('CV PDF export — mobile', () => {
     const downloadBtn = page.getByRole('button', { name: /Télécharger mon CV/i });
     await downloadBtn.click();
 
-    // Attendre que l'export se termine (html2pdf est asynchrone)
+    // Attendre que l'export se termine (html2canvas-pro + jspdf est asynchrone)
     await page.waitForTimeout(5000);
 
     // Aucune erreur JS critique (on exclut CORS / réseau — normales en dev)
