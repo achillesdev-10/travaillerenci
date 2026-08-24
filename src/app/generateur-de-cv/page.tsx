@@ -383,6 +383,7 @@ export default function CVGeneratorPage() {
                     }}
                   >
                     <div
+                      id="cv-preview"
                       ref={previewInnerRef}
                       style={{
                         width: PREVIEW_WIDTH_PX,

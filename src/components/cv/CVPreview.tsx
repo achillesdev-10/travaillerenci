@@ -10,7 +10,7 @@ interface CVPreviewProps {
 export default function CVPreview({ cvData }: CVPreviewProps) {
   return (
     <div
-      id="cv-preview"
+      data-cv-preview=""
       className="bg-white shadow-2xl mx-auto"
       style={{ width: '210mm', minHeight: '297mm', fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif" }}
     >
