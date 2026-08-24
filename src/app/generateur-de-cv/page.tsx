@@ -187,18 +187,32 @@ export default function CVGeneratorPage() {
 
       // Sur mobile, le CV preview peut être masqué (hidden) — on le rend
       // temporairement visible pour html2canvas puis on restaure l'état.
-      const parentHidden = element.closest('[class*="hidden"]') as HTMLElement | null;
-      let previousDisplay = '';
-      let previousParentDisplay = '';
-      if (element.style.display === 'none') {
-        previousDisplay = element.style.display;
-        element.style.display = '';
+      // On remonte le DOM pour trouver l'ancêtre qui contient la classe "hidden"
+      // exacte (pas un sous-ensemble comme "overflow-hidden").
+      let hiddenAncestor: HTMLElement | null = null;
+      let cursor: HTMLElement | null = element.parentElement;
+      while (cursor) {
+        if (
+          cursor.classList.contains('hidden') ||
+          cursor.className.split(/\s+/).some((c) => c === 'hidden')
+        ) {
+          hiddenAncestor = cursor;
+          break;
+        }
+        cursor = cursor.parentElement;
       }
-      if (parentHidden) {
-        previousParentDisplay = parentHidden.style.display;
-        parentHidden.style.display = 'block';
-        parentHidden.classList.remove('hidden');
+      let previousAncestorClass = '';
+      if (hiddenAncestor) {
+        previousAncestorClass = hiddenAncestor.className;
+        hiddenAncestor.classList.remove('hidden');
+        // Forcer display:block pour contrer le display:none de .hidden
+        hiddenAncestor.style.display = '';
+        hiddenAncestor.offsetHeight; // force reflow
       }
+
+      // Attendre un frame pour que le navigateur peigne l'élément rendu
+      // avant la capture html2canvas.
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
 
       const opt = {
         margin: 0 as any,
@@ -211,10 +225,9 @@ export default function CVGeneratorPage() {
         await html2pdf().set(opt as any).from(element).save();
       } finally {
         // Restaurer l'état d'origine.
-        if (previousDisplay) element.style.display = previousDisplay;
-        if (parentHidden && previousParentDisplay !== undefined) {
-          parentHidden.style.display = previousParentDisplay;
-          parentHidden.classList.add('hidden');
+        if (hiddenAncestor) {
+          hiddenAncestor.className = previousAncestorClass;
+          hiddenAncestor.style.display = '';
         }
       }
     } catch (err) {
