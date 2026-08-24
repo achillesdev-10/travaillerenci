@@ -4,10 +4,8 @@ import type { Metadata } from 'next';
 import { ArticleService } from '@/services/articleService';
 import CoverImage from '@/components/content/CoverImage';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
-import type { Article } from '@/types/article';
 import { formatDate, formatRelativeTime, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
-import { IMAGES } from '@/lib/images';
 
 export const revalidate = 300;
 

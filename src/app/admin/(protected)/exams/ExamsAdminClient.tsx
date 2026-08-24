@@ -123,7 +123,7 @@ export default function ExamsAdminClient({
   const [, startTransition] = useTransition();
 
   const [exams, setExams] = useState<Exam[]>(initialExams);
-  const [stats, setStats] = useState(initialStats);
+  const [stats] = useState(initialStats);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<ExamStatus | 'all'>('pending');
   const [categoryFilter, setCategoryFilter] = useState<ExamCategory | 'all'>('all');
@@ -162,17 +162,6 @@ export default function ExamsAdminClient({
   }
   function redirectToLogin() {
     router.replace('/admin/login?next=/admin/exams');
-  }
-
-  function applyLocal(exam: Exam) {
-    setExams((prev) => prev.map((e) => (e.id === exam.id ? exam : e)));
-    setStats((prev) => ({
-      ...prev,
-      total: Math.max(0, prev.total),
-      published:
-        prev.published + (exam.status === 'published' && !prev ? 0 : 0),
-    }));
-    startTransition(() => router.refresh());
   }
 
   async function handleUpdateStatus(exam: Exam, newStatus: ExamStatus) {

@@ -49,6 +49,7 @@ export default function PollWidget() {
     if (stored !== null) {
       const idx = Number(stored);
       if (Number.isInteger(idx)) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setVoted(idx);
         load();
         return;

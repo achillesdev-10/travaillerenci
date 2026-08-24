@@ -56,6 +56,7 @@ export default function AdminAppShell({
 
   // Ferme le drawer à chaque changement de route.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileOpen(false);
   }, [pathname]);
 

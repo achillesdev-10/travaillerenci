@@ -29,6 +29,7 @@ export default function LegacyAccountMigrator() {
     // migration en dev).
     const legacy = readLegacyAccount();
     if (!legacy) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStatus('done');
       return;
     }

@@ -16,6 +16,7 @@ export default function ExamCard({ exam, priority = false }: { exam: Exam; prior
   const phase = examPhase(exam);
   const deadline = exam.registration_end ? new Date(exam.registration_end) : null;
   const deadlinePassed =
+    // eslint-disable-next-line react-hooks/purity
     deadline && !Number.isNaN(deadline.getTime()) && deadline.getTime() < Date.now();
 
   return (

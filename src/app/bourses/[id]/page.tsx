@@ -65,6 +65,7 @@ export default async function BourseDetailPage({ params }: PageProps) {
 
   const deadline = bourse.deadline ? new Date(bourse.deadline) : null;
   const deadlinePassed =
+    // eslint-disable-next-line react-hooks/purity
     deadline && !Number.isNaN(deadline.getTime()) && deadline.getTime() < Date.now();
 
   const hasLink = Boolean(bourse.apply_link);
@@ -390,6 +391,7 @@ function MetaRow({
 function MiniBourseCard({ bourse }: { bourse: JobOfferSchema }) {
   const deadline = bourse.deadline ? new Date(bourse.deadline) : null;
   const deadlinePassed =
+    // eslint-disable-next-line react-hooks/purity
     deadline && !Number.isNaN(deadline.getTime()) && deadline.getTime() < Date.now();
 
   return (

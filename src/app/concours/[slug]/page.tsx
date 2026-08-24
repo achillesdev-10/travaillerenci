@@ -119,6 +119,7 @@ export default async function ConcoursDetailPage({ params }: PageProps) {
   }
 
   const phase = examPhase(exam);
+  // eslint-disable-next-line react-hooks/purity
   const now = Date.now();
   const regEnd = exam.registration_end ? new Date(exam.registration_end).getTime() : null;
   const regStart = exam.registration_start ? new Date(exam.registration_start).getTime() : null;

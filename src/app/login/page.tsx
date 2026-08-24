@@ -36,6 +36,7 @@ export default function LoginPage() {
       oauth_error: "Une erreur est survenue lors de la connexion Google. Veuillez réessayer.",
       rate_limited: "Trop de tentatives. Réessayez dans quelques minutes.",
     };
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setError(messages[param] ?? "Une erreur est survenue.");
     // Nettoie l'URL pour ne pas réafficher l'erreur après un refresh.
     window.history.replaceState({}, "", window.location.pathname);

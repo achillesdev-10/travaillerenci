@@ -14,7 +14,6 @@ import { useTransition } from 'react';
 import {
   DIPLOMA_FILTERS,
   EXAM_CATEGORIES,
-  EXAM_PHASE_LABEL,
 } from '@/lib/examConstants';
 import { cn } from '@/lib/utils';
 

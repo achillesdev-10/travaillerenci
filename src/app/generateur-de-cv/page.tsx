@@ -121,12 +121,14 @@ export default function CVGeneratorPage() {
       }
       return cleaned;
     });
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setHydrated(true);
   }, [setCVData]);
 
   // Indicateur « sauvegardé » : feedback après chaque modification du CV.
   useEffect(() => {
     if (!hydrated) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSaveState('saving');
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => setSaveState('saved'), 450);

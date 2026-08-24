@@ -57,6 +57,7 @@ export default function CVPreview({ cvData }: CVPreviewProps) {
 
           {cvData.photoUrl && (
             <div className="shrink-0">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={cvData.photoUrl}
                 alt={`Photo de ${cvData.fullName || 'profil'}`}

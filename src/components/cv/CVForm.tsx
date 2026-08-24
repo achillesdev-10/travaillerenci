@@ -186,6 +186,7 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
           <div className="relative shrink-0">
             <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-primary/15 bg-gray-100 dark:bg-slate-800 shadow-inner flex items-center justify-center">
               {cvData.photoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={cvData.photoUrl}
                   alt="Photo de profil"

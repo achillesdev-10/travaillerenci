@@ -17,7 +17,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { ArticleService } from '@/services/articleService';
-import { isSupabaseConfigured } from '@/lib/supabase';
 import type { ArticleCategory } from '@/types/article';
 
 // ---------------------------------------------------------------------------
@@ -51,17 +50,7 @@ export async function GET(request: NextRequest) {
 // POST — Pipeline CRON : scrape → réécriture IA → insertion
 // ---------------------------------------------------------------------------
 
-/**
- * Tokens de source autorisés (URLs de scraping emploi CI).
- * En production, ces URLs pointent vers les pages RSS ou pages d'emploi
- * ciblées du marché ivoirien.
- */
-const SCRAPE_SOURCES = [
-  { url: 'https://www.emploi.ci', category: 'emploi' as const },
-  { url: 'https://www.jumboemploi.com', category: 'emploi' as const },
-  { url: 'https://www.joboneyci.com', category: 'emploi' as const },
-  { url: 'https://www.afriqueorientation.net', category: 'formation' as const },
-];
+
 
 interface ScrapedArticle {
   title: string;

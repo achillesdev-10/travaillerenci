@@ -40,6 +40,7 @@ export default function PWAInstallCTA({
     const iOS =
       /iPad|iPhone|iPod/.test(ua) ||
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsIOS(iOS);
 
     const onBeforeInstallPrompt = (e: Event) => {

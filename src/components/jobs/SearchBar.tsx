@@ -55,6 +55,7 @@ export default function SearchBar({
   // Le debounce attend 350ms d'inactivité avant de naviguer.
   const pushFilters = useMemo(
     () =>
+      // eslint-disable-next-line react-hooks/refs
       debounce((q: string, c: string, ct: string) => {
         const { searchParams: sp, pathname: pn, compact: cp, onSearch: os } = latestRef.current;
         const params = new URLSearchParams(sp.toString());

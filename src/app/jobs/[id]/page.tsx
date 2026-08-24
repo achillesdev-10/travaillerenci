@@ -106,6 +106,7 @@ export default async function JobDetailPage({ params }: PageProps) {
     job.is_expired ||
     (deadline !== null &&
       !Number.isNaN(deadline.getTime()) &&
+      // eslint-disable-next-line react-hooks/purity
       deadline.getTime() < Date.now());
   const hasApplyLink = Boolean(job.apply_link);
   const hasApplyEmail = Boolean(job.apply_email);

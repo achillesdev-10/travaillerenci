@@ -10,7 +10,6 @@ import ConcoursFilters from '@/components/concours/ConcoursFilters';
 import ConcoursTabSection from './_components/ConcoursTabSection';
 import PWAInstallCTA from '@/components/concours/PWAInstallCTA';
 import {
-  DIPLOMA_FILTERS,
   EXAM_CATEGORIES,
   EXAM_CATEGORY_LABEL,
   EXAM_PHASE_LABEL,
@@ -72,14 +71,6 @@ const VALID_PHASES = new Set<string>([
   ...Object.keys(PHASE_GROUPS),
 ]);
 
-const PHASE_OPTIONS: { value: ExamPhase | ''; label: string }[] = [
-  { value: '', label: 'Tous' },
-  { value: 'upcoming', label: 'À venir' },
-  { value: 'open', label: 'Inscriptions ouvertes' },
-  { value: 'ongoing', label: 'En cours' },
-  { value: 'results', label: 'Résultats publiés' },
-  { value: 'closed', label: 'Clos' },
-];
 
 interface ConcoursPageProps {
   searchParams: Promise<{
@@ -104,7 +95,7 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
   const activeTab = sp.tab || 'concours';
   const page = Math.max(1, Number(sp.page) || 1);
 
-  const [organizers, all] = await Promise.all([
+  const [, all] = await Promise.all([
     ExamService.listOrganizers(),
     ExamService.list({
       keyword,

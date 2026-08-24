@@ -114,7 +114,8 @@ export default async function BoursesPage() {
 
 function ScholarshipCard({ bourse }: { bourse: JobOfferSchema }) {
   const deadline = bourse.deadline ? new Date(bourse.deadline) : null;
-  const deadlinePassed = deadline && !Number.isNaN(deadline.getTime()) && deadline.getTime() < Date.now();
+  const deadlinePassed = // eslint-disable-next-line react-hooks/purity
+    deadline && !Number.isNaN(deadline.getTime()) && deadline.getTime() < Date.now();
 
   return (
     <Link

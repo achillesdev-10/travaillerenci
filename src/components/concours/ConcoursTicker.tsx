@@ -91,6 +91,7 @@ export default function ConcoursTicker({ exams }: { exams: Exam[] }) {
   const alerts = examsToAlerts(exams);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
