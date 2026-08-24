@@ -185,14 +185,31 @@ export default function CVGeneratorPage() {
       const wasOnEdit = activeTab === 'edit';
       if (wasOnEdit) {
         setActiveTab('preview');
-        // Attendre 2 frames pour que React rende l'aperçu et le navigateur peigne
-        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        // Attendre que l'élément #cv-preview soit réellement présent et visible
+        // dans le DOM (2 frames ne suffisent pas toujours sur mobile).
+        await new Promise<void>((resolve) => {
+          let tries = 0;
+          const check = () => {
+            const el = document.getElementById('cv-preview');
+            if (el && el.offsetHeight > 0) return resolve();
+            if (++tries > 30) return resolve(); // sécurité : max 500ms
+            requestAnimationFrame(check);
+          };
+          requestAnimationFrame(check);
+        });
       }
 
       const html2pdfModule = await import('html2pdf.js');
       const html2pdf = html2pdfModule.default;
       const element = document.getElementById('cv-preview');
       if (!element) throw new Error('Aperçu CV introuvable.');
+
+      // Retirer temporairement le transform scale pour que html2canvas
+      // capture le CV à sa taille réelle A4 (794px) et non à l'échelle réduite.
+      const originalTransform = element.style.transform;
+      const originalTransformOrigin = element.style.transformOrigin;
+      element.style.transform = 'none';
+      element.style.transformOrigin = 'top left';
 
       const opt = {
         margin: 0 as any,
@@ -204,6 +221,9 @@ export default function CVGeneratorPage() {
       try {
         await html2pdf().set(opt as any).from(element).save();
       } finally {
+        // Restaurer le transform scale d'origine
+        element.style.transform = originalTransform;
+        element.style.transformOrigin = originalTransformOrigin;
         // Toujours restaurer l'onglet Éditer, même si save() échoue ou ne se résout pas.
         if (wasOnEdit) setActiveTab('edit');
       }
