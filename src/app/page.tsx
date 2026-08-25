@@ -11,6 +11,8 @@ import NewsTicker, { type TickerItem } from '@/components/home/NewsTicker';
 import HomeCarousel from '@/components/home/HomeCarousel';
 import PollWidget from '@/components/home/PollWidget';
 import OffersGrid from '@/components/home/OffersGrid';
+import ScrollingOffers from '@/components/home/ScrollingOffers';
+import ForumSection from '@/components/home/ForumSection';
 import SocialLinks from '@/components/layout/SocialLinks';
 import { buildCarouselSlides } from '@/lib/homeCarousel';
 import { IMAGES, LOCAL_IMAGES } from '@/lib/images';
@@ -529,6 +531,19 @@ export default async function HomePage({
             </Link>
           ))}
         </div>
+      </section>
+
+      {/* ======================================================================== */}
+      {/*   FORUM / Q&A — Questions de la communauté                              */}
+      {/* ======================================================================== */}
+      <ForumSection />
+
+      {/* ======================================================================== */}
+      {/*   DÉFILANT D'OFFRES — carrousel horizontal qui défile lentement          */}
+      {/* ======================================================================== */}
+      <section className="container mx-auto px-4 mt-10 sm:mt-14 max-w-6xl">
+        <SectionHeading kicker="À découvrir" title="Offres qui défilent" />
+        <ScrollingOffers offers={jobsList.slice(0, 20)} />
       </section>
 
       {/* ======================================================================== */}

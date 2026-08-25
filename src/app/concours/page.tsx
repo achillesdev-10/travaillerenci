@@ -148,13 +148,13 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
     <main className="flex-1 min-h-screen bg-gray-50 py-8 transition-colors dark:bg-slate-950 sm:py-12">
       <div className="container mx-auto max-w-6xl px-4">
         {/* ===================== HÉRO ===================== */}
-        <section className="relative overflow-hidden mb-6 rounded-3xl bg-primary text-white shadow-2xl shadow-primary/20">
+        <section className="relative overflow-hidden mb-6 rounded-3xl bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 shadow-lg">
           <div
-            className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-orange-400/30 blur-3xl"
+            className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-orange-400/10 blur-3xl"
             aria-hidden="true"
           />
           <div
-            className="pointer-events-none absolute -bottom-32 -left-16 h-80 w-80 rounded-full bg-emerald-300/20 blur-3xl"
+            className="pointer-events-none absolute -bottom-32 -left-16 h-80 w-80 rounded-full bg-emerald-300/10 blur-3xl"
             aria-hidden="true"
           />
 
@@ -162,21 +162,21 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
             <div>
               <nav
                 aria-label="Fil d'Ariane"
-                className="mb-5 text-sm text-white/70"
+                className="mb-5 text-sm text-gray-500 dark:text-gray-400"
               >
-                <Link href="/" className="hover:text-white">Accueil</Link>
+                <Link href="/" className="hover:text-primary">Accueil</Link>
                 <span className="mx-2" aria-hidden="true">/</span>
-                <span className="font-medium text-white">Concours administratifs</span>
+                <span className="font-medium text-gray-900 dark:text-white">Concours administratifs</span>
               </nav>
 
               <div className="mb-4 flex flex-wrap gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold backdrop-blur-sm border border-white/20">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold text-primary dark:text-emerald-400 border border-primary/20">
                   <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
                     <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   Sources officielles
                 </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold backdrop-blur-sm border border-white/20">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-500/10 px-3 py-1 text-[11px] font-bold text-orange-600 dark:text-orange-400 border border-orange-500/20">
                   <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
                     <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
@@ -184,29 +184,51 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
                 </span>
               </div>
 
-              <h1 className="mb-4 font-[var(--font-display)] text-3xl font-extrabold leading-tight sm:text-4xl lg:text-5xl">
+              <h1 className="mb-4 font-[var(--font-display)] text-3xl font-extrabold leading-tight sm:text-4xl lg:text-5xl text-gray-900 dark:text-white">
                 Concours administratifs en Côte d&apos;Ivoire
               </h1>
-              <p className="max-w-xl text-base text-white/85 sm:text-lg">
-                Retrouvez les concours <strong className="text-white">en cours</strong> et{' '}
-                <strong className="text-white">à venir</strong> de la fonction publique et des
+              <p className="max-w-xl text-base text-gray-600 dark:text-gray-300 sm:text-lg">
+                Retrouvez les concours <strong className="text-gray-900 dark:text-white">en cours</strong> et{' '}
+                <strong className="text-gray-900 dark:text-white">à venir</strong> de la fonction publique et des
                 grandes écoles ivoiriennes (ENA, INFAS, CAFOP, gendarmerie…), alimentés
                 directement depuis les sources officielles.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3">
                 <div>
-                  <div className="font-[var(--font-display)] text-2xl font-black">{totalRecensed}</div>
-                  <div className="text-[11px] uppercase tracking-widest text-white/70">concours recensés</div>
+                  <div className="font-[var(--font-display)] text-2xl font-black text-gray-900 dark:text-white">{totalRecensed}</div>
+                  <div className="text-[11px] uppercase tracking-widest text-gray-500 dark:text-gray-400">concours recensés</div>
                 </div>
                 <div>
-                  <div className="font-[var(--font-display)] text-2xl font-black">10+</div>
-                  <div className="text-[11px] uppercase tracking-widest text-white/70">sources officielles</div>
+                  <div className="font-[var(--font-display)] text-2xl font-black text-gray-900 dark:text-white">10+</div>
+                  <div className="text-[11px] uppercase tracking-widest text-gray-500 dark:text-gray-400">sources officielles</div>
                 </div>
                 <div>
-                  <div className="font-[var(--font-display)] text-2xl font-black">100 %</div>
-                  <div className="text-[11px] uppercase tracking-widest text-white/70">relu avant publication</div>
+                  <div className="font-[var(--font-display)] text-2xl font-black text-gray-900 dark:text-white">100 %</div>
+                  <div className="text-[11px] uppercase tracking-widest text-gray-500 dark:text-gray-400">relu avant publication</div>
                 </div>
+              </div>
+
+              {/* CTA S'inscrire */}
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link
+                  href="/register"
+                  className="inline-flex items-center gap-2 rounded-xl bg-primary text-white px-6 py-3 text-sm font-bold shadow-md shadow-primary/20 hover:bg-primary-dark hover:shadow-lg transition-all"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <line x1="19" y1="8" x2="19" y2="14" />
+                    <line x1="22" y1="11" x2="16" y2="11" />
+                  </svg>
+                  S'inscrire — c'est gratuit
+                </Link>
+                <Link
+                  href="/jobs"
+                  className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 px-5 py-3 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-700 transition-all"
+                >
+                  Voir les offres d'emploi
+                </Link>
               </div>
             </div>
 

@@ -8,6 +8,12 @@ interface CVPreviewProps {
 }
 
 export default function CVPreview({ cvData }: CVPreviewProps) {
+  // Default generic skill levels for display
+  const skillLevels = [
+    95, 90, 85, 80, 75, 70, 88, 82, 78, 92,
+    87, 73, 83, 76, 91, 84, 79, 86, 74, 81,
+  ];
+
   return (
     <div
       data-cv-preview=""
@@ -21,32 +27,32 @@ export default function CVPreview({ cvData }: CVPreviewProps) {
         }
       `}</style>
 
-      {/* ── En-tête coloré ── */}
-      <header className="bg-[#1a2744] text-white px-[18mm] pt-[16mm] pb-[12mm]">
+      {/* ── En-tête propre sans fond coloré ── */}
+      <header className="px-[18mm] pt-[16mm] pb-[8mm] border-b-2 border-gray-200">
         <div className="flex items-start gap-6">
           {cvData.photoUrl ? (
-            <div className="shrink-0 w-20 h-20 rounded-full overflow-hidden border-[3px] border-white/20 shadow-lg">
+            <div className="shrink-0 w-[72px] h-[72px] rounded-full overflow-hidden border-2 border-gray-200 shadow-sm">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={cvData.photoUrl}
                 alt={`Photo de ${cvData.fullName || 'profil'}`}
                 crossOrigin={cvData.photoUrl.startsWith('http') ? 'anonymous' : undefined}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover object-top"
               />
             </div>
           ) : (
-            <div className="shrink-0 w-20 h-20 rounded-full bg-white/10 flex items-center justify-center text-2xl font-bold border-[3px] border-white/20">
+            <div className="shrink-0 w-[72px] h-[72px] rounded-full bg-gray-100 flex items-center justify-center text-xl font-bold text-gray-400 border-2 border-gray-200">
               {(cvData.fullName || '?').charAt(0).toUpperCase()}
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <h1 className="text-[22px] font-extrabold tracking-tight leading-tight">
+            <h1 className="text-[20px] font-extrabold tracking-tight leading-tight text-gray-900">
               {cvData.fullName || 'Votre Nom Complet'}
             </h1>
-            <p className="text-[13px] font-semibold text-emerald-300 mt-1 uppercase tracking-[0.12em]">
+            <p className="text-[12px] font-semibold text-primary mt-1 uppercase tracking-[0.1em]">
               {cvData.jobTitle || 'Titre du poste recherché'}
             </p>
-            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-white/70">
+            <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-gray-500">
               {cvData.email && <span>{cvData.email}</span>}
               {cvData.phone && <span>{cvData.phone}</span>}
               {cvData.city && <span>{cvData.city}</span>}
@@ -56,13 +62,13 @@ export default function CVPreview({ cvData }: CVPreviewProps) {
       </header>
 
       {/* ── Corps ── */}
-      <div className="px-[18mm] py-[10mm]">
+      <div className="px-[18mm] py-[8mm]">
 
         {/* Profil */}
         {cvData.summary && (
-          <section className="mb-6">
+          <section className="mb-5">
             <SectionTitle label="Profil" />
-            <p className="text-[11px] text-gray-600 leading-relaxed mt-2 whitespace-pre-wrap">
+            <p className="text-[10.5px] text-gray-600 leading-relaxed mt-2 whitespace-pre-wrap">
               {cvData.summary}
             </p>
           </section>
@@ -70,17 +76,17 @@ export default function CVPreview({ cvData }: CVPreviewProps) {
 
         {/* Expériences */}
         {cvData.experiences.length > 0 && (
-          <section className="mb-6">
+          <section className="mb-5">
             <SectionTitle label="Expériences professionnelles" />
-            <div className="space-y-4 mt-2">
+            <div className="space-y-3.5 mt-2">
               {cvData.experiences.map((exp) => (
                 <div key={exp.id}>
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <h3 className="text-[12px] font-bold text-gray-900 leading-tight">
+                      <h3 className="text-[11.5px] font-bold text-gray-900 leading-tight">
                         {exp.position || 'Poste'}
                       </h3>
-                      <p className="text-[11px] font-semibold text-[#1a2744]">
+                      <p className="text-[10.5px] font-semibold text-primary">
                         {exp.company || 'Entreprise'}
                       </p>
                     </div>
@@ -89,7 +95,7 @@ export default function CVPreview({ cvData }: CVPreviewProps) {
                     </span>
                   </div>
                   {exp.description && (
-                    <p className="mt-1.5 text-[10.5px] text-gray-600 leading-relaxed whitespace-pre-wrap">
+                    <p className="mt-1.5 text-[10px] text-gray-600 leading-relaxed whitespace-pre-wrap">
                       {exp.description}
                     </p>
                   )}
@@ -101,16 +107,16 @@ export default function CVPreview({ cvData }: CVPreviewProps) {
 
         {/* Formations */}
         {cvData.educations.length > 0 && (
-          <section className="mb-6">
+          <section className="mb-5">
             <SectionTitle label="Formation" />
-            <div className="space-y-3 mt-2">
+            <div className="space-y-2.5 mt-2">
               {cvData.educations.map((edu) => (
                 <div key={edu.id} className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <h3 className="text-[11px] font-bold text-gray-900">
                       {edu.degree || 'Diplôme'}
                     </h3>
-                    <p className="text-[10px] text-gray-500">{edu.school || 'École'}</p>
+                    <p className="text-[9.5px] text-gray-500">{edu.school || 'École'}</p>
                   </div>
                   <span className="text-[9px] font-semibold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full whitespace-nowrap mt-0.5 shrink-0">
                     {edu.year}
@@ -121,18 +127,26 @@ export default function CVPreview({ cvData }: CVPreviewProps) {
           </section>
         )}
 
-        {/* Compétences */}
+        {/* Compétences — barres de progression */}
         {cvData.skills.length > 0 && (
           <section className="mb-4">
             <SectionTitle label="Compétences" />
-            <div className="flex flex-wrap gap-1.5 mt-2">
-              {cvData.skills.map((skill) => (
-                <span
-                  key={skill}
-                  className="px-2.5 py-1 rounded-full bg-[#1a2744]/8 text-[10px] font-semibold text-[#1a2744] border border-[#1a2744]/15"
-                >
-                  {skill}
-                </span>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-2.5 mt-2">
+              {cvData.skills.map((skill, idx) => (
+                <div key={skill}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] font-semibold text-gray-800">{skill}</span>
+                    <span className="text-[9px] text-gray-400 font-medium">
+                      {skillLevels[idx % skillLevels.length]}%
+                    </span>
+                  </div>
+                  <div className="h-[5px] bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full"
+                      style={{ width: `${skillLevels[idx % skillLevels.length]}%` }}
+                    />
+                  </div>
+                </div>
               ))}
             </div>
           </section>
@@ -154,7 +168,7 @@ export default function CVPreview({ cvData }: CVPreviewProps) {
 /* ── Sous-composant ── */
 function SectionTitle({ label }: { label: string }) {
   return (
-    <h2 className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#1a2744] border-b-2 border-[#1a2744] pb-1.5">
+    <h2 className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.14em] text-gray-900 border-b-2 border-gray-900 pb-1.5">
       {label}
     </h2>
   );

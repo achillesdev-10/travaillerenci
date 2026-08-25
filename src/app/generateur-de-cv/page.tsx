@@ -339,7 +339,7 @@ export default function CVGeneratorPage() {
                 alt="Générateur de CV IA - travaillerenci"
                 fill
                 sizes="(min-width: 1024px) 420px, 100vw"
-                className="object-cover"
+                className="object-cover object-top"
               />
               <div className="absolute inset-0 bg-gradient-to-tr from-emerald-950/60 via-transparent to-transparent" aria-hidden="true" />
             </div>
@@ -420,6 +420,19 @@ export default function CVGeneratorPage() {
                     </div>
                   </div>
                 </div>
+              </div>
+              {/* Bouton de téléchargement sous le CV */}
+              <div className="mt-4 text-center">
+                <button
+                  onClick={exportPDF}
+                  disabled={isExporting || !hydrated}
+                  className="px-6 py-3 rounded-xl bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary-dark hover:shadow-xl transition-all disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  {isExporting ? 'Génération…' : 'Télécharger le CV (PDF)'}
+                </button>
               </div>
             </div>
           </div>

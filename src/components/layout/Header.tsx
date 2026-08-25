@@ -6,16 +6,15 @@ import { cn } from '@/lib/utils';
 import { useDarkMode } from '@/hooks/useDarkMode';
 import { fetchCurrentUser, logoutCurrentUser, type StoredUser } from '@/lib/clientAuth';
 import SocialLinks from '@/components/layout/SocialLinks';
-import InstallPrompt from '@/components/layout/InstallPrompt';
 
 const NAV_LINKS = [
   { label: 'Accueil', href: '/' },
   { label: 'Offres d\'emploi', href: '/jobs' },
-  { label: 'Entreprises', href: '/companies' },
-  { label: 'Candidats', href: '/candidates' },
-  { label: 'Bourses d\'études', href: '/bourses' },
-  { label: 'Concours admin.', href: '/concours' },
-  { label: 'Générateur CV', href: '/generateur-de-cv' },
+  { label: 'Stages', href: '/stages' },
+  { label: 'Concours', href: '/concours' },
+  { label: 'Bourse d\'études', href: '/bourses' },
+  { label: 'Mon CV Pro', href: '/generateur-de-cv' },
+  { label: 'Conseils', href: '/blog' },
 ];
 
 export default function Header() {
@@ -102,8 +101,17 @@ export default function Header() {
           </nav>
 
           <div className="hidden lg:flex items-center gap-2">
-            {/* PWA : installation de l'application */}
-            <InstallPrompt />
+            {/* Recherche */}
+            <Link
+              href="/jobs"
+              aria-label="Rechercher"
+              className="p-2 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 hover:border-gray-300 dark:hover:border-slate-600 transition-all duration-200"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+            </Link>
             {/* Réseaux sociaux */}
             <SocialLinks size="sm" className="gap-1.5 mr-1" />
             {/* Bouton Mode Sombre */}
@@ -159,8 +167,17 @@ export default function Header() {
           </div>
 
           <div className="flex items-center gap-2 lg:hidden">
-            {/* PWA : installation de l'application (compact sur mobile) */}
-            <InstallPrompt compact />
+            {/* Recherche (compact sur mobile) */}
+            <Link
+              href="/jobs"
+              aria-label="Rechercher"
+              className="p-2 rounded-xl border border-border bg-gray-50 dark:bg-slate-800 text-gray-700 dark:text-gray-300"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+            </Link>
             <button
               onClick={toggleDarkMode}
               aria-label="Basculer le mode sombre"

@@ -23,9 +23,9 @@ export default function Footer() {
             </div>
             <div>
               <div className="text-base font-black font-[var(--font-display)] text-white leading-none">
-                <span className="text-orange-400">Travailler</span>
+                <span className="text-white">Travailler</span>
                 <span className="text-white">En</span>
-                <span className="text-primary">Ci</span>
+                <span className="text-white">Ci</span>
               </div>
               <div className="text-[9px] uppercase tracking-widest text-gray-500 mt-0.5">
                 L’emploi en Côte d’Ivoire
