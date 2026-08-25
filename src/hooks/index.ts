@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
+export { useAuth } from '@/hooks/useAuth';
+export type { UseAuthReturn, StoredUser, AuthRole } from '@/hooks/useAuth';
+
 export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((prev: T) => T)) => void] {
   const [stored, setStored] = useState<T>(() => {
     if (typeof window === 'undefined') return initialValue;
