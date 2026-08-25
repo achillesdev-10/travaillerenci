@@ -97,6 +97,46 @@ export default async function BourseDetailPage({ params }: PageProps) {
     .slice(0, 3);
 
   const canonicalUrl = `${getSiteUrl()}/bourses/${bourse.id}`;
+
+  // EducationalOccupationalProgram — schema.org pour les bourses d'études.
+  // Google for Jobs ne indexe pas les bourses, mais ce schéma améliore
+  // le rich snippet dans les résultats de recherche classiques.
+  const posted = new Date(bourse.created_at);
+  const datePostedIso =
+    !Number.isNaN(posted.getTime()) && bourse.created_at.includes('T')
+      ? bourse.created_at
+      : !Number.isNaN(posted.getTime())
+        ? posted.toISOString()
+        : undefined;
+
+  const educationalProgramJsonLd: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'EducationalOccupationalProgram',
+    name: bourse.title,
+    description: (bourse.seo_description || bourse.description || '').replace(/\*\*/g, '').replace(/#/g, ' '),
+    provider: {
+      '@type': 'Organization',
+      name: bourse.company,
+    },
+    ...(bourse.location
+      ? {
+          location: {
+            '@type': 'Place',
+            address: {
+              '@type': 'PostalAddress',
+              addressLocality: bourse.location,
+              addressCountry: 'CI',
+            },
+          },
+        }
+      : {}),
+    ...(datePostedIso ? { datePosted: datePostedIso } : {}),
+    ...(bourse.deadline
+      ? { validThrough: new Date(bourse.deadline).toISOString() }
+      : {}),
+    ...(bourse.apply_link ? { url: bourse.apply_link } : { url: canonicalUrl }),
+  };
+
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -109,6 +149,10 @@ export default async function BourseDetailPage({ params }: PageProps) {
 
   return (
     <main className="flex-1 min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(educationalProgramJsonLd) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
