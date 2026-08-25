@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import EmailVerificationBanner from '@/components/dashboard/EmailVerificationBanner';
 
 export const dynamic = "force-dynamic";
@@ -20,63 +21,45 @@ export default function CompanyDashboardPage() {
           </p>
         </div>
 
-        <a
-          href="/admin/jobs"
+        <Link
+          href="/dashboard/company/jobs/new"
           className="rounded-2xl bg-primary text-white px-5 py-3 text-xs font-bold hover:brightness-110 transition-all shadow-lg shadow-primary/20 text-center"
         >
           + Publier une offre
-        </a>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div className="rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 shadow-xl">
-          <div className="text-xs uppercase tracking-wider font-semibold text-gray-500 dark:text-slate-400">Offres publiées</div>
-          <div className="text-3xl font-black text-gray-900 dark:text-white mt-2">2</div>
-          <div className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">Actives et visibles</div>
-        </div>
+        <Link
+          href="/dashboard/company/jobs"
+          className="rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 shadow-xl hover:border-primary/30 hover:shadow-md transition-all"
+        >
+          <div className="text-xs uppercase tracking-wider font-semibold text-gray-500 dark:text-slate-400">Mes offres</div>
+          <div className="text-3xl font-black text-primary dark:text-emerald-400 mt-2">→</div>
+          <div className="text-xs text-primary dark:text-emerald-400 mt-1 font-semibold">Gérer mes offres</div>
+        </Link>
 
         <div className="rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 shadow-xl">
           <div className="text-xs uppercase tracking-wider font-semibold text-gray-500 dark:text-slate-400">Candidatures reçues</div>
-          <div className="text-3xl font-black text-gray-900 dark:text-white mt-2">14</div>
-          <div className="text-xs text-primary mt-1">+5 cette semaine</div>
+          <div className="text-3xl font-black text-gray-900 dark:text-white mt-2">—</div>
+          <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">Bientôt disponible</div>
         </div>
 
-        <div className="rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 shadow-xl">
-          <div className="text-xs uppercase tracking-wider font-semibold text-gray-500 dark:text-slate-400">Vues totales des offres</div>
-          <div className="text-3xl font-black text-gray-900 dark:text-white mt-2">380</div>
-          <div className="text-xs text-gray-500 dark:text-slate-400 mt-1">Engagement élevé</div>
-        </div>
+        <Link
+          href="/dashboard/company/jobs/new"
+          className="rounded-3xl border border-primary/30 dark:border-primary/20 bg-primary/5 dark:bg-primary/10 p-6 shadow-xl hover:shadow-md transition-all"
+        >
+          <div className="text-xs uppercase tracking-wider font-semibold text-primary dark:text-emerald-400">Nouvelle offre</div>
+          <div className="text-3xl font-black text-primary dark:text-emerald-400 mt-2">+</div>
+          <div className="text-xs text-primary dark:text-emerald-400 mt-1 font-semibold">Publier maintenant</div>
+        </Link>
       </div>
 
-      <div className="rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 lg:p-8 shadow-xl space-y-6">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white">Dernières candidatures reçues</h2>
-        <div className="divide-y divide-gray-100 dark:divide-slate-800 text-sm">
-          <div className="py-4 flex items-center justify-between">
-            <div>
-              <div className="font-bold text-gray-900 dark:text-white">Koffi Kouadio — Développeur React / Node</div>
-              <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Pour le poste : Développeur Full Stack Senior</div>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="inline-flex rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                CV Téléchargé
-              </span>
-              <button type="button" className="px-3 py-1.5 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xs font-bold hover:bg-gray-200 dark:hover:bg-slate-700">Contacter</button>
-            </div>
-          </div>
-
-          <div className="py-4 flex items-center justify-between">
-            <div>
-              <div className="font-bold text-gray-900 dark:text-white">Aya Marie Traoré — Master Marketing Digital</div>
-              <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Pour le poste : Chef de Projet Marketing Digital</div>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="inline-flex rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                Nouveau
-              </span>
-              <button type="button" className="px-3 py-1.5 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xs font-bold hover:bg-gray-200 dark:hover:bg-slate-700">Contacter</button>
-            </div>
-          </div>
-        </div>
+      <div className="rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 lg:p-8 shadow-xl">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Dernières candidatures reçues</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          La gestion des candidatures sera bientôt disponible. Vous pourrez consulter, filtrer et contacter les candidats directement depuis cet espace.
+        </p>
       </div>
     </div>
   );
