@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       seo_keywords: null,
       slug: null,
       source_url: null,
-      source_website: null,
+      source_website: 'recruiter-self-service',
     };
 
     const created = await JobOfferSchemaService.create(data as JobOfferSchemaInsert);

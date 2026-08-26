@@ -268,7 +268,7 @@ export class JobOfferSchemaService {
   static async list(filters: JobOfferSchemaFilters = {}): Promise<PaginatedRows<JobOfferSchema>> {
     if (isSupabaseConfigured()) return this.listSupabase(filters);
     const db = await getDb();
-    const { category, keyword, location, contract_type, status, is_verified, is_archived, is_expired, company, limit = 50, offset = 0, order_by = 'created_at', order_dir = 'desc' } = filters;
+    const { category, keyword, location, contract_type, status, is_verified, is_archived, is_expired, company, source_website, limit = 50, offset = 0, order_by = 'created_at', order_dir = 'desc' } = filters;
     if (!db) return { rows: [], total: 0 };
     const clauses: string[] = [];
     const params: Record<string, unknown> = {};
@@ -296,6 +296,7 @@ export class JobOfferSchemaService {
     if (typeof is_archived === 'boolean') { clauses.push(`is_archived = $ia`); params.$ia = is_archived ? 1 : 0; }
     if (typeof is_expired === 'boolean') { clauses.push(`is_expired = $ie`); params.$ie = is_expired ? 1 : 0; }
     if (company) { clauses.push('company LIKE $co'); params.$co = `%${company}%`; }
+    if (source_website) { clauses.push('source_website = $sw'); params.$sw = source_website; }
     const whereSql = clauses.length > 0 ? `WHERE ${clauses.join(' AND ')}` : '';
     const orderSafe = ['created_at', 'title', 'company'].includes(order_by!) ? order_by : 'created_at';
     const dirSafe = order_dir === 'asc' ? 'ASC' : 'DESC';
@@ -572,6 +573,7 @@ export class JobOfferSchemaService {
       is_archived,
       is_expired,
       company,
+      source_website,
       limit = 50,
       offset = 0,
       order_by = 'created_at',
@@ -598,6 +600,9 @@ export class JobOfferSchemaService {
     }
     if (company) {
       query = query.ilike('company', `%${company}%`);
+    }
+    if (source_website) {
+      query = query.eq('source_website', source_website);
     }
     if (category) {
       const list = Array.isArray(category) ? category : [category];

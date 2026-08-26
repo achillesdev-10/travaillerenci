@@ -7,6 +7,7 @@ import AdminSidebar from "./AdminSidebar";
 const PAGE_TITLES: Array<{ prefix: string; title: string; subtitle: string }> = [
   { prefix: "/admin/login", title: "Authentification", subtitle: "Connexion sécurisée" },
   { prefix: "/admin/jobs", title: "Gestion des offres", subtitle: "Modération, SEO et publication" },
+  { prefix: "/admin/recruiters", title: "Offres Recruteurs", subtitle: "Modération des offres self-service" },
   { prefix: "/admin/analytics", title: "Analytics", subtitle: "Audience et trafic du site" },
   { prefix: "/admin/users", title: "Utilisateurs", subtitle: "Candidats et entreprises inscrits" },
   { prefix: "/admin/reports", title: "Signalements", subtitle: "File de modération des contenus signalés" },

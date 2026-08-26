@@ -130,6 +130,7 @@ export interface JobOfferSchemaFilters {
   is_archived?: boolean;
   is_expired?: boolean;
   company?: string;
+  source_website?: string;
   limit?: number;
   offset?: number;
   order_by?: 'created_at' | 'title' | 'company';
