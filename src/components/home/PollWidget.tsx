@@ -61,7 +61,7 @@ export default function PollWidget() {
     load();
   }, [load]);
 
-  // Après 30 secondes, réafficher les options de sélection
+  // Après 10 minutes, réafficher les options de sélection
   useEffect(() => {
     if (voted === null) {
       if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
@@ -69,7 +69,7 @@ export default function PollWidget() {
       setCountdown(null);
       return;
     }
-    const duration = 30;
+    const duration = 600; // 10 minutes
     setCountdown(duration);
     countdownRef.current = setInterval(() => {
       setCountdown((prev) => {
