@@ -40,13 +40,13 @@ export default function ReportsAdminClient({
     if (isMutating) return;
     setIsMutating(report.id);
     try {
-      const res = await fetch(`/api/admin/reports/${report.id}`, {
+      const res = await fetch(`/api/achilles/reports/${report.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
       });
       if (res.status === 401) {
-        router.replace('/admin/login?next=/admin/reports');
+        router.replace('/achilles/login?next=/achilles/reports');
         return;
       }
       if (!res.ok) throw new Error(await readError(res));

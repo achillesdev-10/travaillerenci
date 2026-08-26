@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       getAdminDashboardData(),
     ]);
 
-    revalidatePath("/admin");
+    revalidatePath("/achilles");
 
     return NextResponse.json({
       ...payload,

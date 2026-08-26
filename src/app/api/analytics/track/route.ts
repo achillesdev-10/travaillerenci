@@ -66,7 +66,7 @@ export async function POST(request: Request) {
     const pagePath = String(body.path || "/");
 
     // Ignore admin routes or bots if desired
-    if (pagePath.startsWith("/admin")) {
+    if (pagePath.startsWith("/achilles")) {
       return NextResponse.json({ tracked: false });
     }
 

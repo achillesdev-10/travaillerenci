@@ -66,11 +66,11 @@ export async function getAdminSessionFromRequest(
 }
 
 export async function requireAdminSession(
-  nextPath: string = '/admin'
+  nextPath: string = '/achilles'
 ): Promise<AdminSession> {
   const session = await getAdminSession();
   if (!session) {
-    redirect(`/admin/login?next=${encodeURIComponent(nextPath)}`);
+    redirect(`/achilles/login?next=${encodeURIComponent(nextPath)}`);
   }
   return session;
 }

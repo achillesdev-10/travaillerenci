@@ -99,9 +99,9 @@ function normalizePatch(body: Record<string, unknown>): Partial<JobOfferSchemaIn
 }
 
 function revalidateAdminPages(jobId: string) {
-  revalidatePath('/admin');
-  revalidatePath('/admin/jobs');
-  revalidatePath(`/admin/jobs/${jobId}`);
+  revalidatePath('/achilles');
+  revalidatePath('/achilles/jobs');
+  revalidatePath(`/achilles/jobs/${jobId}`);
   revalidatePath('/');
   revalidatePath('/jobs');
   revalidatePath(`/jobs/${jobId}`);

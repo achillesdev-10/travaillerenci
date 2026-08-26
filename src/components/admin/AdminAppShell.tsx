@@ -5,15 +5,15 @@ import { usePathname } from "next/navigation";
 import AdminSidebar from "./AdminSidebar";
 
 const PAGE_TITLES: Array<{ prefix: string; title: string; subtitle: string }> = [
-  { prefix: "/admin/login", title: "Authentification", subtitle: "Connexion sécurisée" },
-  { prefix: "/admin/jobs", title: "Gestion des offres", subtitle: "Modération, SEO et publication" },
-  { prefix: "/admin/recruiters", title: "Offres Recruteurs", subtitle: "Modération des offres self-service" },
-  { prefix: "/admin/analytics", title: "Analytics", subtitle: "Audience et trafic du site" },
-  { prefix: "/admin/users", title: "Utilisateurs", subtitle: "Candidats et entreprises inscrits" },
-  { prefix: "/admin/reports", title: "Signalements", subtitle: "File de modération des contenus signalés" },
-  { prefix: "/admin/blog", title: "Gestion du blog", subtitle: "Articles et publications" },
-  { prefix: "/admin/scraper", title: "Scraper", subtitle: "Pilote des sources d'offres" },
-  { prefix: "/admin/settings", title: "Paramètres", subtitle: "Configuration de la plateforme" },
+  { prefix: "/achilles/login", title: "Authentification", subtitle: "Connexion sécurisée" },
+  { prefix: "/achilles/jobs", title: "Gestion des offres", subtitle: "Modération, SEO et publication" },
+  { prefix: "/achilles/recruiters", title: "Offres Recruteurs", subtitle: "Modération des offres self-service" },
+  { prefix: "/achilles/analytics", title: "Analytics", subtitle: "Audience et trafic du site" },
+  { prefix: "/achilles/users", title: "Utilisateurs", subtitle: "Candidats et entreprises inscrits" },
+  { prefix: "/achilles/reports", title: "Signalements", subtitle: "File de modération des contenus signalés" },
+  { prefix: "/achilles/blog", title: "Gestion du blog", subtitle: "Articles et publications" },
+  { prefix: "/achilles/scraper", title: "Scraper", subtitle: "Pilote des sources d'offres" },
+  { prefix: "/achilles/settings", title: "Paramètres", subtitle: "Configuration de la plateforme" },
 ];
 
 function getPageMeta(pathname: string) {
@@ -22,7 +22,7 @@ function getPageMeta(pathname: string) {
       return entry;
     }
   }
-  return { prefix: "/admin", title: "Vue d'ensemble", subtitle: "KPIs, offres et santé du scraper" };
+  return { prefix: "/achilles", title: "Vue d'ensemble", subtitle: "KPIs, offres et santé du scraper" };
 }
 
 export default function AdminAppShell({

@@ -37,8 +37,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Action non reconnue.' }, { status: 400 });
     }
 
-    revalidatePath('/admin');
-    revalidatePath('/admin/jobs');
+    revalidatePath('/achilles');
+    revalidatePath('/achilles/jobs');
     revalidatePath('/');
     revalidatePath('/jobs');
 

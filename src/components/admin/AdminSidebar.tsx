@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
   {
-    href: '/admin',
+    href: '/achilles',
     label: "Vue d'ensemble",
     description: 'KPIs, offres, scraper',
     icon: (
@@ -19,7 +19,7 @@ const NAV_ITEMS = [
     ),
   },
   {
-    href: '/admin/jobs',
+    href: '/achilles/jobs',
     label: "Offres d'emploi",
     description: 'Modération & SEO',
     icon: (
@@ -31,7 +31,7 @@ const NAV_ITEMS = [
     ),
   },
   {
-    href: '/admin/exams',
+    href: '/achilles/exams',
     label: 'Concours',
     description: 'Modération des concours',
     icon: (
@@ -42,7 +42,7 @@ const NAV_ITEMS = [
     ),
   },
   {
-    href: '/admin/recruiters',
+    href: '/achilles/recruiters',
     label: 'Offres Recruteurs',
     description: 'Modération self-service',
     icon: (
@@ -55,7 +55,7 @@ const NAV_ITEMS = [
     ),
   },
   {
-    href: '/admin/analytics',
+    href: '/achilles/analytics',
     label: 'Analytics',
     description: 'Visites & trafic',
     icon: (
@@ -66,7 +66,7 @@ const NAV_ITEMS = [
     ),
   },
   {
-    href: '/admin/users',
+    href: '/achilles/users',
     label: 'Utilisateurs',
     description: 'Candidats & entreprises',
     icon: (
@@ -79,7 +79,7 @@ const NAV_ITEMS = [
     ),
   },
   {
-    href: '/admin/reports',
+    href: '/achilles/reports',
     label: 'Signalements',
     description: 'File de modération',
     icon: (
@@ -91,7 +91,7 @@ const NAV_ITEMS = [
     ),
   },
   {
-    href: '/admin/blog',
+    href: '/achilles/blog',
     label: 'Blog',
     description: 'Articles & publications',
     icon: (
@@ -102,7 +102,7 @@ const NAV_ITEMS = [
     ),
   },
   {
-    href: '/admin/scraper',
+    href: '/achilles/scraper',
     label: 'Scraper',
     description: 'Pilote des sources',
     icon: (
@@ -116,7 +116,7 @@ const NAV_ITEMS = [
     ),
   },
   {
-    href: '/admin/settings',
+    href: '/achilles/settings',
     label: 'Paramètres',
     description: 'Configuration',
     icon: (
@@ -141,7 +141,7 @@ export default function AdminSidebar({
   async function handleLogout() {
     await fetch('/api/admin/session', { method: 'DELETE' });
     onNavigate?.();
-    router.replace('/admin/login');
+    router.replace('/achilles/login');
     router.refresh();
   }
 
@@ -153,7 +153,7 @@ export default function AdminSidebar({
     <aside className="flex h-full w-full flex-col border-r border-white/[0.06] bg-slate-950 text-white">
       {/* Brand */}
       <div className="border-b border-white/[0.06] px-6 py-6">
-        <Link href="/admin" onClick={handleNavigate} className="flex items-center gap-3">
+        <Link href="/achilles" onClick={handleNavigate} className="flex items-center gap-3">
           <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25">
             <span className="font-[var(--font-display)] text-xl font-black text-white">T</span>
             <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-slate-950 bg-emerald-400" />
@@ -187,7 +187,7 @@ export default function AdminSidebar({
       <nav className="mt-5 flex-1 space-y-1 overflow-y-auto px-3">
         {NAV_ITEMS.map((item) => {
           const active =
-            item.href === '/admin' ? pathname === item.href : pathname.startsWith(item.href);
+            item.href === '/achilles' ? pathname === item.href : pathname.startsWith(item.href);
 
           return (
             <Link

@@ -41,7 +41,7 @@ function normalizePatch(body: Record<string, unknown>): Partial<BlogPostInsert> 
 
 function revalidateBlogPages() {
   revalidatePath('/blog');
-  revalidatePath('/admin/blog');
+  revalidatePath('/achilles/blog');
 }
 
 export async function PATCH(

@@ -7,7 +7,7 @@ import PasswordInput from '@/components/auth/PasswordInput';
 function AdminLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextUrl = searchParams.get('next') || '/admin';
+  const nextUrl = searchParams.get('next') || '/achilles';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -71,7 +71,7 @@ function AdminLoginForm() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="achillesdev10@gmail.com"
+              placeholder="email@exemple.com"
               className="w-full rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-primary transition-colors"
             />
           </div>

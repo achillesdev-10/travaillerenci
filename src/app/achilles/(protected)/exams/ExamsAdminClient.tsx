@@ -92,7 +92,7 @@ const EMPTY_FORM = {
 
 type FormState = typeof EMPTY_FORM;
 
-/** Résultat du contrôle anti-duplication (POST /api/admin/exams/similarity). */
+/** Résultat du contrôle anti-duplication (POST /api/achilles/exams/similarity). */
 type SimResult = {
   score: number | null;
   threshold: number;
@@ -161,7 +161,7 @@ export default function ExamsAdminClient({
     return `Erreur serveur (${res.status}).`;
   }
   function redirectToLogin() {
-    router.replace('/admin/login?next=/admin/exams');
+    router.replace('/achilles/login?next=/achilles/exams');
   }
 
   async function handleUpdateStatus(exam: Exam, newStatus: ExamStatus) {
@@ -175,7 +175,7 @@ export default function ExamsAdminClient({
     const previous = exam;
     setExams((prev) => prev.map((e) => (e.id === exam.id ? { ...e, status: newStatus } : e)));
     try {
-      const res = await fetch(`/api/admin/exams/${exam.id}`, {
+      const res = await fetch(`/api/achilles/exams/${exam.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
@@ -197,7 +197,7 @@ export default function ExamsAdminClient({
     if (!confirm(`Supprimer le concours « ${exam.title} » ?`)) return;
     setExams((prev) => prev.filter((e) => e.id !== exam.id));
     try {
-      const res = await fetch(`/api/admin/exams/${exam.id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/achilles/exams/${exam.id}`, { method: 'DELETE' });
       if (res.status === 401) {
         redirectToLogin();
         return;
@@ -323,7 +323,7 @@ export default function ExamsAdminClient({
     }
     try {
       const res = await fetch(
-        isCreating ? '/api/admin/exams' : `/api/admin/exams/${editingExam!.id}`,
+        isCreating ? '/api/achilles/exams' : `/api/achilles/exams/${editingExam!.id}`,
         {
           method: isCreating ? 'POST' : 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -349,7 +349,7 @@ export default function ExamsAdminClient({
     setSimChecking(true);
     setSimResult(null);
     try {
-      const res = await fetch('/api/admin/exams/similarity', {
+      const res = await fetch('/api/achilles/exams/similarity', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ description_md: description, source_url: sourceUrl }),

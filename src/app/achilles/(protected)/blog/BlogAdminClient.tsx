@@ -96,7 +96,7 @@ export default function BlogAdminClient({
   }
 
   function redirectToLogin() {
-    router.replace('/admin/login?next=/admin/blog');
+    router.replace('/achilles/login?next=/achilles/blog');
   }
 
   const filteredPosts = useMemo(() => {
@@ -163,7 +163,7 @@ export default function BlogAdminClient({
     if (!editingPost && !isCreating) return;
     try {
       const res = await fetch(
-        isCreating ? '/api/admin/blog' : `/api/admin/blog/${editingPost!.id}`,
+        isCreating ? '/api/achilles/blog' : `/api/achilles/blog/${editingPost!.id}`,
         {
           method: isCreating ? 'POST' : 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -201,7 +201,7 @@ export default function BlogAdminClient({
     const previous = posts;
     setPosts((prev) => prev.map((p) => (p.id === post.id ? { ...p, status } : p)));
     try {
-      const res = await fetch(`/api/admin/blog/${post.id}`, {
+      const res = await fetch(`/api/achilles/blog/${post.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
@@ -226,7 +226,7 @@ export default function BlogAdminClient({
     const previous = posts;
     setPosts((prev) => prev.filter((p) => p.id !== id));
     try {
-      const res = await fetch(`/api/admin/blog/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/achilles/blog/${id}`, { method: 'DELETE' });
       if (res.status === 401) {
         setPosts(previous);
         redirectToLogin();
