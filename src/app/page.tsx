@@ -553,7 +553,7 @@ export default async function HomePage({
       {/* ======================================================================== */}
       {/*   OFFRE À LA UNE — grille 2 colonnes dès le mobile                        */}
       {/* ======================================================================== */}
-      <section className="container mx-auto px-4 pb-4 sm:pb-8 max-w-6xl">
+      <section className="container mx-auto px-4 pb-4 sm:pb-8 max-w-6xl mt-10 sm:mt-14 py-8 sm:py-10 rounded-3xl bg-orange-50/60 dark:bg-orange-950/20">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 sm:gap-4 mt-10 sm:mt-14 mb-4 sm:mb-6">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white font-[var(--font-display)]">

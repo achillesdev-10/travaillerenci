@@ -8,6 +8,29 @@ interface ScrollingOffersProps {
   offers: JobOfferSchema[];
 }
 
+// Couleurs aléatoires pour les blocs
+const CARD_COLORS = [
+  'from-orange-50 to-orange-100/50 border-orange-200/60',
+  'from-emerald-50 to-emerald-100/50 border-emerald-200/60',
+  'from-blue-50 to-blue-100/50 border-blue-200/60',
+  'from-purple-50 to-purple-100/50 border-purple-200/60',
+  'from-rose-50 to-rose-100/50 border-rose-200/60',
+  'from-amber-50 to-amber-100/50 border-amber-200/60',
+  'from-sky-50 to-sky-100/50 border-sky-200/60',
+  'from-indigo-50 to-indigo-100/50 border-indigo-200/60',
+];
+
+const DARK_CARD_COLORS = [
+  'from-orange-950/40 to-slate-900 border-orange-800/30',
+  'from-emerald-950/40 to-slate-900 border-emerald-800/30',
+  'from-blue-950/40 to-slate-900 border-blue-800/30',
+  'from-purple-950/40 to-slate-900 border-purple-800/30',
+  'from-rose-950/40 to-slate-900 border-rose-800/30',
+  'from-amber-950/40 to-slate-900 border-amber-800/30',
+  'from-sky-950/40 to-slate-900 border-sky-800/30',
+  'from-indigo-950/40 to-slate-900 border-indigo-800/30',
+];
+
 export default function ScrollingOffers({ offers }: ScrollingOffersProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const isPaused = useRef(false);
@@ -18,12 +41,11 @@ export default function ScrollingOffers({ offers }: ScrollingOffersProps) {
 
     let animId: number;
     let scrollPos = 0;
-    const speed = 0.5; // pixels per frame (~30px/s at 60fps)
+    const speed = 0.5;
 
     const tick = () => {
       if (!isPaused.current) {
         scrollPos += speed;
-        // Reset to start when reaching the midpoint (we duplicate items for seamless loop)
         if (scrollPos >= el.scrollWidth / 2) {
           scrollPos = 0;
         }
@@ -38,7 +60,6 @@ export default function ScrollingOffers({ offers }: ScrollingOffersProps) {
 
   if (!offers.length) return null;
 
-  // Duplicate the list for seamless infinite scroll
   const doubled = [...offers, ...offers];
 
   function contractBadge(type?: string | null) {
@@ -73,34 +94,37 @@ export default function ScrollingOffers({ offers }: ScrollingOffersProps) {
         className="flex gap-4 overflow-hidden py-2"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
-        {doubled.map((offer, i) => (
-          <Link
-            key={`${offer.id}-${i}`}
-            href={`/jobs/${offer.id}`}
-            className="shrink-0 w-[280px] sm:w-[320px] rounded-2xl border border-gray-100 bg-white dark:bg-slate-900 dark:border-slate-800 p-4 shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200 group"
-          >
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <h3 className="text-[13px] font-bold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-primary transition-colors">
-                {offer.title}
-              </h3>
-              {contractBadge(offer.contract_type)}
-            </div>
-            <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-2 line-clamp-1">
-              {offer.company || 'Entreprise'}
-            </p>
-            <div className="flex items-center gap-2 text-[10px] text-gray-400 dark:text-gray-500">
-              {offer.location && (
-                <span className="inline-flex items-center gap-1">
-                  <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                  {offer.location}
-                </span>
-              )}
-            </div>
-          </Link>
-        ))}
+        {doubled.map((offer, i) => {
+          const colorIdx = i % CARD_COLORS.length;
+          return (
+            <Link
+              key={`${offer.id}-${i}`}
+              href={`/jobs/${offer.id}`}
+              className={`shrink-0 w-[280px] sm:w-[320px] rounded-2xl border bg-gradient-to-br p-4 shadow-sm hover:shadow-md transition-all duration-200 group dark:${DARK_CARD_COLORS[colorIdx]} ${CARD_COLORS[colorIdx]}`}
+            >
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <h3 className="text-[13px] font-bold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+                  {offer.title}
+                </h3>
+                {contractBadge(offer.contract_type)}
+              </div>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-2 line-clamp-1">
+                {offer.company || 'Entreprise'}
+              </p>
+              <div className="flex items-center gap-2 text-[10px] text-gray-400 dark:text-gray-500">
+                {offer.location && (
+                  <span className="inline-flex items-center gap-1">
+                    <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                      <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    {offer.location}
+                  </span>
+                )}
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 export default function PolitiqueConfidentialitePage() {
   return (
     <main className="min-h-screen bg-background text-foreground py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-4xl mx-auto space-y-8 bg-gradient-to-br from-white via-gray-50 to-orange-50/40 dark:from-slate-950 dark:via-slate-900 dark:to-orange-950/10 rounded-3xl p-6 sm:p-10">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight font-[var(--font-display)]">Politique de Confidentialité</h1>
           <p className="text-sm text-muted-foreground mt-2">Dernière mise à jour : 31 juillet 2026</p>

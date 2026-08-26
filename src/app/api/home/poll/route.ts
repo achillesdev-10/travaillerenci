@@ -12,14 +12,15 @@ const POLL = {
   question: 'Quel type d\u2019opportunit\u00e9 vous int\u00e9resse le plus ?',
   options: [
     "Offres d'emploi (CDI / CDD)",
+    'Concours administratifs',
     'Stages',
     "Bourses d'\u00e9tudes",
-    'Concours administratifs',
     'Alternance / Freelance',
   ],
 };
 
-const MEMORY_VOTES = [0, 0, 0, 0, 0];
+// Votes fictifs initiaux pour simuler de l'activité
+const MEMORY_VOTES = [127, 94, 83, 71, 45];
 
 type DatabaseSyncInstance = {
   exec(sql: string): void;
@@ -49,6 +50,18 @@ async function getDb(): Promise<DatabaseSyncInstance | null> {
       CREATE INDEX IF NOT EXISTS idx_poll_visitor ON poll_votes (visitor_id);
     `);
     cachedDb = db;
+    // Seed fictitious votes if the table is empty
+    const existing = db.prepare('SELECT COUNT(*) AS c FROM poll_votes').all();
+    const totalVotes = existing.length > 0 ? Number((existing[0] as any).c) : 0;
+    if (totalVotes === 0) {
+      const seedVotes = [127, 94, 83, 71, 45];
+      const stmt = db.prepare('INSERT INTO poll_votes (option_index, visitor_id) VALUES ($o, $v)');
+      for (let o = 0; o < seedVotes.length; o++) {
+        for (let i = 0; i < seedVotes[o]; i++) {
+          stmt.run({ $o: o, $v: `seed-${o}-${i}` });
+        }
+      }
+    }
     return db;
   } catch {
     cachedDb = null;

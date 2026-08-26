@@ -8,7 +8,7 @@ export const metadata = {
 export default function ConditionsUtilisationPage() {
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-slate-950">
-      <section className="container mx-auto px-4 py-12 md:py-20 max-w-3xl">
+      <section className="container mx-auto px-4 py-12 md:py-20 max-w-3xl bg-gradient-to-br from-white via-gray-50 to-orange-50/40 dark:from-slate-950 dark:via-slate-900 dark:to-orange-950/10 rounded-3xl mx-auto my-8">
         <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:gap-2.5 transition-all mb-8">
           <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 12h14" />
@@ -75,7 +75,7 @@ export default function ConditionsUtilisationPage() {
           <section>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">7. Contact</h2>
             <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-              Pour toute question concernant ces conditions, contactez-nous à <a href="mailto:contact@travaillerenci.ci" className="text-primary hover:underline">contact@travaillerenci.ci</a>.
+              Pour toute question concernant ces conditions, contactez-nous à <a href="mailto:achillesdev10@gmail.com" className="text-primary hover:underline">achillesdev10@gmail.com</a>.
             </p>
           </section>
         </div>

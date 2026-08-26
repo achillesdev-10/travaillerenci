@@ -210,6 +210,61 @@ function seedDefaultPosts(db: DatabaseSyncInstance) {
       tags: 'salaire, negotiation, emploi, carriere',
       published_at: new Date(Date.now() - 30 * 86400000).toISOString(),
     },
+    {
+      slug: 'reseau-professionnel-cote-divoire',
+      title: "Comment développer son réseau professionnel en Côte d'Ivoire",
+      excerpt:
+        "Networking, associations, événements professionnel : les meilleures stratégies pour élargir votre cercle professionnel.",
+      content:
+        "## Pourquoi le réseau est essentiel en Côte d'Ivoire ?\n\nEn Côte d'Ivoire, plus de 60% des emplois sont trouvés grâce au réseau. Développer vos contacts professionnels est un investissement crucial.\n\n## Les canaux incontournables\n\n### LinkedIn\n\n- Créez un profil complet et optimisé\n\n- Publiez du contenu régulièrement\n\n- Rejoignez des groupes liés à votre secteur\n\n### Événements professionnels\n\n- Salons de l'emploi (Forum Jobs CI, Salon de l'Emploi Young)\n\n- Conférences sectorielles\n\n- Meetups tech (GDG Abidjan, JsAbidjan)\n\n### Associations et clubs\n\n- Associations d'anciens élèves\n\n- Chambres de commerce (CCI, CCIAB)\n\n- Clusters sectoriels\n\n## Les erreurs à éviter\n\n- **Demander un emploi directement** lors d'un premier contact\n\n- **Ne jamais donner suite** après une rencontre\n\n- **Négliger les relations existantes** au profit de nouvelles\n\n## Conseil pratique\n\nVisez **5 nouveaux contacts qualifiés** par mois, et maintenez **20 contacts actifs** dans votre réseau.",
+      author: 'TravaillerenCi',
+      tags: 'reseau, networking, carriere, abidjan',
+      published_at: new Date(Date.now() - 35 * 86400000).toISOString(),
+    },
+    {
+      slug: 'tremplin-emploi-entrepreneuriat',
+      title: "Devenir entrepreneur en Côte d'Ivoire : le guide pour se lancer",
+      excerpt:
+        "Créer sa startup, les aides disponibles, les pièges à éviter… Tout ce qu'il faut savoir pour entreprendre en CI.",
+      content:
+        "## L'entrepreneuriat en plein essor en Côte d'Ivoire\n\nAvec des hubs comme l'Open Digital Lab, XHub et le Village Babel, Abidjan est devenue un écosystème startup dynamique.\n\n## Étape 1 : Valider son idée\n\n- Étude de marché rapide (concurrence, taille du marché)\n\n- Interviews potentiels clients (minimum 20)\n\n- Prototype minimum viable (MVP)\n\n## Étape 2 : Créer l'entreprise\n\n- Statuts et immatriculation au guichet unique (CFE)\n\n- Numéro CNPS et identification fiscale\n\n- Compte bancaire professionnel\n\n## Étape 3 : Financement\n\n- **Bootstrapping** : autofinancement\n\n- **Preti Sahel** : microfinance pour jeunes entrepreneurs\n\n- **Seedstars Afrique** : concours de startups\n\n- **Incubateurs** : accès à des subventions et mentors\n\n## Les erreurs fatales\n\n- Lancer sans valider son marché\n\n- Refuser de pivoter face aux retours\n\n- Négliger la comptabilité\n\n- S'isoler : trouvez un mentor",
+      author: 'TravaillerenCi',
+      tags: 'entrepreneuriat, startup, business, abidjan',
+      published_at: new Date(Date.now() - 40 * 86400000).toISOString(),
+    },
+    {
+      slug: 'teletravail-emploi-distance-cote-divoire',
+      title: "Le télétravail en Côte d'Ivoire : opportunités et conseils",
+      excerpt:
+        "De plus en plus d'entreprises ivoiriennes adoptent le télétravail. Découvrez comment en profiter.",
+      content:
+        "## Le télétravail s'installe en Côte d'Ivoire\n\nLa pandémie a accéléré la transition numérique. Aujourd'hui, de nombreuses entreprises à Abidjan proposent des formules hybrides ou 100% télétravail.\n\n## Les secteurs qui recrutent en télétravail\n\n- **IT/Digital** : Développeurs, designers, chefs de projet\n\n- **Marketing digital** : Community managers, SEO, SEA\n\n- **Rédaction/Traduction** : Copywriters, traducteurs\n\n- **Support client** : Agents multilingues\n\n- **Comptabilité** : Comptables freelance\n\n## Les plateformes pour trouver du travail à distance\n\n- TravaillerEnCi (offres locales avec télétravail)\n\n- Upwork, Fiverr, Malt (freelance international)\n\n- RemoteOK, WeWorkRemotely (emplois 100% distants)\n\n## Aménager son espace de travail\n\n- Connexion internet stable (fibre ou 4G+)\n\n- Bureau dédié et ergonomique\n\n- Horaires fixes pour préserver l'équilibre vie pro/perso\n\n## Le salaire du télétravail\n\nLes salaires en télétravail sont souvent **10-20% inférieurs** à ceux du présentiel, mais les économies (transport, repas) compensent largement.",
+      author: 'TravaillerenCi',
+      tags: 'teletravail, remote, emploi, digital',
+      published_at: new Date(Date.now() - 45 * 86400000).toISOString(),
+    },
+    {
+      slug: 'competences-ia-avenir-emploi',
+      title: "Les compétences en IA qui transformeront le marché du travail en Afrique",
+      excerpt:
+        "L'intelligence artificielle révolutionne l'emploi. Découvrez les compétences à acquérir pour rester compétitif.",
+      content:
+        "## L'IA : menace ou opportunité ?\n\nPlutôt qu'une menace, l'IA est un accélérateur de productivité. Les professionnels qui la maîtriseront seront les plus demandés.\n\n## Les compétences les plus recherchées\n\n### Prompt Engineering\n\nSavoir interagir efficacement avec les outils IA (ChatGPT, Claude, Copilot).\n\n### Analyse de données avec IA\n\nPython, SQL, Power BI + outils d'IA pour l'analyse prédictive.\n\n### Automation\n\nZapier, Make, n8n pour automatiser les tâches répétitives.\n\n### Création de contenu avec l'IA\n\nMaîtriser les outils de génération de texte, image et vidéo.\n\n## Comment se former ?\n\n- **Coursera** : Cours Google AI, IBM Watson\n\n- **Openclassrooms** : Parcours Data Scientist\n\n- **YouTube** : Tutoriels gratuits en français\n\n- **Communautés** : Rejoignez les groupes IA d'Abidjan\n\n## Impact sur les métiers en CI\n\n- Les métiers adminstratifs seront partiellement automatisés\n\n- Les métiers créatifs et strategiques gagneront en valeur\n\n- De nouveaux postes apparaîtront (AI Trainer, Prompt Engineer, Data Annotator)",
+      author: 'TravaillerenCi',
+      tags: 'intelligence artificielle, ia, competences, avenir',
+      published_at: new Date(Date.now() - 50 * 86400000).toISOString(),
+    },
+    {
+      slug: 'erreurs-cv-eviter-cote-divoire',
+      title: "Les 10 erreurs sur un CV qui font fuir les recruteurs en CI",
+      excerpt:
+        "Fautes d'orthographe, photo inadéquate, format illisible… Découvrez les erreurs qui éliminent votre CV en 5 secondes.",
+      content:
+        "## Votre CV na que 7 secondes pour convaincre\n\nEn Côte dIvoire, les recruteurs reçoivent en moyenne 80 à 150 CV par offre. Voici les erreurs qui font la différence.\n\n## Les erreurs fatales\n\n### 1. Fautes dorthographe\n\nRelisez-vous. Faites relire. Trois fautes = élimination quasi certaine.\n\n### 2. Photo non professionnelle\n\nPas de selfie, pas de photo de groupe. Photo didentité claire et souriante uniquement.\n\n### 3. CV trop long\n\nUne page pour les juniors, deux pages maximum pour les seniors.\n\n### 4. Manque de mots-clés\n\nReprenez les termes exacts de lannonce dans vos compétences et expériences.\n\n### 5. Informations obsolètes\n\nSupprimez les expériences de plus de 15 ans, mettez à jour vos coordonnées.\n\n### 6. Objectif professionnel vague\n\nÀ la recherche dun emploi stable nest pas un objectif. Soyez spécifique.\n\n### 7. Pas de chiffres\n\nQuantifiez vos réalisations : Augmenté les ventes de 25% plutôt que Amélioré les ventes.\n\n### 8. Format non standard\n\nUtilisez le générateur CV de TravaillerenCi pour un format optimisé.\n\n### 9. Coordonnées incomplètes\n\nEmail, téléphone, ville : le minimum syndical. Ajoutez LinkedIn si possible.\n\n### 10. Pas de preuve sociale\n\nCertifications, recommandations, projets réalisés : tout renforce votre crédibilité.",
+      author: 'TravaillerenCi',
+      tags: 'cv, erreurs, candidature, recrutement',
+      published_at: new Date(Date.now() - 55 * 86400000).toISOString(),
+    },
   ];
 
   const stmt = db.prepare(
