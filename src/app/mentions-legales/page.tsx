@@ -1,51 +1,70 @@
-export const dynamic = "force-dynamic";
+import Link from 'next/link';
+
+export const metadata = {
+  title: 'Mentions légales — TravaillerenCi',
+  description: 'Mentions légales du site TravaillerenCi, plateforme d\'emploi en Côte d\'Ivoire.',
+};
 
 export default function MentionsLegalesPage() {
   return (
-    <main className="min-h-screen bg-background text-foreground py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight font-[var(--font-display)]">Mentions Légales</h1>
-          <p className="text-sm text-muted-foreground mt-2">Dernière mise à jour : 31 juillet 2026</p>
+    <main className="min-h-screen bg-gray-50 dark:bg-slate-950">
+      <section className="container mx-auto px-4 py-12 md:py-20 max-w-3xl">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:gap-2.5 transition-all mb-8">
+          <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 12h14" />
+            <path d="m10 5-7 7 7 7" />
+          </svg>
+          Retour à l&apos;accueil
+        </Link>
+
+        <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white font-[var(--font-display)] mb-6">
+          Mentions légales
+        </h1>
+
+        <div className="prose prose-gray dark:prose-invert max-w-none space-y-8">
+          <section>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Éditeur du site</h2>
+            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+              <strong>TravaillerenCi</strong><br />
+              Site d&apos;information sur l&apos;emploi, les stages, les bourses et les concours administratifs en Côte d&apos;Ivoire.
+            </p>
+            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+              Email de contact : <a href="mailto:contact@travaillerenci.ci" className="text-primary hover:underline">contact@travaillerenci.ci</a>
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Hébergeur</h2>
+            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+              Le site est hébergé par Vercel Inc., 349 S Biscayne Blvd, Suite 900, Miami, FL 33131, États-Unis.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Propriété intellectuelle</h2>
+            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+              L&apos;ensemble du contenu de ce site (textes, images, graphismes, logos, icônes, sons, logiciels) est la propriété exclusive de TravaillerenCi ou de ses partenaires et est protégé par les lois internationales relatives à la propriété intellectuelle.
+            </p>
+            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+              Toute reproduction, représentation, modification, publication, transmission ou dénaturation du site ou de son contenu, par quelque procédé que ce soit, est interdite sans autorisation préalable.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Données personnelles</h2>
+            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+              Conformément à la loi ivoirienne n°2013-450 relative à la protection des données à caractère personnel, vous disposez de droits sur vos données. Pour plus d&apos;informations, consultez notre <Link href="/confidentialite" className="text-primary hover:underline">Politique de confidentialité</Link>.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Cookies</h2>
+            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+              Notre site utilise des cookies pour améliorer l&apos;expérience utilisateur. Consultez notre <Link href="/cookies" className="text-primary hover:underline">Politique de cookies</Link> pour en savoir plus.
+            </p>
+          </section>
         </div>
-
-        <div className="space-y-6 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-          <section className="space-y-3">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">1. Éditeur du site</h2>
-            <p>
-              Le site <strong>TravaillerEnCi</strong> (ci-après « la Plateforme ») est édité et exploité en tant que plateforme numérique de mise en relation professionnelle et d'offres d'emploi en Côte d'Ivoire.
-            </p>
-            <p>
-              <strong>Contact officiel :</strong><br />
-              Email : <a href="mailto:achillesdev10@gmail.com" className="text-primary hover:underline">achillesdev10@gmail.com</a><br />
-              Siège social : Abidjan, Côte d'Ivoire
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">2. Hébergement</h2>
-            <p>
-              Le site est hébergé par la société <strong>Vercel Inc.</strong><br />
-              Adresse : 440 N Barranca Ave #4133 Covina, CA 91723, USA.<br />
-              Site web : <a href="https://vercel.com" target="_blank" rel="noreferrer" className="text-primary hover:underline">https://vercel.com</a>
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">3. Propriété intellectuelle</h2>
-            <p>
-              L'ensemble des éléments graphiques, textuels, de structure, ainsi que les bases de données intégrées sur TravaillerEnCi sont protégés par les lois en vigueur sur la propriété intellectuelle. Toute reproduction, représentation, modification ou exploitation non autorisée de tout ou partie des éléments du site est strictement interdite.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">4. Limitation de responsabilité</h2>
-            <p>
-              TravaillerEnCi agit en tant qu'agrégateur d'offres d'emploi et intermédiaire technologique. Les annonces diffusées proviennent soit de sources publiques (scraping automatisé), soit d'offres directement publiées par des entreprises partenaires. TravaillerEnCi ne saurait être tenu responsable de l'exactitude, de la véracité ou de la disponibilité des offres d'emploi publiées par des tiers.
-            </p>
-          </section>
-        </div>
-      </div>
+      </section>
     </main>
   );
 }

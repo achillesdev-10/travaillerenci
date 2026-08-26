@@ -83,15 +83,42 @@ export default function PollWidget() {
         } catch {
           /* noop */
         }
+      } else {
+        // Même en cas d'erreur serveur, afficher un résultat optimiste
+        setPoll((prev) => {
+          if (!prev) return prev;
+          const optimisticVotes = [...prev.votes];
+          optimisticVotes[option] = (optimisticVotes[option] || 0) + 1;
+          return { ...prev, votes: optimisticVotes };
+        });
+        setVoted(option);
+        try {
+          localStorage.setItem(STORAGE_KEY, String(option));
+        } catch {
+          /* noop */
+        }
       }
     } catch {
-      /* noop */
+      // Hors-ligne : afficher un résultat optimiste
+      setPoll((prev) => {
+        if (!prev) return prev;
+        const optimisticVotes = [...prev.votes];
+        optimisticVotes[option] = (optimisticVotes[option] || 0) + 1;
+        return { ...prev, votes: optimisticVotes };
+      });
+      setVoted(option);
+      try {
+        localStorage.setItem(STORAGE_KEY, String(option));
+      } catch {
+        /* noop */
+      }
     } finally {
       setSubmitting(null);
     }
   }
 
   const total = poll ? poll.votes.reduce((a, b) => a + b, 0) : 0;
+  const hasVoted = voted !== null;
 
   return (
     <section
@@ -156,12 +183,16 @@ export default function PollWidget() {
                     <div
                       className={`relative overflow-hidden rounded-xl border px-3.5 py-2.5 ${
                         isVoted
-                          ? 'border-primary/40 bg-primary/5'
+                          ? 'border-primary/50 bg-primary/5 shadow-sm shadow-primary/10'
                           : 'border-gray-100 bg-white dark:border-slate-700 dark:bg-slate-800/60'
                       }`}
                     >
                       <div
-                        className="absolute inset-y-0 left-0 bg-primary/10 transition-all duration-700"
+                        className={`absolute inset-y-0 left-0 transition-all duration-700 ease-out ${
+                          isVoted
+                            ? 'bg-gradient-to-r from-primary/20 to-primary/10'
+                            : 'bg-primary/8'
+                        }`}
                         style={{ width: `${pct}%` }}
                       />
                       <div className="relative flex items-center justify-between gap-2 text-[13px]">
@@ -182,10 +213,15 @@ export default function PollWidget() {
             })}
           </div>
 
-          {voted === null && (
-            <p className="mt-3 text-[11px] text-gray-400 dark:text-gray-500">
-              Un seul vote par visiteur — les résultats s&apos;affichent immédiatement.
-            </p>
+          {hasVoted && (
+            <div className="mt-3 flex items-center gap-2 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/40 px-3.5 py-2.5">
+              <svg className="h-4 w-4 text-emerald-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                Merci pour votre vote ! Voici les résultats.
+              </span>
+            </div>
           )}
         </>
       ) : (

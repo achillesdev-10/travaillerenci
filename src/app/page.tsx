@@ -380,6 +380,7 @@ export default async function HomePage({
             suffix="+"
             label="Offres d'emploi"
             color="bg-orange-500"
+            href="/jobs"
             icon={
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
                 <rect x="2" y="7" width="20" height="14" rx="2" />
@@ -392,6 +393,7 @@ export default async function HomePage({
             suffix=""
             label="Concours suivis"
             color="bg-indigo-600"
+            href="/concours"
             icon={
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
                 <path d="M3 21h18" />
@@ -405,6 +407,7 @@ export default async function HomePage({
             suffix=""
             label="Bourses d'études"
             color="bg-emerald-600"
+            href="/bourses"
             icon={
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
                 <path d="M22 10 12 5 2 10l10 5 10-5Z" />
@@ -418,6 +421,7 @@ export default async function HomePage({
             suffix=""
             label="Conseils & articles"
             color="bg-rose-500"
+            href="/blog"
             icon={
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
                 <path d="M15 12h-5M15 8h-5M8 3h5.6a1 1 0 0 1 .7.3l3.4 3.4a1 1 0 0 1 .3.7V21a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" />
@@ -805,15 +809,17 @@ function HomeStat({
   label,
   color,
   icon,
+  href,
 }: {
   value: number;
   suffix: string;
   label: string;
   color: string;
   icon: ReactNode;
+  href?: string;
 }) {
-  return (
-    <div className="flex items-center gap-3 sm:gap-4 rounded-2xl border border-border bg-white dark:bg-slate-900 p-3.5 sm:p-5 shadow-sm hover:shadow-md transition-shadow animate-fade-in-up">
+  const content = (
+    <div className="flex items-center gap-3 sm:gap-4 rounded-2xl border border-border bg-white dark:bg-slate-900 p-3.5 sm:p-5 shadow-sm hover:shadow-md transition-all duration-300 animate-fade-in-up">
       <span className={`shrink-0 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl ${color} text-white shadow-md`}>
         <span aria-hidden="true">{icon}</span>
       </span>
@@ -828,6 +834,19 @@ function HomeStat({
       </div>
     </div>
   );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className="block hover:-translate-y-0.5 transition-transform duration-300"
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return content;
 }
 
 function Stat({ icon, label }: { icon: ReactNode; label: string }) {

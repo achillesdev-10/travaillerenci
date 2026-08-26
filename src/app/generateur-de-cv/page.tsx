@@ -10,6 +10,7 @@ import { useLocalStorage } from '@/hooks';
 
 const CVFormDynamic = dynamic(() => import('@/components/cv/CVForm'), { ssr: false });
 const CVPreviewDynamic = dynamic(() => import('@/components/cv/CVPreview'), { ssr: false });
+const CoverLetterDynamic = dynamic(() => import('@/components/cv/CoverLetterGenerator'), { ssr: false });
 
 /** Largeur naturelle du CV A4 en px (@96dpi : 210mm ≈ 794px). */
 const PREVIEW_WIDTH_PX = 794;
@@ -71,6 +72,7 @@ const sampleCV: CVData = {
 export default function CVGeneratorPage() {
   const [cvData, setCVData] = useLocalStorage<CVData>('travaillerenci_cv_data', createEmptyCV());
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
+  const [mode, setMode] = useState<'cv' | 'letter'>('cv');
   const [isExporting, setIsExporting] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
@@ -347,6 +349,44 @@ export default function CVGeneratorPage() {
         </div>
       </section>
 
+      {/* Mode toggle : CV / Lettre de motivation */}
+      <div className="container mx-auto px-4 pt-6 max-w-6xl">
+        <div className="inline-flex p-1.5 rounded-xl bg-gray-100 dark:bg-slate-800 w-full sm:w-auto">
+          <button
+            onClick={() => setMode('cv')}
+            className={`flex-1 sm:flex-none px-5 py-2.5 rounded-lg text-sm font-bold transition-all inline-flex items-center justify-center gap-2 ${
+              mode === 'cv'
+                ? 'bg-white dark:bg-slate-900 text-gray-900 dark:text-white shadow'
+                : 'text-gray-600 dark:text-gray-400'
+            }`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 2v6h6M9 13h6M9 17h4" />
+            </svg>
+            Générateur de CV
+          </button>
+          <button
+            onClick={() => setMode('letter')}
+            className={`flex-1 sm:flex-none px-5 py-2.5 rounded-lg text-sm font-bold transition-all inline-flex items-center justify-center gap-2 ${
+              mode === 'letter'
+                ? 'bg-white dark:bg-slate-900 text-gray-900 dark:text-white shadow'
+                : 'text-gray-600 dark:text-gray-400'
+            }`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            Lettre de motivation IA
+          </button>
+        </div>
+      </div>
+
+      {mode === 'letter' ? (
+        <section className="container mx-auto px-4 py-6 md:py-8 max-w-3xl">
+          <CoverLetterDynamic />
+        </section>
+      ) : (
       <section className="container mx-auto px-4 py-6 md:py-8">
         <div className="lg:hidden mb-5">
           <div className="inline-flex p-1.5 rounded-xl bg-gray-100 dark:bg-slate-800 w-full">
@@ -438,6 +478,7 @@ export default function CVGeneratorPage() {
           </div>
         </div>
       </section>
+      )}
 
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }

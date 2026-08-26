@@ -8,8 +8,16 @@ const NAV_LINKS = [
   { label: 'Concours', href: '/concours' },
   { label: 'Entreprises', href: '/companies' },
   { label: 'Candidats', href: '/candidates' },
+  { label: 'Publier une offre', href: '/publier-offre' },
   { label: 'Blog', href: '/blog' },
   { label: 'Contact', href: '/contact' },
+];
+
+const LEGAL_LINKS = [
+  { label: 'Mentions légales', href: '/mentions-legales' },
+  { label: 'Conditions d\u2019utilisation', href: '/conditions-utilisation' },
+  { label: 'Politique de confidentialité', href: '/confidentialite' },
+  { label: 'Politique de cookies', href: '/cookies' },
 ];
 
 export default function Footer() {
@@ -42,16 +50,25 @@ export default function Footer() {
           </nav>
         </div>
 
-        <div className="border-t border-gray-800 mt-6 pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
-          <div className="flex items-center gap-4">
-            <p>
-              © {new Date().getFullYear()} TravaillerenCi — Tous droits réservés.
-            </p>
-            <PWAInstallCTA variant="compact" className="border-gray-700 bg-gray-800 text-gray-300 hover:bg-gray-700" />
+        <div className="border-t border-gray-800 mt-6 pt-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
+            <div className="flex items-center gap-4">
+              <p>
+                © {new Date().getFullYear()} TravaillerenCi — Tous droits réservés.
+              </p>
+              <PWAInstallCTA variant="compact" className="border-gray-700 bg-gray-800 text-gray-300 hover:bg-gray-700" />
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="hidden sm:inline text-[11px]">Télécharger l'App 📱</span>
+              <SocialLinks size="sm" variant="dark" className="gap-2" />
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="hidden sm:inline text-[11px]">Télécharger l'App 📱</span>
-            <SocialLinks size="sm" variant="dark" className="gap-2" />
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mt-3 pt-3 border-t border-gray-800/50">
+            {LEGAL_LINKS.map((link) => (
+              <Link key={link.href} href={link.href} className="text-[11px] text-gray-500 hover:text-gray-300 transition-colors">
+                {link.label}
+              </Link>
+            ))}
           </div>
         </div>
       </div>
