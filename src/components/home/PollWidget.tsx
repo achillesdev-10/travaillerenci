@@ -25,6 +25,8 @@ export default function PollWidget() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState<number | null>(null);
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -59,22 +61,38 @@ export default function PollWidget() {
     load();
   }, [load]);
 
-  // Après 1 minute, réafficher les options de sélection
+  // Après 30 secondes, réafficher les options de sélection
   useEffect(() => {
     if (voted === null) {
       if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+      if (countdownRef.current) clearInterval(countdownRef.current);
+      setCountdown(null);
       return;
     }
+    const duration = 30;
+    setCountdown(duration);
+    countdownRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev !== null && prev <= 1) {
+          if (countdownRef.current) clearInterval(countdownRef.current);
+          return null;
+        }
+        return prev !== null ? prev - 1 : null;
+      });
+    }, 1000);
     resetTimerRef.current = setTimeout(() => {
       setVoted(null);
+      setCountdown(null);
+      if (countdownRef.current) clearInterval(countdownRef.current);
       try {
         localStorage.removeItem(STORAGE_KEY);
       } catch {
         /* noop */
       }
-    }, 60_000);
+    }, duration * 1000);
     return () => {
       if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+      if (countdownRef.current) clearInterval(countdownRef.current);
     };
   }, [voted]);
 
@@ -234,13 +252,20 @@ export default function PollWidget() {
           </div>
 
           {hasVoted && (
-            <div className="mt-3 flex items-center gap-2 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/40 px-3.5 py-2.5">
-              <svg className="h-4 w-4 text-emerald-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 6 9 17l-5-5" />
-              </svg>
-              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-                Merci pour votre vote ! Voici les résultats.
-              </span>
+            <div className="mt-3 flex items-center justify-between gap-2 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/40 px-3.5 py-2.5">
+              <div className="flex items-center gap-2">
+                <svg className="h-4 w-4 text-emerald-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                  Merci pour votre vote !
+                </span>
+              </div>
+              {countdown !== null && (
+                <span className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                  {Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, '0')}
+                </span>
+              )}
             </div>
           )}
         </>
