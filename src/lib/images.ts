@@ -45,10 +45,10 @@ export const IMAGES = {
   community: UNSPLASH('photo-1529156069898-49953e39b3ac', 1200),
   // Catégories de concours (administratif, sécurité, militaire, autre…)
   // NB : santé et enseignement réutilisent IMAGES.sante / IMAGES.education.
-  examAdmin: UNSPLASH('photo-1554224155-8d04cb21cd6c', 1000),
-  examSecurite: UNSPLASH('photo-1589994965851-a8f479c573a9', 1000),
-  examMilitaire: UNSPLASH('photo-1579912437766-7896df6d3cd3', 1000),
-  examAutre: UNSPLASH('photo-1434030216411-0b793f4b4173', 1000),
+  examAdmin: UNSPLASH('photo-1497366811353-6870744d04b2', 1000),
+  examSecurite: UNSPLASH('photo-1557804506-669a67965ba0', 1000),
+  examMilitaire: UNSPLASH('photo-1521791136064-7986c2920216', 1000),
+  examAutre: UNSPLASH('photo-1456513080510-7bf3a84b82f8', 1000),
 } as const;
 
 // -----------------------------------------------------------------------------
