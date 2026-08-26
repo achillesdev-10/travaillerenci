@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useDarkMode } from '@/hooks/useDarkMode';
 import { fetchCurrentUser, logoutCurrentUser, type StoredUser } from '@/lib/clientAuth';
@@ -23,13 +24,16 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState<StoredUser | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
+  const pathname = usePathname();
 
+  // Re-fetch session à chaque changement de route (ex. après login → redirect)
+  // ET au montage initial. Sans ça, le Header ne détecte pas la session
+  // après une connexion puis une navigation client-side vers le dashboard.
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     onScroll();
     window.addEventListener('scroll', onScroll);
 
-    // Session réelle : lecture côté serveur (cookie httpOnly, rien à forger).
     let cancelled = false;
     fetchCurrentUser()
       .then((current) => {
@@ -43,7 +47,7 @@ export default function Header() {
       cancelled = true;
       window.removeEventListener('scroll', onScroll);
     };
-  }, []);
+  }, [pathname]);
 
   async function handleLogout() {
     await logoutCurrentUser();

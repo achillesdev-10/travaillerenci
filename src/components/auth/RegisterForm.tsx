@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import PasswordInput from '@/components/auth/PasswordInput';
-import { apiRegister, apiResendVerification } from '@/lib/authApi';
+import { apiRegister } from '@/lib/authApi';
 import { isGoogleAuthVisible } from '@/lib/config';
 import { REGIONS_CI, SECTORS } from '@/lib/constants';
 import { DIPLOMA_FILTERS } from '@/lib/examConstants';
@@ -31,12 +31,6 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
   const [profileSectors, setProfileSectors] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  // Vérification d'email ACTIVÉE : après l'inscription, l'email du compte n'est
-  // pas confirmé → on affiche un écran « Vérifiez votre boîte mail » (au lieu
-  // de rediriger vers le tableau de bord) avec option de renvoi du lien.
-  const [verificationPending, setVerificationPending] = useState<string | null>(null);
-  const [resendStatus, setResendStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
-  const [resendFeedback, setResendFeedback] = useState<string | null>(null);
 
   function toggleSector(slug: string) {
     setProfileSectors((prev) =>
@@ -77,23 +71,6 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
     router.push(role === 'candidate' ? '/dashboard/candidate' : '/dashboard/company');
   }
 
-  /** Renvoie le lien de confirmation (écran « vérifiez votre email »). */
-  async function handleResendVerification() {
-    if (resendStatus === 'sending') return;
-    setResendStatus('sending');
-    setResendFeedback(null);
-    const result = await apiResendVerification();
-    if (result.ok) {
-      setResendStatus('sent');
-      setResendFeedback(
-        result.data.message || 'Un nouveau lien vient de vous être envoyé.',
-      );
-    } else {
-      setResendStatus('error');
-      setResendFeedback(result.error);
-    }
-  }
-
   function googleAuthHref(): string {
     const next =
       role === 'company' ? '/dashboard/company' : '/dashboard/candidate';
@@ -132,91 +109,12 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
       }
 
       // Succès : la session (cookie httpOnly) a été posée par le serveur.
-      // Vérification d'email ACTIVÉE → le compte est créé non vérifié : on
-      // redirige vers un écran « vérifiez votre email » au lieu du dashboard.
-      if (result.data.user.email_verified === false) {
-        setVerificationPending(result.data.user.email);
-        return;
-      }
       redirectToDashboard();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erreur lors de l’inscription');
     } finally {
       setLoading(false);
     }
-  }
-
-  // Écran de succès quand la vérification d'email est ACTIVÉE : le compte est
-  // créé mais l'email doit être confirmé avant de profiter de l'espace.
-  if (verificationPending) {
-    return (
-      <div className="w-full max-w-md space-y-6 rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 shadow-2xl text-center">
-        <Link
-          href="/"
-          className="inline-block text-2xl font-black text-primary font-[var(--font-display)]"
-        >
-          Travailleren<span className="text-gray-900 dark:text-white">Ci</span>
-        </Link>
-
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
-          <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-            />
-          </svg>
-        </div>
-
-        <div className="space-y-2">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            Vérifiez votre boîte mail
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-slate-400 leading-relaxed">
-            Nous avons envoyé un lien de confirmation à{' '}
-            <strong className="text-gray-900 dark:text-white break-all">{verificationPending}</strong>.
-            Cliquez sur ce lien (valable 24 h) pour activer votre compte.
-          </p>
-        </div>
-
-        {resendFeedback ? (
-          <p
-            className={`text-xs font-semibold ${
-              resendStatus === 'error'
-                ? 'text-rose-600 dark:text-rose-400'
-                : 'text-emerald-600 dark:text-emerald-400'
-            }`}
-          >
-            {resendFeedback}
-          </p>
-        ) : null}
-
-        <div className="space-y-3">
-          <button
-            type="button"
-            onClick={handleResendVerification}
-            disabled={resendStatus === 'sending'}
-            className="w-full rounded-2xl bg-primary py-3.5 text-xs font-bold text-white hover:brightness-110 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
-          >
-            {resendStatus === 'sending'
-              ? 'Envoi du lien…'
-              : resendStatus === 'sent'
-                ? 'Lien renvoyé ✓'
-                : 'Renvoyer le lien'}
-          </button>
-          <Link
-            href={role === 'candidate' ? '/dashboard/candidate' : '/dashboard/company'}
-            className="block w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 py-3.5 text-xs font-bold text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 transition-all"
-          >
-            Accéder à mon espace
-          </Link>
-          <p className="text-[11px] text-gray-400 dark:text-slate-500">
-            Pas reçu ? Vérifiez vos spams ou réessayez dans une minute.
-          </p>
-        </div>
-      </div>
-    );
   }
 
   return (
