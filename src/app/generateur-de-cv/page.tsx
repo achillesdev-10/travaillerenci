@@ -335,13 +335,13 @@ export default function CVGeneratorPage() {
               </div>
             </div>
             {/* Illustration — bannière locale optimisée (desktop) */}
-            <div className="hidden lg:block relative h-72 rounded-3xl overflow-hidden shadow-2xl ring-1 ring-black/5">
+            <div className="hidden lg:block relative h-[220px] rounded-3xl overflow-hidden shadow-2xl ring-1 ring-black/5">
               <Image
                 src={LOCAL_IMAGES.cvGenerator}
                 alt="Générateur de CV IA - travaillerenci"
                 fill
                 sizes="(min-width: 1024px) 420px, 100vw"
-                className="object-cover object-top"
+                className="object-cover object-center"
               />
               <div className="absolute inset-0 bg-gradient-to-tr from-emerald-950/60 via-transparent to-transparent" aria-hidden="true" />
             </div>

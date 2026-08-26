@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface PollData {
   question: string;
@@ -24,6 +24,7 @@ export default function PollWidget() {
   const [voted, setVoted] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState<number | null>(null);
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -57,6 +58,25 @@ export default function PollWidget() {
     }
     load();
   }, [load]);
+
+  // Après 1 minute, réafficher les options de sélection
+  useEffect(() => {
+    if (voted === null) {
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+      return;
+    }
+    resetTimerRef.current = setTimeout(() => {
+      setVoted(null);
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch {
+        /* noop */
+      }
+    }, 60_000);
+    return () => {
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+    };
+  }, [voted]);
 
   async function vote(option: number) {
     if (submitting !== null || voted !== null) return;
