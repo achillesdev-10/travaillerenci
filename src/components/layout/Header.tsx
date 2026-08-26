@@ -141,9 +141,20 @@ export default function Header() {
               <>
                 <Link
                   href={dashboardHref}
-                  className="text-[13px] font-bold text-gray-800 dark:text-white px-3 py-2 bg-gray-100 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700"
+                  className="flex items-center gap-2 text-[13px] font-bold text-gray-800 dark:text-white px-3 py-2 bg-gray-100 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700"
                 >
-                  {user.name || user.email} ({user.role === 'company' ? 'Entreprise' : 'Candidat'})
+                  {user.avatar_url ? (
+                    <img
+                      src={user.avatar_url}
+                      alt=""
+                      className="w-6 h-6 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center text-white text-[10px] font-black shrink-0">
+                      {(user.name || user.email || '?')[0].toUpperCase()}
+                    </div>
+                  )}
+                  <span>{user.name || user.email} ({user.role === 'company' ? 'Entreprise' : 'Candidat'})</span>
                 </Link>
                 <button
                   onClick={handleLogout}

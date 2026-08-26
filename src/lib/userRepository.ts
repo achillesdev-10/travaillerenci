@@ -28,6 +28,8 @@ export type StoredUser = {
   /** Vrai si l'email a été confirmé (lien de vérification cliqué, ou email
    *  vérifié par Google au moment du SSO). */
   email_verified: boolean;
+  /** URL de la photo de profil (Supabase Storage ou data URI). */
+  avatar_url?: string | null;
   created_at: string;
 };
 
@@ -41,6 +43,8 @@ export type PublicUser = {
   needs_password_reset: boolean;
   /** Vrai si l'email a été confirmé. */
   email_verified: boolean;
+  /** URL de la photo de profil. */
+  avatar_url?: string | null;
   created_at: string;
 };
 
@@ -59,6 +63,7 @@ function toPublic(user: StoredUser): PublicUser {
     role: user.role,
     needs_password_reset: Boolean(user.needs_password_reset),
     email_verified: Boolean(user.email_verified),
+    avatar_url: user.avatar_url ?? null,
     created_at: user.created_at,
   };
 }
@@ -137,6 +142,9 @@ function ensureSchema(db: DatabaseSyncInstance) {
   }
   if (!cols.some((c) => c.name === 'email_verified')) {
     db.exec('ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0');
+  }
+  if (!cols.some((c) => c.name === 'avatar_url')) {
+    db.exec('ALTER TABLE users ADD COLUMN avatar_url TEXT');
   }
 
   db.exec(`CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);`);

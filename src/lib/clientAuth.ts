@@ -19,6 +19,8 @@ export type StoredUser = {
   needs_password_reset?: boolean;
   /** Vrai si l'email a été confirmé. */
   email_verified?: boolean;
+  /** URL de la photo de profil. */
+  avatar_url?: string | null;
 };
 
 /** Récupère l'utilisateur connecté depuis le serveur (cookie httpOnly). */
