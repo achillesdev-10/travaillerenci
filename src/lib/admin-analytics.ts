@@ -193,9 +193,9 @@ async function fromSupabase(days: number): Promise<AdminAnalyticsData> {
   const supabase = getSupabaseClient();
   if (!supabase) return emptyAnalytics("Supabase non configuré.");
 
-  const { data, error } = await supabase
+  const { data, error, count } = await supabase
     .from("site_visits")
-    .select("path,ip_hash,user_agent,created_at")
+    .select("path,ip_hash,user_agent,created_at", { count: "exact" })
     .order("created_at", { ascending: false })
     .limit(5000);
 
@@ -215,7 +215,7 @@ async function fromSupabase(days: number): Promise<AdminAnalyticsData> {
   }));
 
   const result = fromSqliteRows(rows as unknown as Record<string, unknown>[], days);
-  return { ...result, source: "supabase" };
+  return { ...result, totalVisits: count ?? result.totalVisits, source: "supabase" };
 }
 
 /**

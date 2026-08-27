@@ -1049,14 +1049,14 @@ async function getAdminDashboardDataFromSupabase(
     const weekStart = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
     const [{ count: total }, { count: today }, { count: week }] = await Promise.all([
-      supabase.from("site_visits").select("id", { count: "exact", head: true }),
+      supabase.from("site_visits").select("id", { count: "exact" }),
       supabase
         .from("site_visits")
-        .select("id", { count: "exact", head: true })
+        .select("id", { count: "exact" })
         .gte("created_at", todayStart.toISOString()),
       supabase
         .from("site_visits")
-        .select("id", { count: "exact", head: true })
+        .select("id", { count: "exact" })
         .gte("created_at", weekStart.toISOString()),
     ]);
 
