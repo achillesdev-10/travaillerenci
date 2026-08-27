@@ -132,7 +132,7 @@ travaillerenci/
 │
 ├── .env.example                 ← Modèle variables d'environnement
 ├── .env.local                   ← (à créer, non versionné)
-├── .eslintrc.json               ← Configuration ESLint (Next + TS)
+├── eslint.config.mjs            ← Configuration ESLint (Next + TS, flat config)
 ├── .gitignore
 ├── next.config.mjs              ← Config Next.js (images, headers, rewrites…)
 ├── next-env.d.ts
