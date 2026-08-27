@@ -5,7 +5,7 @@ const GEMINI_MODEL = 'gemini-2.0-flash';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL = 'llama-3.3-70b-versatile';
+const GROQ_MODEL = process.env.ASSISTANT_GROQ_MODEL || 'qwen/qwen3.8-27b';
 
 const SYSTEM_PROMPT = `Tu es un expert RH et rédacteur professionnel spécialisé dans le marché de l'emploi en Côte d'Ivoire pour la plateforme TravaillerenCi.
 

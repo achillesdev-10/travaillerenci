@@ -5,9 +5,35 @@ import {
   isAdminCredentialsConfigured,
   validateAdminCredentials,
 } from '@/lib/adminSession';
+import { is2faEnabled } from '@/lib/totp';
+import { getClientIp, isRateLimited } from '@/lib/rateLimit';
+import { notifyAdminLoginFailed } from '@/services/adminAlerts';
+
+export const runtime = 'nodejs';
+
+// --- Configuration rate-limit admin ------------------------------------------------
+// Plus strict que le login candidat : 5 tentatives / 15 min par IP.
+const ADMIN_LOGIN_MAX_ATTEMPTS = 5;
+const ADMIN_LOGIN_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+
+    // --- Rate limiting (5 tentatives / 15 min par IP) ---
+    if (
+      isRateLimited(
+        `admin-login:${ip}`,
+        ADMIN_LOGIN_MAX_ATTEMPTS,
+        ADMIN_LOGIN_WINDOW_MS,
+      )
+    ) {
+      return NextResponse.json(
+        { error: 'Trop de tentatives. Réessayez plus tard.' },
+        { status: 429 },
+      );
+    }
+
     const body = (await request.json()) as {
       email?: string;
       password?: string;
@@ -32,12 +58,24 @@ export async function POST(request: Request) {
 
     const isValid = await validateAdminCredentials(email, password);
     if (!isValid) {
+      // --- Alerte WhatsApp sur échec de connexion ---
+      await notifyAdminLoginFailed({ ip, email });
+
       return NextResponse.json(
         { error: 'Identifiants administrateur invalides.' },
         { status: 401 }
       );
     }
 
+    // --- 2FA : si activé, retourner 2fa_required sans créer la session ---
+    if (is2faEnabled()) {
+      return NextResponse.json({
+        status: '2fa_required',
+        email,
+      });
+    }
+
+    // --- Pas de 2FA : création directe de la session ---
     const token = await createAdminSessionToken(email);
     const response = NextResponse.json({
       ok: true,

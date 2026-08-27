@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getSupabaseClient, isSupabaseConfigured } from '@/lib/supabase';
+import { getClientIp, isRateLimited } from '@/lib/rateLimit';
 
 /** Bucket public dédié aux photos de CV (voir supabase/migrations/0008). */
 const BUCKET = 'cv-photos';
@@ -11,6 +12,10 @@ const ALLOWED_MIME: Record<string, string> = {
   'image/webp': 'webp',
 };
 
+// --- Rate-limit upload photo : 10 uploads / 10 min par IP ---
+const PHOTO_UPLOAD_MAX = 10;
+const PHOTO_UPLOAD_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+
 /**
  * POST /api/cv/photo
  * Body : multipart/form-data avec le champ `file`.
@@ -18,11 +23,23 @@ const ALLOWED_MIME: Record<string, string> = {
  * Réponses :
  *  - 200 { url }                    → photo uploadée, URL publique Supabase
  *  - 400 { error }                  → fichier invalide (type / taille)
+ *  - 429 { error }                  → trop d'uploads (rate-limit)
  *  - 501 { error, code }            → Supabase non configuré (le client
  *                                     garde alors un aperçu local blob:)
  */
+export const runtime = 'nodejs';
+
 export async function POST(request: NextRequest) {
   try {
+    // --- Rate limiting ---
+    const ip = getClientIp(request);
+    if (isRateLimited(`cv-photo:${ip}`, PHOTO_UPLOAD_MAX, PHOTO_UPLOAD_WINDOW_MS)) {
+      return NextResponse.json(
+        { error: 'Trop d\'uploads. Réessayez dans quelques minutes.' },
+        { status: 429 },
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get('file');
 

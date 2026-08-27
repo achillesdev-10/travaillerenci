@@ -23,7 +23,7 @@ const GEMINI_MODEL = process.env.ASSISTANT_GEMINI_MODEL || 'gemini-2.0-flash';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL = process.env.ASSISTANT_GROQ_MODEL || 'llama-3.3-70b-versatile';
+const GROQ_MODEL = process.env.ASSISTANT_GROQ_MODEL || 'qwen/qwen3.8-27b';
 
 /** Timeout par appel IA (ms). */
 const AI_TIMEOUT_MS = 25_000;

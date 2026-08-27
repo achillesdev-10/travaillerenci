@@ -309,7 +309,12 @@ Référence complète : voir `.env.example`.
 | `ASSISTANT_AI_RATE_LIMIT_PER_HOUR` | 🟡 | Assistant : max requêtes IA/heure/IP (défaut 20) |
 | `ASSISTANT_MAX_MESSAGE_LENGTH` | 🟡 | Assistant : longueur max d'un message (défaut 500) |
 | `ASSISTANT_GEMINI_MODEL` | 🟡 | Assistant : modèle Gemini (défaut `gemini-2.0-flash`) |
-| `ASSISTANT_GROQ_MODEL` | 🟡 | Assistant : modèle Groq fallback (défaut `llama-3.3-70b-versatile`) |
+| `ASSISTANT_GROQ_MODEL` | 🟡 | Assistant : modèle Groq fallback (défaut `qwen/qwen3.8-27b`) |
+| `ADMIN_SESSION_SECRET` | ✅ admin | Secret HMAC pour signer les cookies de session admin |
+| `ADMIN_SESSION_TTL_HOURS` | 🟡 | Durée de validité de la session admin (défaut 12h) |
+| `ADMIN_TOTP_SECRET` | 🟡 | Secret TOTP base32 pour la 2FA admin (Google Authenticator) |
+| `ADMIN_ALERT_ENABLED` | 🟡 | `1` pour activer les alertes de connexion admin échouée |
+| `ADMIN_ALERT_WEBHOOK_URL` | 🟡 | Webhook externe pour alertes admin (prioritaire sur WhatsApp direct) |
 | `WHATSAPP_WEBHOOK_URL` | 🟡 | Webhook sortant appelé à chaque nouvelle offre insérée pour diffusion WhatsApp |
 | `WHATSAPP_META_ACCESS_TOKEN` | 🟡 | Token Meta WhatsApp Cloud API si vous envoyez directement sans webhook |
 | `WHATSAPP_META_PHONE_NUMBER_ID` | 🟡 | Identifiant du numéro WhatsApp Business Meta |
@@ -358,6 +363,28 @@ Référence complète : voir `.env.example`.
   - `WHATSAPP_WEBHOOK_URL` pour déléguer l'envoi à n8n, Make, Zapier, Twilio ou une passerelle interne.
   - `WHATSAPP_META_*` pour appeler directement l'API WhatsApp Cloud de Meta.
 - Pour désactiver ponctuellement l'envoi lors d'un scrape, lancez : `python scraper.py --no-notify`.
+
+### Sécurité du panneau admin 🔒
+
+> ⚠️ **Ne jamais publier le chemin d'accès admin dans un contexte public** (README, source maps, commentaires, sitemap). Le blocage repose uniquement sur l'authentification.
+
+- **Chemin admin** : `/[votre-chemin-admin]` (configurable, ne pas exposer en clair).
+- **Authentification** : email + mot de passe, cookie httpOnly signé (HMAC-SHA256).
+- **Rate-limiting** : 5 tentatives max / 15 minutes par IP sur le login admin. Au-delà : message générique « Trop de tentatives. Réessayez plus tard. » sans révéler d'information technique.
+- **2FA (TOTP)** : optionnel, activable depuis `Paramètres → Sécurité`. Compatible Google Authenticator / Authy. Le secret est stocké dans `ADMIN_TOTP_SECRET` (variable d'environnement).
+- **Alertes de sécurité** : à chaque échec de connexion admin, une notification WhatsApp est envoyée (date/heure, IP, email tenté). Activer via `ADMIN_ALERT_ENABLED=1`.
+
+**Configuration de la 2FA :**
+1. Aller dans le dashboard admin → Paramètres → Sécurité.
+2. Cliquer « Activer » sur la section 2FA.
+3. Scanner le QR code avec Google Authenticator / Authy.
+4. Saisir le code à 6 chiffres pour valider.
+5. Ajouter `ADMIN_TOTP_SECRET=<secret>` dans `.env.local` ou les variables Vercel.
+
+**Pour régénérer un secret TOTP :**
+```bash
+npx tsx -e "import speakeasy from 'speakeasy'; console.log(speakeasy.generateSecret({name:'TravaillerEnCi Admin'}).base32)"
+```
 
 ---
 

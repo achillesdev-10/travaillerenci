@@ -14,6 +14,10 @@ function AdminLoginForm() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // --- État 2FA ---
+  const [needs2fa, setNeeds2fa] = useState(false);
+  const [totpCode, setTotpCode] = useState('');
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
@@ -27,8 +31,42 @@ function AdminLoginForm() {
       });
 
       const data = await res.json();
+
+      // --- 2FA requise : afficher le champ TOTP ---
+      if (data.status === '2fa_required') {
+        setNeeds2fa(true);
+        setIsLoading(false);
+        return;
+      }
+
       if (!res.ok) {
         throw new Error(data.error || 'Identifiants invalides');
+      }
+
+      router.replace(nextUrl);
+      router.refresh();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Une erreur est survenue';
+      setError(msg);
+      setIsLoading(false);
+    }
+  }
+
+  async function handleTotpSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    try {
+      const res = await fetch('/api/admin/session/verify-totp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: totpCode, email }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Code invalide');
       }
 
       router.replace(nextUrl);
@@ -51,7 +89,9 @@ function AdminLoginForm() {
             Administration TravaillerenCi
           </h1>
           <p className="text-xs text-slate-400">
-            Veuillez vous authentifier avec vos identifiants administrateur.
+            {needs2fa
+              ? 'Saisissez le code à 6 chiffres de votre application d\'authentification.'
+              : 'Veuillez vous authentifier avec vos identifiants administrateur.'}
           </p>
         </div>
 
@@ -61,39 +101,82 @@ function AdminLoginForm() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-              Email administrateur
-            </label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="email@exemple.com"
-              className="w-full rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-primary transition-colors"
+        {!needs2fa ? (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                Email administrateur
+              </label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="email@exemple.com"
+                className="w-full rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-primary transition-colors"
+              />
+            </div>
+
+            <PasswordInput
+              label="Mot de passe"
+              value={password}
+              onChange={setPassword}
+              autoComplete="current-password"
+              labelClassName="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5 ml-0"
+              inputClassName="rounded-2xl border border-slate-800 bg-slate-950 text-white placeholder-slate-600 focus:border-primary"
+              buttonClassName="text-slate-500 hover:text-slate-200"
             />
-          </div>
 
-          <PasswordInput
-            label="Mot de passe"
-            value={password}
-            onChange={setPassword}
-            autoComplete="current-password"
-            labelClassName="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5 ml-0"
-            inputClassName="rounded-2xl border border-slate-800 bg-slate-950 text-white placeholder-slate-600 focus:border-primary"
-            buttonClassName="text-slate-500 hover:text-slate-200"
-          />
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full rounded-2xl bg-primary py-3.5 text-sm font-bold text-slate-950 hover:brightness-110 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
+            >
+              {isLoading ? 'Connexion en cours...' : 'Se connecter au Dashboard'}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleTotpSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                Code d'authentification (TOTP)
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]{6}"
+                maxLength={6}
+                required
+                autoFocus
+                value={totpCode}
+                onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ''))}
+                placeholder="000000"
+                className="w-full rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-primary transition-colors text-center tracking-[0.5em] font-mono"
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full rounded-2xl bg-primary py-3.5 text-sm font-bold text-slate-950 hover:brightness-110 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
-          >
-            {isLoading ? 'Connexion en cours...' : 'Se connecter au Dashboard'}
-          </button>
-        </form>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setNeeds2fa(false);
+                  setTotpCode('');
+                  setError('');
+                }}
+                className="flex-1 rounded-2xl border border-slate-700 py-3.5 text-sm font-medium text-slate-300 hover:bg-slate-800 transition-all"
+              >
+                Retour
+              </button>
+              <button
+                type="submit"
+                disabled={isLoading || totpCode.length !== 6}
+                className="flex-1 rounded-2xl bg-primary py-3.5 text-sm font-bold text-slate-950 hover:brightness-110 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
+              >
+                {isLoading ? 'Vérification...' : 'Vérifier'}
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );
