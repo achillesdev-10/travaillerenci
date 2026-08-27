@@ -384,7 +384,11 @@ export default function CVGeneratorPage() {
 
       {mode === 'letter' ? (
         <section className="container mx-auto px-4 py-6 md:py-8 max-w-3xl">
-          <CoverLetterDynamic />
+          <CoverLetterDynamic
+            initialName={cvData.fullName}
+            initialSkills={cvData.skills}
+            initialExperience={cvData.experiences.map((e) => `${e.position} chez ${e.company} (${e.period})`).join('\n')}
+          />
         </section>
       ) : (
       <section className="container mx-auto px-4 py-6 md:py-8">
@@ -424,6 +428,26 @@ export default function CVGeneratorPage() {
           <div className={`lg:col-span-5 ${activeTab === 'preview' ? 'hidden lg:block' : ''}`}>
             <div className="lg:sticky lg:top-24 overflow-y-auto max-h-[calc(100vh-8rem)] lg:pr-2 custom-scrollbar">
               {hydrated && <CVFormDynamic cvData={cvData} onChange={setCVData} />}
+
+              {/* Aperçu lettre de motivation — lien vers le mode lettre */}
+              <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50/60 p-4 dark:border-blue-900/30 dark:bg-blue-950/20">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-base">✉️</span>
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">Lettre de motivation</h3>
+                </div>
+                <p className="text-[12px] text-gray-600 dark:text-gray-300 mb-3">
+                  Vos infos du CV sont automatiquement utilisées pour pré-remplir la lettre. Ajoutez le nom de l'entreprise et le poste visé pour générer une lettre personnalisée.
+                </p>
+                <button
+                  onClick={() => setMode('letter')}
+                  className="inline-flex items-center gap-1.5 text-[12px] font-bold text-blue-600 dark:text-blue-400 hover:gap-2.5 transition-all"
+                >
+                  Ouvrir le générateur de lettre
+                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
 

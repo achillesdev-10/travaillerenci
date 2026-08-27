@@ -77,6 +77,26 @@ export default async function BoursesPage() {
           </h2>
         </div>
 
+        {/* Widget : conseils bourses */}
+        <div className="mb-8 rounded-2xl border border-amber-100 bg-amber-50/60 p-5 shadow-sm dark:border-amber-900/30 dark:bg-amber-950/20">
+          <div className="flex items-start gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400">
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 14l9-5-9-5-9 5 9 5z" />
+                <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+              </svg>
+            </span>
+            <div>
+              <h3 className="font-[var(--font-display)] text-sm font-bold text-gray-900 dark:text-white mb-1">💡 Conseils pour votre candidature</h3>
+              <ul className="text-[12.5px] text-gray-600 dark:text-gray-300 space-y-1 list-disc list-inside">
+                <li>Postulez tôt — les places sont souvent limitées</li>
+                <li>Préparez un CV professionnel avec le <Link href="/generateur-de-cv" className="font-bold text-primary hover:underline">générateur IA</Link></li>
+                <li>Partagez les bourses avec vos amis sur WhatsApp et Facebook</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
         {bourses.length > 0 ? (
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
             {bourses.map((bourse) => (

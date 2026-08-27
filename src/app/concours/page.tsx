@@ -148,72 +148,61 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
     <main className="flex-1 min-h-screen bg-gray-50 py-8 transition-colors dark:bg-slate-950 sm:py-12">
       <div className="container mx-auto max-w-6xl px-4">
         {/* ===================== HÉRO ===================== */}
-        <section className="relative overflow-hidden mb-6 rounded-3xl bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 shadow-lg">
-          <div
-            className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-orange-400/10 blur-3xl"
-            aria-hidden="true"
-          />
-          <div
-            className="pointer-events-none absolute -bottom-32 -left-16 h-80 w-80 rounded-full bg-emerald-300/10 blur-3xl"
-            aria-hidden="true"
-          />
+        <section className="relative overflow-hidden mb-6 rounded-2xl bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 shadow-md">
+          <div className="relative p-5 sm:p-7">
+            <nav
+              aria-label="Fil d'Ariane"
+              className="mb-3 text-sm text-gray-500 dark:text-gray-400"
+            >
+              <Link href="/" className="hover:text-primary">Accueil</Link>
+              <span className="mx-2" aria-hidden="true">/</span>
+              <span className="font-medium text-gray-900 dark:text-white">Concours administratifs</span>
+            </nav>
 
-          <div className="relative grid items-center gap-8 p-6 sm:p-10 lg:grid-cols-2 lg:p-12">
-            <div>
-              <nav
-                aria-label="Fil d'Ariane"
-                className="mb-5 text-sm text-gray-500 dark:text-gray-400"
-              >
-                <Link href="/" className="hover:text-primary">Accueil</Link>
-                <span className="mx-2" aria-hidden="true">/</span>
-                <span className="font-medium text-gray-900 dark:text-white">Concours administratifs</span>
-              </nav>
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold text-primary dark:text-emerald-400 border border-primary/20">
+                <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Sources officielles
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-500/10 px-3 py-1 text-[11px] font-bold text-orange-600 dark:text-orange-400 border border-orange-500/20">
+                <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Mis à jour automatiquement
+              </span>
+            </div>
 
-              <div className="mb-4 flex flex-wrap gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold text-primary dark:text-emerald-400 border border-primary/20">
-                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Sources officielles
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-500/10 px-3 py-1 text-[11px] font-bold text-orange-600 dark:text-orange-400 border border-orange-500/20">
-                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  Mis à jour automatiquement
-                </span>
-              </div>
+            <h1 className="mb-2 font-[var(--font-display)] text-2xl font-extrabold leading-tight sm:text-3xl text-gray-900 dark:text-white">
+              Concours administratifs en Côte d&apos;Ivoire
+            </h1>
+            <p className="max-w-xl text-sm text-gray-600 dark:text-gray-300 sm:text-base mb-4">
+              Retrouvez les concours <strong className="text-gray-900 dark:text-white">en cours</strong> et{' '}
+              <strong className="text-gray-900 dark:text-white">à venir</strong> de la fonction publique et des
+              grandes écoles ivoiriennes (ENA, INFAS, CAFOP, gendarmerie…), alimentés
+              directement depuis les sources officielles.
+            </p>
 
-              <h1 className="mb-4 font-[var(--font-display)] text-3xl font-extrabold leading-tight sm:text-4xl lg:text-5xl text-gray-900 dark:text-white">
-                Concours administratifs en Côte d&apos;Ivoire
-              </h1>
-              <p className="max-w-xl text-base text-gray-600 dark:text-gray-300 sm:text-lg">
-                Retrouvez les concours <strong className="text-gray-900 dark:text-white">en cours</strong> et{' '}
-                <strong className="text-gray-900 dark:text-white">à venir</strong> de la fonction publique et des
-                grandes écoles ivoiriennes (ENA, INFAS, CAFOP, gendarmerie…), alimentés
-                directement depuis les sources officielles.
-              </p>
-
-              <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3">
+            <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+              <div className="flex flex-wrap gap-x-6 gap-y-2">
                 <div>
-                  <div className="font-[var(--font-display)] text-2xl font-black text-gray-900 dark:text-white">{totalRecensed}</div>
+                  <div className="font-[var(--font-display)] text-xl font-black text-gray-900 dark:text-white">{totalRecensed}</div>
                   <div className="text-[11px] uppercase tracking-widest text-gray-500 dark:text-gray-400">concours recensés</div>
                 </div>
                 <div>
-                  <div className="font-[var(--font-display)] text-2xl font-black text-gray-900 dark:text-white">10+</div>
+                  <div className="font-[var(--font-display)] text-xl font-black text-gray-900 dark:text-white">10+</div>
                   <div className="text-[11px] uppercase tracking-widest text-gray-500 dark:text-gray-400">sources officielles</div>
                 </div>
                 <div>
-                  <div className="font-[var(--font-display)] text-2xl font-black text-gray-900 dark:text-white">100 %</div>
+                  <div className="font-[var(--font-display)] text-xl font-black text-gray-900 dark:text-white">100 %</div>
                   <div className="text-[11px] uppercase tracking-widest text-gray-500 dark:text-gray-400">relu avant publication</div>
                 </div>
               </div>
-
-              {/* CTA S'inscrire */}
-              <div className="mt-6 flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2">
                 <Link
                   href="/register"
-                  className="inline-flex items-center gap-2 rounded-xl bg-primary text-white px-6 py-3 text-sm font-bold shadow-md shadow-primary/20 hover:bg-primary-dark hover:shadow-lg transition-all"
+                  className="inline-flex items-center gap-2 rounded-xl bg-primary text-white px-4 py-2 text-sm font-bold shadow-md shadow-primary/20 hover:bg-primary-dark hover:shadow-lg transition-all"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -225,15 +214,12 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
                 </Link>
                 <Link
                   href="/jobs"
-                  className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 px-5 py-3 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-700 transition-all"
+                  className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 px-4 py-2 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-700 transition-all"
                 >
                   Voir les offres d'emploi
                 </Link>
               </div>
             </div>
-
-            {/* Illustration SVG — bureau du candidat (concours) */}
-            <ConcoursHeroIllustration />
           </div>
         </section>
 
@@ -259,6 +245,47 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
               initialPhase={rawPhase}
             />
           </Suspense>
+        </div>
+
+        {/* ===================== CALENDRIER DES CONCOURS ADMINISTRATIFS ===================== */}
+        <div className="mb-6 rounded-2xl border border-indigo-100 bg-white p-5 shadow-md shadow-black/5 dark:border-indigo-900/30 dark:bg-slate-900">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400">
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+            </span>
+            <div>
+              <h3 className="font-[var(--font-display)] text-sm font-bold text-gray-900 dark:text-white">Calendrier des concours administratifs</h3>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400">Sessions & rappels — très recherché en période de session</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[
+              { name: 'ENA', full: "École Nationale d'Administration", color: 'bg-emerald-50 text-emerald-700 border-emerald-200', darkColor: 'dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/40', icon: '🏛️' },
+              { name: 'Fonction Publique', full: 'Concours de la Fonction Publique', color: 'bg-orange-50 text-orange-700 border-orange-200', darkColor: 'dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800/40', icon: '🏢' },
+              { name: 'CAFOP', full: "Centres d'Animation de Formation P\u00e9dagogique", color: 'bg-blue-50 text-blue-700 border-blue-200', darkColor: 'dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/40', icon: '🎓' },
+            ].map((item) => (
+              <Link
+                key={item.name}
+                href={`/concours?q=${encodeURIComponent(item.name)}`}
+                className={`group rounded-xl border p-3.5 transition-all hover:-translate-y-0.5 hover:shadow-md ${item.color} ${item.darkColor}`}
+              >
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-lg" aria-hidden="true">{item.icon}</span>
+                  <span className="font-[var(--font-display)] text-sm font-bold">{item.name}</span>
+                </div>
+                <p className="text-[11px] opacity-80 leading-snug line-clamp-2">{item.full}</p>
+                <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-bold opacity-0 transition-opacity group-hover:opacity-100">
+                  Voir les sessions
+                  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+                </span>
+              </Link>
+            ))}
+          </div>
+          <p className="mt-3 text-[11px] text-gray-400 dark:text-gray-500 text-center">
+            🔔 Activez une alerte pour recevoir les dates d'inscription par email
+          </p>
         </div>
 
         {/* ===================== PWA CTA — Bannière ===================== */}
@@ -558,78 +585,6 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
 // -----------------------------------------------------------------------------
 //  Sous-composants
 // -----------------------------------------------------------------------------
-
-/** Illustration d'en-tête : fiche concours + toque + calendrier (SVG inline). */
-function ConcoursHeroIllustration() {
-  return (
-    <div className="relative hidden lg:block" aria-hidden="true">
-      <svg viewBox="0 0 460 340" className="w-full max-w-md mx-auto drop-shadow-2xl" role="img">
-        <defs>
-          <linearGradient id="concours-card" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#ffffff" />
-            <stop offset="100%" stopColor="#f1f5f9" />
-          </linearGradient>
-          <linearGradient id="concours-cap" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#fb923c" />
-            <stop offset="100%" stopColor="#f77f00" />
-          </linearGradient>
-          <linearGradient id="concours-doc" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#34d399" />
-            <stop offset="100%" stopColor="#059669" />
-          </linearGradient>
-        </defs>
-
-        <circle cx="230" cy="170" r="150" fill="#ffffff" opacity="0.12" />
-        <circle cx="230" cy="170" r="110" fill="#ffffff" opacity="0.10" />
-
-        {/* Toque de diplômé (orange) */}
-        <g transform="translate(300 40)">
-          <ellipse cx="62" cy="70" rx="58" ry="16" fill="#d97706" opacity="0.35" />
-          <path d="M8 52 L62 18 L116 52 L62 86 Z" fill="url(#concours-cap)" />
-          <path d="M8 52 L62 86 L116 52" fill="none" stroke="#ea580c" strokeWidth="3" />
-          <path d="M116 52 L116 92 L62 112 L8 92 L8 52" fill="none" stroke="#ea580c" strokeWidth="3" />
-          <path d="M62 18 L62 30" stroke="#ea580c" strokeWidth="3" />
-          <circle cx="62" cy="36" r="5" fill="#fde68a" />
-          <path d="M62 36 Q88 30 108 44" fill="none" stroke="#fbbf24" strokeWidth="4" strokeLinecap="round" />
-        </g>
-
-        {/* Fiche concours (carte blanche) */}
-        <g transform="translate(34 96) rotate(-3)">
-          <rect x="0" y="0" width="240" height="190" rx="18" fill="url(#concours-card)" />
-          <rect x="18" y="18" width="66" height="24" rx="12" fill="#009639" />
-          <rect x="18" y="58" width="150" height="12" rx="6" fill="#cbd5e1" />
-          <rect x="18" y="78" width="190" height="10" rx="5" fill="#e2e8f0" />
-          <rect x="18" y="94" width="176" height="10" rx="5" fill="#e2e8f0" />
-          <rect x="18" y="120" width="204" height="10" rx="5" fill="#e2e8f0" />
-          <rect x="18" y="136" width="160" height="10" rx="5" fill="#e2e8f0" />
-          <g transform="translate(178 138)">
-            <circle cx="22" cy="22" r="22" fill="url(#concours-doc)" />
-            <path d="M13 22l7 7 14-16" fill="none" stroke="#ffffff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-          </g>
-          <circle cx="120" cy="-6" r="8" fill="#ef4444" />
-          <circle cx="120" cy="-6" r="3" fill="#fecaca" />
-        </g>
-
-        {/* Calendrier (bleu) */}
-        <g transform="translate(300 178)">
-          <rect x="0" y="0" width="96" height="104" rx="14" fill="#ffffff" />
-          <rect x="0" y="0" width="96" height="30" rx="14" fill="#003087" />
-          <rect x="0" y="16" width="96" height="14" fill="#003087" />
-          <circle cx="24" cy="16" r="4" fill="#ffffff" opacity="0.5" />
-          <circle cx="72" cy="16" r="4" fill="#ffffff" opacity="0.5" />
-          <text x="48" y="74" textAnchor="middle" fontSize="34" fontWeight="800" fill="#003087" fontFamily="Poppins, sans-serif">08</text>
-          <rect x="16" y="86" width="64" height="8" rx="4" fill="#93c5fd" />
-          <path d="M14 -8 L14 12 M82 -8 L82 12" stroke="#003087" strokeWidth="5" strokeLinecap="round" />
-        </g>
-
-        <circle cx="96" cy="70" r="7" fill="#fbbf24" />
-        <circle cx="420" cy="120" r="6" fill="#34d399" />
-        <circle cx="40" cy="300" r="8" fill="#fbbf24" opacity="0.8" />
-        <circle cx="430" cy="290" r="10" fill="#ffffff" opacity="0.25" />
-      </svg>
-    </div>
-  );
-}
 
 function ConcoursEmptyState() {
   return (

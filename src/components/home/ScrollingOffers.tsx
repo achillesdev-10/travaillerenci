@@ -8,28 +8,9 @@ interface ScrollingOffersProps {
   offers: JobOfferSchema[];
 }
 
-// Dégradé orange-blanc pour tous les blocs
-const CARD_COLORS = [
-  'from-orange-50 to-white border-orange-200/60',
-  'from-orange-100/60 to-white border-orange-200/50',
-  'from-orange-50 to-orange-50 border-orange-200/40',
-  'from-white to-orange-50 border-orange-200/50',
-  'from-orange-100/40 to-white border-orange-200/60',
-  'from-white to-orange-100/40 border-orange-200/50',
-  'from-orange-50 to-orange-50 border-orange-200/40',
-  'from-orange-100/30 to-white border-orange-200/60',
-];
-
-const DARK_CARD_COLORS = [
-  'from-orange-950/40 to-slate-900 border-orange-800/30',
-  'from-orange-950/30 to-slate-900 border-orange-800/20',
-  'from-orange-950/40 to-slate-900 border-orange-800/30',
-  'from-orange-950/25 to-slate-900 border-orange-800/20',
-  'from-orange-950/40 to-slate-900 border-orange-800/30',
-  'from-orange-950/30 to-slate-900 border-orange-800/20',
-  'from-orange-950/40 to-slate-900 border-orange-800/30',
-  'from-orange-950/25 to-slate-900 border-orange-800/20',
-];
+// Cartes blanches avec ombre subtile pour tous les blocs
+const CARD_CLASS = 'bg-white border-gray-100 shadow-md hover:shadow-lg';
+const DARK_CARD_CLASS = 'bg-slate-900 border-slate-800 shadow-md hover:shadow-lg';
 
 export default function ScrollingOffers({ offers }: ScrollingOffersProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -95,12 +76,11 @@ export default function ScrollingOffers({ offers }: ScrollingOffersProps) {
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {doubled.map((offer, i) => {
-          const colorIdx = i % CARD_COLORS.length;
           return (
             <Link
               key={`${offer.id}-${i}`}
               href={`/jobs/${offer.id}`}
-              className={`shrink-0 w-[280px] sm:w-[320px] rounded-2xl border bg-gradient-to-br p-4 shadow-sm hover:shadow-md transition-all duration-200 group dark:${DARK_CARD_COLORS[colorIdx]} ${CARD_COLORS[colorIdx]}`}
+              className={`shrink-0 w-[280px] sm:w-[320px] rounded-2xl border p-4 transition-all duration-200 group dark:${DARK_CARD_CLASS} ${CARD_CLASS}`}
             >
               <div className="flex items-start justify-between gap-2 mb-2">
                 <h3 className="text-[13px] font-bold text-black dark:text-white leading-snug line-clamp-2 group-hover:text-primary transition-colors">

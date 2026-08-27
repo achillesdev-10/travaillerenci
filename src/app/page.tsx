@@ -546,7 +546,6 @@ export default async function HomePage({
       {/*   DÉFILANT D'OFFRES — carrousel horizontal qui défile lentement          */}
       {/* ======================================================================== */}
       <section className="container mx-auto px-4 mt-10 sm:mt-14 max-w-6xl">
-        <SectionHeading kicker="À découvrir" title="Offres qui défilent" />
         <ScrollingOffers offers={jobsList.slice(0, 20)} />
       </section>
 
