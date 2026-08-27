@@ -14,7 +14,7 @@ import {
  *  Next.js 16 a renommé la convention `middleware.ts` (dépréciée) en `proxy.ts`.
  *
  *  Ce proxy valide la signature ET l'expiration du jeton de session admin :
- *  — Routes pages  /achilles/*     → redirect 307 vers /achilles/login
+ *  — Routes pages  /cz7tk/*     → redirect 307 vers /cz7tk/login
  *  — Routes API     /api/admin/*    → 401 JSON (les fetch clients gèrent 401)
  *  — Exception      /api/admin/session → laissé ouvert (login/logout)
  *
@@ -65,19 +65,19 @@ export async function proxy(request: NextRequest) {
   }
 
   // 3. Page de login : si déjà authentifié, direction le dashboard.
-  if (pathname === '/achilles/login') {
+  if (pathname === '/cz7tk/login') {
     if (hasValidSession) {
-      return NextResponse.redirect(new URL('/achilles', request.url));
+      return NextResponse.redirect(new URL('/cz7tk', request.url));
     }
     return NextResponse.next();
   }
 
-  // 4. Pages /achilles/* : redirect 307 vers /achilles/login.
-  //    NB : on couvre aussi le chemin exact "/achilles" (le dashboard) —
-  //    `startsWith("/achilles/")` seul laissait /achilles accessible sans session.
-  if (pathname === '/achilles' || pathname.startsWith('/achilles/')) {
+  // 4. Pages /cz7tk/* : redirect 307 vers /cz7tk/login.
+  //    NB : on couvre aussi le chemin exact "/cz7tk" (le dashboard) —
+  //    `startsWith("/cz7tk/")` seul laissait /cz7tk accessible sans session.
+  if (pathname === '/cz7tk' || pathname.startsWith('/cz7tk/')) {
     if (!hasValidSession) {
-      const loginUrl = new URL('/achilles/login', request.url);
+      const loginUrl = new URL('/cz7tk/login', request.url);
       loginUrl.searchParams.set('next', pathname + request.nextUrl.search);
       return NextResponse.redirect(loginUrl);
     }
@@ -96,5 +96,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/achilles/:path*', '/api/admin/:path*', '/dashboard/:path*'],
+  matcher: ['/cz7tk/:path*', '/api/admin/:path*', '/dashboard/:path*'],
 };

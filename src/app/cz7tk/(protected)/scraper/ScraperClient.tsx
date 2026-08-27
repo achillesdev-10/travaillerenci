@@ -64,10 +64,10 @@ export default function ScraperClient({
   } | null>(null);
 
   async function refresh() {
-    const response = await fetch("/api/achilles/scraper", { cache: "no-store" });
+    const response = await fetch("/api/cz7tk/scraper", { cache: "no-store" });
 
     if (response.status === 401) {
-      router.replace("/achilles/login?next=/achilles/scraper");
+      router.replace("/cz7tk/login?next=/cz7tk/scraper");
       return;
     }
 
@@ -100,10 +100,10 @@ export default function ScraperClient({
   async function handleTrigger() {
     setFeedback(null);
 
-    const response = await fetch("/api/achilles/scraper", { method: "POST" });
+    const response = await fetch("/api/cz7tk/scraper", { method: "POST" });
 
     if (response.status === 401) {
-      router.replace("/achilles/login?next=/achilles/scraper");
+      router.replace("/cz7tk/login?next=/cz7tk/scraper");
       return;
     }
 
@@ -251,7 +251,7 @@ export default function ScraperClient({
                 : "Déclencher une extraction"}
           </button>
           <a
-            href="/achilles/jobs"
+            href="/cz7tk/jobs"
             className="rounded-2xl border border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 px-5 py-3 text-xs font-bold transition-colors"
           >
             Voir les offres importées →

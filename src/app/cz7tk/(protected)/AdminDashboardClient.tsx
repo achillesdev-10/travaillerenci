@@ -226,7 +226,7 @@ export default function AdminDashboardClient({
   } | null>(null);
 
   function redirectToLogin() {
-    router.replace("/achilles/login?next=/achilles");
+    router.replace("/cz7tk/login?next=/cz7tk");
   }
 
   const filteredOffers = useMemo(() => {
@@ -326,7 +326,7 @@ export default function AdminDashboardClient({
   async function handleTriggerScraper() {
     setFeedback(null);
 
-    const response = await fetch("/api/achilles/scraper", {
+    const response = await fetch("/api/cz7tk/scraper", {
       method: "POST",
     });
 
@@ -444,7 +444,7 @@ export default function AdminDashboardClient({
       value: reportCounts.pending,
       hint: "File de modération à traiter",
       accent: "from-rose-500 to-red-600",
-      href: "/achilles/reports",
+      href: "/cz7tk/reports",
       icon: (
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
@@ -576,7 +576,7 @@ export default function AdminDashboardClient({
             </p>
           </div>
           <Link
-            href="/achilles/reports"
+            href="/cz7tk/reports"
             className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-emerald-400 transition hover:text-emerald-300"
           >
             Ouvrir la file de modération

@@ -13,7 +13,7 @@ export default async function ProtectedAdminLayout({
   const session = await getAdminSession();
 
   if (!session) {
-    redirect("/achilles/login");
+    redirect("/cz7tk/login");
   }
 
   return <AdminAppShell email={email}>{children}</AdminAppShell>;

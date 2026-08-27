@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
   try {
     const scraperHealth = await triggerScraperRun();
 
-    revalidatePath("/achilles");
+    revalidatePath("/cz7tk");
 
     return NextResponse.json({
       scraperHealth,

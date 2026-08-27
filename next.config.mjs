@@ -12,10 +12,10 @@ const nextConfig = {
   },
   async rewrites() {
     return [
-      // Le dashboard admin utilise /api/achilles/* côté client mais les
+      // Le dashboard admin utilise /api/cz7tk/* côté client mais les
       // routes API existent sous /api/admin/*.
       {
-        source: '/api/achilles/:path*',
+        source: '/api/cz7tk/:path*',
         destination: '/api/admin/:path*',
       },
     ];

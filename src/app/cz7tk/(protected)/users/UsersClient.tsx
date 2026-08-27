@@ -88,9 +88,9 @@ export default function UsersClient({ initialData }: UsersClientProps) {
   async function handleRefresh() {
     setRefreshError(null);
     try {
-      const res = await fetch("/api/achilles/users", { cache: "no-store" });
+      const res = await fetch("/api/cz7tk/users", { cache: "no-store" });
       if (res.status === 401) {
-        router.replace("/achilles/login?next=/achilles/users");
+        router.replace("/cz7tk/login?next=/cz7tk/users");
         return;
       }
       if (!res.ok) {

@@ -40,13 +40,13 @@ export default function ReportsAdminClient({
     if (isMutating) return;
     setIsMutating(report.id);
     try {
-      const res = await fetch(`/api/achilles/reports/${report.id}`, {
+      const res = await fetch(`/api/cz7tk/reports/${report.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
       });
       if (res.status === 401) {
-        router.replace('/achilles/login?next=/achilles/reports');
+        router.replace('/cz7tk/login?next=/cz7tk/reports');
         return;
       }
       if (!res.ok) throw new Error(await readError(res));

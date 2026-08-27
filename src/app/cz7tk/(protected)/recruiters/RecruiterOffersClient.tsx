@@ -63,13 +63,13 @@ export default function RecruiterOffersClient({
     );
 
     try {
-      const res = await fetch(`/api/achilles/jobs/${job.id}`, {
+      const res = await fetch(`/api/cz7tk/jobs/${job.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus, is_verified: isVerified }),
       });
       if (res.status === 401) {
-        router.replace('/achilles/login?next=/achilles/recruiters');
+        router.replace('/cz7tk/login?next=/cz7tk/recruiters');
         return;
       }
       if (!res.ok) {
@@ -90,10 +90,10 @@ export default function RecruiterOffersClient({
     const previous = [...jobs];
     setJobs((prev) => prev.filter((j) => j.id !== id));
     try {
-      const res = await fetch(`/api/achilles/jobs/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/cz7tk/jobs/${id}`, { method: 'DELETE' });
       if (res.status === 401) {
         setJobs(previous);
-        router.replace('/achilles/login?next=/achilles/recruiters');
+        router.replace('/cz7tk/login?next=/cz7tk/recruiters');
         return;
       }
       if (!res.ok) throw new Error('Erreur suppression');

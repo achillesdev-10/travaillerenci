@@ -93,7 +93,7 @@ export default function AdminJobsClient({
   }
 
   function redirectToLogin() {
-    router.replace('/achilles/login?next=/achilles/jobs');
+    router.replace('/cz7tk/login?next=/cz7tk/jobs');
   }
 
   const filteredJobs = jobs.filter((job) => {
@@ -145,7 +145,7 @@ export default function AdminJobsClient({
     );
 
     try {
-      const res = await fetch(`/api/achilles/jobs/${job.id}`, {
+      const res = await fetch(`/api/cz7tk/jobs/${job.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus, is_verified: isVerified }),
@@ -174,7 +174,7 @@ export default function AdminJobsClient({
     const previousJobs = [...jobs];
     setJobs((prev) => prev.filter((j) => j.id !== id));
     try {
-      const res = await fetch(`/api/achilles/jobs/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/cz7tk/jobs/${id}`, { method: 'DELETE' });
       if (res.status === 401) {
         setJobs(previousJobs);
         redirectToLogin();
@@ -196,7 +196,7 @@ export default function AdminJobsClient({
     const targetStatus: JobOfferSchemaStatus = action === 'publish' ? 'published' : action === 'archive' ? 'archived' : 'pending';
 
     try {
-      const res = await fetch('/api/achilles/jobs/bulk', {
+      const res = await fetch('/api/cz7tk/jobs/bulk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(
@@ -318,7 +318,7 @@ export default function AdminJobsClient({
     if (!editingJob && !isCreating) return;
     try {
       const res = await fetch(
-        isCreating ? '/api/achilles/jobs' : `/api/achilles/jobs/${editingJob!.id}`,
+        isCreating ? '/api/cz7tk/jobs' : `/api/cz7tk/jobs/${editingJob!.id}`,
         {
           method: isCreating ? 'POST' : 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -371,7 +371,7 @@ export default function AdminJobsClient({
     setIsAiRewriting(true);
     setModalNotice(null);
     try {
-      const res = await fetch('/api/achilles/jobs/ai-rewrite', {
+      const res = await fetch('/api/cz7tk/jobs/ai-rewrite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -7,7 +7,7 @@ import PasswordInput from '@/components/auth/PasswordInput';
 function AdminLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextUrl = searchParams.get('next') || '/achilles';
+  const nextUrl = searchParams.get('next') || '/cz7tk';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

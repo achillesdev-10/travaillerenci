@@ -7,7 +7,7 @@ export default function AnalyticsTracker() {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!pathname || pathname.startsWith("/achilles")) {
+    if (!pathname || pathname.startsWith("/cz7tk")) {
       return;
     }
 

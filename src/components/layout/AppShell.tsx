@@ -11,7 +11,7 @@ export default function AppShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isAdminRoute = pathname.startsWith('/achilles');
+  const isAdminRoute = pathname.startsWith('/cz7tk');
 
   if (isAdminRoute) {
     return <>{children}</>;

@@ -108,8 +108,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    revalidatePath('/achilles');
-    revalidatePath('/achilles/jobs');
+    revalidatePath('/cz7tk');
+    revalidatePath('/cz7tk/jobs');
     revalidatePath('/');
     revalidatePath('/jobs');
 

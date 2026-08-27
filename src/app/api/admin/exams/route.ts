@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       await notifyExamPublished(created);
     }
 
-    revalidatePath('/achilles/exams');
+    revalidatePath('/cz7tk/exams');
     revalidatePath('/concours');
     // URL SEO (slug) — les URLs legacy par ID redirigent en 308 vers le slug.
     revalidatePath(`/concours/${created.slug || created.id}`);
