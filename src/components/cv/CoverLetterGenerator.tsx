@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface CoverLetterForm {
   companyName: string;
@@ -34,6 +34,16 @@ export default function CoverLetterGenerator({
     experience: initialExperience,
     motivation: '',
   });
+
+  // Sync form fields when CV data props change (pre-fill from CV editor)
+  useEffect(() => {
+    setForm((prev) => ({
+      ...prev,
+      candidateName: initialName || prev.candidateName,
+      skills: initialSkills.length > 0 ? initialSkills.join(', ') : prev.skills,
+      experience: initialExperience || prev.experience,
+    }));
+  }, [initialName, initialSkills, initialExperience]);
   const [result, setResult] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
