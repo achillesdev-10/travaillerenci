@@ -228,6 +228,96 @@ def test_emploici_fallback_parsing():
     assert "FinancePlus" in text
 
 
+# ---------------------------------------------------------------------------
+# Tests du cache de hash (content_hash.py)
+# ---------------------------------------------------------------------------
+
+def test_content_hash_unchanged():
+    """Le même contenu brut est détecté comme inchangé."""
+    from scraper.core.content_hash import ContentHashCache
+
+    cache = ContentHashCache()
+    cache._cache = {}  # force vide
+    assert not cache.is_unchanged("https://example.com/1", "Titre", "Description")
+    cache.store("https://example.com/1", "Titre", "Description")
+    assert cache.is_unchanged("https://example.com/1", "Titre", "Description")
+
+
+def test_content_hash_changed():
+    """Un contenu modifié n'est pas détecté comme inchangé."""
+    from scraper.core.content_hash import ContentHashCache
+
+    cache = ContentHashCache()
+    cache._cache = {}
+    cache.store("https://example.com/1", "Titre ancien", "Description ancienne")
+    assert not cache.is_unchanged("https://example.com/1", "Titre nouveau", "Description nouvelle")
+
+
+def test_content_hash_different_url():
+    """Deux URLs différentes ont des hashes différents."""
+    from scraper.core.content_hash import ContentHashCache
+
+    cache = ContentHashCache()
+    cache._cache = {}
+    cache.store("https://a.com/1", "Titre", "Description")
+    assert not cache.is_unchanged("https://b.com/1", "Titre", "Description")
+
+
+# ---------------------------------------------------------------------------
+# Tests de déduplication inter-sources (duplicate_detector.py)
+# ---------------------------------------------------------------------------
+
+def test_cross_source_dedup_exact_match():
+    """Doublon exact titre+entreprise → détecté."""
+    from scraper.core.duplicate_detector import DuplicateDetector
+    from scraper.models.content_item import ContentItem
+
+    det = DuplicateDetector()
+    # Simule un item déjà vu en intra-run
+    item1 = ContentItem(
+        title="Développeur Web",
+        company="TechCI",
+        location="Abidjan",
+        description="Description test assez longue pour passer la validation.",
+        source_url="https://a.com/1",
+    )
+    assert det.is_duplicate(item1) is False  # premier passage
+
+    item2 = ContentItem(
+        title="Développeur Web",
+        company="TechCI",
+        location="Abidjan",
+        description="Autre description aussi longue pour le test.",
+        source_url="https://b.com/2",
+    )
+    assert det.is_duplicate(item2) is True  # même titre+entreprise
+
+
+def test_no_false_positive_different_company():
+    """Titre similaire mais entreprise différente → pas de doublon."""
+    from scraper.core.duplicate_detector import DuplicateDetector
+    from scraper.models.content_item import ContentItem
+
+    det = DuplicateDetector()
+    item1 = ContentItem(
+        title="Développeur Web Full-Stack",
+        company="TechCI",
+        location="Abidjan",
+        description="Description test assez longue pour passer la validation.",
+        source_url="https://a.com/1",
+    )
+    det.is_duplicate(item1)
+
+    item2 = ContentItem(
+        title="Développeur Web Full-Stack",
+        company="AutreEntreprise",
+        location="Abidjan",
+        description="Autre description aussi longue pour le test.",
+        source_url="https://b.com/2",
+    )
+    assert det.is_duplicate(item2) is False
+
+
 if __name__ == "__main__":
     import traceback
 

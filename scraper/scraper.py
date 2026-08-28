@@ -68,6 +68,7 @@ from scraper.core.duplicate_detector import DuplicateDetector
 from scraper.core.cleaner import clean_item
 from scraper.core.base_scraper import BaseScraper
 from scraper.core.gemini import GeminiEnricher
+from scraper.core.content_hash import ContentHashCache
 from scraper.core.scheduler import JobScheduler
 from scraper.models.content_item import ContentItem
 from scraper.database.repository import JobRepository
@@ -161,11 +162,13 @@ def run_scraping_pipeline(
 
     http_client = HttpClient()
     enricher = GeminiEnricher() if use_ai else GeminiEnricher(api_key=None)
-    dup_detector = DuplicateDetector()
+    dup_detector = DuplicateDetector(db_path=DB_PATH)
     health_tracker = SourceHealthTracker()
+    hash_cache = ContentHashCache()
     all_items: List[ContentItem] = []
     per_category: Dict[str, int] = {"job": 0, "internship": 0, "scholarship": 0, "exam": 0}
     per_source_stats: Dict[str, Dict[str, int]] = {}  # source → {collected, errors}
+    gemini_skipped = 0  # nombre d'appels Gemini évités grâce au cache
 
     for name in site_names:
         scraper_class = SCRAPER_REGISTRY.get(name)
@@ -181,28 +184,62 @@ def run_scraping_pipeline(
             raw_items = scraper.scrape(max_offers=max_per_site)
             logger.info(f"  ✓ [{name}] {len(raw_items)} contenus bruts collectés.")
 
+            # Phase 1 : Nettoyage + déduplication intra-run + inter-sources
+            cleaned_items: List[ContentItem] = []
             for item in raw_items:
-                # 0. Garde-fou : jamais de données « démo » en production.
+                # Garde-fou : jamais de données « démo » en production.
                 if not demo_data and _is_demo_source_url(item.source_url):
                     logger.warning(f"  ⛔ Contenu de démonstration ignoré : {item.title[:50]} ({item.source_url})")
                     continue
 
-                # 1. Nettoyage & structuration de la description.
+                # Nettoyage & structuration de la description.
                 try:
                     clean_item(item)
                 except Exception as exc:
                     logger.warning(f"  ⚠ Nettoyage impossible pour {item.title[:50]}: {exc}")
 
-                # 2. Enrichissement IA : classification + réécriture (jamais bloquant).
-                #    Sans clé Gemini, `enrich()` retombe sur les heuristiques locales
-                #    pour que stages / concours ne soient jamais classés par défaut
-                #    en « emploi ».
-                try:
-                    enricher.enrich(item)
-                except Exception as exc:
-                    logger.warning(f"  ⚠ Enrichissement IA impossible : {exc}")
+                # Détection doublons (intra-run + inter-sources via BDD).
+                if dup_detector.is_duplicate(item):
+                    logger.debug(f"  🔁 Doublon détecté : {item.title[:50]}")
+                    continue
 
-                # 3. Validation qualité.
+                cleaned_items.append(item)
+
+            # Phase 2 : Enrichissement IA (batch si > 1 item, sinon individuel)
+            # Cache de hash : les items inchangés sont skippés (pas d'appel IA).
+            items_to_enrich: List[ContentItem] = []
+            items_skipped: List[ContentItem] = []
+            for item in cleaned_items:
+                if use_ai and hash_cache.is_unchanged(item.source_url, item.title, item.description):
+                    gemini_skipped += 1
+                    items_skipped.append(item)
+                else:
+                    items_to_enrich.append(item)
+
+            if items_to_enrich:
+                if len(items_to_enrich) > 1:
+                    logger.info(f"  🤖 Batch IA : {len(items_to_enrich)} contenus à enrichir")
+                    try:
+                        enricher.enrich_batch(items_to_enrich, batch_size=5)
+                    except Exception as exc:
+                        logger.warning(f"  ⚠ Échec batch, repli individuel : {exc}")
+                        for item in items_to_enrich:
+                            try:
+                                enricher.enrich(item)
+                            except Exception:
+                                pass
+                else:
+                    try:
+                        enricher.enrich(items_to_enrich[0])
+                    except Exception as exc:
+                        logger.warning(f"  ⚠ Enrichissement IA impossible : {exc}")
+
+            # Mise à jour du cache de hash pour tous les items traités
+            for item in cleaned_items:
+                hash_cache.store(item.source_url, item.title, item.description)
+
+            # Phase 3 : Validation qualité + slug/SEO + ajout à all_items
+            for item in cleaned_items:
                 ok, reason = item.is_valid()
                 if not ok:
                     logger.debug(f"  🚫 Contenu rejeté ({reason}): {item.title[:50]} @ {item.company}")
@@ -212,15 +249,9 @@ def run_scraping_pipeline(
                     logger.debug(f"  🚫 Contenu hors ciblage ({reason}): {item.title[:50]}")
                     continue
 
-                # 4. Détection doublons (dans ce run).
-                if dup_detector.is_duplicate(item):
-                    logger.debug(f"  🔁 Doublon détecté : {item.title[:50]}")
-                    continue
-
-                # 5. Slug & SEO par défaut si absent.
+                # Slug & SEO par défaut si absent.
                 if not item.slug:
                     from slugify import slugify
-
                     item.slug = slugify(f"{item.title}-{item.company}", separator="-")
                 if not item.seo_title:
                     item.seo_title = f"{item.title} | TravaillerEnCi"
@@ -235,6 +266,10 @@ def run_scraping_pipeline(
 
                 per_category[item.category_sql()] = per_category.get(item.category_sql(), 0) + 1
                 all_items.append(item)
+
+            if items_skipped:
+                logger.debug(f"  ⏭ {len(items_skipped)} contenus inchangés (Gemini skippé via cache)")
+
         except Exception as exc:
             logger.error(f"  ❌ Erreur critique sur le scraper {name}: {exc}", exc_info=True)
             source_errors += 1
@@ -253,6 +288,9 @@ def run_scraping_pipeline(
 
     http_client.close()
     enricher.close()
+    hash_cache.save()
+    if gemini_skipped > 0:
+        logger.info(f"  ⏭ {gemini_skipped} appel(s) Gemini évité(s) grâce au cache de hash.")
 
     cat_summary = ", ".join(f"{CATEGORY_LABELS[k]}={v}" for k, v in per_category.items() if v)
     logger.info(f"\n📊 Bilan collecte : {len(all_items)} contenus valides uniques prêts à l'enregistrement.")

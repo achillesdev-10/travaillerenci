@@ -24,7 +24,7 @@ import json
 import os
 import re
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import httpx
 
@@ -148,6 +148,45 @@ class GeminiEnricher:
             pass
 
     # ------------------------------------------------------------------
+    # Batch enrichment : regroupe plusieurs items en un seul appel API
+    # ------------------------------------------------------------------
+    def enrich_batch(self, items: List[ContentItem], batch_size: int = 5) -> List[ContentItem]:
+        """Enrichit un lot d'items en un seul appel Gemini (ou par batches).
+
+        Réduit la latence totale et le nombre de requêtes API en regroupant
+        plusieurs offres dans un seul prompt. Chaque item est enrichi
+        individuellement si le batch échoue.
+
+        Retourne la liste des items enrichis (certains peuvent ne pas avoir
+        été enrichis en cas d'erreur sur leur batch).
+        """
+        if not items:
+            return []
+        if not self.enabled and not self.groq.enabled:
+            # Pas d'IA disponible → heuristiques pour tous
+            return [self._apply_heuristics(item) for item in items]
+
+        results: List[ContentItem] = []
+        for i in range(0, len(items), batch_size):
+            batch = items[i:i + batch_size]
+            if len(batch) == 1:
+                # Un seul item → enrichissement classique
+                results.append(self.enrich(batch[0]))
+                continue
+
+            try:
+                enriched = self._enrich_batch_items(batch)
+                results.extend(enriched)
+            except Exception as exc:
+                logger.warning(f"⚠ Échec batch Gemini ({len(batch)} items) : {exc} — repli individuel")
+                for item in batch:
+                    try:
+                        results.append(self.enrich(item))
+                    except Exception:
+                        results.append(self._apply_heuristics(item))
+        return results
+
+    # ------------------------------------------------------------------
     def enrich(self, item: ContentItem) -> ContentItem:
         """Classifie + réécrit un item. Ne lève JAMAIS : fallback heuristique.
 
@@ -221,6 +260,89 @@ class GeminiEnricher:
             f"{item.description[:9000]}\n\n"
             "--- JSON ---"
         )
+
+    def _enrich_batch_items(self, items: List[ContentItem]) -> List[ContentItem]:
+        """Enrichit un lot d'items en un seul appel Gemini.
+
+        Construit un prompt contenant tous les items séparés par un séparateur,
+        demande un JSON array en réponse, puis applique chaque résultat
+        à l'item correspondant.
+        """
+        separator = "\n---ITEM_SEPARATOR---\n"
+        parts = []
+        for idx, item in enumerate(items):
+            parts.append(
+                f"[ITEM {idx}]\n"
+                f"Titre brut : {item.title}\n"
+                f"Source : {item.source_url}\n\n"
+                f"{item.description[:4000]}"
+            )
+
+        batch_prompt = (
+            f"{SYSTEM_PROMPT}\n\n"
+            f"Tu dois traiter {len(items)} contenus en une seule réponse.\n"
+            f"Pour chaque contenu, retourne un objet JSON avec les mêmes champs.\n"
+            f"Réponds avec un JSON ARRAY contenant {len(items)} objets, dans le même ordre.\n\n"
+            f"Sections éditoriales par catégorie : {_EDITORIAL_SECTIONS}\n\n"
+            "Schéma JSON attendu pour CHAQUE élément du tableau :\n"
+            '{\n'
+            '  "category": "job | internship | scholarship | exam",\n'
+            '  "title": "titre normalisé",\n'
+            '  "organization": "nom de l\'entreprise / organisme",\n'
+            '  "contract_type": "CDI | CDD | Stage | ...",\n'
+            '  "location": "ville / pays",\n'
+            '  "deadline": "YYYY-MM-DD ou null",\n'
+            '  "description_markdown": "description Markdown structurée",\n'
+            '  "seo_title": "titre SEO ≤ 60 car.",\n'
+            '  "seo_description": "résumé SEO 155 car. max",\n'
+            '  "seo_keywords": "mots-clés séparés par des virgules"\n'
+            '}\n\n'
+            "--- Contenus bruts ---\n"
+            f"{separator.join(parts)}\n\n"
+            "--- JSON ARRAY ---"
+        )
+
+        # Appel Gemini
+        raw = None
+        if self.enabled:
+            try:
+                raw = self._call_gemini(batch_prompt)
+            except Exception as exc:
+                logger.warning(f"⚠ Échec Gemini batch : {exc}")
+
+        # Repli Groq si Gemini échoue
+        if raw is None and self.groq.enabled:
+            try:
+                raw = self.groq.complete(SYSTEM_PROMPT, batch_prompt)
+            except Exception as exc:
+                logger.warning(f"⚠ Échec Groq batch : {exc}")
+
+        if raw is None:
+            raise RuntimeError("Aucun provider IA disponible pour le batch")
+
+        # Parsing de la réponse
+        try:
+            results_raw = self._parse_json(raw)
+            if not isinstance(results_raw, list):
+                # Le modèle a renvoyé un objet unique au lieu d'un tableau
+                results_raw = [results_raw]
+        except ValueError:
+            raise RuntimeError("Réponse IA batch non parsable")
+
+        # Application des résultats
+        enriched: List[ContentItem] = []
+        for idx, item in enumerate(items):
+            if idx < len(results_raw):
+                try:
+                    self._validate_ai_result(results_raw[idx], item)
+                    self._apply_ai(item, results_raw[idx])
+                    enriched.append(item)
+                except Exception:
+                    enriched.append(self._apply_heuristics(item))
+            else:
+                enriched.append(self._apply_heuristics(item))
+
+        return enriched
 
     def _call_gemini(self, prompt: str) -> str:
         url = GEMINI_URL.format(model=self.model)
