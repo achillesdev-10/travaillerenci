@@ -275,6 +275,7 @@ def run_scraping_pipeline(
     # Phase 3 : Validation qualité + slug/SEO + assemblage final
     # ==========================================================================
     for item in all_cleaned:
+        # Validation qualité stricte (rejet)
         ok, reason = item.is_valid()
         if not ok:
             logger.debug(f"  🚫 Rejeté ({reason}): {item.title[:50]} @ {item.company}")
@@ -283,6 +284,13 @@ def run_scraping_pipeline(
         if not ok:
             logger.debug(f"  🚫 Hors ciblage ({reason}): {item.title[:50]}")
             continue
+
+        # Validation qualité douce : marque les contenus nécessitant une revue
+        # admin (titre court, description courte, ville non vérifiée).
+        needs_rev, rev_reason = item.needs_review()
+        if needs_rev:
+            item.status = "pending"  # force en attente de modération
+            logger.info(f"  ⚠ Revue requise ({rev_reason}): {item.title[:50]}")
 
         if not item.slug:
             from slugify import slugify

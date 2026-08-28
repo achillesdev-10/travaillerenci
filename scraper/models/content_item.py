@@ -101,6 +101,24 @@ class ContentItem(BaseModel):
             return False, "source_url obligatoire"
         return True, "ok"
 
+    def needs_review(self) -> tuple[bool, str]:
+        """Vérifie les problèmes de qualité qui nécessitent une revue admin.
+
+        Contrairement à is_valid() qui rejette purement, needs_review()
+        identifie les contenus qui doivent être en statut 'pending' pour
+        révision (plutôt que publiés automatiquement).
+        """
+        if not self.title or len(self.title.strip()) < 10:
+            return True, "titre trop court pour publication automatique"
+        if not self.description or len(self.description.strip()) < 50:
+            return True, "description trop courte pour publication automatique"
+        # Ville non reconnue (défaut "Abidjan" maispas de mention explicite)
+        if self.category in ('job', 'internship') and self.location == 'Abidjan':
+            corpus = f"{self.title} {self.description}".lower()
+            if 'abidjan' not in corpus:
+                return True, "ville non vérifiée dans le contenu"
+        return False, "ok"
+
     def is_valid_ivorian(self) -> tuple[bool, str]:
         """Validation géographique ivoirienne — réservée aux emplois & stages.
 

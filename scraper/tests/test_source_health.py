@@ -318,6 +318,74 @@ def test_no_false_positive_different_company():
     assert det.is_duplicate(item2) is False
 
 
+# ---------------------------------------------------------------------------
+# Tests de validation qualité (needs_review)
+# ---------------------------------------------------------------------------
+
+def test_needs_review_short_title():
+    """Titre < 10 caractères → needs_review."""
+    from scraper.models.content_item import ContentItem
+
+    item = ContentItem(
+        title="Dev Web",
+        company="TechCI",
+        location="Abidjan",
+        description="Description assez longue pour passer la validation du modèle.",
+        source_url="https://example.com/1",
+    )
+    needs, reason = item.needs_review()
+    assert needs is True
+    assert "titre" in reason
+
+
+def test_needs_review_short_description():
+    """Description < 50 caractères → needs_review."""
+    from scraper.models.content_item import ContentItem
+
+    item = ContentItem(
+        title="Développeur Web Full-Stack",
+        company="TechCI",
+        location="Abidjan",
+        description="Description courte.",
+        source_url="https://example.com/1",
+    )
+    needs, reason = item.needs_review()
+    assert needs is True
+    assert "description" in reason
+
+
+def test_needs_review_unknown_city():
+    """Ville Abidjan par défaut sans mention dans le contenu → needs_review."""
+    from scraper.models.content_item import ContentItem
+
+    item = ContentItem(
+        title="Développeur Web Full-Stack pour entreprise internationale",
+        company="TechCI",
+        location="Abidjan",
+        description="Offre de développement web dans une entreprise internationale sans localisation précise.",
+        source_url="https://example.com/1",
+    )
+    needs, reason = item.needs_review()
+    assert needs is True
+    assert "ville" in reason
+
+
+def test_no_needs_review_good_item():
+    """Item de qualité → pas de needs_review."""
+    from scraper.models.content_item import ContentItem
+
+    item = ContentItem(
+        title="Développeur Web Full-Stack React/Node.js",
+        company="TechCI Solutions",
+        location="Abidjan",
+        description="Offre de développement web à Abidjan. React, Node.js, TypeScript. 3 ans d'expérience minimum.",
+        source_url="https://example.com/1",
+    )
+    needs, reason = item.needs_review()
+    assert needs is False
+    assert reason == "ok"
+
+
 if __name__ == "__main__":
     import traceback
 
