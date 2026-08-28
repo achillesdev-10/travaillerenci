@@ -49,12 +49,45 @@ export type SourceHealthStats = {
   runs_tracked: number;
 };
 
+/** Article Entreprendre avec vues pour le dashboard admin. */
+export type TopEntreprendreArticle = {
+  id: string;
+  title: string;
+  sector: string;
+  view_count: number;
+  helpful_count: number;
+  comment_count: number;
+  published_at: string | null;
+};
+
+/** Stats Entreprendre agrégées. */
+export type EntreprendreDashboardStats = {
+  totalPublished: number;
+  totalComments: number;
+  topSectors: Array<{ sector: string; count: number }>;
+  mostCommented: TopEntreprendreArticle[];
+  topViewed: TopEntreprendreArticle[];
+};
+
+/** Score de santé global de la plateforme. */
+export type HealthScore = {
+  score: number;
+  level: "good" | "warning" | "critical";
+  breakdown: Array<{
+    label: string;
+    status: "good" | "warning" | "critical";
+    detail: string;
+  }>;
+};
+
 export type AdminDashboardData = {
   offers: DashboardOffer[];
   cities: string[];
   stats: DashboardStats;
   scraperHealth: ScraperHealth;
   sourceHealth: Record<string, SourceHealthStats>;
+  healthScore: HealthScore;
+  entreprendreStats: EntreprendreDashboardStats;
 };
 
 export type BulkAction = "delete" | "verify" | "archive";
@@ -712,10 +745,242 @@ export async function getScraperRunHistory(limit = 10): Promise<ScraperRunRecord
   }
 }
 
-export async function getAdminDashboardData(): Promise<AdminDashboardData> {
+function computeHealthScore(
+  scraperHealth: ScraperHealth,
+  sourceHealth: Record<string, SourceHealthStats>,
+  pendingReports: number,
+  totalOffers: number,
+): HealthScore {
+  const breakdown: HealthScore["breakdown"] = [];
+  let totalPoints = 0;
+  const maxPoints = 3;
+
+  // 1. Scraper health (1 point)
+  if (scraperHealth.status === "success") {
+    breakdown.push({ label: "Scraper", status: "good", detail: "Dernier run réussi" });
+    totalPoints += 1;
+  } else if (scraperHealth.status === "running") {
+    breakdown.push({ label: "Scraper", status: "good", detail: "Exécution en cours" });
+    totalPoints += 1;
+  } else if (scraperHealth.status === "error") {
+    breakdown.push({ label: "Scraper", status: "critical", detail: "Dernier run échoué" });
+  } else {
+    breakdown.push({ label: "Scraper", status: "warning", detail: "Aucune exécution récente" });
+  }
+
+  // 2. Source health threshold (1 point)
+  const sourceKeys = Object.keys(sourceHealth);
+  if (sourceKeys.length === 0) {
+    breakdown.push({ label: "Sources", status: "warning", detail: "Pas d'historique source" });
+  } else {
+    const allOk = sourceKeys.every((k) => sourceHealth[k].threshold_ok);
+    const failedSources = sourceKeys.filter((k) => !sourceHealth[k].threshold_ok);
+    if (allOk) {
+      breakdown.push({ label: "Sources", status: "good", detail: `${sourceKeys.length} source(s) sous seuil OK` });
+      totalPoints += 1;
+    } else {
+      breakdown.push({
+        label: "Sources",
+        status: "critical",
+        detail: `${failedSources.length} source(s) sous le seuil (${failedSources.join(", ")})`,
+      });
+    }
+  }
+
+  // 3. Pending reports (1 point)
+  if (pendingReports === 0) {
+    breakdown.push({ label: "Modération", status: "good", detail: "Aucun signalement en attente" });
+    totalPoints += 1;
+  } else if (pendingReports <= 5) {
+    breakdown.push({ label: "Modération", status: "warning", detail: `${pendingReports} signalement(s) en attente` });
+  } else {
+    breakdown.push({ label: "Modération", status: "critical", detail: `${pendingReports} signalement(s) en attente` });
+  }
+
+  const score = Math.round((totalPoints / maxPoints) * 100);
+  const level: HealthScore["level"] = score >= 80 ? "good" : score >= 40 ? "warning" : "critical";
+
+  return { score, level, breakdown };
+}
+
+function getTopOffersByViews(db: SqliteDb, limit = 5): DashboardOffer[] {
+  const tables = getTableNames(db);
+  const offerTable = findExistingTable(tables, ["job_offers", "jobs", "offers"]);
+  if (!offerTable) return [];
+  const columns = getTableColumns(db, offerTable);
+  const clicksColumn = pickFirstAvailable(columns, ["clicks", "clicks_count", "click_count", "total_clicks", "views"]);
+  if (!clicksColumn) return [];
+  const titleColumn = pickFirstAvailable(columns, ["title", "job_title", "poste"]);
+  const companyColumn = pickFirstAvailable(columns, ["company", "company_name", "employer"]);
+  const cityColumn = pickFirstAvailable(columns, ["city", "location"]);
+  const idColumn = pickFirstAvailable(columns, ["id"]);
+  if (!idColumn || !titleColumn) return [];
+
+  const rows = db
+    .prepare(
+      `SELECT ${quoteIdentifier(idColumn)} AS id,
+              ${titleColumn ? quoteIdentifier(titleColumn) : `''`} AS title,
+              ${companyColumn ? quoteIdentifier(companyColumn) : `''`} AS company,
+              ${cityColumn ? quoteIdentifier(cityColumn) : `''`} AS city,
+              ${quoteIdentifier(clicksColumn)} AS clicks
+       FROM ${quoteIdentifier(offerTable)}
+       ORDER BY ${quoteIdentifier(clicksColumn)} DESC
+       LIMIT ?`,
+    )
+    .all({ $limit: limit }) as SqliteRow[];
+
+  return rows.map((row) => ({
+    id: String(row.id),
+    title: stringFromUnknown(row.title, "Titre indisponible"),
+    company: stringFromUnknown(row.company, ""),
+    city: stringFromUnknown(row.city, ""),
+    status: "Vérifiées" as const,
+    deadline: null,
+    sourceUrl: "",
+    createdAt: null,
+    clicks: numberFromUnknown(row.clicks),
+  }));
+}
+
+function getEntreprendreStats(db: SqliteDb): EntreprendreDashboardStats {
+  const tables = getTableNames(db);
+  const empty: EntreprendreDashboardStats = {
+    totalPublished: 0,
+    totalComments: 0,
+    topSectors: [],
+    mostCommented: [],
+    topViewed: [],
+  };
+
+  if (!tables.has("entreprendre_articles")) return empty;
+
+  const cols = getTableColumns(db, "entreprendre_articles");
+
+  // Total published
+  const publishedRow = db
+    .prepare(`SELECT COUNT(*) AS c FROM entreprendre_articles WHERE status = 'published'`)
+    .get() as { c?: number };
+  const totalPublished = numberFromUnknown(publishedRow?.c);
+
+  // Total comments
+  let totalComments = 0;
+  if (tables.has("entreprendre_comments")) {
+    const commentRow = db
+      .prepare(`SELECT COUNT(*) AS c FROM entreprendre_comments WHERE status = 'visible'`)
+      .get() as { c?: number };
+    totalComments = numberFromUnknown(commentRow?.c);
+  }
+
+  // Top sectors
+  const sectorRows = db
+    .prepare(
+      `SELECT sector, COUNT(*) AS c FROM entreprendre_articles
+       WHERE status = 'published' GROUP BY sector ORDER BY c DESC LIMIT 5`,
+    )
+    .all() as Array<{ sector: string; c: number }>;
+  const topSectors = sectorRows.map((r) => ({ sector: r.sector, count: numberFromUnknown(r.c) }));
+
+  // Helper to get articles with comment counts
+  function getArticlesWithMeta(orderBy: string, limit: number): TopEntreprendreArticle[] {
+    const rows = db
+      .prepare(
+        `SELECT a.id, a.title, a.sector, a.view_count, a.helpful_count, a.published_at,
+                COALESCE(cm.cnt, 0) AS comment_count
+         FROM entreprendre_articles a
+         LEFT JOIN (
+           SELECT article_id, COUNT(*) AS cnt
+           FROM entreprendre_comments
+           WHERE status = 'visible'
+           GROUP BY article_id
+         ) cm ON cm.article_id = a.id
+         WHERE a.status = 'published'
+         ORDER BY ${orderBy}
+         LIMIT ?`,
+      )
+      .all({ $limit: limit }) as SqliteRow[];
+    return rows.map((r) => ({
+      id: String(r.id),
+      title: stringFromUnknown(r.title, ""),
+      sector: String(r.sector || ""),
+      view_count: numberFromUnknown(r.view_count),
+      helpful_count: numberFromUnknown(r.helpful_count),
+      comment_count: numberFromUnknown(r.comment_count),
+      published_at: r.published_at ? String(r.published_at) : null,
+    }));
+  }
+
+  const mostCommented = getArticlesWithMeta("comment_count DESC, a.view_count DESC", 5);
+  const topViewed = getArticlesWithMeta("a.view_count DESC", 5);
+
+  return { totalPublished, totalComments, topSectors, mostCommented, topViewed };
+}
+
+async function getEntreprendreStatsFromSupabase(): Promise<EntreprendreDashboardStats> {
+  const supabase = getSupabaseClient();
+  const empty: EntreprendreDashboardStats = {
+    totalPublished: 0,
+    totalComments: 0,
+    topSectors: [],
+    mostCommented: [],
+    topViewed: [],
+  };
+  if (!supabase) return empty;
+
+  try {
+    const [publishedRes, commentsRes, sectorsRes, viewedRes, commentedRes] = await Promise.all([
+      supabase.from("entreprendre_articles").select("id", { count: "exact", head: true }).eq("status", "published"),
+      supabase.from("entreprendre_comments").select("id", { count: "exact", head: true }).eq("status", "visible"),
+      supabase.from("entreprendre_articles").select("sector").eq("status", "published"),
+      supabase.from("entreprendre_articles").select("id,title,sector,view_count,helpful_count,published_at").eq("status", "published").order("view_count", { ascending: false }).limit(5),
+      supabase.from("entreprendre_articles").select("id,title,sector,view_count,helpful_count,published_at,entreprendre_comments!article_id(id)").eq("status", "published").order("helpful_count", { ascending: false }).limit(5),
+   ]);
+
+    const totalPublished = numberFromUnknown(publishedRes.count);
+    const totalComments = numberFromUnknown(commentsRes.count);
+
+    // Aggregate sectors
+    const sectorMap = new Map<string, number>();
+    for (const row of (sectorsRes.data || [])) {
+      sectorMap.set(row.sector, (sectorMap.get(row.sector) || 0) + 1);
+    }
+    const topSectors = Array.from(sectorMap.entries())
+      .map(([sector, count]) => ({ sector, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    const topViewed = (viewedRes.data || []).map((r: Record<string, unknown>) => ({
+      id: String(r.id),
+      title: String(r.title),
+      sector: String(r.sector || ""),
+      view_count: numberFromUnknown(r.view_count),
+      helpful_count: numberFromUnknown(r.helpful_count),
+      comment_count: 0,
+      published_at: r.published_at ? String(r.published_at) : null,
+    }));
+
+    const mostCommented = (commentedRes.data || []).map((r: Record<string, unknown>) => {
+      const comments = r.entreprendre_comments;
+      return {
+        id: String(r.id),
+        title: String(r.title),
+        sector: String(r.sector || ""),
+        view_count: numberFromUnknown(r.view_count),
+        helpful_count: numberFromUnknown(r.helpful_count),
+        comment_count: Array.isArray(comments) ? comments.length : 0,
+        published_at: r.published_at ? String(r.published_at) : null,
+      };
+    });
+
+    return { totalPublished, totalComments, topSectors, mostCommented, topViewed };
+  } catch {
+    return empty;
+  }
+}
+
+export async function getAdminDashboardData(pendingReports = 0): Promise<AdminDashboardData> {
   const supabase = isSupabaseConfigured() ? getSupabaseClient() : null;
   if (supabase) {
-    return getAdminDashboardDataFromSupabase(supabase);
+    return getAdminDashboardDataFromSupabase(supabase, pendingReports);
   }
 
   const db = openDatabase();
@@ -829,12 +1094,23 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
 
   const sourceHealth = readSourceHealth();
 
+  const healthScore = computeHealthScore(scraperHealth, sourceHealth, pendingReports, stats.totalActiveOffers);
+  const entreprendreStats = db ? getEntreprendreStats(db) : {
+    totalPublished: 0,
+    totalComments: 0,
+    topSectors: [],
+    mostCommented: [],
+    topViewed: [],
+  };
+
   return {
     offers,
     cities,
     stats,
     scraperHealth,
     sourceHealth,
+    healthScore,
+    entreprendreStats,
   };
 }
 
@@ -977,6 +1253,7 @@ export async function applyBulkAction(action: BulkAction, ids: string[]): Promis
 /** Variante Supabase : lit les offres + stats pour la vue d'ensemble. */
 async function getAdminDashboardDataFromSupabase(
   supabase: NonNullable<ReturnType<typeof getSupabaseClient>>,
+  pendingReports = 0,
 ): Promise<AdminDashboardData> {
   // Expiration automatique (Supabase) : idem SQLite, sans faire échouer le
   // dashboard si la colonne `deadline` n'est pas encore migrée.
@@ -1053,6 +1330,8 @@ async function getAdminDashboardDataFromSupabase(
         message: "Impossible de lire les offres (Supabase).",
       },
       sourceHealth: {},
+      healthScore: { score: 0, level: "critical", breakdown: [{ label: "Offres", status: "critical", detail: "Impossible de lire les offres" }] },
+      entreprendreStats: { totalPublished: 0, totalComments: 0, topSectors: [], mostCommented: [], topViewed: [] },
     };
   }
 
@@ -1167,7 +1446,10 @@ async function getAdminDashboardDataFromSupabase(
   }
 
   const sourceHealth = readSourceHealth();
-  return { offers, cities, stats, scraperHealth, sourceHealth };
+  const healthScore = computeHealthScore(scraperHealth, sourceHealth, pendingReports, stats.totalActiveOffers);
+  const entreprendreStats = await getEntreprendreStatsFromSupabase();
+
+  return { offers, cities, stats, scraperHealth, sourceHealth, healthScore, entreprendreStats };
 }
 
 /** Variante Supabase des actions en masse (verify / archive / delete). */

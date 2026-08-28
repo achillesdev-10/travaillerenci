@@ -7,10 +7,15 @@ import { resolveContentItem } from "@/lib/itemResolver";
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
-  const [initialData, adminStats, reportCounts, pendingReports] = await Promise.all([
-    getAdminDashboardData(),
+  const [adminStats, reportCounts] = await Promise.all([
     JobOfferSchemaService.getAdminStats(7),
     ReportService.countByStatus(),
+  ]);
+
+  const pendingCount = reportCounts.pending ?? 0;
+
+  const [initialData, pendingReports] = await Promise.all([
+    getAdminDashboardData(pendingCount),
     ReportService.list("pending", 5),
   ]);
 

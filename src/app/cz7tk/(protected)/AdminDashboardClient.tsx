@@ -8,6 +8,9 @@ import type {
   BulkAction,
   DashboardOffer,
   ScraperHealth,
+  HealthScore,
+  EntreprendreDashboardStats,
+  SourceHealthStats,
 } from "../../../lib/admin-dashboard";
 import type { JobOffersActivityPoint } from "@/services/jobOfferSchemaService";
 import type { Report, ReportStatus } from "@/services/reportService";
@@ -214,6 +217,9 @@ export default function AdminDashboardClient({
   const [cities, setCities] = useState(initialData.cities);
   const [stats, setStats] = useState(initialData.stats);
   const [scraperHealth, setScraperHealth] = useState(initialData.scraperHealth);
+  const [healthScore] = useState(initialData.healthScore);
+  const [entreprendreStats] = useState(initialData.entreprendreStats);
+  const [sourceHealth] = useState(initialData.sourceHealth);
   const [statusFilter, setStatusFilter] =
     useState<(typeof STATUS_OPTIONS)[number]>("Toutes");
   const [cityFilter, setCityFilter] = useState("Toutes");
@@ -263,6 +269,10 @@ export default function AdminDashboardClient({
     setStats(payload.stats);
     setScraperHealth(payload.scraperHealth);
   }
+
+  // Sélecteurs dérivés pour les nouvelles cartes
+  const healthLevelColor = healthScore.level === "good" ? "emerald" : healthScore.level === "warning" ? "amber" : "rose";
+  const healthLevelLabel = healthScore.level === "good" ? "Bon" : healthScore.level === "warning" ? "Attention" : "Critique";
 
   function toggleSelect(id: string) {
     setSelectedIds((current) =>
@@ -560,6 +570,167 @@ export default function AdminDashboardClient({
             </article>
           );
         })}
+      </section>
+
+      {/* ===== Score de santé + Entreprendre + Contenu top ===== */}
+      <section className="grid gap-4 lg:grid-cols-3">
+        {/* Score de santé globale */}
+        <article className="rounded-3xl border border-white/[0.06] bg-slate-900/60 p-5 shadow-lg shadow-black/20 backdrop-blur">
+          <div className="flex items-center justify-between">
+            <h2 className="font-[var(--font-display)] text-base font-bold text-white">Santé globale</h2>
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold border-${healthLevelColor}-500/30 bg-${healthLevelColor}-500/10 text-${healthLevelColor}-300`}
+            >
+              {healthLevelLabel}
+            </span>
+          </div>
+          <div className="mt-4">
+            <div className="relative h-3 w-full overflow-hidden rounded-full bg-white/[0.06]">
+              <div
+                className={`absolute inset-y-0 left-0 rounded-full bg-gradient-to-r transition-all ${
+                  healthScore.level === "good"
+                    ? "from-emerald-500 to-emerald-400"
+                    : healthScore.level === "warning"
+                      ? "from-amber-500 to-amber-400"
+                      : "from-rose-500 to-rose-400"
+                }`}
+                style={{ width: `${healthScore.score}%` }}
+              />
+            </div>
+            <p className="mt-2 text-right text-sm font-bold text-white">{healthScore.score}%</p>
+          </div>
+          <ul className="mt-4 space-y-2 border-t border-white/[0.06] pt-4">
+            {healthScore.breakdown.map((item) => (
+              <li key={item.label} className="flex items-center gap-2 text-sm">
+                <span
+                  className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                    item.status === "good"
+                      ? "bg-emerald-400"
+                      : item.status === "warning"
+                        ? "bg-amber-400"
+                        : "bg-rose-400"
+                  }`}
+                />
+                <span className="text-slate-400">{item.label}</span>
+                <span className="ml-auto text-xs text-slate-500">{item.detail}</span>
+              </li>
+            ))}
+          </ul>
+        </article>
+
+        {/* Stats Entreprendre */}
+        <article className="rounded-3xl border border-white/[0.06] bg-slate-900/60 p-5 shadow-lg shadow-black/20 backdrop-blur">
+          <div className="flex items-center justify-between">
+            <h2 className="font-[var(--font-display)] text-base font-bold text-white">Entreprendre</h2>
+            <Link
+              href="/cz7tk/entreprendre"
+              className="text-xs font-semibold text-emerald-400 transition hover:text-emerald-300"
+            >
+              Gérer →
+            </Link>
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="rounded-2xl border border-white/[0.06] bg-slate-950/60 p-3 text-center">
+              <p className="font-[var(--font-display)] text-2xl font-black text-white">{entreprendreStats.totalPublished}</p>
+              <p className="mt-1 text-[11px] text-slate-500">Articles publiés</p>
+            </div>
+            <div className="rounded-2xl border border-white/[0.06] bg-slate-950/60 p-3 text-center">
+              <p className="font-[var(--font-display)] text-2xl font-black text-white">{entreprendreStats.totalComments}</p>
+              <p className="mt-1 text-[11px] text-slate-500">Commentaires</p>
+            </div>
+          </div>
+          {entreprendreStats.topSectors.length > 0 && (
+            <div className="mt-4 border-t border-white/[0.06] pt-4">
+              <p className="text-xs font-medium text-slate-500 mb-2">Secteurs populaires</p>
+              <div className="space-y-1.5">
+                {entreprendreStats.topSectors.map((s) => (
+                  <div key={s.sector} className="flex items-center justify-between text-sm">
+                    <span className="text-slate-300 capitalize">{s.sector.replace(/-/g, " ")}</span>
+                    <span className="font-medium text-slate-400">{s.count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {entreprendreStats.mostCommented.length > 0 && (
+            <div className="mt-4 border-t border-white/[0.06] pt-4">
+              <p className="text-xs font-medium text-slate-500 mb-2">Plus commentés</p>
+              <ul className="space-y-1.5">
+                {entreprendreStats.mostCommented.slice(0, 3).map((a) => (
+                  <li key={a.id} className="flex items-center justify-between text-sm">
+                    <span className="truncate text-slate-300">{a.title}</span>
+                    <span className="shrink-0 ml-2 text-xs text-slate-500">💬 {a.comment_count}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </article>
+
+        {/* Taux de succès scraper par source */}
+        <article className="rounded-3xl border border-white/[0.06] bg-slate-900/60 p-5 shadow-lg shadow-black/20 backdrop-blur">
+          <h2 className="font-[var(--font-display)] text-base font-bold text-white">
+            Taux de succès par source
+          </h2>
+          <p className="mt-1 text-xs text-slate-500">Basé sur l'historique 30 jours</p>
+          {Object.keys(sourceHealth).length === 0 ? (
+            <p className="mt-6 text-center text-sm text-slate-500">
+              Aucune donnée de source disponible.
+            </p>
+          ) : (
+            <div className="mt-4 space-y-4">
+              {Object.entries(sourceHealth).map(([source, sh]) => {
+                const rate = Math.round(sh.success_rate * 100);
+                const barColor =
+                  rate >= 90
+                    ? "from-emerald-500 to-emerald-400"
+                    : rate >= 60
+                      ? "from-amber-500 to-amber-400"
+                      : "from-rose-500 to-rose-400";
+                const dotColor =
+                  rate >= 90 ? "bg-emerald-400" : rate >= 60 ? "bg-amber-400" : "bg-rose-400";
+                return (
+                  <div key={source}>
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`} />
+                        <span className="text-white font-medium">{source}</span>
+                      </div>
+                      <span className="text-slate-400 text-xs">{sh.runs_tracked} runs</span>
+                    </div>
+                    <div className="mt-2 relative h-2.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                      <div
+                        className={`absolute inset-y-0 left-0 rounded-full bg-gradient-to-r ${barColor}`}
+                        style={{ width: `${rate}%` }}
+                      />
+                    </div>
+                    <div className="mt-1.5 flex items-center justify-between text-xs text-slate-500">
+                      <span>Taux de succès</span>
+                      <span className="font-semibold text-white">{rate}%</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {/* Top offres par vues */}
+          {offers.filter((o) => o.clicks > 0).length > 0 && (
+            <div className="mt-5 border-t border-white/[0.06] pt-4">
+              <p className="text-xs font-medium text-slate-500 mb-2">Top offres (clics)</p>
+              <ul className="space-y-1.5">
+                {[...offers]
+                  .sort((a, b) => b.clicks - a.clicks)
+                  .slice(0, 5)
+                  .map((o) => (
+                    <li key={o.id} className="flex items-center justify-between text-sm">
+                      <span className="truncate text-slate-300">{o.title}</span>
+                      <span className="shrink-0 ml-2 text-xs font-medium text-white">{o.clicks}</span>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          )}
+        </article>
       </section>
 
       {/* ===== Derniers signalements ===== */}
