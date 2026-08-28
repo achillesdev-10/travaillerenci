@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import AdminSidebar from "./AdminSidebar";
 import NotificationCenter from "./NotificationCenter";
+import AdminSearch from "./AdminSearch";
 
 const PAGE_TITLES: Array<{ prefix: string; title: string; subtitle: string }> = [
   { prefix: "/cz7tk/login", title: "Authentification", subtitle: "Connexion sécurisée" },
@@ -125,6 +126,7 @@ export default function AdminAppShell({
           </div>
 
           <div className="flex items-center gap-3">
+            <AdminSearch />
             <NotificationCenter />
             <div className="hidden items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 md:inline-flex">
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
