@@ -1,22 +1,19 @@
 import Link from 'next/link';
 import { is2faEnabled } from '@/lib/totp';
+import { PlatformSettingsService } from '@/services/platformSettingsService';
+import SettingsClient from './SettingsClient';
 
 export const dynamic = 'force-dynamic';
 
-export default function AdminSettingsPage() {
+export default async function AdminSettingsPage() {
   const twoFactorEnabled = is2faEnabled();
+  const settings = await PlatformSettingsService.getAll();
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl lg:text-3xl font-extrabold tracking-tight text-white font-[var(--font-display)]">
-          Paramètres de la plateforme
-        </h1>
-        <p className="text-sm text-slate-400 mt-1">
-          Gérez les configurations générales, les clés d'accès et les préférences administrateur.
-        </p>
-      </div>
+      <SettingsClient initialSettings={settings} />
 
+      {/* Sécurité (section existante, inchangée) */}
       <div className="rounded-3xl border border-slate-800 bg-slate-950 p-6 lg:p-8 shadow-xl space-y-6">
         <div>
           <h2 className="text-base font-bold text-white">Sécurité et authentification</h2>
