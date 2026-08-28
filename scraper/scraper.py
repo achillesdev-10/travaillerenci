@@ -30,6 +30,7 @@ import io
 import os
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Type
@@ -170,121 +171,135 @@ def run_scraping_pipeline(
     per_source_stats: Dict[str, Dict[str, int]] = {}  # source → {collected, errors}
     gemini_skipped = 0  # nombre d'appels Gemini évités grâce au cache
 
-    for name in site_names:
-        scraper_class = SCRAPER_REGISTRY.get(name)
-        if not scraper_class:
-            logger.error(f"❌ Scraper '{name}' inconnu. Disponibles : {list(SCRAPER_REGISTRY.keys())}")
-            continue
+    # ==========================================================================
+    # Phase 1 : Collecte parallèle des sources (scrape + clean + dedup)
+    # Chaque source est scrapée en parallèle pour réduire la latence totale.
+    # Un délai raisonnable entre requêtes au sein d'une source est déjà géré
+    # par le retry de HttpClient (tenacity).
+    # ==========================================================================
+    source_results: Dict[str, tuple] = {}  # name → (cleaned_items, errors, duration)
 
-        logger.info(f"▶ Lancement du scraper : {name}")
-        source_start = time.time()
-        source_errors = 0
+    def _scrape_source(name: str) -> tuple:
+        """Scrape une source et retourne (items_nettoyés, erreurs, durée)."""
+        scraper_class_local = SCRAPER_REGISTRY.get(name)
+        if not scraper_class_local:
+            logger.error(f"❌ Scraper '{name}' inconnu.")
+            return [], 1, 0.0
+
+        t_start = time.time()
+        errors = 0
+        cleaned: List[ContentItem] = []
         try:
-            scraper = scraper_class(http_client)
-            raw_items = scraper.scrape(max_offers=max_per_site)
+            scraper_inst = scraper_class_local(http_client)
+            raw_items = scraper_inst.scrape(max_offers=max_per_site)
             logger.info(f"  ✓ [{name}] {len(raw_items)} contenus bruts collectés.")
 
-            # Phase 1 : Nettoyage + déduplication intra-run + inter-sources
-            cleaned_items: List[ContentItem] = []
             for item in raw_items:
-                # Garde-fou : jamais de données « démo » en production.
                 if not demo_data and _is_demo_source_url(item.source_url):
-                    logger.warning(f"  ⛔ Contenu de démonstration ignoré : {item.title[:50]} ({item.source_url})")
+                    logger.warning(f"  ⛔ Démo ignoré : {item.title[:50]}")
                     continue
-
-                # Nettoyage & structuration de la description.
                 try:
                     clean_item(item)
                 except Exception as exc:
-                    logger.warning(f"  ⚠ Nettoyage impossible pour {item.title[:50]}: {exc}")
-
-                # Détection doublons (intra-run + inter-sources via BDD).
+                    logger.warning(f"  ⚠ Nettoyage impossible : {exc}")
                 if dup_detector.is_duplicate(item):
-                    logger.debug(f"  🔁 Doublon détecté : {item.title[:50]}")
+                    logger.debug(f"  🔁 Doublon : {item.title[:50]}")
                     continue
-
-                cleaned_items.append(item)
-
-            # Phase 2 : Enrichissement IA (batch si > 1 item, sinon individuel)
-            # Cache de hash : les items inchangés sont skippés (pas d'appel IA).
-            items_to_enrich: List[ContentItem] = []
-            items_skipped: List[ContentItem] = []
-            for item in cleaned_items:
-                if use_ai and hash_cache.is_unchanged(item.source_url, item.title, item.description):
-                    gemini_skipped += 1
-                    items_skipped.append(item)
-                else:
-                    items_to_enrich.append(item)
-
-            if items_to_enrich:
-                if len(items_to_enrich) > 1:
-                    logger.info(f"  🤖 Batch IA : {len(items_to_enrich)} contenus à enrichir")
-                    try:
-                        enricher.enrich_batch(items_to_enrich, batch_size=5)
-                    except Exception as exc:
-                        logger.warning(f"  ⚠ Échec batch, repli individuel : {exc}")
-                        for item in items_to_enrich:
-                            try:
-                                enricher.enrich(item)
-                            except Exception:
-                                pass
-                else:
-                    try:
-                        enricher.enrich(items_to_enrich[0])
-                    except Exception as exc:
-                        logger.warning(f"  ⚠ Enrichissement IA impossible : {exc}")
-
-            # Mise à jour du cache de hash pour tous les items traités
-            for item in cleaned_items:
-                hash_cache.store(item.source_url, item.title, item.description)
-
-            # Phase 3 : Validation qualité + slug/SEO + ajout à all_items
-            for item in cleaned_items:
-                ok, reason = item.is_valid()
-                if not ok:
-                    logger.debug(f"  🚫 Contenu rejeté ({reason}): {item.title[:50]} @ {item.company}")
-                    continue
-                ok, reason = item.is_valid_ivorian()
-                if not ok:
-                    logger.debug(f"  🚫 Contenu hors ciblage ({reason}): {item.title[:50]}")
-                    continue
-
-                # Slug & SEO par défaut si absent.
-                if not item.slug:
-                    from slugify import slugify
-                    item.slug = slugify(f"{item.title}-{item.company}", separator="-")
-                if not item.seo_title:
-                    item.seo_title = f"{item.title} | TravaillerEnCi"
-                if not item.seo_description:
-                    label = CATEGORY_LABELS.get(item.category_sql(), "Opportunité")
-                    base = f"{label} : {item.title} — {item.company} ({item.location})."
-                    if item.category_sql() in ("job", "internship") and item.contract_type != "CDI":
-                        base += f" Contrat {item.contract_type}."
-                    item.seo_description = (
-                        base + " Missions, profil recherché et procédure de candidature sur TravaillerEnCi."
-                    )[:180]
-
-                per_category[item.category_sql()] = per_category.get(item.category_sql(), 0) + 1
-                all_items.append(item)
-
-            if items_skipped:
-                logger.debug(f"  ⏭ {len(items_skipped)} contenus inchangés (Gemini skippé via cache)")
-
+                cleaned.append(item)
         except Exception as exc:
-            logger.error(f"  ❌ Erreur critique sur le scraper {name}: {exc}", exc_info=True)
-            source_errors += 1
+            logger.error(f"  ❌ Erreur scraper {name}: {exc}", exc_info=True)
+            errors = 1
+        return cleaned, errors, time.time() - t_start
 
-        # Enregistrement de la santé de la source
-        source_duration = time.time() - source_start
-        source_label = getattr(scraper_class, 'source_label', name)
-        source_collected = sum(1 for i in all_items if getattr(i, 'source', '') == source_label)
-        health_tracker.record_run(
-            source=name,
-            collected=source_collected,
-            errors=source_errors,
-            duration_seconds=source_duration,
-        )
-        per_source_stats[name] = {"collected": source_collected, "errors": source_errors}
+    logger.info(f"\n🔄 Collecte parallèle de {len(site_names)} source(s)...")
+    with ThreadPoolExecutor(max_workers=min(len(site_names), 3)) as executor:
+        futures = {executor.submit(_scrape_source, name): name for name in site_names}
+        for future in as_completed(futures):
+            name = futures[future]
+            try:
+                cleaned, errors, duration = future.result()
+                source_results[name] = (cleaned, errors, duration)
+                source_label = getattr(SCRAPER_REGISTRY.get(name), 'source_label', name)
+                health_tracker.record_run(
+                    source=name,
+                    collected=len(cleaned),
+                    errors=errors,
+                    duration_seconds=duration,
+                )
+                per_source_stats[name] = {"collected": len(cleaned), "errors": errors}
+                logger.info(f"  ✓ [{name}] terminé en {duration:.1f}s ({len(cleaned)} items valides)")
+            except Exception as exc:
+                logger.error(f"  ❌ Exception sur {name}: {exc}")
+                source_results[name] = ([], 1, 0.0)
+                health_tracker.record_run(source=name, collected=0, errors=1)
+                per_source_stats[name] = {"collected": 0, "errors": 1}
+
+    # ==========================================================================
+    # Phase 2 : Enrichissement IA batch (toutes sources confondues)
+    # ==========================================================================
+    all_cleaned: List[ContentItem] = []
+    for name in site_names:
+        if name in source_results:
+            cleaned, _, _ = source_results[name]
+            all_cleaned.extend(cleaned)
+
+    items_to_enrich: List[ContentItem] = []
+    for item in all_cleaned:
+        if use_ai and hash_cache.is_unchanged(item.source_url, item.title, item.description):
+            gemini_skipped += 1
+        else:
+            items_to_enrich.append(item)
+
+    if items_to_enrich:
+        if len(items_to_enrich) > 1:
+            logger.info(f"  🤖 Batch IA : {len(items_to_enrich)} contenus à enrichir")
+            try:
+                enricher.enrich_batch(items_to_enrich, batch_size=5)
+            except Exception as exc:
+                logger.warning(f"  ⚠ Échec batch, repli individuel : {exc}")
+                for item in items_to_enrich:
+                    try:
+                        enricher.enrich(item)
+                    except Exception:
+                        pass
+        else:
+            try:
+                enricher.enrich(items_to_enrich[0])
+            except Exception as exc:
+                logger.warning(f"  ⚠ Enrichissement IA impossible : {exc}")
+
+    for item in all_cleaned:
+        hash_cache.store(item.source_url, item.title, item.description)
+
+    # ==========================================================================
+    # Phase 3 : Validation qualité + slug/SEO + assemblage final
+    # ==========================================================================
+    for item in all_cleaned:
+        ok, reason = item.is_valid()
+        if not ok:
+            logger.debug(f"  🚫 Rejeté ({reason}): {item.title[:50]} @ {item.company}")
+            continue
+        ok, reason = item.is_valid_ivorian()
+        if not ok:
+            logger.debug(f"  🚫 Hors ciblage ({reason}): {item.title[:50]}")
+            continue
+
+        if not item.slug:
+            from slugify import slugify
+            item.slug = slugify(f"{item.title}-{item.company}", separator="-")
+        if not item.seo_title:
+            item.seo_title = f"{item.title} | TravaillerEnCi"
+        if not item.seo_description:
+            label = CATEGORY_LABELS.get(item.category_sql(), "Opportunité")
+            base = f"{label} : {item.title} — {item.company} ({item.location})."
+            if item.category_sql() in ("job", "internship") and item.contract_type != "CDI":
+                base += f" Contrat {item.contract_type}."
+            item.seo_description = (
+                base + " Missions, profil recherché et procédure de candidature sur TravaillerEnCi."
+            )[:180]
+
+        per_category[item.category_sql()] = per_category.get(item.category_sql(), 0) + 1
+        all_items.append(item)
 
     http_client.close()
     enricher.close()

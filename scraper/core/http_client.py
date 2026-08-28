@@ -21,9 +21,13 @@ logger = setup_logger("http_client")
 
 
 class HttpClient:
-    def __init__(self, timeout: float = 30.0, use_cache: bool = True, verify_ssl: bool | None = None):
+    def __init__(self, timeout: float = 15.0, use_cache: bool = True, verify_ssl: bool | None = None):
         self.timeout = timeout
         self.proxy_manager = ProxyManager()
+
+        # Cache HTTP conditionnel : stocke ETag/Last-Modified par URL
+        # pour éviter de retélécharger des pages inchangées.
+        self._etag_cache: dict[str, dict] = {}  # url → {etag, last_modified}
 
         # Vérification TLS : désactivable via l'environnement (certains sites
         # ouest-africains exposent des chaînes de certificats incomplètes).
@@ -50,7 +54,36 @@ class HttpClient:
     )
     def get(self, url: str) -> httpx.Response:
         headers = {"User-Agent": self.proxy_manager.get_random_user_agent()}
+
+        # Cache HTTP conditionnel : si on a un ETag ou Last-Modified pour
+        # cette URL, on ajoute les en-têtes If-None-Match / If-Modified-Since
+        # pour éviter de retélécharger une page inchangée (304 Not Modified).
+        cached = self._etag_cache.get(url)
+        if cached:
+            if cached.get("etag"):
+                headers["If-None-Match"] = cached["etag"]
+            if cached.get("last_modified"):
+                headers["If-Modified-Since"] = cached["last_modified"]
+
         resp = self.client.get(url, headers=headers)
+
+        # 304 Not Modified : la page n'a pas changé, on retourne une réponse
+        # vide avec le statut 304 pour que l'appelant sache qu'il peut
+        # réutiliser le contenu en cache.
+        if resp.status_code == 304:
+            logger.debug(f"  ↩️ 304 Not Modified : {url}")
+            resp.raise_for_status()
+            return resp
+
+        # Mise à jour du cache ETag/Last-Modified
+        etag = resp.headers.get("etag")
+        last_modified = resp.headers.get("last-modified")
+        if etag or last_modified:
+            self._etag_cache[url] = {
+                "etag": etag,
+                "last_modified": last_modified,
+            }
+
         # Blocage RÉEL : status 403/429 OU page « challenge » Cloudflare
         # (« Just a moment… »). La simple présence du mot « cloudflare » dans
         # le HTML n'est PAS un blocage (CDN présent sur beaucoup de sites).
