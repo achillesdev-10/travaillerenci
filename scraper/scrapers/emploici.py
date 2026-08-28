@@ -108,7 +108,7 @@ class EmploiciScraper(BaseScraper):
                     candidate = h2.get_text(" ", strip=True)
                     if (
                         len(candidate) > 12
-                        and not re.match(r"^(autres|recherche|offres)", candidate, re.I)
+                        and not re.match(r"^(autres|recherche|offres|postuler)", candidate, re.I)
                     ):
                         title = re.sub(
                             r"\s*-\s*(Abidjan[^|]*|Cocody|Plateau|Bouaké|Yamoussoukro|San-Pédro).*$",
@@ -116,6 +116,15 @@ class EmploiciScraper(BaseScraper):
                             candidate,
                         ).strip()
                         break
+                # Fallback : og:title si aucun h2 trouvé
+                if not title or len(title) < 5:
+                    og = soup.find("meta", property="og:title")
+                    title = (og.get("content", "").strip() if og else "") or ""
+                    title = re.sub(
+                        r"\s*-\s*(Abidjan[^|]*|Cocody|Plateau|Bouaké|Yamoussoukro|San-Pédro).*$",
+                        "",
+                        title,
+                    ).strip()
                 title = re.sub(r"\s+", " ", title).strip()
 
                 location = fields.get("lieu") or fields.get("ville") or "Abidjan"

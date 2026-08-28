@@ -29,6 +29,7 @@ import argparse
 import io
 import os
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Type
@@ -71,6 +72,7 @@ from scraper.core.scheduler import JobScheduler
 from scraper.models.content_item import ContentItem
 from scraper.database.repository import JobRepository
 from scraper.database.exam_repository import ExamRepository
+from scraper.source_health import SourceHealthTracker
 
 # Scrapers actifs — sources VÉRIFIÉES en HTTP simple (les anciennes sources
 # novojob / rmo / emploiivoire / jobivoire2 / emploi.ci étaient mortes ou
@@ -96,6 +98,10 @@ CATEGORY_LABELS = {
     "scholarship": "Bourse",
     "exam": "Concours",
 }
+
+# Seuil minimal : si une source retourne moins de 20% de sa moyenne
+# historique (7 derniers runs), le run de cette source est marqué suspect.
+SOURCE_LOW_VOLUME_THRESHOLD = 0.20
 
 
 def _is_demo_source_url(url: str) -> bool:
@@ -156,8 +162,10 @@ def run_scraping_pipeline(
     http_client = HttpClient()
     enricher = GeminiEnricher() if use_ai else GeminiEnricher(api_key=None)
     dup_detector = DuplicateDetector()
+    health_tracker = SourceHealthTracker()
     all_items: List[ContentItem] = []
     per_category: Dict[str, int] = {"job": 0, "internship": 0, "scholarship": 0, "exam": 0}
+    per_source_stats: Dict[str, Dict[str, int]] = {}  # source → {collected, errors}
 
     for name in site_names:
         scraper_class = SCRAPER_REGISTRY.get(name)
@@ -166,6 +174,8 @@ def run_scraping_pipeline(
             continue
 
         logger.info(f"▶ Lancement du scraper : {name}")
+        source_start = time.time()
+        source_errors = 0
         try:
             scraper = scraper_class(http_client)
             raw_items = scraper.scrape(max_offers=max_per_site)
@@ -227,6 +237,19 @@ def run_scraping_pipeline(
                 all_items.append(item)
         except Exception as exc:
             logger.error(f"  ❌ Erreur critique sur le scraper {name}: {exc}", exc_info=True)
+            source_errors += 1
+
+        # Enregistrement de la santé de la source
+        source_duration = time.time() - source_start
+        source_label = getattr(scraper_class, 'source_label', name)
+        source_collected = sum(1 for i in all_items if getattr(i, 'source', '') == source_label)
+        health_tracker.record_run(
+            source=name,
+            collected=source_collected,
+            errors=source_errors,
+            duration_seconds=source_duration,
+        )
+        per_source_stats[name] = {"collected": source_collected, "errors": source_errors}
 
     http_client.close()
     enricher.close()
@@ -235,6 +258,14 @@ def run_scraping_pipeline(
     logger.info(f"\n📊 Bilan collecte : {len(all_items)} contenus valides uniques prêts à l'enregistrement.")
     if cat_summary:
         logger.info(f"   Répartition : {cat_summary}")
+
+    # Vérification des seuils et alertes automatiques
+    alerts = health_tracker.check_and_alert()
+    if alerts:
+        from scraper.source_health import send_scraper_alerts
+        send_scraper_alerts(alerts)
+        for alert in alerts:
+            logger.warning(f"  🚨 {alert['message']}")
 
     if dry_run:
         for idx, item in enumerate(all_items, 1):
@@ -296,9 +327,15 @@ def run_scraping_pipeline(
         f"Publiées={st['published']}, {st.get('by_category', {})}"
     )
 
+    source_details = ", ".join(
+        f"{k}: {v['collected']} collecté(s)"
+        + (f", {v['errors']} erreur(s)" if v['errors'] else "")
+        for k, v in per_source_stats.items()
+    )
     end_msg = (
         f"Scraping terminé : {created_count} nouveau(x) contenu(s), {updated_count} mis à jour."
         + (f" [{cat_summary}]" if cat_summary else "")
+        + (f" | Sources: {source_details}" if source_details else "")
     )
     if run_log_id is not None:
         try:

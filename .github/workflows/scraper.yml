@@ -76,6 +76,10 @@ jobs:
           python scraper/tests/test_alert_digest.py
           python scraper/tests/test_ai_fallback.py
 
+      - name: Run source health tests (threshold + fallback selectors)
+        run: |
+          python scraper/tests/test_source_health.py
+
   # ==========================================================================
   # Vérification du code front (Next.js) à chaque push / PR :
   #   • ESLint (flat config, eslint.config.mjs)

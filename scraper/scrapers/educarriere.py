@@ -63,6 +63,17 @@ class EducarriereScraper(BaseScraper):
                 h1 = soup.find("h1")
                 title = h1.get_text(" ", strip=True) if h1 else ""
                 if not title or len(title) < 5:
+                    # Fallback 1 : og:title
+                    og = soup.find("meta", property="og:title")
+                    title = og.get("content", "").strip() if og else ""
+                if not title or len(title) < 5:
+                    # Fallback 2 : premier h2 non-navigation
+                    for h2 in soup.find_all("h2"):
+                        candidate = h2.get_text(" ", strip=True)
+                        if len(candidate) > 8 and not re.match(r"^(autres|recherche|offres|postuler)", candidate, re.I):
+                            title = candidate
+                            break
+                if not title or len(title) < 5:
                     og = soup.find("meta", property="og:title")
                     title = og.get("content", "").strip() if og else ""
                 # Retire le suffixe « - Offres d'emploi - Educarriere.ci »
@@ -73,8 +84,14 @@ class EducarriereScraper(BaseScraper):
                     soup.select_one(".job-description")
                     or soup.select_one("article")
                     or soup.select_one(".offre-description")
+                    or soup.select_one(".post-content")
+                    or soup.select_one(".entry-content")
+                    or soup.select_one(".annonce-detail")
+                    or soup.select_one("section.content")
                     or soup.select_one("main")
                     or soup.select_one(".content")
+                    or soup.select_one("#content")
+                    or soup.select_one(".detail-content")
                 )
                 raw = str(container) if container else ""
                 text = clean_html_text(container or soup)
