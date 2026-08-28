@@ -11,7 +11,19 @@ import type { EntreprendreSector, BudgetRange } from '@/types/entreprendre';
 import ArticleHelpfulVote from '@/components/entreprendre/ArticleHelpfulVote';
 import ArticleComments from '@/components/entreprendre/ArticleComments';
 
-export const dynamic = 'force-dynamic';
+// ISR : revalidation toutes les heures
+export const revalidate = 3600;
+
+// Génère statiquement les 50 articles les plus récents au build
+export async function generateStaticParams() {
+  const { rows } = await EntreprendreArticleService.list({
+    status: 'published',
+    order_by: 'published_at',
+    order_dir: 'desc',
+    limit: 50,
+  });
+  return rows.map((a) => ({ slug: a.slug }));
+}
 
 /** Libellés français des secteurs. */
 const SECTOR_LABELS: Record<EntreprendreSector, string> = {

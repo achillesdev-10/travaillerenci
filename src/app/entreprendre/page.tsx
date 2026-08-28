@@ -10,7 +10,8 @@ import type {
 } from '@/types/entreprendre';
 import EntreprendreFilters from '@/components/entreprendre/EntreprendreFilters';
 
-export const dynamic = 'force-dynamic';
+// ISR : revalidation toutes les heures (articles statiques, données fraîches)
+export const revalidate = 3600;
 
 export const metadata = {
   title: 'Entreprendre — Guides business en Côte d\'Ivoire | TravaillerenCi',
