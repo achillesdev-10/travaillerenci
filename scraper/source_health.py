@@ -33,8 +33,9 @@ DATA_DIR = PROJECT_ROOT / "data"
 HEALTH_JSON = DATA_DIR / "source-health.json"
 DB_PATH = DATA_DIR / "travaillerenci.sqlite3"
 
-# Historique conservé (runs)
-HISTORY_WINDOW = 7
+# Historique conservé (runs) — 30 jours permet de repérer une
+# dégradation progressive plutôt que juste un échec brutal.
+HISTORY_WINDOW = 30
 # Seuil minimal (fraction de la moyenne historique)
 DEFAULT_THRESHOLD = 0.20
 

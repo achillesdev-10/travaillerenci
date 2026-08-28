@@ -36,11 +36,25 @@ export type ScraperHealth = {
   message: string | null;
 };
 
+/** Stats de santé par source scraper (historique 30 jours). */
+export type SourceHealthStats = {
+  latest_collected: number;
+  latest_published: number;
+  latest_errors: number;
+  latest_duration: number;
+  latest_timestamp: string;
+  threshold_ok: boolean;
+  average_collected: number | null;
+  success_rate: number;
+  runs_tracked: number;
+};
+
 export type AdminDashboardData = {
   offers: DashboardOffer[];
   cities: string[];
   stats: DashboardStats;
   scraperHealth: ScraperHealth;
+  sourceHealth: Record<string, SourceHealthStats>;
 };
 
 export type BulkAction = "delete" | "verify" | "archive";
@@ -53,6 +67,11 @@ const SCRAPER_HEALTH_PATH = path.join(
   process.cwd(),
   "data",
   "admin-scraper-health.json",
+);
+const SOURCE_HEALTH_PATH = path.join(
+  process.cwd(),
+  "data",
+  "source-health.json",
 );
 
 let inMemoryScraperHealth: ScraperHealth | null = null;
@@ -447,6 +466,42 @@ function readStoredScraperHealth(): ScraperHealth {
   }
 }
 
+function readSourceHealth(): Record<string, SourceHealthStats> {
+  if (!existsSync(SOURCE_HEALTH_PATH)) {
+    return {};
+  }
+  try {
+    const raw = JSON.parse(readFileSync(SOURCE_HEALTH_PATH, "utf8"));
+    if (!raw || typeof raw !== "object") return {};
+    const result: Record<string, SourceHealthStats> = {};
+    for (const [source, runs] of Object.entries(raw)) {
+      if (!Array.isArray(runs) || runs.length === 0) continue;
+      const latest = runs[runs.length - 1] as Record<string, unknown>;
+      // Calcul de la moyenne (exclut le dernier run)
+      const prevRuns = runs.slice(0, -1);
+      const avg = prevRuns.length > 0
+        ? prevRuns.reduce((sum: number, r: Record<string, unknown>) => sum + numberFromUnknown(r.collected), 0) / prevRuns.length
+        : null;
+      // Taux de succès
+      const successes = runs.filter((r: Record<string, unknown>) => numberFromUnknown(r.errors) === 0).length;
+      result[source] = {
+        latest_collected: numberFromUnknown(latest.collected),
+        latest_published: numberFromUnknown(latest.published),
+        latest_errors: numberFromUnknown(latest.errors),
+        latest_duration: numberFromUnknown(latest.duration_seconds),
+        latest_timestamp: String(latest.timestamp || ""),
+        threshold_ok: latest.threshold_ok !== false,
+        average_collected: avg !== null ? Math.round(avg * 10) / 10 : null,
+        success_rate: runs.length > 0 ? Math.round((successes / runs.length) * 100) / 100 : 1,
+        runs_tracked: runs.length,
+      };
+    }
+    return result;
+  } catch {
+    return {};
+  }
+}
+
 function writeStoredScraperHealth(scraperHealth: ScraperHealth) {
   inMemoryScraperHealth = scraperHealth;
   try {
@@ -772,11 +827,14 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     ? getScraperHealthFromDatabase(db) ?? readStoredScraperHealth()
     : readStoredScraperHealth();
 
+  const sourceHealth = readSourceHealth();
+
   return {
     offers,
     cities,
     stats,
     scraperHealth,
+    sourceHealth,
   };
 }
 
@@ -994,6 +1052,7 @@ async function getAdminDashboardDataFromSupabase(
         offersAdded: null,
         message: "Impossible de lire les offres (Supabase).",
       },
+      sourceHealth: {},
     };
   }
 
@@ -1107,7 +1166,8 @@ async function getAdminDashboardDataFromSupabase(
     };
   }
 
-  return { offers, cities, stats, scraperHealth };
+  const sourceHealth = readSourceHealth();
+  return { offers, cities, stats, scraperHealth, sourceHealth };
 }
 
 /** Variante Supabase des actions en masse (verify / archive / delete). */
