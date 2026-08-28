@@ -102,6 +102,18 @@ const NAV_ITEMS = [
     ),
   },
   {
+    href: '/cz7tk/entreprendre',
+    label: 'Entreprendre',
+    description: 'Guides business',
+    icon: (
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5z" />
+        <path d="M2 17l10 5 10-5" />
+        <path d="M2 12l10 5 10-5" />
+      </svg>
+    ),
+  },
+  {
     href: '/cz7tk/scraper',
     label: 'Scraper',
     description: 'Pilote des sources',

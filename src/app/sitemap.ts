@@ -3,6 +3,7 @@ import { getSiteUrl } from '@/lib/site';
 import { ExamService } from '@/services/examService';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import { BlogService } from '@/services/blogService';
+import { EntreprendreArticleService } from '@/services/entreprendreService';
 import { DIPLOMA_SEO } from '@/lib/examSeo';
 import { EXAM_CATEGORIES } from '@/lib/examConstants';
 
@@ -19,6 +20,7 @@ const STATIC_ROUTES = [
   '/concours',
   '/bourses',
   '/blog',
+  '/entreprendre',
   '/candidates',
   '/companies',
   '/generateur-de-cv',
@@ -60,11 +62,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   // Concours publiés — prioritaires (module Concours Administratifs).
-  const [examRes, jobRes, bourseRes, blogRes] = await Promise.allSettled([
+  const [examRes, jobRes, bourseRes, blogRes, entreprendreRes] = await Promise.allSettled([
     ExamService.list({ status: 'published', limit: 500, order_by: 'created_at', order_dir: 'desc' }),
     JobOfferSchemaService.list({ status: 'published', category: ['job', 'internship'], limit: 500, order_by: 'created_at', order_dir: 'desc' }),
     JobOfferSchemaService.list({ status: 'published', category: 'scholarship', limit: 200, order_by: 'created_at', order_dir: 'desc' }),
     BlogService.list({ status: 'published', limit: 500 }),
+    EntreprendreArticleService.list({ status: 'published', limit: 500, order_by: 'published_at', order_dir: 'desc' }),
   ]);
 
   const examEntries: MetadataRoute.Sitemap =
@@ -108,6 +111,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }))
       : [];
 
+  const entreprendreEntries: MetadataRoute.Sitemap =
+    entreprendreRes.status === 'fulfilled'
+      ? entreprendreRes.value.rows.map((article) => ({
+          url: `${BASE_URL}/entreprendre/${article.slug}`,
+          lastModified: new Date(article.updated_at || article.created_at),
+          changeFrequency: 'weekly' as const,
+          priority: 0.7,
+        }))
+      : [];
+
   return [
     ...staticEntries,
     ...categoryEntries,
@@ -116,5 +129,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...jobEntries,
     ...bourseEntries,
     ...blogEntries,
+    ...entreprendreEntries,
   ];
 }

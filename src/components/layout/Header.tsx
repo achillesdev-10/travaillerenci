@@ -16,6 +16,7 @@ const NAV_LINKS = [
   { label: 'Bourse d\'études', href: '/bourses' },
   { label: 'Mon CV Pro', href: '/generateur-de-cv' },
   { label: 'Conseils', href: '/blog' },
+  { label: 'Entreprendre', href: '/entreprendre' },
   { label: 'Publier une offre', href: '/publier-offre' },
 ];
 
