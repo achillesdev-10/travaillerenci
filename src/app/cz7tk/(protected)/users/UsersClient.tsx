@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { AdminUsersData, AdminUserRole } from "@/lib/admin-users";
+import { csvCell, downloadCsv, formatDate as fmtDate } from "@/lib/csvExport";
 
 type UsersClientProps = {
   initialData: AdminUsersData;
@@ -196,6 +197,29 @@ export default function UsersClient({ initialData }: UsersClientProps) {
             </p>
           </div>
           <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
+            <button
+              type="button"
+              onClick={() => {
+                if (filteredUsers.length === 0) return;
+                const headers = ["Nom", "Email", "Rôle", "Titre", "Site", "Inscrit le"];
+                const rows = filteredUsers.map((u) => [
+                  csvCell(u.name || ""),
+                  csvCell(u.email),
+                  csvCell(roleLabel(u.role)),
+                  csvCell(u.headline || ""),
+                  csvCell(u.website || ""),
+                  csvCell(fmtDate(u.created_at)),
+                ]);
+                downloadCsv("utilisateurs-travaillerenci", headers, rows);
+              }}
+              disabled={filteredUsers.length === 0}
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-xs font-semibold text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M5 21h14" />
+              </svg>
+              Exporter CSV
+            </button>
             <button
               type="button"
               onClick={() => startTransition(() => void handleRefresh())}

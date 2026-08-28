@@ -9,6 +9,7 @@ import type {
   ExamStatus,
   ExamType,
 } from '@/types/exam';
+import { csvCell, downloadCsv, formatDate as fmtDate } from '@/lib/csvExport';
 import {
   EXAM_CATEGORIES,
   EXAM_CONFIDENCE_LABEL,
@@ -405,16 +406,43 @@ export default function ExamsAdminClient({
             éligibilité, dates clés, documents et publication.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={openCreateModal}
-          className="inline-flex items-center gap-2 self-start rounded-2xl bg-primary px-5 py-3 text-xs font-bold text-slate-950 shadow-lg shadow-primary/20 transition-all hover:brightness-110"
-        >
-          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-          Nouveau concours
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              if (filteredExams.length === 0) return;
+              const headers = ['Titre', 'Organisateur', 'Type', 'Catégorie', 'Statut', 'Inscriptions fin', 'Date examen', 'Vues'];
+              const rows = filteredExams.map((e) => [
+                csvCell(e.title),
+                csvCell(e.organizer),
+                csvCell(e.exam_type || ''),
+                csvCell(e.category),
+                csvCell(EXAM_STATUS_LABEL[e.status] || e.status),
+                csvCell(fmtDate(e.registration_end)),
+                csvCell(fmtDate(e.exam_date)),
+                String(e.views_count || 0),
+              ]);
+              downloadCsv('concours-travaillerenci', headers, rows);
+            }}
+            disabled={filteredExams.length === 0}
+            className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-xs font-semibold text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M5 21h14" />
+            </svg>
+            Exporter CSV
+          </button>
+          <button
+            type="button"
+            onClick={openCreateModal}
+            className="inline-flex items-center gap-2 self-start rounded-2xl bg-primary px-5 py-3 text-xs font-bold text-slate-950 shadow-lg shadow-primary/20 transition-all hover:brightness-110"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Nouveau concours
+          </button>
+        </div>
       </div>
 
       {/* Stats */}

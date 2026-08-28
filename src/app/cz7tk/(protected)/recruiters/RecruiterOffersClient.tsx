@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import type { JobOfferSchema, JobOfferSchemaStatus } from '@/types';
+import { csvCell, downloadCsv, formatDate as fmtDate } from '@/lib/csvExport';
 
 function formatDeadline(deadline: string | null) {
   if (!deadline) return null;
@@ -106,13 +107,39 @@ export default function RecruiterOffersClient({
   return (
     <div className="space-y-6 pb-24">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl lg:text-3xl font-extrabold tracking-tight text-white font-[var(--font-display)]">
-          Offres des recruteurs
-        </h1>
-        <p className="text-sm text-slate-400 mt-1">
-          Modérez les offres publiées via l&apos;espace recruteur self-service (/publier-offre).
-        </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl lg:text-3xl font-extrabold tracking-tight text-white font-[var(--font-display)]">
+            Offres des recruteurs
+          </h1>
+          <p className="text-sm text-slate-400 mt-1">
+            Modérez les offres publiées via l&apos;espace recruteur self-service (/publier-offre).
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            if (filteredJobs.length === 0) return;
+            const headers = ['Titre', 'Entreprise', 'Ville', 'Type contrat', 'Statut', 'Date limite', 'Créée le'];
+            const rows = filteredJobs.map((j) => [
+              csvCell(j.title),
+              csvCell(j.company),
+              csvCell(j.location),
+              csvCell(j.contract_type || ''),
+              csvCell(j.status),
+              csvCell(fmtDate(j.deadline)),
+              csvCell(fmtDate(j.created_at)),
+            ]);
+            downloadCsv('offres-recruteurs-travaillerenci', headers, rows);
+          }}
+          disabled={filteredJobs.length === 0}
+          className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-xs font-semibold text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M5 21h14" />
+          </svg>
+          Exporter CSV
+        </button>
       </div>
 
       {/* Stats */}

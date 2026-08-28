@@ -9,6 +9,7 @@ import {
   REPORT_TYPE_BADGES,
   formatReportDate,
 } from '@/lib/reportLabels';
+import { csvCell, downloadCsv } from '@/lib/csvExport';
 
 type ReportWithContent = Report & { content: ResolvedContentItem | null };
 type StatusFilter = ReportStatus | 'all';
@@ -82,14 +83,39 @@ export default function ReportsAdminClient({
 
   return (
     <div className="space-y-8 pb-24">
-      <div>
-        <h1 className="text-2xl lg:text-3xl font-extrabold tracking-tight text-white font-[var(--font-display)]">
-          Signalements des utilisateurs
-        </h1>
-        <p className="text-sm text-slate-400 mt-1">
-          Les signalements d'abus soumis depuis les fiches (frais demandés, contenu frauduleux…).
-          Ouvrez le contenu signalé pour le modérer, puis traitez le signalement.
-        </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl lg:text-3xl font-extrabold tracking-tight text-white font-[var(--font-display)]">
+            Signalements des utilisateurs
+          </h1>
+          <p className="text-sm text-slate-400 mt-1">
+            Les signalements d'abus soumis depuis les fiches (frais demandés, contenu frauduleux…).
+            Ouvrez le contenu signalé pour le modérer, puis traitez le signalement.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            if (visibleReports.length === 0) return;
+            const headers = ['Type', 'Raison', 'Statut', 'Signalé par', 'Détails', 'Date'];
+            const rows = visibleReports.map((r) => [
+              csvCell(r.item_type),
+              csvCell(REPORT_REASON_LABELS[r.reason]?.label || r.reason),
+              csvCell(r.status),
+              csvCell(r.reporter_email || 'Anonyme'),
+              csvCell(r.details || ''),
+              csvCell(formatReportDate(r.created_at)),
+            ]);
+            downloadCsv('signalements-travaillerenci', headers, rows);
+          }}
+          disabled={visibleReports.length === 0}
+          className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-xs font-semibold text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M5 21h14" />
+          </svg>
+          Exporter CSV
+        </button>
       </div>
 
       {/* Onglets de statut */}
