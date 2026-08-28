@@ -46,6 +46,9 @@ export default async function BlogArticlePage({
   const post = await BlogService.getBySlug(slug);
   if (!post || post.status !== 'published') notFound();
 
+  // Incrémenter le compteur de vues (fire-and-forget)
+  BlogService.incrementViewCount(post.id).catch(() => {});
+
   const tags = tagList(post.tags);
   const { rows: related } = await BlogService.list({
     status: 'published',

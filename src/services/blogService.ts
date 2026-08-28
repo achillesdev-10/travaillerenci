@@ -67,6 +67,7 @@ function ensureSchema(db: DatabaseSyncInstance) {
       tags         TEXT,
       status       TEXT NOT NULL DEFAULT 'draft',
       published_at TEXT,
+      view_count   INTEGER NOT NULL DEFAULT 0,
       created_at   TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at   TEXT NOT NULL DEFAULT (datetime('now')),
       CONSTRAINT valid_blog_status CHECK (status IN ('draft','published','archived'))
@@ -292,6 +293,7 @@ function rowToPost(row: any): BlogPost {
     tags: row.tags ?? null,
     published_at: row.published_at ?? null,
     status: row.status || 'draft',
+    view_count: Number(row.view_count ?? 0),
   };
 }
 
@@ -307,6 +309,7 @@ function normalizePostFromSupabase(row: any): BlogPost {
     tags: row.tags ?? null,
     status: (['draft', 'published', 'archived'].includes(row.status) ? row.status : 'draft') as BlogPostStatus,
     published_at: row.published_at ?? null,
+    view_count: Number(row.view_count ?? 0),
     created_at: row.created_at ?? new Date().toISOString(),
     updated_at: row.updated_at ?? new Date().toISOString(),
   };
@@ -506,6 +509,24 @@ export class BlogService {
     const db = await getDb();
     if (!db) return false;
     return (db.prepare('DELETE FROM blog_posts WHERE id = $id').run({ $id: id }).changes || 0) > 0;
+  }
+
+  /** Incrémente le compteur de vues d'un article. */
+  static async incrementViewCount(id: string): Promise<void> {
+    if (isSupabaseConfigured()) {
+      const supabase = getSupabaseClient();
+      if (!supabase) return;
+      try {
+        const { data } = await supabase.from('blog_posts').select('view_count').eq('id', id).single();
+        if (data) {
+          await supabase.from('blog_posts').update({ view_count: (data.view_count || 0) + 1 }).eq('id', id);
+        }
+      } catch { /* noop */ }
+      return;
+    }
+    const db = await getDb();
+    if (!db) return;
+    db.prepare('UPDATE blog_posts SET view_count = view_count + 1 WHERE id = $id').run({ $id: id });
   }
 
   // ===========================================================================

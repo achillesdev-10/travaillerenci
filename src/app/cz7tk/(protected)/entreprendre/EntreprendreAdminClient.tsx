@@ -433,8 +433,8 @@ export default function EntreprendreAdminClient({
 
       {/* Modal */}
       {(editingArticle || isCreating) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="w-full max-w-3xl rounded-3xl border border-slate-800 bg-slate-900 p-6 lg:p-8 shadow-2xl space-y-6 my-8">
+        <div className="fixed inset-0 z-50 flex justify-center bg-slate-950/80 backdrop-blur-sm overflow-y-auto">
+          <div className="w-full max-w-3xl rounded-3xl border border-slate-800 bg-slate-900 p-6 lg:p-8 shadow-2xl space-y-6 my-8 mx-4">
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">
               <div>
                 <h3 className="text-xl font-bold text-white font-[var(--font-display)]">

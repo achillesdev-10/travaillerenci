@@ -263,16 +263,29 @@ export default function BlogAdminClient({
             ). Seuls les articles « Publiés » sont visibles sur le site.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={openCreateModal}
-          className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-3 text-xs font-bold text-slate-950 hover:brightness-110 transition-all shadow-lg shadow-primary/20"
-        >
-          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-          Nouvel article
-        </button>
+        <div className="flex gap-2">
+          <a
+            href="/cz7tk/blog/bulk-import"
+            className="inline-flex items-center gap-2 rounded-2xl border border-slate-800 bg-slate-900 px-4 py-3 text-xs font-bold text-slate-300 hover:bg-slate-800 transition-all"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <path d="M17 8l-5-5-5 5" />
+              <path d="M12 3v12" />
+            </svg>
+            Import CSV
+          </a>
+          <button
+            type="button"
+            onClick={openCreateModal}
+            className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-3 text-xs font-bold text-slate-950 hover:brightness-110 transition-all shadow-lg shadow-primary/20"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Nouvel article
+          </button>
+        </div>
       </div>
 
       {/* ===== Onglets de statut ===== */}
@@ -322,6 +335,7 @@ export default function BlogAdminClient({
                 <th className="py-4 px-6">Article</th>
                 <th className="py-4 px-6">Tags</th>
                 <th className="py-4 px-6">Statut</th>
+                <th className="py-4 px-6">Vues</th>
                 <th className="py-4 px-6">Publié le</th>
                 <th className="py-4 px-6 text-right">Actions</th>
               </tr>
@@ -329,7 +343,7 @@ export default function BlogAdminClient({
             <tbody className="divide-y divide-slate-800/60 text-sm">
               {filteredPosts.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-slate-500">
+                  <td colSpan={6} className="py-12 text-center text-slate-500">
                     Aucun article trouvé dans cette vue.
                   </td>
                 </tr>
@@ -386,6 +400,9 @@ export default function BlogAdminClient({
                           <span className={`h-1.5 w-1.5 rounded-full ${badge.dot}`} />
                           {badge.label}
                         </span>
+                      </td>
+                      <td className="py-4 px-6 text-xs text-slate-300 whitespace-nowrap">
+                        👁 {post.view_count}
                       </td>
                       <td className="py-4 px-6 text-xs text-slate-300 whitespace-nowrap">
                         {formatDate(post.status === 'published' ? post.published_at : post.updated_at)}
@@ -445,8 +462,8 @@ export default function BlogAdminClient({
 
       {/* ===== Modal d'édition / création ===== */}
       {(editingPost || isCreating) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="w-full max-w-3xl rounded-3xl border border-slate-800 bg-slate-900 p-6 lg:p-8 shadow-2xl space-y-6 my-8">
+        <div className="fixed inset-0 z-50 flex justify-center bg-slate-950/80 backdrop-blur-sm overflow-y-auto">
+          <div className="w-full max-w-3xl rounded-3xl border border-slate-800 bg-slate-900 p-6 lg:p-8 shadow-2xl space-y-6 my-8 mx-4">
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">
               <div>
                 <h3 className="text-xl font-bold text-white font-[var(--font-display)]">

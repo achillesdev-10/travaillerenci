@@ -25,12 +25,14 @@ export interface BlogPost {
   status: BlogPostStatus;
   /** Date de publication (ISO 8601) — affichée une fois le statut "published". */
   published_at: string | null;
+  /** Nombre de vues (incrémenté à chaque visite de la page article). */
+  view_count: number;
   created_at: string;
   updated_at: string;
 }
 
-/** DTO d'insertion — id, created_at, updated_at générés par la BDD. */
-export type BlogPostInsert = Omit<BlogPost, 'id' | 'created_at' | 'updated_at'>;
+/** DTO d'insertion — id, created_at, updated_at, view_count générés par la BDD. */
+export type BlogPostInsert = Omit<BlogPost, 'id' | 'created_at' | 'updated_at' | 'view_count'>;
 
 export interface BlogPostFilters {
   status?: BlogPostStatus | BlogPostStatus[];
