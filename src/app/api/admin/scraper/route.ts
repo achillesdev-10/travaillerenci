@@ -28,6 +28,20 @@ export async function POST(request: NextRequest) {
 
     revalidatePath("/cz7tk");
 
+    // Notification admin si échec (fire-and-forget)
+    if (scraperHealth.status === "error") {
+      try {
+        const { AdminNotificationService } = await import('@/services/adminNotificationService');
+        await AdminNotificationService.create(
+          'scraper_error',
+          `Le scraper a échoué : ${scraperHealth.message || 'Erreur inconnue'}`,
+          '/cz7tk/scraper',
+        );
+      } catch {
+        // Silently ignore
+      }
+    }
+
     return NextResponse.json({
       scraperHealth,
       message: scraperHealth.message ?? "Le scraper a bien été déclenché.",

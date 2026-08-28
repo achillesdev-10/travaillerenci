@@ -117,5 +117,17 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Notification admin (fire-and-forget)
+  try {
+    const { AdminNotificationService } = await import('@/services/adminNotificationService');
+    await AdminNotificationService.create(
+      'new_report',
+      `Nouveau signalement : ${itemType} signalé pour "${reason}"`,
+      '/cz7tk/reports',
+    );
+  } catch {
+    // Silently ignore — notification is non-critical
+  }
+
   return NextResponse.json({ ok: true, id: created.id }, { status: 201 });
 }

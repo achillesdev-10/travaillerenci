@@ -75,6 +75,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Notification admin (fire-and-forget)
+    try {
+      const { AdminNotificationService } = await import('@/services/adminNotificationService');
+      await AdminNotificationService.create(
+        'new_recruiter_pending',
+        `Nouvelle offre recruteur en attente : "${title}" — ${company}`,
+        '/cz7tk/jobs',
+      );
+    } catch {
+      // Silently ignore — notification is non-critical
+    }
+
     return NextResponse.json({
       ok: true,
       message: 'Votre offre a été soumise avec succès ! Elle sera publiée après validation par notre équipe.',
