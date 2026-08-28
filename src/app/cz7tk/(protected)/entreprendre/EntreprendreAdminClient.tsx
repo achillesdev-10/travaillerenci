@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useTransition } from 'react';
+import { useMemo, useState, useRef, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import type {
   EntreprendreArticle,
@@ -111,6 +111,8 @@ export default function EntreprendreAdminClient({
   const [modalNotice, setModalNotice] = useState<string | null>(null);
   const [previewMode, setPreviewMode] = useState(false);
   const [form, setForm] = useState<EditForm>(EMPTY_FORM);
+  const [imageUploading, setImageUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function readError(res: Response): Promise<string> {
     try {
@@ -205,6 +207,27 @@ export default function EntreprendreAdminClient({
       startTransition(() => { router.refresh(); });
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : 'Erreur inconnue');
+    }
+  }
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/admin/entreprendre/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (res.status === 401) { redirectToLogin(); return; }
+      if (!res.ok) throw new Error(data.error || 'Erreur upload');
+      const md = `![${file.name.replace(/\.[^.]+$/, '')}](${data.url})`;
+      setForm((f) => ({ ...f, content: f.content ? f.content + '\n\n' + md : md }));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Erreur lors de l\'upload de l\'image');
+    } finally {
+      setImageUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   }
 
@@ -513,8 +536,16 @@ export default function EntreprendreAdminClient({
                       className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-colors ${!previewMode ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'}`}>Écrire</button>
                     <button type="button" onClick={() => setPreviewMode(true)}
                       className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-colors ${previewMode ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'}`}>Aperçu</button>
+                    <div className="w-px h-5 bg-slate-700 mx-0.5" />
+                    <label className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-colors cursor-pointer ${imageUploading ? 'text-amber-400 animate-pulse' : 'text-slate-400 hover:text-white'}`}>
+                      🖼 Image
+                      <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" disabled={imageUploading} onChange={handleImageUpload} />
+                    </label>
                   </div>
                 </div>
+                <p className="text-[10px] text-slate-500 -mt-1">
+                  💡 Insérez des images via le bouton « 🖼 Image » ou coller directement une URL Markdown : <code className="text-slate-400">![Légende](https://url)</code>
+                </p>
                 {modalNotice && <p className="text-[11px] text-amber-300/90 bg-amber-500/10 border border-amber-500/20 rounded-xl px-3 py-2">{modalNotice}</p>}
                 {previewMode ? (
                   <div className="rounded-2xl border border-slate-800 bg-slate-950 p-5 min-h-[240px] text-slate-300 text-sm">
