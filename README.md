@@ -296,7 +296,8 @@ Référence complète : voir `.env.example`.
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | si Supabase | Clé publique Supabase (côté client) |
 | `SUPABASE_SERVICE_ROLE_KEY` | si Supabase | Clé admin (côté serveur uniquement) |
 | `GEMINI_API_KEY` | 🟡 | Réécriture & classification IA des contenus scrapés (Google AI Studio). Sans elle, le scraper reste fonctionnel (heuristiques) |
-| `GROQ_API_KEY` | 🟡 | Repli IA (Groq) si Gemini échoue — circuit breaker sur quota 429 |
+| `GROQ_API_KEY` | 🟡 | Repli IA 2e palier (Groq) si Gemini échoue — circuit breaker sur quota 429 |
+| `CEREBRAS_API_KEY` | 🟡 | Repli IA 3e palier (Cerebras, llama3.1-8b) — https://cloud.cerebras.ai |
 | `GEMINI_MODEL` | 🟡 | Modèle Gemini principal (défaut : `gemini-flash-latest`) |
 | `GEMINI_MODEL_FALLBACKS` | 🟡 | Modèles de repli Gemini, séparés par virgules (défaut : `gemini-3-flash-preview`) |
 | `SCRAPER_MAX_DURATION_SECONDS` | 🟡 | Timeout global du run scraper en secondes (défaut : 900 = 15 min). Arrêt propre + sauvegarde |
@@ -326,7 +327,7 @@ Référence complète : voir `.env.example`.
 
 ### Pipeline du scraper (offres, stages, bourses, concours)
 - Le scraper `scraper/scraper.py` collecte **des données réelles** depuis des sources ivoiriennes vérifiées : `educarriere.ci` (emplois & stages), `emploici.net` (emplois & stages) et `boursedetude.org` (bourses d'études).
-- Chaque contenu est nettoyé, **classifié et réécrit en Markdown par Gemini** (`GEMINI_API_KEY`), puis inséré en statut `pending` dans la table `job_offers` (colonne `category` : `job` / `internship` / `scholarship` / `exam`).
+- Chaque contenu est nettoyé, **classifié et réécrit en Markdown** via une chaîne de repli IA : **Gemini** (`GEMINI_API_KEY`) → **Groq** (`GROQ_API_KEY`) → **Cerebras** (`CEREBRAS_API_KEY`) → heuristiques locales. Un circuit breaker coupe immédiatement un provider dont le quota 429 est épuisé. Inséré en statut `pending` dans la table `job_offers` (colonne `category` : `job` / `internship` / `scholarship` / `exam`).
 - **Aucune donnée de démonstration** : `--purge-demo` supprime les anciennes offres « démo ».
 - L'admin modère dans `/admin/jobs` (éditer, valider → publier, rejeter, supprimer) ; les contenus publiés alimentent `/jobs`, `/bourses` et `/concours`.
 - **Automatisation** : le workflow GitHub `scraper.yml` tourne **2× par jour** (06:00 & 18:00 UTC) et est déclenchable à la main ; le dashboard admin (`/admin/scraper`) peut aussi lancer une extraction.
