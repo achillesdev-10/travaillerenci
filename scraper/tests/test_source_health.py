@@ -27,7 +27,7 @@ PROJECT_ROOT = HERE.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from scraper.source_health import SourceHealthTracker  # noqa: E402
+from scraper.source_health import SourceHealthTracker, HISTORY_WINDOW  # noqa: E402
 
 
 def test_average_collected_empty():
@@ -153,7 +153,7 @@ def test_history_window_limit():
     tracker = SourceHealthTracker()
     for i in range(15):
         tracker.record_run("test_source", collected=i, errors=0)
-    assert len(tracker._history["test_source"]) <= 7  # HISTORY_WINDOW
+    assert len(tracker._history["test_source"]) <= HISTORY_WINDOW
 
 
 def test_stats_summary():
