@@ -3,17 +3,19 @@
 """
 ===============================================================================
   TravaillerEnCi — scraper/tests/test_ai_fallback.py
-  Tests du fallback IA Gemini → Groq → heuristiques locales
+  Tests du fallback IA Gemini → Groq → Cerebras → heuristiques locales
 
   Scénarios couverts :
-    • Gemini fonctionne → provider=gemini, Groq JAMAIS appelé ;
+    • Gemini fonctionne → provider=gemini, Groq/Cerebras JAMAIS appelés ;
     • Gemini échoue (exception, réponse vide, JSON invalide) → Groq prend le
       relais (provider=groq) ;
     • résultat IA inexploitable (titre vide, titre = nom de fichier, description
       trop courte) → validation → Groq ;
-    • les deux fournisseurs échouent → repli heuristique propre, jamais de
+    • Gemini + Groq échouent → Cerebras prend le relais (provider=cerebras) ;
+    • les trois fournisseurs échouent → repli heuristique propre, jamais de
       fiche mal structurée, jamais d'exception ;
-    • rejet explicite IA (is_concours=false) conservé sans basculer sur Groq ;
+    • Cerebras désactivé (clé absente) → ignoré sans crash ;
+    • rejet explicite IA (is_concours=false) conservé sans basculer ;
     • clean_exam_title normalise les titres bruts / noms de fichiers.
 
   Usage : python -m pytest scraper/tests -q   (ou exécution directe)
@@ -86,6 +88,23 @@ class FakeGroq:
         return self._result
 
 
+class FakeCerebras:
+    """Remplace CerebrasClient : même pattern que FakeGroq."""
+
+    def __init__(self, result):
+        self._result = result
+        self.enabled = True
+        self.calls = 0
+
+    def complete(self, system_prompt: str, user_prompt: str) -> str:
+        self.calls += 1
+        if isinstance(self._result, Exception):
+            raise self._result
+        if self._result is None:
+            raise AssertionError("Cerebras ne devait PAS être appelé (Gemini/Groq ont suffi)")
+        return self._result
+
+
 def make_content_item(title: str = "Comptable senior") -> ContentItem:
     return ContentItem(
         title=title,
@@ -114,8 +133,8 @@ def make_exam_item(title: str = "Concours ENA 2026") -> ExamItem:
     )
 
 
-def make_enricher(klass, groq_result, gemini_result=None):
-    """Enricheur avec Gemini stubé + Groq factice."""
+def make_enricher(klass, groq_result, gemini_result=None, cerebras_result=None):
+    """Enricheur avec Gemini stubé + Groq/Cerebras factices."""
     enricher = klass(api_key="test-gemini-key")
     if gemini_result is not None:
         def _call(prompt, **_kw):
@@ -124,6 +143,7 @@ def make_enricher(klass, groq_result, gemini_result=None):
             return gemini_result
         enricher.call_gemini = _call  # type: ignore[method-assign]
     enricher.groq = FakeGroq(groq_result)  # type: ignore[assignment]
+    enricher.cerebras = FakeCerebras(cerebras_result)  # type: ignore[assignment]
     return enricher
 
 
@@ -270,6 +290,101 @@ def test_exam_both_fail_heuristic_cleans_title():
     enricher.enrich(item)
     assert item.title == "Communiqué concours 2026"
     assert item.confidence in ("low", "medium", "high")
+
+
+# ---------------------------------------------------------------------------
+# Cerebras fallback (3e palier)
+# ---------------------------------------------------------------------------
+
+def test_cerebras_fallback_when_gemini_and_groq_fail():
+    """Gemini + Groq échouent → Cerebras prend le relais (provider=cerebras)."""
+    item = make_content_item()
+    enricher = make_enricher(
+        GeminiEnricher,
+        groq_result=RuntimeError("Groq injoignable"),
+        gemini_result=RuntimeError("Gemini quota dépassé (429)"),
+        cerebras_result=VALID_JSON,
+    )
+    enricher.enrich(item)
+    assert item.title == "Comptable senior"
+    assert item.category == "job"
+    assert enricher.cerebras.calls == 1, "Cerebras doit prendre le relais après échec Gemini + Groq"
+    assert enricher.groq.calls == 1
+
+
+def test_cerebras_not_called_when_gemini_ok():
+    """Gemini fonctionne → Groq ni Cerebras ne doivent être appelés."""
+    item = make_content_item()
+    enricher = make_enricher(
+        GeminiEnricher,
+        groq_result=None,
+        gemini_result=VALID_JSON,
+        cerebras_result=None,
+    )
+    enricher.enrich(item)
+    assert item.category == "job"
+    assert enricher.groq.calls == 0
+    assert enricher.cerebras.calls == 0
+
+
+def test_cerebras_not_called_when_groq_ok():
+    """Gemini échoue, Groq suffit → Cerebras ne doit PAS être appelé."""
+    item = make_content_item()
+    enricher = make_enricher(
+        GeminiEnricher,
+        groq_result=VALID_JSON,
+        gemini_result=RuntimeError("Gemini injoignable"),
+        cerebras_result=None,
+    )
+    enricher.enrich(item)
+    assert item.title == "Comptable senior"
+    assert enricher.groq.calls == 1
+    assert enricher.cerebras.calls == 0, "Cerebras ne doit pas être appelé si Groq a réussi"
+
+
+def test_all_three_fail_heuristic_fallback():
+    """Gemini + Groq + Cerebras échouent → repli heuristique, jamais d'exception."""
+    item = make_content_item()
+    enricher = make_enricher(
+        GeminiEnricher,
+        groq_result=RuntimeError("Groq injoignable"),
+        gemini_result=RuntimeError("Gemini quota dépassé (429)"),
+        cerebras_result=RuntimeError("Cerebras injoignable"),
+    )
+    enricher.enrich(item)  # ne doit JAMAIS lever
+    assert item.category in CONTENT_CATEGORIES
+    assert item.title == "Comptable senior"
+
+
+def test_cerebras_exam_fallback():
+    """Concours : Gemini + Groq échouent → Cerebras pour les examens."""
+    item = make_exam_item()
+    enricher = make_enricher(
+        ExamGeminiEnricher,
+        groq_result=RuntimeError("Groq injoignable"),
+        gemini_result=RuntimeError("Gemini injoignable"),
+        cerebras_result=VALID_EXAM_JSON,
+    )
+    enricher.enrich(item)
+    assert item.title == "Concours direct ENA cycle moyen"
+    assert item.exam_type == "concours_direct"
+    assert enricher.cerebras.calls == 1
+
+
+def test_cerebras_disabled_gracefully():
+    """CEREBRAS_API_KEY absente → Cerebras ignoré, pas de crash."""
+    item = make_content_item()
+    enricher = make_enricher(
+        GeminiEnricher,
+        groq_result=RuntimeError("Groq injoignable"),
+        gemini_result=RuntimeError("Gemini injoignable"),
+        cerebras_result=RuntimeError("CEREBRAS_API_KEY absente"),
+    )
+    # Forcer cerebras.enabled = False pour simuler la clé absente
+    enricher.cerebras.enabled = False  # type: ignore[attr-defined]
+    enricher.enrich(item)  # ne doit JAMAIS lever
+    assert item.category in CONTENT_CATEGORIES
+    assert enricher.cerebras.calls == 0, "Cerebras ne doit pas être appelé si désactivé"
 
 
 if __name__ == "__main__":
