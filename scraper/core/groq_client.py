@@ -47,6 +47,10 @@ class GroqClient:
         self.model = model or os.getenv("GROQ_MODEL", DEFAULT_GROQ_MODEL)
         self.enabled = bool(self.api_key)
         self.session = httpx.Client(timeout=60, follow_redirects=True)
+        # Circuit breaker : callback optionnel appelé quand un429 quota
+        # est détecté. Le parent (_GeminiClient) utilise ce callback
+        # pour marquer Groq indisponible pour le reste du run.
+        self._on_quota_429: Optional[object] = None  # callable(provider_name: str) | None
 
     def close(self) -> None:
         try:
@@ -89,6 +93,7 @@ class GroqClient:
 
         max_attempts = 4
         last_exc: Optional[Exception] = None
+        saw_quota = False
         for attempt in range(max_attempts):
             try:
                 resp = self.session.post(GROQ_URL, headers=headers, json=payload)
@@ -96,13 +101,17 @@ class GroqClient:
                     # Payload trop lourd → pas de sens de retry
                     raise RuntimeError("Groq : payload trop volumineux (413)")
                 if resp.status_code == 429:
-                    wait = min(5 * (2 ** attempt), 60)
-                    logger.warning(
-                        f"⚠️ Groq 429 (tentative {attempt + 1}/{max_attempts}) — "
-                        f"attente {wait}s avant nouvelle tentative."
-                    )
-                    time.sleep(wait)
-                    continue
+                    saw_quota = True
+                    # Circuit breaker : un quota épuisé ne se régénère pas
+                    # en quelques secondes — signaler immédiatement au parent
+                    # pour marquer Groq indisponible.
+                    if self._on_quota_429 is not None:
+                        try:
+                            self._on_quota_429("groq")  # type: ignore[misc]
+                        except Exception:
+                            pass
+                    # Retour immédiat : pas de backoff sur un quota épuisé
+                    raise RuntimeError("Groq : quota 429 épuisé")
                 if resp.status_code >= 500:
                     wait = min(2 * (2 ** attempt), 16)
                     logger.warning(
@@ -123,7 +132,7 @@ class GroqClient:
                 return content
             except Exception as exc:  # noqa: BLE001
                 last_exc = exc
-                if isinstance(exc, RuntimeError) and "413" in str(exc):
+                if isinstance(exc, RuntimeError) and ("413" in str(exc) or "429" in str(exc)):
                     raise
                 time.sleep(1)
         raise RuntimeError(f"Groq injoignable : {last_exc}")

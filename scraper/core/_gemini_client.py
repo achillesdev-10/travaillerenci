@@ -75,6 +75,9 @@ class _GeminiClient:
       - les retries avec backoff sur 429/500/503
       - le fallback automatique Gemini → Groq
       - le parse JSON robuste (fences, extraction d'objet, etc.)
+      - un circuit breaker par provider (Gemini / Groq) : dès qu'une erreur
+        429 (quota épuisé) est détectée, le provider est marqué indisponible
+        pour le reste du run — plus aucun appel réseau IA inutile.
 
     Les sous-classes (GeminiEnricher, ExamGeminiEnricher) n'ont qu'à
     implémenter : `_build_prompt`, `_validate_ai_result`, `_apply_ai`,
@@ -98,10 +101,17 @@ class _GeminiClient:
 
         # Fallback Gemini → Groq (GROQ_API_KEY)
         self.groq = GroqClient()
+        self.groq._on_quota_429 = self._on_provider_quota_exhausted  # type: ignore[attr-defined]
         self.session = httpx.Client(timeout=60, follow_redirects=True)
         # Cooldown après un429 : timestamp du dernier rate-limit reçu.
         # Permet d'ajouter un délai entre deux requêtes même en dehors des retries.
         self._last_rate_limit: float = 0.0
+
+        # Circuit breaker : état par provider (durée du run uniquement).
+        # Dès qu'un provider renvoie 429 (quota épuisé), il est marqué
+        # indisponible — les appels suivants basculent directement sur
+        # le repli heuristique sans aucun appel réseau IA inutile.
+        self._providers_unavailable: dict[str, float] = {}  # provider → timestamp
 
         if self.enabled or self.groq.enabled:
             providers = "Gemini + repli Groq" if (self.enabled and self.groq.enabled) else (
@@ -118,9 +128,34 @@ class _GeminiClient:
         except Exception:
             pass
 
+    # ── Circuit breaker ────────────────────────────────────────────────────
+
+    def _on_provider_quota_exhausted(self, provider: str) -> None:
+        """Callback appelé quand un provider signale un quota 429 épuisé.
+
+        Marque le provider indisponible pour le reste du run. Utilisé
+        par le callback GroqClient._on_quota_429 et par call_gemini.
+        """
+        if provider not in self._providers_unavailable:
+            self._providers_unavailable[provider] = time.time()
+            logger.warning(
+                f"🚫 Circuit breaker : provider '{provider}' marqué indisponible "
+                f"(quota 429 épuisé) — plus aucun appel réseau IA sur ce provider "
+                f"pour le reste du run."
+            )
+
+    def _is_provider_available(self, provider: str) -> bool:
+        """Vérifie si un provider n'a pas été marqué indisponible."""
+        return provider not in self._providers_unavailable
+
     # ── Appel Gemini avec chaîne de repli ─────────────────────────────────
 
     def call_gemini(self, prompt: str, *, system_prompt: str = "") -> str:
+        # Circuit breaker : si Gemini a déjà été marqué indisponible
+        # (quota 429 épuisé sur un appel précédent), ne pas réessayer.
+        if not self._is_provider_available("gemini"):
+            raise GeminiQuotaExhausted(self.model)
+
         """Envoie un prompt à Gemini avec repli automatique inter-modèles.
 
         Si le modèle principal est saturé (429), essaie les modèles de repli
@@ -177,6 +212,11 @@ class _GeminiClient:
             except Exception as exc:
                 last_exc = exc
                 break
+
+        # Tous les modèles ont échoué — si c'est un quota 429,
+        # marquer Gemini indisponible pour le reste du run.
+        if isinstance(last_exc, GeminiQuotaExhausted):
+            self._on_provider_quota_exhausted("gemini")
         raise RuntimeError(f"Gemini injoignable : {last_exc}")
 
     def _post_gemini(self, url: str, headers: dict, payload: dict) -> str:
@@ -270,21 +310,30 @@ class _GeminiClient:
         last_exc: Optional[Exception] = None
 
         # 1) Gemini
-        if self.enabled:
+        if self.enabled and self._is_provider_available("gemini"):
             try:
                 return self.call_gemini(prompt, system_prompt=system_prompt)
             except Exception as exc:
                 last_exc = exc
+                # Si le msg contient "429" ou "quota", marquer indisponible
+                if "429" in str(exc) or "quota" in str(exc).lower():
+                    self._on_provider_quota_exhausted("gemini")
                 logger.warning(f"⚠️ Échec Gemini : {exc} — tentative Groq…")
+        elif self.enabled and not self._is_provider_available("gemini"):
+            logger.debug("⏭️ Gemini indisponible (circuit breaker) — tentative Groq…")
 
         # 2) Groq — léger délai avant d'appeler Groq pour laisser
         #    le quota Gemini se rétablir et ne pas cumuler les 429.
-        if self.groq.enabled:
+        if self.groq.enabled and self._is_provider_available("groq"):
             time.sleep(1)
             try:
                 return self.groq.complete(system_prompt or prompt, prompt)
             except Exception as exc:
                 last_exc = exc
+                if "429" in str(exc) or "quota" in str(exc).lower():
+                    self._on_provider_quota_exhausted("groq")
                 logger.warning(f"⚠️ Échec Groq : {exc}")
+        elif self.groq.enabled and not self._is_provider_available("groq"):
+            logger.debug("⏭️ Groq indisponible (circuit breaker)")
 
         raise RuntimeError(f"Aucun provider IA disponible : {last_exc}")

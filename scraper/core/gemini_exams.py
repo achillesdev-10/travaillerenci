@@ -176,8 +176,19 @@ class ExamGeminiEnricher(_GeminiClient):
         """
         prompt = self._build_prompt(item)
 
+        # --- Circuit breaker : si les deux providers sont indisponibles,
+        # basculer directement en heuristiques sans aucun appel réseau. ---
+        gemini_ok = self.enabled and self._is_provider_available("gemini")
+        groq_ok = self.groq.enabled and self._is_provider_available("groq")
+        if not gemini_ok and not groq_ok:
+            logger.warning(
+                f"⚠️ Circuit breaker actif — tous les providers indisponibles "
+                f"pour « {item.title[:50]} » — repli heuristique immédiat."
+            )
+            return self._apply_heuristics(item)
+
         # --- 1) Gemini (fournisseur principal) ---
-        if self.enabled:
+        if gemini_ok:
             try:
                 raw = self.call_gemini(prompt)
                 parsed = self.parse_json(raw)
@@ -198,7 +209,7 @@ class ExamGeminiEnricher(_GeminiClient):
                 )
 
         # --- 2) Groq (repli automatique) ---
-        if self.groq.enabled:
+        if groq_ok:
             try:
                 raw = self.groq.complete(SYSTEM_PROMPT, prompt)
                 parsed = self.parse_json(raw)
