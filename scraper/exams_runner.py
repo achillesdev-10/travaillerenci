@@ -43,6 +43,7 @@ from __future__ import annotations
 import argparse
 import io
 import json
+import os
 import sys
 import time
 from datetime import datetime, timezone
@@ -132,6 +133,12 @@ def report_sources() -> int:
     return 0
 
 
+# Timeout global du run (secondes). Lecture depuis SCRAPER_MAX_DURATION_SECONDS
+# (défaut 900s = 15 min). Au-delà, le traitement des éléments restants est
+# arrêté proprement et tout ce qui a déjà été traité est enregistré en base.
+_MAX_DURATION = int(os.getenv("SCRAPER_MAX_DURATION_SECONDS", "900"))
+
+
 def run(
     source_ids: List[str],
     max_per_source: int,
@@ -139,11 +146,13 @@ def run(
     use_ai: bool,
     similarity_threshold: float,
 ) -> int:
+    run_start = time.time()
     logger.info("=" * 60)
     logger.info("🚀 Pipeline Concours Administratifs (table exams)")
     logger.info(
         f"   Max par source : {max_per_source} | Dry-run : {dry_run} | IA : {use_ai} | "
-        f"Seuil anti-duplication : {similarity_threshold:.0%}"
+        f"Seuil anti-duplication : {similarity_threshold:.0%} | "
+        f"Timeout run : {_MAX_DURATION}s"
     )
     logger.info("=" * 60)
 
@@ -165,6 +174,7 @@ def run(
     # rejetées avant insertion — non comptées dans all_items.
     rejected_noise: List[str] = []
 
+    run_timed_out = False
     for cfg in enabled:
         source_id = cfg.get("id")
         base = str(cfg.get("base_url", ""))
@@ -180,6 +190,16 @@ def run(
             scraper = build_scraper(cfg, http_client)
             raw_items = scraper.scrape(max_offers=max_per_source)
             for item_idx, item in enumerate(raw_items):
+                # Timeout global : si le run dépasse la durée maximale,
+                # arrêter le traitement des éléments restants proprement.
+                elapsed = time.time() - run_start
+                if elapsed > _MAX_DURATION:
+                    run_timed_out = True
+                    logger.warning(
+                        f"⏰ Timeout run ({_MAX_DURATION}s dépassés) — "
+                        f"arrêt du traitement après {len(all_items)} éléments traités."
+                    )
+                    break
                 # Texte source BRUT conservé AVANT la réécriture — nécessaire
                 # au contrôle anti-duplication (comparaison source ↔ réécrit).
                 raw_text = item.description_md
@@ -218,11 +238,22 @@ def run(
                 all_items.append(item)
         except Exception as exc:
             logger.error(f"  ❌ Erreur source {source_id} : {exc}", exc_info=True)
+        if run_timed_out:
+            break
 
     http_client.close()
     enricher.close()
 
-    logger.info(f"\n📊 {len(all_items)} concours bruts valides prêts à l'enregistrement.")
+    elapsed_total = time.time() - run_start
+    logger.info(
+        f"\n📊 {len(all_items)} concours bruts valides prêts à l'enregistrement."
+        f" (durée : {elapsed_total:.0f}s)"
+    )
+    if run_timed_out:
+        logger.warning(
+            f"⏰ Timeout : traitement interrompu après {_MAX_DURATION}s — "
+            f"les {len(all_items)} éléments traités vont être enregistrés."
+        )
     if rejected_noise:
         logger.warning(f"🚫 {len(rejected_noise)} page(s) hors-sujet ignorée(s) — non enregistrées.")
     if to_rewrite:

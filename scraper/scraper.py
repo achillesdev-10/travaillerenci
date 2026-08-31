@@ -135,6 +135,12 @@ def _write_admin_health(
         logger.debug(f"Écriture admin-scraper-health.json impossible : {exc}")
 
 
+# Timeout global du run (secondes). Lecture depuis SCRAPER_MAX_DURATION_SECONDS
+# (défaut 900s = 15 min). Au-delà, le traitement des éléments restants est
+# arrêté proprement et tout ce qui a déjà été traité est enregistré en base.
+_MAX_DURATION = int(os.getenv("SCRAPER_MAX_DURATION_SECONDS", "900"))
+
+
 def run_scraping_pipeline(
     site_names: List[str],
     max_per_site: int,
@@ -142,6 +148,7 @@ def run_scraping_pipeline(
     demo_data: bool = False,
     use_ai: bool = True,
 ) -> int:
+    run_start = time.time()
     logger.info("=" * 60)
     logger.info("🚀 Démarrage du pipeline de scraping TravaillerEnCi")
     logger.info(f"   Sites cibles : {site_names}")
@@ -258,6 +265,17 @@ def run_scraping_pipeline(
             except Exception as exc:
                 logger.warning(f"  ⚠ Échec batch, repli individuel : {exc}")
                 for idx, item in enumerate(items_to_enrich):
+                    # Timeout global : arrêter l'enrichissement si le run
+                    # dépasse la durée maximale.
+                    elapsed = time.time() - run_start
+                    if elapsed > _MAX_DURATION:
+                        logger.warning(
+                            f"⏰ Timeout run ({_MAX_DURATION}s dépassés) — "
+                            f"arrêt enrichissement IA après {idx}/{len(items_to_enrich)} éléments."
+                        )
+                        # Les éléments restants seront traités en heuristique
+                        # dans la boucle ci-dessous.
+                        break
                     # Délai inter-requête pour éviter les 429 cascadants
                     if idx > 0:
                         time.sleep(1.5)
