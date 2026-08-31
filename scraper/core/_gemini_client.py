@@ -223,31 +223,50 @@ class _GeminiClient:
         """POST vers un modèle, avec retries sur 429/500/503 (quota/minute).
 
         Stratégie de backoff :
-          • 429 (rate-limit) : backoff exponentiel 5→10→20→40s (4 tentatives)
-          • 503 (service indisponible) : 2s fixes (problème transitoire)
-          • 500 (erreur serveur) : 3s fixes
-        Si toutes les tentatives échouent sur 429, lève GeminiQuotaExhausted
+          • 429 (quota épuisé / rate-limit) : 1 seule tentative de retry
+            avec délai court (3s) — un quota épuisé ne se régénère pas
+            en quelques secondes, donc les retries multiples sont inutiles.
+            Le circuit breaker marque ensuite le provider indisponible.
+          • 503 (service indisponible temporaire) : backoff exponentiel
+            2→4→8→16s (jusqu'à 4 tentatives) — retenter a du sens ici.
+          • 500 (erreur serveur) : 3s fixes (jusqu'à 4 tentatives)
+
+        Retourne None si toutes les tentatives sur 429 échouent
         (le modèle appelant passera au modèle de repli).
         """
         last_exc: Optional[Exception] = None
         saw_quota = False
-        max_attempts = 4
-        for attempt in range(max_attempts):
+        for attempt in range(4):
             try:
                 resp = self.session.post(url, headers=headers, json=payload)
-                if resp.status_code in (429, 500, 503):
-                    saw_quota = saw_quota or resp.status_code == 429
-                    if resp.status_code == 429:
-                        # Backoff exponentiel : 5, 10, 20, 40 secondes
-                        wait = min(5 * (2 ** attempt), 60)
-                        self._last_rate_limit = time.time() + wait
-                    elif resp.status_code == 503:
-                        wait = 2
-                    else:
+                if resp.status_code == 429:
+                    saw_quota = True
+                    # Un quota épuisé ne se régénère pas à court terme :
+                    # 1 seule tentative de retry avec délai court, pas de
+                    # backoff exponentiel qui gaspille du temps (5→40s).
+                    if attempt == 0:
                         wait = 3
+                        self._last_rate_limit = time.time() + wait
+                        logger.warning(
+                            f"⚠️ Gemini 429 (tentative 1/2) — attente {wait}s avant dernière tentative."
+                        )
+                        time.sleep(wait)
+                        continue
+                    # Deuxième tentative échouée → abandon immédiat
+                    logger.warning("⚠️ Gemini 429 persistant — quota épuisé, abandon.")
+                    return None  # type: ignore[return-value]
+                if resp.status_code == 503:
+                    # Indisponibilité temporaire : backoff exponentiel
+                    wait = min(2 * (2 ** attempt), 16)
                     logger.warning(
-                        f"⚠️ Gemini {resp.status_code} (tentative {attempt + 1}/{max_attempts}) — "
-                        f"attente {wait}s avant nouvelle tentative."
+                        f"⚠️ Gemini 503 (tentative {attempt + 1}/4) — attente {wait}s."
+                    )
+                    time.sleep(wait)
+                    continue
+                if resp.status_code == 500:
+                    wait = 3
+                    logger.warning(
+                        f"⚠️ Gemini 500 (tentative {attempt + 1}/4) — attente {wait}s."
                     )
                     time.sleep(wait)
                     continue
