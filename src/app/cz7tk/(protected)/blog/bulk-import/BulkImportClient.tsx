@@ -44,6 +44,37 @@ export default function BulkImportClient() {
   const [result, setResult] = useState<{ imported: number; errors?: Array<{ index: number; error: string }> } | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
 
+  const processItems = useCallback((items: Record<string, string>[]) => {
+    const parsed: ParsedArticle[] = items
+      .map((item) => {
+        const title = (item.title || '').trim();
+        const content = (item.content || '').trim();
+        if (!title || !content) return null;
+        return {
+          title,
+          slug: slugify(title),
+          category: (item.category || '').trim(),
+          excerpt: (item.excerpt || '').trim(),
+          content,
+          image_url: (item.image_url || '').trim(),
+          author: 'TravaillerenCi',
+          tags: (item.category || '').trim(),
+          status: 'draft' as const,
+          selected: true,
+        };
+      })
+      .filter(Boolean) as ParsedArticle[];
+
+    if (parsed.length === 0) {
+      setErrorMsg('Aucun article valide trouvé. Vérifiez que chaque ligne a un titre et un contenu.');
+      setStatus('error');
+      return;
+    }
+
+    setArticles(parsed);
+    setStatus('preview');
+  }, []);
+
   const handleFile = useCallback((file: File) => {
     setStatus('parsing');
     setErrorMsg('');
@@ -77,38 +108,7 @@ export default function BulkImportClient() {
         },
       });
     }
-  }, []);
-
-  function processItems(items: Record<string, string>[]) {
-    const parsed: ParsedArticle[] = items
-      .map((item) => {
-        const title = (item.title || '').trim();
-        const content = (item.content || '').trim();
-        if (!title || !content) return null;
-        return {
-          title,
-          slug: slugify(title),
-          category: (item.category || '').trim(),
-          excerpt: (item.excerpt || '').trim(),
-          content,
-          image_url: (item.image_url || '').trim(),
-          author: 'TravaillerenCi',
-          tags: (item.category || '').trim(),
-          status: 'draft' as const,
-          selected: true,
-        };
-      })
-      .filter(Boolean) as ParsedArticle[];
-
-    if (parsed.length === 0) {
-      setErrorMsg('Aucun article valide trouvé. Vérifiez que chaque ligne a un titre et un contenu.');
-      setStatus('error');
-      return;
-    }
-
-    setArticles(parsed);
-    setStatus('preview');
-  }
+  }, [processItems]);
 
   function toggleArticle(index: number) {
     setArticles((prev) =>
