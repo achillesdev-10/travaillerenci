@@ -296,6 +296,10 @@ Référence complète : voir `.env.example`.
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | si Supabase | Clé publique Supabase (côté client) |
 | `SUPABASE_SERVICE_ROLE_KEY` | si Supabase | Clé admin (côté serveur uniquement) |
 | `GEMINI_API_KEY` | 🟡 | Réécriture & classification IA des contenus scrapés (Google AI Studio). Sans elle, le scraper reste fonctionnel (heuristiques) |
+| `GROQ_API_KEY` | 🟡 | Repli IA (Groq) si Gemini échoue — circuit breaker sur quota 429 |
+| `GEMINI_MODEL` | 🟡 | Modèle Gemini principal (défaut : `gemini-flash-latest`) |
+| `GEMINI_MODEL_FALLBACKS` | 🟡 | Modèles de repli Gemini, séparés par virgules (défaut : `gemini-3-flash-preview`) |
+| `SCRAPER_MAX_DURATION_SECONDS` | 🟡 | Timeout global du run scraper en secondes (défaut : 900 = 15 min). Arrêt propre + sauvegarde |
 | `JWT_SECRET` | si auth locale | Sel JWT (générez via `openssl rand -hex 32`) |
 | `GOOGLE_CLIENT_ID` | si OAuth Google | OAuth Client ID (Google Cloud Console) |
 | `GOOGLE_CLIENT_SECRET` | si OAuth Google | OAuth Client Secret (application Web) |

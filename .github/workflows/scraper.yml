@@ -16,6 +16,10 @@ jobs:
   scrape-content:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    # Timeout de sécurité : avec le circuit breaker sur quota IA, un run
+    # complet ne devrait jamais dépasser ~15 min. 30 min = filet de sécurité
+    # pour éviter qu'un run bloqué tourne inutilement longtemps.
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
@@ -60,6 +64,9 @@ jobs:
           # avant les heuristiques locales. Optionnel mais fortement recommandé.
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           SCRAPER_SITES: ${{ vars.SCRAPER_SITES }}
+          # Timeout de sécurité au niveau du run Python (secondes).
+          # Circuit breaker + timeout ensemble garantissent un arrêt propre.
+          SCRAPER_MAX_DURATION_SECONDS: 900
         run: |
           set -euo pipefail
           # SCRAPER_SITES (variable de repo) est optionnelle : défaut = educarriere,emploici,boursedetude
@@ -75,6 +82,8 @@ jobs:
           # locales en dernier recours.
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           EXAM_SOURCES: ${{ vars.EXAM_SOURCES }}
+          # Timeout de sécurité au niveau du run Python (secondes).
+          SCRAPER_MAX_DURATION_SECONDS: 900
         run: |
           set -euo pipefail
           # EXAM_SOURCES (variable de repo) optionnelle : filtre les sources
