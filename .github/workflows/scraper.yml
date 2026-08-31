@@ -63,6 +63,9 @@ jobs:
           # timeout, JSON invalide, réponse inexploitable), Groq prend le relais
           # avant les heuristiques locales. Optionnel mais fortement recommandé.
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          # Repli IA 3e palier (https://cloud.cerebras.ai) : dernier palier IA
+          # avant le repli heuristique — circuit breaker sur quota 429.
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
           SCRAPER_SITES: ${{ vars.SCRAPER_SITES }}
           # Timeout de sécurité au niveau du run Python (secondes).
           # Circuit breaker + timeout ensemble garantissent un arrêt propre.
@@ -81,6 +84,8 @@ jobs:
           # scraper de contenus — Gemini d'abord, Groq si échec, heuristiques
           # locales en dernier recours.
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          # Repli IA 3e palier (https://cloud.cerebras.ai)
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
           EXAM_SOURCES: ${{ vars.EXAM_SOURCES }}
           # Timeout de sécurité au niveau du run Python (secondes).
           SCRAPER_MAX_DURATION_SECONDS: 900
