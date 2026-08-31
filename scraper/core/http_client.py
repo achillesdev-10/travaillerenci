@@ -25,9 +25,11 @@ class HttpClient:
         self.timeout = timeout
         self.proxy_manager = ProxyManager()
 
-        # Cache HTTP conditionnel : stocke ETag/Last-Modified par URL
-        # pour éviter de retélécharger des pages inchangées.
-        self._etag_cache: dict[str, dict] = {}  # url → {etag, last_modified}
+        # Cache HTTP conditionnel : stocke ETag/Last-Modified + CORPS DE LA
+        # RÉPONSE par URL. Quand un serveur renvoie 304 Not Modified, la
+        # réponse HTTP n'a PAS de body : on réinjecte donc le texte/HTML
+        # précédemment stocké pour éviter de rendre une page vide.
+        self._etag_cache: dict[str, dict] = {}  # url → {etag, last_modified, body, content_type}
 
         # Vérification TLS : désactivable via l'environnement (certains sites
         # ouest-africains exposent des chaînes de certificats incomplètes).
@@ -67,22 +69,39 @@ class HttpClient:
 
         resp = self.client.get(url, headers=headers)
 
-        # 304 Not Modified : la page n'a pas changé, on retourne une réponse
-        # vide avec le statut 304 pour que l'appelant sache qu'il peut
-        # réutiliser le contenu en cache.
+        # 304 Not Modified : la page n'a pas changé mais la réponse n'a PAS
+        # de body. On construit une réponse « virtuelle » avec le body
+        # précédemment mis en cache (si disponible) pour que l'appelant
+        # reçoive un contenu exploitable au lieu d'un texte vide.
         if resp.status_code == 304:
             logger.debug(f"  ↩️ 304 Not Modified : {url}")
-            resp.raise_for_status()
+            if cached and "body" in cached:
+                # Retourne une nouvelle réponse « 200 OK » forgée à partir
+                # du body en cache. Les headers de cache originaux sont
+                # conservés pour que la détection de blocage fonctionne.
+                resp = httpx.Response(
+                    status_code=200,
+                    headers=dict(resp.headers),
+                    content=cached["body"],
+                    request=resp.request,
+                )
             return resp
 
-        # Mise à jour du cache ETag/Last-Modified
+        # Mise à jour du cache ETag/Last-Modified + BODY
         etag = resp.headers.get("etag")
         last_modified = resp.headers.get("last-modified")
-        if etag or last_modified:
-            self._etag_cache[url] = {
+        if etag or last_modified or cached:
+            entry = dict(cached or {})
+            entry.update({
                 "etag": etag,
                 "last_modified": last_modified,
-            }
+            })
+            try:
+                entry["body"] = resp.content
+                entry["content_type"] = resp.headers.get("content-type", "")
+            except Exception:
+                pass
+            self._etag_cache[url] = entry
 
         # Blocage RÉEL : status 403/429 OU page « challenge » Cloudflare
         # (« Just a moment… »). La simple présence du mot « cloudflare » dans
@@ -98,4 +117,7 @@ class HttpClient:
         return resp
 
     def close(self):
-        self.client.close()
+        try:
+            self.client.close()
+        except Exception:
+            pass

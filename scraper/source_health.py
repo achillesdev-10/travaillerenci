@@ -114,7 +114,10 @@ class SourceHealthTracker:
     ) -> SourceHealthRecord:
         """Enregistre les résultats d'un run pour une source."""
         # Vérification du seuil minimal
-        avg = self._average_collected(source)
+        # ⚠ On utilise exclude_last=False car le run courant n'a PAS encore été
+        # ajouté à self._history à ce stade : runs[-1] est une donnée
+        # historique valide, pas le run en cours.
+        avg = self._average_collected(source, exclude_last=False)
         threshold_ok = True
         if avg is not None and avg > 0:
             threshold_ok = collected >= avg * self.threshold
@@ -140,12 +143,22 @@ class SourceHealthTracker:
 
         return record
 
-    def _average_collected(self, source: str) -> Optional[float]:
-        """Moyenne du nombre d'offres collectées sur les runs historiques."""
+    def _average_collected(self, source: str, *, exclude_last: bool = True) -> Optional[float]:
+        """Moyenne du nombre d'offres collectées sur les runs historiques.
+
+        Paramètres :
+          exclude_last : True quand le dernier run de l'historique EST le run
+                         courant (appel POST-enregistrement, ex. get_stats_summary,
+                         tests unitaires). False quand on est DANS record_run()
+                         et que le run courant n'a PAS encore été ajouté :
+                         dans ce cas, runs[-1] est toujours une donnée historique
+                         valide et ne doit PAS être exclue.
+        """
         runs = self._history.get(source, [])
-        if len(runs) < 2:
+        values_src = runs[:-1] if exclude_last else runs
+        if len(values_src) < 1:
             return None
-        values = [r.get("collected", 0) for r in runs[:-1]]  # exclut le run en cours
+        values = [r.get("collected", 0) for r in values_src]
         if not values:
             return None
         return sum(values) / len(values)

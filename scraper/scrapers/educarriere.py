@@ -60,26 +60,60 @@ class EducarriereScraper(BaseScraper):
                 if soup is None:
                     continue
 
+                # --- JSON-LD schema.org/JobPosting (fallback le plus structuré) ---
+                ld = self.extract_jsonld(soup, type_contains="JobPosting")
+                ld_title = ""
+                ld_desc = ""
+                ld_company = ""
+                ld_location = ""
+                ld_salary = ""
+                if isinstance(ld, dict):
+                    ld_title = str(ld.get("title") or "").strip()
+                    ld_desc_raw = ld.get("description") or ""
+                    ld_desc = clean_html_text(ld_desc_raw) if isinstance(ld_desc_raw, str) else ""
+                    hiring = ld.get("hiringOrganization")
+                    if isinstance(hiring, dict):
+                        ld_company = str(hiring.get("name") or "").strip()
+                    place = ld.get("jobLocation")
+                    if isinstance(place, dict):
+                        addr = place.get("address")
+                        if isinstance(addr, dict):
+                            parts = [str(addr.get(k) or "") for k in ("addressLocality", "addressRegion", "addressCountry")]
+                            ld_location = ", ".join(p for p in parts if p)
+                        else:
+                            ld_location = str(place.get("name") or "").strip()
+                    # Salaire structuré schema.org
+                    salary_base = ld.get("baseSalary")
+                    if isinstance(salary_base, dict):
+                        val = salary_base.get("value")
+                        cur = salary_base.get("currency") or ""
+                        if isinstance(val, dict):
+                            minv = val.get("minValue")
+                            maxv = val.get("maxValue")
+                            unit = val.get("unitText") or ""
+                            if minv and maxv:
+                                ld_salary = f"{minv} - {maxv} {cur} {unit}".strip()
+                            elif val.get("value"):
+                                ld_salary = f"{val.get('value')} {cur} {unit}".strip()
+
+                # --- Titre : H1 → og:title → JSON-LD → H2 fallback ---
                 h1 = soup.find("h1")
                 title = h1.get_text(" ", strip=True) if h1 else ""
                 if not title or len(title) < 5:
-                    # Fallback 1 : og:title
-                    og = soup.find("meta", property="og:title")
-                    title = og.get("content", "").strip() if og else ""
+                    title = self.extract_meta_tag(soup, property="og:title")
                 if not title or len(title) < 5:
-                    # Fallback 2 : premier h2 non-navigation
+                    title = ld_title
+                if not title or len(title) < 5:
                     for h2 in soup.find_all("h2"):
                         candidate = h2.get_text(" ", strip=True)
                         if len(candidate) > 8 and not re.match(r"^(autres|recherche|offres|postuler)", candidate, re.I):
                             title = candidate
                             break
-                if not title or len(title) < 5:
-                    og = soup.find("meta", property="og:title")
-                    title = og.get("content", "").strip() if og else ""
                 # Retire le suffixe « - Offres d'emploi - Educarriere.ci »
                 title = re.sub(r"\s*-\s*Offres d'emploi.*$", "", title).strip()
                 title = re.sub(r"\s+", " ", title)
 
+                # --- Conteneur description + meta description ---
                 container = (
                     soup.select_one(".job-description")
                     or soup.select_one("article")
@@ -95,18 +129,33 @@ class EducarriereScraper(BaseScraper):
                 )
                 raw = str(container) if container else ""
                 text = clean_html_text(container or soup)
+                if len(text) < 40 and len(ld_desc) >= 40:
+                    text = ld_desc
+                    raw = ld_desc
+                if not raw or len(text) < 40:
+                    # Dernier filet : meta description
+                    meta_desc = self.extract_meta_tag(soup, name="description")
+                    if len(meta_desc) >= 20:
+                        text = meta_desc
+                        raw = meta_desc
 
                 if not raw or len(text) < 40:
                     continue
 
                 emails = extract_emails(text)
+                salary = ld_salary or (self.extract_salary(text) or "")
+                if salary and salary.lower() not in text.lower():
+                    text = f"Salaire : {salary}\n\n{text}"
+
+                company = ld_company or self.guess_company(text, default=self.source_label)
+                location = ld_location or self.guess_location(text)
 
                 item = ContentItem(
                     title=title,
-                    company=self.guess_company(text, default=self.source_label),
-                    location=self.guess_location(text),
+                    company=company,
+                    location=location,
                     contract_type=self.guess_contract(text),
-                    description=self.clean_html(raw),
+                    description=self.clean_html(text),
                     deadline=self.extract_deadline(text),
                     application_url=link,
                     application_email=emails[0] if emails else None,

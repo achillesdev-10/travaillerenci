@@ -71,7 +71,7 @@ from scraper.core.base_scraper import BaseScraper
 from scraper.core.gemini import GeminiEnricher
 from scraper.core.content_hash import ContentHashCache
 from scraper.core.scheduler import JobScheduler
-from scraper.models.content_item import ContentItem
+from scraper.models.content_item import ContentItem, NEUTRAL_CONTRACT
 from scraper.database.repository import JobRepository
 from scraper.database.exam_repository import ExamRepository
 from scraper.source_health import SourceHealthTracker
@@ -274,6 +274,24 @@ def run_scraping_pipeline(
     for item in all_cleaned:
         hash_cache.store(item.source_url, item.title, item.description)
 
+    # Préservation des catégories « verrouillées » par la source (post-enrichissement).
+    # Certaines sources sont 100% dédiées à une catégorie : ex. BourseDetude.org publie
+    # UNIQUEMENT des bourses. Même si l'IA (Gemini/Groq) se trompe et renvoie
+    # category="job" (confusion avec recrutement d'université), on restaure la
+    # catégorie attendue pour éviter une bourse qui apparaîtrait dans les emplois.
+    _SCHOLARSHIP_SOURCES = {
+        "Bourse d'étude (boursedetude.org)",
+    }
+    for item in all_cleaned:
+        if item.source in _SCHOLARSHIP_SOURCES:
+            if item.category != "scholarship":
+                logger.debug(
+                    f"  🛡 Restauration catégorie scholarship sur « {item.title[:50]} » "
+                    f"(IA avait classifié en {item.category!r})"
+                )
+            item.category = "scholarship"
+            item.contract_type = NEUTRAL_CONTRACT
+
     # ==========================================================================
     # Phase 3 : Validation qualité + slug/SEO + assemblage final
     # ==========================================================================
@@ -312,9 +330,18 @@ def run_scraping_pipeline(
         per_category[item.category_sql()] = per_category.get(item.category_sql(), 0) + 1
         all_items.append(item)
 
-    http_client.close()
-    enricher.close()
-    hash_cache.save()
+    try:
+        http_client.close()
+    except Exception:
+        pass
+    try:
+        enricher.close()
+    except Exception:
+        pass
+    try:
+        hash_cache.save()
+    except Exception as exc:
+        logger.warning(f"Échec sauvegarde content-hashes.json : {exc}")
     if gemini_skipped > 0:
         logger.info(f"  ⏭ {gemini_skipped} appel(s) Gemini évité(s) grâce au cache de hash.")
 

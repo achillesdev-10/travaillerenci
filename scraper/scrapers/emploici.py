@@ -97,12 +97,54 @@ class EmploiciScraper(BaseScraper):
                     continue
 
                 text = clean_html_text(soup)
+
+                # JSON-LD schema.org (fallback structuré le plus fiable)
+                ld = self.extract_jsonld(soup, type_contains="JobPosting")
+                ld_title = ""
+                ld_desc = ""
+                ld_company = ""
+                ld_location = ""
+                ld_salary = ""
+                if isinstance(ld, dict):
+                    ld_title = str(ld.get("title") or "").strip()
+                    ld_desc_raw = ld.get("description") or ""
+                    ld_desc = clean_html_text(ld_desc_raw) if isinstance(ld_desc_raw, str) else ""
+                    hiring = ld.get("hiringOrganization")
+                    if isinstance(hiring, dict):
+                        ld_company = str(hiring.get("name") or "").strip()
+                    place = ld.get("jobLocation")
+                    if isinstance(place, dict):
+                        addr = place.get("address")
+                        if isinstance(addr, dict):
+                            parts = [str(addr.get(k) or "") for k in ("addressLocality", "addressRegion", "addressCountry")]
+                            ld_location = ", ".join(p for p in parts if p)
+                    salary_base = ld.get("baseSalary")
+                    if isinstance(salary_base, dict):
+                        val = salary_base.get("value")
+                        cur = salary_base.get("currency") or ""
+                        if isinstance(val, dict):
+                            minv = val.get("minValue")
+                            maxv = val.get("maxValue")
+                            unit = val.get("unitText") or ""
+                            if minv and maxv:
+                                ld_salary = f"{minv} - {maxv} {cur} {unit}".strip()
+                            elif val.get("value"):
+                                ld_salary = f"{val.get('value')} {cur} {unit}".strip()
+
+                if len(text) < 40 and len(ld_desc) >= 40:
+                    text = ld_desc
+
+                if len(text) < 40:
+                    meta_desc = self.extract_meta_tag(soup, name="description")
+                    if len(meta_desc) >= 20:
+                        text = meta_desc
+
                 if len(text) < 40:
                     continue
 
                 fields = _parse_fields(text)
 
-                # Titre : le <h2> de l'annonce (ex. « Emploi Commercial BTP … - Abidjan »)
+                # Titre : H2 → JSON-LD → og:title
                 title = ""
                 for h2 in soup.find_all("h2"):
                     candidate = h2.get_text(" ", strip=True)
@@ -116,32 +158,45 @@ class EmploiciScraper(BaseScraper):
                             candidate,
                         ).strip()
                         break
-                # Fallback : og:title si aucun h2 trouvé
                 if not title or len(title) < 5:
-                    og = soup.find("meta", property="og:title")
-                    title = (og.get("content", "").strip() if og else "") or ""
+                    title = ld_title
+                if not title or len(title) < 5:
+                    og_title = self.extract_meta_tag(soup, property="og:title")
                     title = re.sub(
                         r"\s*-\s*(Abidjan[^|]*|Cocody|Plateau|Bouaké|Yamoussoukro|San-Pédro).*$",
                         "",
-                        title,
+                        og_title,
                     ).strip()
                 title = re.sub(r"\s+", " ", title).strip()
 
-                location = fields.get("lieu") or fields.get("ville") or "Abidjan"
+                location = fields.get("lieu") or fields.get("ville") or ld_location or "Abidjan"
                 contract = fields.get("type de contrat") or fields.get("contrat") or "CDI"
                 deadline_raw = fields.get("date limite") or ""
                 description = (
                     fields.get("description")
                     or fields.get("profil")
+                    or ld_desc
                     or text
                 )
-                # Coupe le pied de page « Autres offres récentes »
                 cut = re.search(r"Autres offres r[ée]centes", description)
                 if cut:
                     description = description[: cut.start()]
 
+                # Injection salaire (champ structuré « Salaire » → regex → JSON-LD)
+                salary_structured = fields.get("salaire") or ""
+                if not salary_structured:
+                    salary_structured = self.extract_salary(text) or ld_salary or ""
+                if salary_structured and salary_structured.lower() not in description.lower():
+                    description = f"Salaire : {salary_structured}\n\n{description}"
+
+                company = ld_company or self.guess_company(text, default=self.source_label)
+                # Entreprise structurée dans les champs si présente
+                if fields.get("entreprise") and not ld_company:
+                    company_candidate = fields["entreprise"]
+                    if len(company_candidate) >= 3:
+                        company = company_candidate
+
                 emails = extract_emails(text)
-                # Privilégie l'email du recruteur (pas l'email générique du site)
                 apply_email = None
                 if emails:
                     apply_email = next(
@@ -151,7 +206,7 @@ class EmploiciScraper(BaseScraper):
 
                 item = ContentItem(
                     title=title,
-                    company=self.guess_company(text, default=self.source_label),
+                    company=company,
                     location=self.guess_location(f"{location} {text}"),
                     contract_type=self.guess_contract(f"{contract} {text}"),
                     description=description.strip(),
