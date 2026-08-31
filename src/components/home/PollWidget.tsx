@@ -66,6 +66,7 @@ export default function PollWidget() {
     if (voted === null) {
       if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
       if (countdownRef.current) clearInterval(countdownRef.current);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCountdown(null);
       return;
     }

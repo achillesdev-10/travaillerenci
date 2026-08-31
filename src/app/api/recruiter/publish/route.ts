@@ -18,8 +18,7 @@ export async function POST(request: NextRequest) {
     const contractType = typeof body.contract_type === 'string' ? body.contract_type.trim() : '';
     const applyLink = typeof body.apply_link === 'string' ? body.apply_link.trim() : '';
     const applyEmail = typeof body.apply_email === 'string' ? body.apply_email.trim() : '';
-    const contactName = typeof body.contact_name === 'string' ? body.contact_name.trim() : '';
-    const contactPhone = typeof body.contact_phone === 'string' ? body.contact_phone.trim() : '';
+
     const deadline = typeof body.deadline === 'string' ? body.deadline.trim() : '';
 
     // Validation

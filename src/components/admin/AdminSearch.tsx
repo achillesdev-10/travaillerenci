@@ -51,6 +51,7 @@ export default function AdminSearch() {
     if (open) {
       setTimeout(() => inputRef.current?.focus(), 100);
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setQuery("");
       setResults({ offers: [], blog: [], entreprendre: [] });
     }

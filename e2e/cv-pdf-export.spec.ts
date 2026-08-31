@@ -99,7 +99,7 @@ function runTest(viewport: { width: number; height: number }, label: string) {
       // Attendre le téléchargement (nécessaire pour que l'export soit complet)
       const downloadPromise = page.waitForEvent('download', { timeout: 30_000 });
       await downloadBtn.click();
-      const download = await downloadPromise;
+      await downloadPromise;
 
       // Vérifier que le bouton est de nouveau activé
       await expect(downloadBtn).toBeEnabled({ timeout: 15_000 });

@@ -26,6 +26,10 @@ from typing import Optional
 
 import httpx
 
+from scraper.core.logger import setup_logger
+
+logger = setup_logger("groq")
+
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 DEFAULT_GROQ_MODEL = "qwen/qwen3.8-27b"
 
@@ -59,6 +63,10 @@ class GroqClient:
     ) -> str:
         """Envoie la requête et retourne le texte brut de la réponse.
 
+        Stratégie de retry : 4 tentatives avec backoff exponentiel.
+        • 429 (rate-limit) : 5→10→20→40s
+        • 413 (Payload Too Large) : pas de retry, échec immédiat
+        • 5xx (erreur serveur) : 2→4→8s
         Lève une exception si la clé est absente, si l'API répond une erreur
         (429/5xx… après retry), un timeout ou une réponse vide — l'appelant
         décidera de la suite (repli / heuristique)."""
@@ -79,13 +87,29 @@ class GroqClient:
             "max_tokens": max_tokens,
         }
 
+        max_attempts = 4
         last_exc: Optional[Exception] = None
-        for attempt in range(2):
+        for attempt in range(max_attempts):
             try:
                 resp = self.session.post(GROQ_URL, headers=headers, json=payload)
-                if resp.status_code == 429 and attempt == 0:
-                    # Quota/minute dépassé : on laisse le quota se rétablir.
-                    time.sleep(5)
+                if resp.status_code == 413:
+                    # Payload trop lourd → pas de sens de retry
+                    raise RuntimeError("Groq : payload trop volumineux (413)")
+                if resp.status_code == 429:
+                    wait = min(5 * (2 ** attempt), 60)
+                    logger.warning(
+                        f"⚠️ Groq 429 (tentative {attempt + 1}/{max_attempts}) — "
+                        f"attente {wait}s avant nouvelle tentative."
+                    )
+                    time.sleep(wait)
+                    continue
+                if resp.status_code >= 500:
+                    wait = min(2 * (2 ** attempt), 16)
+                    logger.warning(
+                        f"⚠️ Groq {resp.status_code} (tentative {attempt + 1}/{max_attempts}) — "
+                        f"attente {wait}s avant nouvelle tentative."
+                    )
+                    time.sleep(wait)
                     continue
                 resp.raise_for_status()
                 data = resp.json()
@@ -99,5 +123,7 @@ class GroqClient:
                 return content
             except Exception as exc:  # noqa: BLE001
                 last_exc = exc
+                if isinstance(exc, RuntimeError) and "413" in str(exc):
+                    raise
                 time.sleep(1)
         raise RuntimeError(f"Groq injoignable : {last_exc}")

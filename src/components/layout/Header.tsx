@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { useDarkMode } from '@/hooks/useDarkMode';
 import { fetchCurrentUser, logoutCurrentUser, type StoredUser } from '@/lib/clientAuth';
@@ -50,10 +51,12 @@ export default function Header() {
     };
   }, [pathname]);
 
+  const router = useRouter();
+
   async function handleLogout() {
     await logoutCurrentUser();
     setUser(null);
-    window.location.href = '/';
+    router.push('/');
   }
 
   const dashboardHref = user?.role === 'company' ? '/dashboard/company' : '/dashboard/candidate';
@@ -144,9 +147,12 @@ export default function Header() {
                   className="flex items-center gap-2 text-[13px] font-bold text-gray-800 dark:text-white px-3 py-2 bg-gray-100 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700"
                 >
                   {user.avatar_url ? (
-                    <img
+                    <Image
                       src={user.avatar_url}
                       alt=""
+                      width={24}
+                      height={24}
+                      unoptimized
                       className="w-6 h-6 rounded-full object-cover"
                     />
                   ) : (

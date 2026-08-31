@@ -25,6 +25,7 @@
 from __future__ import annotations
 
 import re
+import time
 from typing import Any, Dict, List, Optional
 
 from scraper.models.content_item import (
@@ -33,7 +34,7 @@ from scraper.models.content_item import (
     SQL_CONTRACT_TYPES,
     NEUTRAL_CONTRACT,
 )
-from scraper.core._gemini_client import _GeminiClient
+from scraper.core._gemini_client import _GeminiClient, INTER_REQUEST_DELAY
 from scraper.core.logger import setup_logger
 from scraper.core.utils import classify_content
 
@@ -155,7 +156,11 @@ class GeminiEnricher(_GeminiClient):
                 results.extend(enriched)
             except Exception as exc:
                 logger.warning(f"⚠ Échec batch Gemini ({len(batch)} items) : {exc} — repli individuel")
-                for item in batch:
+                for idx, item in enumerate(batch):
+                    # Délai inter-requête pour éviter les 429 cascadants
+                    # quand le batch échoue et les items sont traités un par un.
+                    if idx > 0 and (self.enabled or self.groq.enabled):
+                        time.sleep(INTER_REQUEST_DELAY)
                     try:
                         results.append(self.enrich(item))
                     except Exception:

@@ -44,6 +44,7 @@ import argparse
 import io
 import json
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import List
@@ -178,11 +179,14 @@ def run(
         try:
             scraper = build_scraper(cfg, http_client)
             raw_items = scraper.scrape(max_offers=max_per_source)
-            for item in raw_items:
+            for item_idx, item in enumerate(raw_items):
                 # Texte source BRUT conservé AVANT la réécriture — nécessaire
                 # au contrôle anti-duplication (comparaison source ↔ réécrit).
                 raw_text = item.description_md
                 # Réécriture 100% + extraction structurée (repli heuristique inclus).
+                # Délai inter-requête pour éviter les 429 cascadants.
+                if item_idx > 0 and use_ai:
+                    time.sleep(1.5)
                 enricher.enrich(item)
                 # Filtrage qualité post-IA : la page décrit-elle un concours
                 # exploitable ? (titre de rubrique/menu, aucune date ni

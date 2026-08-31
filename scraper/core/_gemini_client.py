@@ -25,6 +25,11 @@ import httpx
 from scraper.core.groq_client import GroqClient
 from scraper.core.logger import setup_logger
 
+# Délai minimum entre deux requêtes individuelles (secondes).
+# Évite les429 cascadants quand le batch échoue et les items sont
+# traités un par un.
+INTER_REQUEST_DELAY = float(os.getenv("INTER_REQUEST_DELAY", "1.5"))
+
 logger = setup_logger("gemini_client")
 
 # ── Constantes partagées ──────────────────────────────────────────────────
@@ -94,6 +99,9 @@ class _GeminiClient:
         # Fallback Gemini → Groq (GROQ_API_KEY)
         self.groq = GroqClient()
         self.session = httpx.Client(timeout=60, follow_redirects=True)
+        # Cooldown après un429 : timestamp du dernier rate-limit reçu.
+        # Permet d'ajouter un délai entre deux requêtes même en dehors des retries.
+        self._last_rate_limit: float = 0.0
 
         if self.enabled or self.groq.enabled:
             providers = "Gemini + repli Groq" if (self.enabled and self.groq.enabled) else (
@@ -135,6 +143,16 @@ class _GeminiClient:
             },
         }
 
+        # Respecter le cooldown après un rate-limit (429).
+        # Évite de déclencher immédiatement un autre 429 juste après
+        # avoir reçu le premier.
+        elapsed = time.time() - self._last_rate_limit
+        if elapsed < INTER_REQUEST_DELAY and self._last_rate_limit > 0:
+            remaining = INTER_REQUEST_DELAY - elapsed
+            if remaining > 0.1:
+                logger.debug(f"⏳ Rate-limit cooldown : attente {remaining:.1f}s")
+                time.sleep(remaining)
+
         # Chaîne de repli : modèle principal puis replis
         if self._last_working_model:
             models = [self._last_working_model] + [
@@ -164,19 +182,31 @@ class _GeminiClient:
     def _post_gemini(self, url: str, headers: dict, payload: dict) -> str:
         """POST vers un modèle, avec retries sur 429/500/503 (quota/minute).
 
+        Stratégie de backoff :
+          • 429 (rate-limit) : backoff exponentiel 5→10→20→40s (4 tentatives)
+          • 503 (service indisponible) : 2s fixes (problème transitoire)
+          • 500 (erreur serveur) : 3s fixes
         Si toutes les tentatives échouent sur 429, lève GeminiQuotaExhausted
         (le modèle appelant passera au modèle de repli).
         """
         last_exc: Optional[Exception] = None
         saw_quota = False
-        for attempt in range(4):
+        max_attempts = 4
+        for attempt in range(max_attempts):
             try:
                 resp = self.session.post(url, headers=headers, json=payload)
                 if resp.status_code in (429, 500, 503):
-                    wait = 20 if resp.status_code == 429 else 2
                     saw_quota = saw_quota or resp.status_code == 429
+                    if resp.status_code == 429:
+                        # Backoff exponentiel : 5, 10, 20, 40 secondes
+                        wait = min(5 * (2 ** attempt), 60)
+                        self._last_rate_limit = time.time() + wait
+                    elif resp.status_code == 503:
+                        wait = 2
+                    else:
+                        wait = 3
                     logger.warning(
-                        f"⚠️ Gemini {resp.status_code} (tentative {attempt + 1}/4) — "
+                        f"⚠️ Gemini {resp.status_code} (tentative {attempt + 1}/{max_attempts}) — "
                         f"attente {wait}s avant nouvelle tentative."
                     )
                     time.sleep(wait)
@@ -247,8 +277,10 @@ class _GeminiClient:
                 last_exc = exc
                 logger.warning(f"⚠️ Échec Gemini : {exc} — tentative Groq…")
 
-        # 2) Groq
+        # 2) Groq — léger délai avant d'appeler Groq pour laisser
+        #    le quota Gemini se rétablir et ne pas cumuler les 429.
         if self.groq.enabled:
+            time.sleep(1)
             try:
                 return self.groq.complete(system_prompt or prompt, prompt)
             except Exception as exc:

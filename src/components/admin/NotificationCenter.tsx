@@ -58,6 +58,7 @@ export default function NotificationCenter() {
 
   // Fetch on mount and every 60 seconds
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 60000);
     return () => clearInterval(interval);

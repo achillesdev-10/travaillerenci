@@ -37,6 +37,7 @@ export default function CoverLetterGenerator({
 
   // Sync form fields when CV data props change (pre-fill from CV editor)
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setForm((prev) => ({
       ...prev,
       candidateName: initialName || prev.candidateName,

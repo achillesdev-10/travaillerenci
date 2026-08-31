@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { buildOtpauthUrl, is2faEnabled, generateSecret } from '@/lib/totp';
 
 export default function TwoFactorSetupPage() {
@@ -16,6 +17,7 @@ export default function TwoFactorSetupPage() {
 
   useEffect(() => {
     const existing = is2faEnabled();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setEnabled(existing);
 
     if (!existing) {
@@ -183,11 +185,12 @@ export default function TwoFactorSetupPage() {
 
         <div className="flex justify-center py-4">
           <div className="bg-white p-4 rounded-2xl">
-            <img
+            <Image
               src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(otpauthUrl)}`}
               alt="QR Code 2FA"
               width={200}
               height={200}
+              unoptimized
               className="rounded-lg"
             />
           </div>

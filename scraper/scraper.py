@@ -257,7 +257,10 @@ def run_scraping_pipeline(
                 enricher.enrich_batch(items_to_enrich, batch_size=5)
             except Exception as exc:
                 logger.warning(f"  ⚠ Échec batch, repli individuel : {exc}")
-                for item in items_to_enrich:
+                for idx, item in enumerate(items_to_enrich):
+                    # Délai inter-requête pour éviter les 429 cascadants
+                    if idx > 0:
+                        time.sleep(1.5)
                     try:
                         enricher.enrich(item)
                     except Exception:

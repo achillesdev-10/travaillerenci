@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
+import Image from 'next/image';
 
 interface AvatarUploadProps {
   /** URL actuelle de la photo de profil (null = pas de photo). */
@@ -146,9 +147,12 @@ export default function AvatarUpload({
       >
         {/* Image ou initiale */}
         {avatarUrl ? (
-          <img
+          <Image
             src={avatarUrl}
             alt={`Photo de ${name}`}
+            width={96}
+            height={96}
+            unoptimized
             className="w-full h-full rounded-full object-cover"
           />
         ) : (

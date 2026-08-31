@@ -21,7 +21,7 @@
  */
 
 import { DatabaseSync } from 'node:sqlite';
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import path from 'node:path';
 import { existsSync, readFileSync } from 'node:fs';
 
@@ -307,6 +307,7 @@ async function syncTable(spec: SyncSpec) {
           updated++;
           continue;
         }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { created_at, ...rest } = payload;
         for (const key of spec.preserveOnUpdate) delete rest[key];
         const { error } = await supabase
