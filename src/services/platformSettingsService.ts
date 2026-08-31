@@ -109,18 +109,6 @@ function ensureSchema(db: DatabaseSyncInstance) {
   `);
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function rowToSetting(row: unknown): PlatformSetting {
-  const r = row as { key: string; value: string; updated_at: string };
-  return {
-    key: r.key,
-    value: JSON.parse(r.value),
-    updated_at: r.updated_at,
-  };
-}
 
 function normalizeSettings(raw: Record<string, unknown>): PlatformSettings {
   const defaults = { ...DEFAULT_SETTINGS };

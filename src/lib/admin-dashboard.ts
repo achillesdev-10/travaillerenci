@@ -749,7 +749,6 @@ function computeHealthScore(
   scraperHealth: ScraperHealth,
   sourceHealth: Record<string, SourceHealthStats>,
   pendingReports: number,
-  totalOffers: number,
 ): HealthScore {
   const breakdown: HealthScore["breakdown"] = [];
   let totalPoints = 0;
@@ -803,45 +802,6 @@ function computeHealthScore(
   return { score, level, breakdown };
 }
 
-function getTopOffersByViews(db: SqliteDb, limit = 5): DashboardOffer[] {
-  const tables = getTableNames(db);
-  const offerTable = findExistingTable(tables, ["job_offers", "jobs", "offers"]);
-  if (!offerTable) return [];
-  const columns = getTableColumns(db, offerTable);
-  const clicksColumn = pickFirstAvailable(columns, ["clicks", "clicks_count", "click_count", "total_clicks", "views"]);
-  if (!clicksColumn) return [];
-  const titleColumn = pickFirstAvailable(columns, ["title", "job_title", "poste"]);
-  const companyColumn = pickFirstAvailable(columns, ["company", "company_name", "employer"]);
-  const cityColumn = pickFirstAvailable(columns, ["city", "location"]);
-  const idColumn = pickFirstAvailable(columns, ["id"]);
-  if (!idColumn || !titleColumn) return [];
-
-  const rows = db
-    .prepare(
-      `SELECT ${quoteIdentifier(idColumn)} AS id,
-              ${titleColumn ? quoteIdentifier(titleColumn) : `''`} AS title,
-              ${companyColumn ? quoteIdentifier(companyColumn) : `''`} AS company,
-              ${cityColumn ? quoteIdentifier(cityColumn) : `''`} AS city,
-              ${quoteIdentifier(clicksColumn)} AS clicks
-       FROM ${quoteIdentifier(offerTable)}
-       ORDER BY ${quoteIdentifier(clicksColumn)} DESC
-       LIMIT ?`,
-    )
-    .all({ $limit: limit }) as SqliteRow[];
-
-  return rows.map((row) => ({
-    id: String(row.id),
-    title: stringFromUnknown(row.title, "Titre indisponible"),
-    company: stringFromUnknown(row.company, ""),
-    city: stringFromUnknown(row.city, ""),
-    status: "Vérifiées" as const,
-    deadline: null,
-    sourceUrl: "",
-    createdAt: null,
-    clicks: numberFromUnknown(row.clicks),
-  }));
-}
-
 function getEntreprendreStats(db: SqliteDb): EntreprendreDashboardStats {
   const tables = getTableNames(db);
   const empty: EntreprendreDashboardStats = {
@@ -853,8 +813,6 @@ function getEntreprendreStats(db: SqliteDb): EntreprendreDashboardStats {
   };
 
   if (!tables.has("entreprendre_articles")) return empty;
-
-  const cols = getTableColumns(db, "entreprendre_articles");
 
   // Total published
   const publishedRow = db
@@ -1094,7 +1052,7 @@ export async function getAdminDashboardData(pendingReports = 0): Promise<AdminDa
 
   const sourceHealth = readSourceHealth();
 
-  const healthScore = computeHealthScore(scraperHealth, sourceHealth, pendingReports, stats.totalActiveOffers);
+  const healthScore = computeHealthScore(scraperHealth, sourceHealth, pendingReports);
   const entreprendreStats = db ? getEntreprendreStats(db) : {
     totalPublished: 0,
     totalComments: 0,
@@ -1446,7 +1404,7 @@ async function getAdminDashboardDataFromSupabase(
   }
 
   const sourceHealth = readSourceHealth();
-  const healthScore = computeHealthScore(scraperHealth, sourceHealth, pendingReports, stats.totalActiveOffers);
+  const healthScore = computeHealthScore(scraperHealth, sourceHealth, pendingReports);
   const entreprendreStats = await getEntreprendreStatsFromSupabase();
 
   return { offers, cities, stats, scraperHealth, sourceHealth, healthScore, entreprendreStats };

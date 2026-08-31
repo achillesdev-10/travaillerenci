@@ -10,7 +10,7 @@ import { AdminNotificationService } from "@/services/adminNotificationService";
  */
 
 export async function GET(request: NextRequest) {
-  const { session, error } = await requireAdminApi(request);
+  const { error } = await requireAdminApi(request);
   if (error) return error;
 
   const url = new URL(request.url);
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const { session, error } = await requireAdminApi(request);
+  const { error } = await requireAdminApi(request);
   if (error) return error;
 
   try {
