@@ -19,7 +19,7 @@
 
 import type { AssistantHistoryMessage, AssistantResult } from './types';
 
-const GEMINI_MODEL = process.env.ASSISTANT_GEMINI_MODEL || 'gemini-2.0-flash';
+const GEMINI_MODEL = process.env.ASSISTANT_GEMINI_MODEL || 'gemini-flash-latest';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';

@@ -308,7 +308,7 @@ Référence complète : voir `.env.example`.
 | `ASSISTANT_AI_RATE_LIMIT_PER_MINUTE` | 🟡 | Assistant : max requêtes IA/minute/IP (défaut 5) |
 | `ASSISTANT_AI_RATE_LIMIT_PER_HOUR` | 🟡 | Assistant : max requêtes IA/heure/IP (défaut 20) |
 | `ASSISTANT_MAX_MESSAGE_LENGTH` | 🟡 | Assistant : longueur max d'un message (défaut 500) |
-| `ASSISTANT_GEMINI_MODEL` | 🟡 | Assistant : modèle Gemini (défaut `gemini-2.0-flash`) |
+| `ASSISTANT_GEMINI_MODEL` | 🟡 | Assistant : modèle Gemini (défaut `gemini-flash-latest`) |
 | `ASSISTANT_GROQ_MODEL` | 🟡 | Assistant : modèle Groq fallback (défaut `qwen/qwen3.8-27b`) |
 | `ADMIN_SESSION_SECRET` | ✅ admin | Secret HMAC pour signer les cookies de session admin |
 | `ADMIN_SESSION_TTL_HOURS` | 🟡 | Durée de validité de la session admin (défaut 12h) |

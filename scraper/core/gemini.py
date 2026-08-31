@@ -5,7 +5,7 @@
   TravaillerEnCi — scraper/core/gemini.py
   Enrichissement IA (Gemini) : classification + réécriture des contenus scrapés
 
-  Pour chaque contenu brut collecté, on demande à Gemini (gemini-2.0-flash,
+  Pour chaque contenu brut collecté, on demande à Gemini (gemini-flash-latest,
   API REST — aucune clé = pipeline purement heuristique) de :
 
     1. Classifier la catégorie (job / internship / scholarship / exam)
@@ -15,18 +15,17 @@
   Robustesse : si la clé est absente, la réponse est invalide ou l'appel
   échoue, on retombe sur des heuristiques locales (utils.classify_content)
   pour ne JAMAIS faire échouer le pipeline de scraping.
+
+  La logique HTTP / fallback inter-modèles / parsing JSON est centralisée
+  dans _gemini_client._GeminiClient — ce fichier ne contient que la logique
+  métier spécifique au pipeline d'offres (prompts, validation, SEO, batch).
 ===============================================================================
 """
 
 from __future__ import annotations
 
-import json
-import os
 import re
-import time
 from typing import Any, Dict, List, Optional
-
-import httpx
 
 from scraper.models.content_item import (
     CONTENT_CATEGORIES,
@@ -34,14 +33,14 @@ from scraper.models.content_item import (
     SQL_CONTRACT_TYPES,
     NEUTRAL_CONTRACT,
 )
-from scraper.core.groq_client import GroqClient
+from scraper.core._gemini_client import _GeminiClient
 from scraper.core.logger import setup_logger
 from scraper.core.utils import classify_content
 
 logger = setup_logger("gemini")
 
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
-GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+# Re-export constants for backward compatibility
+from scraper.core._gemini_client import GEMINI_MODEL, GEMINI_MODEL_FALLBACKS, GEMINI_URL  # noqa: F401, E402
 
 SYSTEM_PROMPT = (
     "Tu es un rédacteur expert du marché de l'emploi, des stages, des bourses "
@@ -115,37 +114,14 @@ def _sanitize_contract(value: Any) -> str:
     return NEUTRAL_CONTRACT
 
 
-def _strip_markdown_code_fences(raw: str) -> str:
-    """Retire les blocs ```json ... ``` éventuellement renvoyés par le modèle."""
-    text = raw.strip()
-    text = re.sub(r"^```(?:json)?\s*", "", text, flags=re.I)
-    text = re.sub(r"\s*```$", "", text)
-    return text.strip()
+# Alias pour rétrocompatibilité (anciens imports)
+_GeminiQuotaExhausted = None  # remplacé par _gemini_client.GeminiQuotaExhausted
+_strip_markdown_code_fences = None  # remplacé par _gemini_client.strip_markdown_code_fences
 
 
-class GeminiEnricher:
+class GeminiEnricher(_GeminiClient):
     def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
-        self.api_key = api_key or os.getenv("GEMINI_API_KEY")
-        self.model = model or GEMINI_MODEL
-        self.enabled = bool(self.api_key)
-        # Fallback Gemini → Groq (GROQ_API_KEY) : utilisé si Gemini échoue
-        # (quota, timeout, erreur API, réponse vide ou JSON invalide).
-        self.groq = GroqClient()
-        self.session = httpx.Client(timeout=60, follow_redirects=True)
-        if self.enabled or self.groq.enabled:
-            providers = "Gemini + repli Groq" if (self.enabled and self.groq.enabled) else (
-                "Gemini" if self.enabled else "Groq (Gemini absent)"
-            )
-            logger.info(f"🤖 Enrichissement IA activé ({providers})")
-        else:
-            logger.warning("⚠️ GEMINI_API_KEY et GROQ_API_KEY absentes — classification & réécriture heuristiques.")
-
-    def close(self) -> None:
-        try:
-            self.session.close()
-            self.groq.close()
-        except Exception:
-            pass
+        super().__init__(api_key=api_key, model=model, log_label="gemini", temperature=0.3)
 
     # ------------------------------------------------------------------
     # Batch enrichment : regroupe plusieurs items en un seul appel API
@@ -200,8 +176,8 @@ class GeminiEnricher:
         # --- 1) Gemini (fournisseur principal) ---
         if self.enabled:
             try:
-                raw = self._call_gemini(prompt)
-                parsed = self._parse_json(raw)
+                raw = self.call_gemini(prompt)
+                parsed = self.parse_json(raw)
                 self._validate_ai_result(parsed, item)
                 self._apply_ai(item, parsed)
                 logger.info(f"✅ Réécriture IA OK : « {item.title[:50]} » (provider=gemini)")
@@ -215,7 +191,7 @@ class GeminiEnricher:
         if self.groq.enabled:
             try:
                 raw = self.groq.complete(SYSTEM_PROMPT, prompt)
-                parsed = self._parse_json(raw)
+                parsed = self.parse_json(raw)
                 self._validate_ai_result(parsed, item)
                 self._apply_ai(item, parsed)
                 reason = "repli après échec Gemini" if self.enabled else "Gemini indisponible (non configuré)"
@@ -306,23 +282,19 @@ class GeminiEnricher:
         raw = None
         if self.enabled:
             try:
-                raw = self._call_gemini(batch_prompt)
+                raw = self.call_gemini(batch_prompt)
             except Exception as exc:
                 logger.warning(f"⚠ Échec Gemini batch : {exc}")
 
-        # Repli Groq si Gemini échoue
-        if raw is None and self.groq.enabled:
-            try:
-                raw = self.groq.complete(SYSTEM_PROMPT, batch_prompt)
-            except Exception as exc:
-                logger.warning(f"⚠ Échec Groq batch : {exc}")
-
+        # Repli Groq si Gemini échoue — on n'envoie PAS le batch complet
+        # à Groq car le payload dépasse souvent la limite 413 (Payload Too
+        # Large). L'appelant (enrich_batch) relancera les items individuellement.
         if raw is None:
-            raise RuntimeError("Aucun provider IA disponible pour le batch")
+            raise RuntimeError("Gemini batch échoué — repli individuel requis")
 
         # Parsing de la réponse
         try:
-            results_raw = self._parse_json(raw)
+            results_raw = self.parse_json(raw)
             if not isinstance(results_raw, list):
                 # Le modèle a renvoyé un objet unique au lieu d'un tableau
                 results_raw = [results_raw]
@@ -343,60 +315,6 @@ class GeminiEnricher:
                 enriched.append(self._apply_heuristics(item))
 
         return enriched
-
-    def _call_gemini(self, prompt: str) -> str:
-        url = GEMINI_URL.format(model=self.model)
-        headers = {"Content-Type": "application/json"}
-        if self.api_key:
-            headers["x-goog-api-key"] = self.api_key
-        payload = {
-            "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {
-                "temperature": 0.3,
-                "maxOutputTokens": 4096,
-                "responseMimeType": "application/json",
-            },
-        }
-
-        last_exc: Optional[Exception] = None
-        for attempt in range(2):
-            try:
-                resp = self.session.post(url, headers=headers, json=payload)
-                if resp.status_code in (429, 500, 503) and attempt == 0:
-                    time.sleep(2)
-                    continue
-                resp.raise_for_status()
-                data = resp.json()
-                text = (
-                    data.get("candidates", [{}])[0]
-                    .get("content", {})
-                    .get("parts", [{}])[0]
-                    .get("text", "")
-                )
-                if not text:
-                    raise ValueError("réponse IA vide")
-                return text
-            except Exception as exc:  # noqa: BLE001
-                last_exc = exc
-                time.sleep(1)
-        raise RuntimeError(f"Gemini injoignable : {last_exc}")
-
-    def _parse_json(self, raw: str) -> Dict[str, Any]:
-        text = _strip_markdown_code_fences(raw)
-        # Certains modèles renvoient un JSON fiable mais avec des retours à la
-        # ligne intérieurs aux chaînes : on tente d'abord un parse strict.
-        try:
-            return json.loads(text)
-        except json.JSONDecodeError:
-            pass
-        # Repli : extraire le premier objet {...} équilibré.
-        start, end = text.find("{"), text.rfind("}")
-        if start != -1 and end > start:
-            try:
-                return json.loads(text[start : end + 1])
-            except json.JSONDecodeError:
-                pass
-        raise ValueError("JSON IA illisible")
 
     # ------------------------------------------------------------------
     def _validate_ai_result(self, parsed: Dict[str, Any], item: ContentItem) -> None:

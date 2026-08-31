@@ -118,11 +118,11 @@ def make_enricher(klass, groq_result, gemini_result=None):
     """Enricheur avec Gemini stubé + Groq factice."""
     enricher = klass(api_key="test-gemini-key")
     if gemini_result is not None:
-        def _call(prompt):
+        def _call(prompt, **_kw):
             if isinstance(gemini_result, Exception):
                 raise gemini_result
             return gemini_result
-        enricher._call_gemini = _call  # type: ignore[method-assign]
+        enricher.call_gemini = _call  # type: ignore[method-assign]
     enricher.groq = FakeGroq(groq_result)  # type: ignore[assignment]
     return enricher
 

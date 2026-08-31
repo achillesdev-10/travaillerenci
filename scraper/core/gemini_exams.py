@@ -20,18 +20,18 @@
   Robustesse : en l'absence de clé GEMINI_API_KEY ou si la réponse est
   invalide, on retombe sur le parseur heuristique local (exam_parser.py) pour
   ne JAMAIS faire échouer le pipeline.
+
+  La logique HTTP / fallback inter-modèles / parsing JSON est centralisée
+  dans _gemini_client._GeminiClient — ce fichier ne contient que la logique
+  métier spécifique au pipeline concours (prompts, validation, extraction).
 ===============================================================================
 """
 
 from __future__ import annotations
 
-import json
-import os
 import re
-import time
-from typing import Any, Dict, Optional
-
-import httpx
+from typing import Any, Optional
+from datetime import datetime
 
 from scraper.models.exam_item import ExamItem, normalize_diplomas
 from scraper.core.exam_parser import (
@@ -39,20 +39,13 @@ from scraper.core.exam_parser import (
     confidence_from_gaps,
     parse_communique,
 )
-from scraper.core.groq_client import GroqClient
+from scraper.core._gemini_client import _GeminiClient
 from scraper.core.logger import setup_logger
 
 logger = setup_logger("gemini_exams")
 
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
-# Modèles de repli si le modèle principal est saturé (quota/minute 429) :
-# le quota est PAR MODÈLE — basculer sur un autre modèle contourne la limite.
-GEMINI_MODEL_FALLBACKS = [
-    m.strip()
-    for m in os.getenv("GEMINI_MODEL_FALLBACKS", "gemini-3-flash-preview").split(",")
-    if m.strip()
-]
-GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+# Re-export constants for backward compatibility
+from scraper.core._gemini_client import GEMINI_MODEL, GEMINI_MODEL_FALLBACKS, GEMINI_URL  # noqa: F401, E402
 
 SYSTEM_PROMPT = """\
 Tu es un rédacteur expert des concours administratifs en Côte d'Ivoire \
@@ -166,43 +159,11 @@ SCHÉMA JSON ATTENDU (toutes les clés sont obligatoires, valeurs null si absent
 """
 
 
-def _strip_markdown_code_fences(raw: str) -> str:
-    text = raw.strip()
-    text = re.sub(r"^```(?:json)?\s*", "", text, flags=re.I)
-    text = re.sub(r"\s*```$", "", text)
-    return text.strip()
-
-
-class _GeminiQuotaExhausted(Exception):
-    """Levée quand un modèle Gemini renvoie 429 (quota/minute) après retries."""
-
-
-class ExamGeminiEnricher:
+class ExamGeminiEnricher(_GeminiClient):
     """Enrichit un ExamItem brut via Gemini (repli heuristique garanti)."""
 
     def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
-        self.api_key = api_key or os.getenv("GEMINI_API_KEY")
-        self.model = model or GEMINI_MODEL
-        self.fallback_models = list(GEMINI_MODEL_FALLBACKS)
-        self.enabled = bool(self.api_key)
-        # Fallback Gemini → Groq (GROQ_API_KEY) : utilisé si Gemini échoue
-        # (quota, timeout, erreur API, réponse vide ou JSON invalide).
-        self.groq = GroqClient()
-        self.session = httpx.Client(timeout=60, follow_redirects=True)
-        if self.enabled or self.groq.enabled:
-            providers = "Gemini + repli Groq" if (self.enabled and self.groq.enabled) else (
-                "Gemini" if self.enabled else "Groq (Gemini absent)"
-            )
-            logger.info(f"🤖 Enrichissement concours IA activé ({providers})")
-        else:
-            logger.warning("⚠️ GEMINI_API_KEY et GROQ_API_KEY absentes — extraction heuristique des concours.")
-
-    def close(self) -> None:
-        try:
-            self.session.close()
-            self.groq.close()
-        except Exception:
-            pass
+        super().__init__(api_key=api_key, model=model, log_label="concours", temperature=0.2)
 
     # ------------------------------------------------------------------
     def enrich(self, item: ExamItem) -> ExamItem:
@@ -218,8 +179,8 @@ class ExamGeminiEnricher:
         # --- 1) Gemini (fournisseur principal) ---
         if self.enabled:
             try:
-                raw = self._call_gemini(prompt)
-                parsed = self._parse_json(raw)
+                raw = self.call_gemini(prompt)
+                parsed = self.parse_json(raw)
                 self._validate_ai_result(parsed, item)
                 self._apply_ai(item, parsed)
                 if item.rejected:
@@ -240,7 +201,7 @@ class ExamGeminiEnricher:
         if self.groq.enabled:
             try:
                 raw = self.groq.complete(SYSTEM_PROMPT, prompt)
-                parsed = self._parse_json(raw)
+                parsed = self.parse_json(raw)
                 self._validate_ai_result(parsed, item)
                 self._apply_ai(item, parsed)
                 if item.rejected:
@@ -278,119 +239,8 @@ class ExamGeminiEnricher:
             "--- JSON ---"
         )
 
-    def _call_gemini(self, prompt: str) -> str:
-        headers = {"Content-Type": "application/json"}
-        if self.api_key:
-            headers["x-goog-api-key"] = self.api_key
-        payload = {
-            "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {
-                "temperature": 0.2,
-                "maxOutputTokens": 4096,
-                "responseMimeType": "application/json",
-            },
-        }
-        # Chaîne de repli : modèle principal puis replis (quota/minute PAR
-        # MODÈLE : un 429 sur gemini-flash-latest est contourné par
-        # gemini-3-flash-preview…). Le dernier modèle qui a fonctionné est
-        # réessayé EN PREMIER pour la session (pas d'attente 20s répétée).
-        if getattr(self, "_last_working_model", None):
-            models = [self._last_working_model] + [
-                m for m in ([self.model] + self.fallback_models)
-                if m != self._last_working_model
-            ]
-        else:
-            models = [self.model] + [m for m in self.fallback_models if m != self.model]
-        last_exc: Optional[Exception] = None
-        for model in models:
-            url = GEMINI_URL.format(model=model)
-            try:
-                text = self._post_gemini(url, headers, payload)
-                self._last_working_model = model
-                if model != self.model:
-                    logger.warning(f"↪️ Bascule sur le modèle de repli {model} (quota du modèle principal atteint).")
-                return text
-            except _GeminiQuotaExhausted:
-                # Modèle saturé → essayer le suivant (sans attendre : l'attente
-                # longue a déjà eu lieu dans _post_gemini).
-                last_exc = last_exc or _GeminiQuotaExhausted(model)
-                continue
-            except Exception as exc:
-                last_exc = exc
-                break
-        raise RuntimeError(f"Gemini injoignable : {last_exc}")
-
-    def _post_gemini(self, url: str, headers: dict, payload: dict) -> str:
-        """POST vers un modèle, avec retries sur 429/500/503 (quota/minute).
-
-        Si toutes les tentatives échouent sur 429, lève _GeminiQuotaExhausted
-        (le modèle appelant passera au modèle de repli)."""
-        last_exc: Optional[Exception] = None
-        saw_quota = False
-        for attempt in range(4):
-            try:
-                resp = self.session.post(url, headers=headers, json=payload)
-                if resp.status_code in (429, 500, 503):
-                    # Quota/minute dépassé (429) : attendre plus longtemps que
-                    # pour les 500/503 pour laisser le quota se rétablir.
-                    wait = 20 if resp.status_code == 429 else 2
-                    saw_quota = saw_quota or resp.status_code == 429
-                    logger.warning(
-                        f"⚠️ Gemini {resp.status_code} (tentative {attempt + 1}/4) — "
-                        f"attente {wait}s avant nouvelle tentative."
-                    )
-                    time.sleep(wait)
-                    continue
-                resp.raise_for_status()
-                data = resp.json()
-                text = (
-                    data.get("candidates", [{}])[0]
-                    .get("content", {})
-                    .get("parts", [{}])[0]
-                    .get("text", "")
-                )
-                if not text:
-                    raise ValueError("réponse IA vide")
-                return text
-            except _GeminiQuotaExhausted:
-                raise
-            except Exception as exc:  # noqa: BLE001
-                if isinstance(exc, httpx.HTTPStatusError) and exc.response is not None:
-                    if exc.response.status_code == 429:
-                        raise _GeminiQuotaExhausted() from exc
-                last_exc = exc
-                time.sleep(1)
-        if saw_quota:
-            raise _GeminiQuotaExhausted()
-        raise RuntimeError(f"Gemini injoignable : {last_exc}")
-
-    def _parse_json(self, raw: str) -> Dict[str, Any]:
-        text = _strip_markdown_code_fences(raw)
-        parsed = None
-        try:
-            parsed = json.loads(text)
-        except json.JSONDecodeError:
-            pass
-        # Certains modèles répondent une LISTE [{...}] au lieu d'un objet :
-        # on extrait l'élément unique. Sinon on ne garde qu'un dict.
-        if isinstance(parsed, list) and len(parsed) == 1:
-            parsed = parsed[0]
-        if isinstance(parsed, dict):
-            return parsed
-        start, end = text.find("{"), text.rfind("}")
-        if start != -1 and end > start:
-            try:
-                obj = json.loads(text[start : end + 1])
-                if isinstance(obj, dict):
-                    return obj
-            except json.JSONDecodeError:
-                pass
-        raise ValueError(
-            "JSON IA illisible (attendu un objet, reçu un tableau ou du texte)"
-        )
-
     # ------------------------------------------------------------------
-    def _validate_ai_result(self, parsed: Dict[str, Any], item: ExamItem) -> None:
+    def _validate_ai_result(self, parsed: dict, item: ExamItem) -> None:
         """Valide une réponse IA AVANT application (titre & description exploitables).
 
         Lève ValueError si le résultat est inexploitable — l'appelant bascule
@@ -426,7 +276,7 @@ class ExamGeminiEnricher:
             raise ValueError("description = lien brut, non rédigée")
 
     # ------------------------------------------------------------------
-    def _apply_ai(self, item: ExamItem, parsed: Dict[str, Any]) -> None:
+    def _apply_ai(self, item: ExamItem, parsed: dict) -> None:
         # Rejet explicite : la page ne décrit pas un concours exploitable
         # (menu, rubrique, accueil de section…). On marque la fiche et on ne
         # touche à aucun autre champ — le runner l'écartera.
@@ -447,8 +297,6 @@ class ExamGeminiEnricher:
                 return datetime.fromisoformat(value[:10])
             except ValueError:
                 return None
-
-        from datetime import datetime
 
         title = str(parsed.get("title") or item.title).strip()
         organizer = str(parsed.get("organizer") or item.organizer).strip()

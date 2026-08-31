@@ -9,11 +9,11 @@ import { requireAdminApi } from '@/lib/adminSession';
  * visible mais désactivé côté UI, ou affiche le message).
  *
  * La clé `GEMINI_API_KEY` doit être définie côté serveur (Vercel) :
- * https://aistudio.google.com/apikey — modèle gemini-2.0-flash via REST
+ * https://aistudio.google.com/apikey — modèle gemini-flash-latest via REST
  * (aucun SDK à installer).
  */
 
-const GEMINI_MODEL = 'gemini-2.0-flash';
+const GEMINI_MODEL = 'gemini-flash-latest';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 const SYSTEM_PROMPT = `Tu es un rédacteur d'annonces d'emploi expert pour la Côte d'Ivoire.
