@@ -169,18 +169,18 @@ class ExamGeminiEnricher(_GeminiClient):
     def enrich(self, item: ExamItem) -> ExamItem:
         """Réécrit + extrait les champs. Ne lève JAMAIS : fallback heuristique.
 
-        Ordre : Gemini → (échec : timeout, quota, erreur, vide, JSON invalide,
-        résultat inexploitable) → Groq → (échec) → heuristiques locales.
+        Ordre : Gemini → Groq → Cerebras → heuristiques locales.
         Les logs permettent toujours de savoir quel fournisseur a servi
-        (provider=gemini / provider=groq) et pourquoi le repli a eu lieu.
+        (provider=gemini / groq / cerebras) et pourquoi le repli a eu lieu.
         """
         prompt = self._build_prompt(item)
 
-        # --- Circuit breaker : si les deux providers sont indisponibles,
+        # --- Circuit breaker : si les trois providers sont indisponibles,
         # basculer directement en heuristiques sans aucun appel réseau. ---
         gemini_ok = self.enabled and self._is_provider_available("gemini")
         groq_ok = self.groq.enabled and self._is_provider_available("groq")
-        if not gemini_ok and not groq_ok:
+        cerebras_ok = self.cerebras.enabled and self._is_provider_available("cerebras")
+        if not gemini_ok and not groq_ok and not cerebras_ok:
             logger.warning(
                 f"⚠️ Circuit breaker actif — tous les providers indisponibles "
                 f"pour « {item.title[:50]} » — repli heuristique immédiat."
@@ -227,13 +227,41 @@ class ExamGeminiEnricher(_GeminiClient):
                 return item
             except Exception as exc:
                 logger.warning(
-                    f"⚠️ Échec Groq pour « {item.title[:50]} » (provider=groq, raison : {exc})"
+                    f"⚠️ Échec Groq pour « {item.title[:50]} » (provider=groq, raison : {exc}) — tentative Cerebras…"
                 )
 
-        # --- 3) Heuristiques locales (dernier filet) ---
+        # --- 3) Cerebras (dernier palier IA) ---
+        if cerebras_ok:
+            try:
+                raw = self.cerebras.complete(SYSTEM_PROMPT, prompt)
+                parsed = self.parse_json(raw)
+                self._validate_ai_result(parsed, item)
+                self._apply_ai(item, parsed)
+                if item.rejected:
+                    logger.warning(
+                        f"🚫 IA rejette « {item.title[:50]} » : {item.rejection_reason} (provider=cerebras)"
+                    )
+                else:
+                    reason_parts = []
+                    if self.enabled:
+                        reason_parts.append("Gemini")
+                    if self.groq.enabled:
+                        reason_parts.append("Groq")
+                    reason = f"repli après échec {' + '.join(reason_parts)}" if reason_parts else "Gemini + Groq indisponibles"
+                    logger.warning(
+                        f"↪️ Réécriture via Cerebras : « {item.title[:50]} » (provider=cerebras, {reason})"
+                    )
+                return item
+            except Exception as exc:
+                logger.warning(
+                    f"⚠️ Échec Cerebras pour « {item.title[:50]} » (provider=cerebras, raison : {exc})"
+                )
+
+        # --- 4) Heuristiques locales (dernier filet) ---
         logger.warning(
             f"⚠️ IA indisponible pour « {item.title[:50]} » (gemini={'oui' if self.enabled else 'non'}, "
-            f"groq={'oui' if self.groq.enabled else 'non'}) — repli heuristique."
+            f"groq={'oui' if self.groq.enabled else 'non'}, "
+            f"cerebras={'oui' if self.cerebras.enabled else 'non'}) — repli heuristique."
         )
         return self._apply_heuristics(item)
 

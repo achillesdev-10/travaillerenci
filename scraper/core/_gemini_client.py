@@ -23,6 +23,7 @@ from typing import Any, Dict, Optional
 import httpx
 
 from scraper.core.groq_client import GroqClient
+from scraper.core.cerebras_client import CerebrasClient
 from scraper.core.logger import setup_logger
 
 # Délai minimum entre deux requêtes individuelles (secondes).
@@ -73,11 +74,11 @@ class _GeminiClient:
     Gère :
       - le choix du modèle (principal + replis inter-modèles sur 429)
       - les retries avec backoff sur 429/500/503
-      - le fallback automatique Gemini → Groq
+      - le fallback automatique Gemini → Groq → Cerebras
       - le parse JSON robuste (fences, extraction d'objet, etc.)
-      - un circuit breaker par provider (Gemini / Groq) : dès qu'une erreur
-        429 (quota épuisé) est détectée, le provider est marqué indisponible
-        pour le reste du run — plus aucun appel réseau IA inutile.
+      - un circuit breaker par provider (Gemini / Groq / Cerebras) : dès
+        qu'une erreur 429 (quota épuisé) est détectée, le provider est
+        marqué indisponible pour le reste du run.
 
     Les sous-classes (GeminiEnricher, ExamGeminiEnricher) n'ont qu'à
     implémenter : `_build_prompt`, `_validate_ai_result`, `_apply_ai`,
@@ -99,9 +100,11 @@ class _GeminiClient:
         self._last_working_model: Optional[str] = None
         self._temperature = temperature
 
-        # Fallback Gemini → Groq (GROQ_API_KEY)
+        # Fallback Gemini → Groq → Cerebras
         self.groq = GroqClient()
         self.groq._on_quota_429 = self._on_provider_quota_exhausted  # type: ignore[attr-defined]
+        self.cerebras = CerebrasClient()
+        self.cerebras._on_quota_429 = self._on_provider_quota_exhausted  # type: ignore[attr-defined]
         self.session = httpx.Client(timeout=60, follow_redirects=True)
         # Cooldown après un429 : timestamp du dernier rate-limit reçu.
         # Permet d'ajouter un délai entre deux requêtes même en dehors des retries.
@@ -110,21 +113,27 @@ class _GeminiClient:
         # Circuit breaker : état par provider (durée du run uniquement).
         # Dès qu'un provider renvoie 429 (quota épuisé), il est marqué
         # indisponible — les appels suivants basculent directement sur
-        # le repli heuristique sans aucun appel réseau IA inutile.
+        # le repli suivant (ou heuristique si tous indisponibles).
         self._providers_unavailable: dict[str, float] = {}  # provider → timestamp
 
-        if self.enabled or self.groq.enabled:
-            providers = "Gemini + repli Groq" if (self.enabled and self.groq.enabled) else (
-                "Gemini" if self.enabled else "Groq (Gemini absent)"
-            )
-            logger.info(f"🤖 Enrichissement IA activé ({providers})")
+        # Détection des providers actifs pour le log d'initialisation
+        active = []
+        if self.enabled:
+            active.append("Gemini")
+        if self.groq.enabled:
+            active.append("Groq")
+        if self.cerebras.enabled:
+            active.append("Cerebras")
+        if active:
+            logger.info(f"🤖 Enrichissement IA activé ({' → '.join(active)} → heuristiques)")
         else:
-            logger.warning(f"⚠️ GEMINI_API_KEY et GROQ_API_KEY absentes — enrichissement {log_label} désactivé.")
+            logger.warning(f"⚠️ Aucune clé IA configurée — enrichissement {log_label} désactivé (heuristiques seules).")
 
     def close(self) -> None:
         try:
             self.session.close()
             self.groq.close()
+            self.cerebras.close()
         except Exception:
             pass
 
@@ -322,10 +331,10 @@ class _GeminiClient:
                 pass
         raise ValueError("JSON IA illisible (attendu un objet, reçu un tableau ou du texte)")
 
-    # ── Fallback Gemini → Groq ────────────────────────────────────────────
+    # ── Fallback Gemini → Groq → Cerebras ────────────────────────────────
 
     def call_with_fallback(self, prompt: str, *, system_prompt: str = "") -> str:
-        """Essaie Gemini, puis Groq, puis lève si les deux échouent."""
+        """Essaie Gemini, puis Groq, puis Cerebras, puis lève si les trois échouent."""
         last_exc: Optional[Exception] = None
 
         # 1) Gemini
@@ -334,15 +343,13 @@ class _GeminiClient:
                 return self.call_gemini(prompt, system_prompt=system_prompt)
             except Exception as exc:
                 last_exc = exc
-                # Si le msg contient "429" ou "quota", marquer indisponible
                 if "429" in str(exc) or "quota" in str(exc).lower():
                     self._on_provider_quota_exhausted("gemini")
                 logger.warning(f"⚠️ Échec Gemini : {exc} — tentative Groq…")
         elif self.enabled and not self._is_provider_available("gemini"):
             logger.debug("⏭️ Gemini indisponible (circuit breaker) — tentative Groq…")
 
-        # 2) Groq — léger délai avant d'appeler Groq pour laisser
-        #    le quota Gemini se rétablir et ne pas cumuler les 429.
+        # 2) Groq — léger délai pour laisser le quota Gemini se rétablir.
         if self.groq.enabled and self._is_provider_available("groq"):
             time.sleep(1)
             try:
@@ -351,8 +358,21 @@ class _GeminiClient:
                 last_exc = exc
                 if "429" in str(exc) or "quota" in str(exc).lower():
                     self._on_provider_quota_exhausted("groq")
-                logger.warning(f"⚠️ Échec Groq : {exc}")
+                logger.warning(f"⚠️ Échec Groq : {exc} — tentative Cerebras…")
         elif self.groq.enabled and not self._is_provider_available("groq"):
-            logger.debug("⏭️ Groq indisponible (circuit breaker)")
+            logger.debug("⏭️ Groq indisponible (circuit breaker) — tentative Cerebras…")
+
+        # 3) Cerebras — dernier palier IA avant les heuristiques.
+        if self.cerebras.enabled and self._is_provider_available("cerebras"):
+            time.sleep(1)
+            try:
+                return self.cerebras.complete(system_prompt or prompt, prompt)
+            except Exception as exc:
+                last_exc = exc
+                if "429" in str(exc) or "quota" in str(exc).lower():
+                    self._on_provider_quota_exhausted("cerebras")
+                logger.warning(f"⚠️ Échec Cerebras : {exc}")
+        elif self.cerebras.enabled and not self._is_provider_available("cerebras"):
+            logger.debug("⏭️ Cerebras indisponible (circuit breaker)")
 
         raise RuntimeError(f"Aucun provider IA disponible : {last_exc}")
