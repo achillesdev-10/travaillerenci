@@ -327,17 +327,17 @@ export default function BlogAdminClient({
       </div>
 
       {/* ===== Tableau ===== */}
-      <div className="rounded-3xl border border-slate-800 bg-slate-950 overflow-hidden shadow-xl">
+      <div className="rounded-3xl border border-slate-800 bg-slate-950 shadow-xl">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse min-w-[540px]">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-900/50 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                <th className="py-4 px-6">Article</th>
-                <th className="py-4 px-6">Tags</th>
-                <th className="py-4 px-6">Statut</th>
-                <th className="py-4 px-6">Vues</th>
-                <th className="py-4 px-6">Publié le</th>
-                <th className="py-4 px-6 text-right">Actions</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6 sticky left-0 z-10 bg-slate-900/50">Article</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6 hidden lg:table-cell">Tags</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6">Statut</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6 hidden md:table-cell">Vues</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6 hidden sm:table-cell">Publié le</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-sm">
@@ -353,9 +353,9 @@ export default function BlogAdminClient({
                   const tags = tagList(post.tags);
                   return (
                     <tr key={post.id} className="hover:bg-slate-900/40 transition-colors">
-                      <td className="py-4 px-6">
-                        <div className="flex items-center gap-3">
-                          <div className="shrink-0 w-14 h-10 rounded-lg overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-lg">
+                      <td className="py-3 px-3 sm:py-4 sm:px-6 sticky left-0 z-10 bg-slate-950 hover:bg-slate-900/40">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <div className="shrink-0 w-10 h-8 sm:w-14 sm:h-10 rounded-lg overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-base sm:text-lg">
                             {post.cover_image ? (
                               // eslint-disable-next-line @next/next/no-img-element
                               <img
@@ -368,16 +368,16 @@ export default function BlogAdminClient({
                             )}
                           </div>
                           <div className="min-w-0">
-                            <div className="font-bold text-white truncate max-w-xs">
+                            <div className="font-bold text-white truncate max-w-[180px] sm:max-w-xs">
                               {post.title}
                             </div>
-                            <div className="text-xs text-slate-400 truncate">
+                            <div className="text-[10px] sm:text-xs text-slate-400 truncate">
                               /blog/{post.slug} · {post.author}
                             </div>
                           </div>
                         </div>
                       </td>
-                      <td className="py-4 px-6">
+                      <td className="py-3 px-3 sm:py-4 sm:px-6 hidden lg:table-cell">
                         {tags.length > 0 ? (
                           <div className="flex flex-wrap gap-1.5 max-w-[180px]">
                             {tags.map((t) => (
@@ -393,63 +393,65 @@ export default function BlogAdminClient({
                           <span className="text-slate-600">—</span>
                         )}
                       </td>
-                      <td className="py-4 px-6">
+                      <td className="py-3 px-3 sm:py-4 sm:px-6">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${badge.className}`}
+                          className={`inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold border ${badge.className}`}
                         >
                           <span className={`h-1.5 w-1.5 rounded-full ${badge.dot}`} />
                           {badge.label}
                         </span>
                       </td>
-                      <td className="py-4 px-6 text-xs text-slate-300 whitespace-nowrap">
+                      <td className="py-3 px-3 sm:py-4 sm:px-6 text-xs text-slate-300 whitespace-nowrap hidden md:table-cell">
                         👁 {post.view_count}
                       </td>
-                      <td className="py-4 px-6 text-xs text-slate-300 whitespace-nowrap">
+                      <td className="py-3 px-3 sm:py-4 sm:px-6 text-xs text-slate-300 whitespace-nowrap hidden sm:table-cell">
                         {formatDate(post.status === 'published' ? post.published_at : post.updated_at)}
                       </td>
-                      <td className="py-4 px-6 text-right space-x-2 whitespace-nowrap">
-                        {post.status === 'published' && (
-                          <a
-                            href={`/blog/${post.slug}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 text-xs font-semibold"
-                          >
-                            Voir
-                          </a>
-                        )}
-                        {post.status !== 'published' && (
+                      <td className="py-3 px-3 sm:py-4 sm:px-6 text-right">
+                        <div className="flex flex-wrap items-center justify-end gap-1 sm:gap-2">
+                          {post.status === 'published' && (
+                            <a
+                              href={`/blog/${post.slug}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="px-2 sm:px-3 py-1.5 rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 text-[10px] sm:text-xs font-semibold"
+                            >
+                              Voir
+                            </a>
+                          )}
+                          {post.status !== 'published' && (
+                            <button
+                              type="button"
+                              onClick={() => handleQuickStatus(post, 'published')}
+                              className="px-2 sm:px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-[10px] sm:text-xs font-bold border border-emerald-500/20"
+                            >
+                              Publier
+                            </button>
+                          )}
+                          {post.status === 'published' && (
+                            <button
+                              type="button"
+                              onClick={() => handleQuickStatus(post, 'draft')}
+                              className="px-2 sm:px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 text-[10px] sm:text-xs font-bold border border-amber-500/20"
+                            >
+                              Dépublier
+                            </button>
+                          )}
                           <button
                             type="button"
-                            onClick={() => handleQuickStatus(post, 'published')}
-                            className="px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-xs font-bold border border-emerald-500/20"
+                            onClick={() => openEditModal(post)}
+                            className="px-2 sm:px-3 py-1.5 rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 text-[10px] sm:text-xs font-semibold"
                           >
-                            Publier
+                            Éditer
                           </button>
-                        )}
-                        {post.status === 'published' && (
                           <button
                             type="button"
-                            onClick={() => handleQuickStatus(post, 'draft')}
-                            className="px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 text-xs font-bold border border-amber-500/20"
+                            onClick={() => handleDelete(post.id)}
+                            className="px-2 sm:px-3 py-1.5 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 text-[10px] sm:text-xs font-semibold"
                           >
-                            Dépublier
+                            Supprimer
                           </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => openEditModal(post)}
-                          className="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 text-xs font-semibold"
-                        >
-                          Éditer
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(post.id)}
-                          className="px-3 py-1.5 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 text-xs font-semibold"
-                        >
-                          Supprimer
-                        </button>
+                        </div>
                       </td>
                     </tr>
                   );

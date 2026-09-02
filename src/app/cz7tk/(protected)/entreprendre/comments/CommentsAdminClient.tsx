@@ -123,7 +123,7 @@ export default function CommentsAdminClient({
       </div>
 
       {/* Comments list */}
-      <div className="rounded-3xl border border-slate-800 bg-slate-950 overflow-hidden shadow-xl">
+      <div className="rounded-3xl border border-slate-800 bg-slate-950 shadow-xl">
         {filteredComments.length === 0 ? (
           <div className="py-16 text-center text-slate-500">
             <p className="text-lg font-semibold mb-1">Aucun commentaire</p>

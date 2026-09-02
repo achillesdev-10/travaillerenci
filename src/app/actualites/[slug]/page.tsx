@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { ArticleService } from '@/services/articleService';
 import CoverImage from '@/components/content/CoverImage';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
+import ShareButton from '@/components/ShareButton';
 import { formatDate, formatRelativeTime, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
 
@@ -196,8 +197,22 @@ export default async function ArticleDetailPage({ params }: PageProps) {
           {/* Article body */}
           <article className="lg:col-span-2 order-2 lg:order-1">
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm shadow-black/5 p-5 sm:p-8">
+              <div className="mb-4 flex justify-end">
+                <ShareButton
+                  title={article.title}
+                  text={article.excerpt || article.title}
+                  url={`${getSiteUrl()}/actualites/${article.slug}`}
+                />
+              </div>
               <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 leading-relaxed">
                 <SimpleMarkdown text={article.content} />
+              </div>
+              <div className="mt-6 flex justify-end">
+                <ShareButton
+                  title={article.title}
+                  text={article.excerpt || article.title}
+                  url={`${getSiteUrl()}/actualites/${article.slug}`}
+                />
               </div>
             </div>
 

@@ -308,7 +308,7 @@ export default function BulkImportClient() {
             </div>
           </div>
 
-          <div className="rounded-3xl border border-slate-800 bg-slate-950 overflow-hidden shadow-xl">
+          <div className="rounded-3xl border border-slate-800 bg-slate-950 shadow-xl">
             <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
               <table className="w-full text-left border-collapse">
                 <thead className="sticky top-0 z-10">

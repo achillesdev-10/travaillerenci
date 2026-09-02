@@ -10,6 +10,7 @@ import { IMAGES } from '@/lib/images';
 import type { EntreprendreSector, BudgetRange } from '@/types/entreprendre';
 import ArticleHelpfulVote from '@/components/entreprendre/ArticleHelpfulVote';
 import ArticleComments from '@/components/entreprendre/ArticleComments';
+import ShareButton from '@/components/ShareButton';
 
 // ISR : revalidation toutes les heures
 export const revalidate = 3600;
@@ -270,6 +271,12 @@ export default async function EntreprendreArticlePage({
                   👁 {article.view_count}
                 </span>
                 {/* Partage */}
+                <ShareButton
+                  title={article.title}
+                  text={`${article.title} — ${shareUrl}`}
+                  url={shareUrl}
+                  variant="icon"
+                />
                 <a
                   href={`https://wa.me/?text=${encodeURIComponent(`${article.title} — ${shareUrl}`)}`}
                   target="_blank"
@@ -380,6 +387,15 @@ export default async function EntreprendreArticlePage({
             />
           </div>
         </article>
+
+        {/* Partage fin d'article */}
+        <div className="mt-6 flex items-center justify-center">
+          <ShareButton
+            title={article.title}
+            text={`${article.title} — ${shareUrl}`}
+            url={shareUrl}
+          />
+        </div>
 
         {/* ===== Section commentaires ===== */}
         <div className="mt-8">

@@ -510,18 +510,18 @@ export default function ExamsAdminClient({
       </div>
 
       {/* Tableau */}
-      <div className="overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 shadow-xl">
+      <div className="rounded-3xl border border-slate-800 bg-slate-950 shadow-xl">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left">
+          <table className="w-full border-collapse text-left min-w-[600px]">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-900/50 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                <th className="px-6 py-4">Concours / Organisateur</th>
-                <th className="px-6 py-4">Catégorie</th>
-                <th className="px-6 py-4">Diplômes</th>
-                <th className="px-6 py-4">Clôture inscriptions</th>
-                <th className="px-6 py-4">Confiance</th>
-                <th className="px-6 py-4">Statut</th>
-                <th className="px-6 py-4 text-right">Actions</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 sticky left-0 z-10 bg-slate-900/50">Concours</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 hidden lg:table-cell">Catégorie</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 hidden xl:table-cell">Diplômes</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 hidden md:table-cell">Clôture</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 hidden lg:table-cell">Confiance</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4">Statut</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-sm">
@@ -536,32 +536,32 @@ export default function ExamsAdminClient({
                   const phase = examPhase(exam);
                   return (
                     <tr key={exam.id} className="transition-colors hover:bg-slate-900/40">
-                      <td className="max-w-xs px-6 py-4">
+                      <td className="max-w-xs px-3 sm:px-6 py-3 sm:py-4 sticky left-0 z-10 bg-slate-950 hover:bg-slate-900/40">
                         <a
                           href={`/concours/${exam.slug || exam.id}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="line-clamp-2 font-bold text-white transition-colors hover:text-primary"
+                          className="line-clamp-2 font-bold text-white text-[13px] sm:text-sm transition-colors hover:text-primary"
                         >
                           {exam.title}
                         </a>
-                        <div className="mt-0.5 truncate text-xs text-slate-400">
+                        <div className="mt-0.5 truncate text-[10px] sm:text-xs text-slate-400">
                           {exam.organizer}
                           {exam.source_website && (
-                            <span className="font-medium text-primary/80"> · {exam.source_website}</span>
+                            <span className="font-medium text-primary/80 hidden sm:inline"> · {exam.source_website}</span>
                           )}
                         </div>
-                        <div className="mt-0.5 text-[10px] text-slate-500">
-                          {exam.views_count} vues · {exam.positions_count != null ? `${exam.positions_count} postes` : ''}
+                        <div className="mt-0.5 text-[10px] text-slate-500 sm:hidden">
+                          {phase} · {EXAM_CATEGORIES.find((c) => c.value === exam.category)?.label || exam.category}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <span className="inline-flex rounded-full border border-slate-700 bg-slate-800 px-2.5 py-1 text-[11px] font-bold text-slate-300">
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 hidden lg:table-cell">
+                        <span className="inline-flex rounded-full border border-slate-700 bg-slate-800 px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-bold text-slate-300">
                           {EXAM_CATEGORIES.find((c) => c.value === exam.category)?.label || exam.category}
                         </span>
                         <span className="mt-1 block text-[10px] text-slate-500">{phase}</span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 hidden xl:table-cell">
                         <div className="flex max-w-[160px] flex-wrap gap-1">
                           {exam.diplomas.slice(0, 3).map((d) => (
                             <span key={d} className="rounded bg-slate-800 px-1.5 py-0.5 text-[10px] font-bold text-slate-300">
@@ -573,7 +573,7 @@ export default function ExamsAdminClient({
                           )}
                         </div>
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-xs">
+                      <td className="whitespace-nowrap px-3 sm:px-6 py-3 sm:py-4 text-xs hidden md:table-cell">
                         {exam.registration_end ? (
                           <span className={isPast(exam.registration_end) ? 'text-rose-400' : 'text-slate-300'}>
                             {formatDate(exam.registration_end)}
@@ -582,9 +582,9 @@ export default function ExamsAdminClient({
                           <span className="text-slate-500">—</span>
                         )}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 hidden lg:table-cell">
                         <span
-                          className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-bold ${
+                          className={`inline-flex rounded-full border px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-bold ${
                             exam.confidence === 'high'
                               ? 'border-emerald-500/30 bg-emerald-500/15 text-emerald-400'
                               : exam.confidence === 'low'
@@ -595,9 +595,9 @@ export default function ExamsAdminClient({
                           {EXAM_CONFIDENCE_LABEL[exam.confidence]}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-3 sm:px-6 py-3 sm:py-4">
                         <span
-                          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                          className={`inline-flex items-center gap-1.5 rounded-full border px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold ${
                             exam.status === 'published'
                               ? 'border-emerald-500/30 bg-emerald-500/15 text-emerald-400'
                               : exam.status === 'rejected'
@@ -621,8 +621,8 @@ export default function ExamsAdminClient({
                           {EXAM_STATUS_LABEL[exam.status]}
                         </span>
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-right">
-                        <div className="space-x-2">
+                      <td className="whitespace-nowrap px-3 sm:px-6 py-3 sm:py-4 text-right">
+                        <div className="flex flex-wrap items-center justify-end gap-1 sm:gap-2">
                           {exam.status !== 'published' && (
                             <button
                               type="button"

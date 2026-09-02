@@ -10,6 +10,7 @@ import { formatDate, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
 import { jobDefaultImage } from '@/lib/images';
 import CoverImage from '@/components/content/CoverImage';
+import ShareButton from '@/components/ShareButton';
 
 export const revalidate = 300;
 
@@ -348,12 +349,18 @@ export default async function BourseDetailPage({ params }: PageProps) {
                   </p>
                 ) : null}
               </div>
-              <div className="mt-3">
+              <div className="mt-3 space-y-2">
                 <SaveButton
                   itemType="scholarship"
                   itemId={bourse.id}
                   label="Sauvegarder cette bourse"
                   className="w-full"
+                />
+                <ShareButton
+                  title={bourse.title}
+                  text={`${bourse.title} — ${bourse.company} (${bourse.location || 'International'}) — Consultez cette bourse sur TravaillerEnCi`}
+                  url={canonicalUrl}
+                  className="w-full justify-center"
                 />
               </div>
             </div>

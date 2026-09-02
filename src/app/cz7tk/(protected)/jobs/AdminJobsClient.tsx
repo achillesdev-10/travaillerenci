@@ -562,12 +562,12 @@ export default function AdminJobsClient({
       </div>
 
       {/* Tableau des offres */}
-      <div className="rounded-3xl border border-slate-800 bg-slate-950 overflow-hidden shadow-xl">
+      <div className="rounded-3xl border border-slate-800 bg-slate-950 shadow-xl">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse min-w-[640px]">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-900/50 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                <th className="py-4 px-6 w-10 text-center">
+                <th className="py-3 px-2 sm:py-4 sm:px-6 w-8 sm:w-10 text-center sticky left-0 z-10 bg-slate-900/50">
                   <input
                     type="checkbox"
                     checked={selectedIds.length > 0 && selectedIds.length === filteredJobs.length}
@@ -575,21 +575,21 @@ export default function AdminJobsClient({
                     className="rounded border-slate-700 bg-slate-900 text-primary focus:ring-primary h-4 w-4"
                   />
                 </th>
-                <th className="py-4 px-6">Titre / Organisme / Source</th>
-                <th className="py-4 px-6">Lieu</th>
-                <th className="py-4 px-6">Contrat</th>
-                <th className="py-4 px-6">Date limite</th>
-                <th className="py-4 px-6">Statut</th>
-                <th className="py-4 px-6 text-right">Actions de Modération</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6 sticky left-8 sm:left-10 z-10 bg-slate-900/50">Titre / Organisme</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6 hidden lg:table-cell">Lieu</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6 hidden md:table-cell">Contrat</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6 hidden lg:table-cell">Date limite</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6">Statut</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-sm">
               {filteredJobs.length === 0 ? (
-                <tr><td colSpan={6} className="py-12 text-center text-slate-500">Aucune offre trouvée dans cette vue.</td></tr>
+                <tr><td colSpan={7} className="py-12 text-center text-slate-500">Aucune offre trouvée dans cette vue.</td></tr>
               ) : (
                 filteredJobs.map((job) => (
                   <tr key={job.id} className={`hover:bg-slate-900/40 transition-colors ${selectedIds.includes(job.id) ? 'bg-primary/5' : ''}`}>
-                    <td className="py-4 px-6 text-center">
+                    <td className="py-3 px-2 sm:py-4 sm:px-6 text-center sticky left-0 z-10 bg-slate-950 hover:bg-slate-900/40">
                       <input
                         type="checkbox"
                         checked={selectedIds.includes(job.id)}
@@ -597,31 +597,31 @@ export default function AdminJobsClient({
                         className="rounded border-slate-700 bg-slate-900 text-primary focus:ring-primary h-4 w-4"
                       />
                     </td>
-                    <td className="py-4 px-6">
-                      <div className="font-bold text-white max-w-xs truncate flex items-center gap-2">
+                    <td className="py-3 px-3 sm:py-4 sm:px-6 sticky left-8 sm:left-10 z-10 bg-slate-950 hover:bg-slate-900/40">
+                      <div className="font-bold text-white max-w-[180px] sm:max-w-xs truncate flex items-center gap-1.5 sm:gap-2">
                         <span
-                          className={`shrink-0 inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold ${CATEGORY_BADGES[job.category || 'job'].className}`}
+                          className={`shrink-0 inline-flex items-center rounded-full border px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-bold ${CATEGORY_BADGES[job.category || 'job'].className}`}
                         >
                           {CATEGORY_BADGES[job.category || 'job'].label}
                         </span>
                         <span className="truncate">{job.title}</span>
                         {duplicateIds.includes(job.id) && (
-                          <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-fuchsia-500/15 border border-fuchsia-500/30 px-2 py-0.5 text-[10px] font-bold text-fuchsia-400">
-                            Doublon probable
+                          <span className="shrink-0 hidden sm:inline-flex items-center gap-1 rounded-full bg-fuchsia-500/15 border border-fuchsia-500/30 px-2 py-0.5 text-[10px] font-bold text-fuchsia-400">
+                            Doublon
                           </span>
                         )}
                       </div>
-                      <div className="text-xs text-slate-400 truncate mt-0.5">
-                        {job.company} {job.source_website && <span className="text-primary/80 font-medium">· Source: {job.source_website}</span>}
+                      <div className="text-[10px] sm:text-xs text-slate-400 truncate mt-0.5">
+                        {job.company} {job.source_website && <span className="text-primary/80 font-medium hidden sm:inline">· Source: {job.source_website}</span>}
                       </div>
                     </td>
-                    <td className="py-4 px-6 text-slate-300 text-xs">{job.location}</td>
-                    <td className="py-4 px-6">
-                      <span className="inline-flex rounded-full bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-300">
+                    <td className="py-3 px-3 sm:py-4 sm:px-6 text-slate-300 text-xs hidden lg:table-cell">{job.location}</td>
+                    <td className="py-3 px-3 sm:py-4 sm:px-6 hidden md:table-cell">
+                      <span className="inline-flex rounded-full bg-slate-800 px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold text-slate-300">
                         {job.contract_type}
                       </span>
                     </td>
-                    <td className="py-4 px-6 text-xs whitespace-nowrap">
+                    <td className="py-3 px-3 sm:py-4 sm:px-6 text-xs whitespace-nowrap hidden lg:table-cell">
                       {job.deadline ? (
                         <span
                           className={`inline-flex items-center gap-1.5 ${
@@ -639,8 +639,8 @@ export default function AdminJobsClient({
                         <span className="text-slate-500">—</span>
                       )}
                     </td>
-                    <td className="py-4 px-6">
-                      <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${
+                    <td className="py-3 px-3 sm:py-4 sm:px-6">
+                      <span className={`inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold border ${
                         job.status === 'published'
                           ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
                           : job.status === 'rejected'
@@ -655,39 +655,41 @@ export default function AdminJobsClient({
                         {job.status === 'published' ? 'Publiée' : job.status === 'rejected' ? 'Rejetée' : job.status === 'archived' ? 'Archivée' : 'En attente'}
                       </span>
                     </td>
-                    <td className="py-4 px-6 text-right space-x-2 whitespace-nowrap">
-                      {job.status !== 'published' && (
+                    <td className="py-3 px-3 sm:py-4 sm:px-6 text-right">
+                      <div className="flex flex-wrap items-center justify-end gap-1 sm:gap-2">
+                        {job.status !== 'published' && (
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateStatus(job, 'published')}
+                            className="px-2 sm:px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-[10px] sm:text-xs font-bold border border-emerald-500/20"
+                          >
+                            Publier
+                          </button>
+                        )}
+                        {job.status !== 'rejected' && (
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateStatus(job, 'rejected')}
+                            className="px-2 sm:px-3 py-1.5 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 text-[10px] sm:text-xs font-bold border border-rose-500/20"
+                          >
+                            Rejeter
+                          </button>
+                        )}
                         <button
                           type="button"
-                          onClick={() => handleUpdateStatus(job, 'published')}
-                          className="px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-xs font-bold border border-emerald-500/20"
+                          onClick={() => openEditModal(job)}
+                          className="px-2 sm:px-3 py-1.5 rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 text-[10px] sm:text-xs font-semibold"
                         >
-                          Valider & Publier
+                          Éditer
                         </button>
-                      )}
-                      {job.status !== 'rejected' && (
                         <button
                           type="button"
-                          onClick={() => handleUpdateStatus(job, 'rejected')}
-                          className="px-3 py-1.5 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 text-xs font-bold border border-rose-500/20"
+                          onClick={() => handleDelete(job.id)}
+                          className="px-2 sm:px-3 py-1.5 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 text-[10px] sm:text-xs font-semibold"
                         >
-                          Rejeter
+                          Supprimer
                         </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => openEditModal(job)}
-                        className="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 text-xs font-semibold"
-                      >
-                        Examiner / Éditer
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(job.id)}
-                        className="px-3 py-1.5 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 text-xs font-semibold"
-                      >
-                        Supprimer
-                      </button>
+                      </div>
                     </td>
                   </tr>
                 ))

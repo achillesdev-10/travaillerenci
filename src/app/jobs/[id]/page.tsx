@@ -11,6 +11,7 @@ import { formatDate, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
 import { jobDefaultImage } from '@/lib/images';
 import CoverImage from '@/components/content/CoverImage';
+import ShareButton from '@/components/ShareButton';
 
 export const revalidate = 300;
 
@@ -283,6 +284,11 @@ export default async function JobDetailPage({ params }: PageProps) {
 
               {/* Actions : Partager sur WhatsApp + Sauvegarder */}
               <div className="flex flex-wrap items-center gap-2 pt-1">
+                <ShareButton
+                  title={`${job.title} chez ${job.company}`}
+                  text={`${job.title} chez ${job.company} (${job.location}) — Consultez l'offre complète sur TravaillerEnCi`}
+                  url={`${getSiteUrl()}/jobs/${job.id}`}
+                />
                 <a
                   href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`*${job.title}* chez *${job.company}* (${job.location})\n\nConsultez l'offre complète sur TravaillerEnCi : ${getSiteUrl()}/jobs/${job.id}`)}`}
                   target="_blank"

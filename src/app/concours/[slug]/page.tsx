@@ -22,6 +22,7 @@ import { cn, formatDate, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
 import { examDefaultImage } from '@/lib/images';
 import CoverImage from '@/components/content/CoverImage';
+import ShareButton from '@/components/ShareButton';
 import type { Exam } from '@/types/exam';
 
 export const revalidate = 300;
@@ -354,6 +355,14 @@ export default async function ConcoursDetailPage({ params }: PageProps) {
 
               {/* Sauvegarder ce concours */}
               <SaveButton itemType="exam" itemId={exam.id} label="Sauvegarder ce concours" className="w-full" />
+
+              {/* Partage global */}
+              <ShareButton
+                title={exam.title}
+                text={`Concours ${exam.title} — ${exam.organizer}`}
+                url={absoluteUrl}
+                className="w-full justify-center"
+              />
 
               {/* Partage WhatsApp / Facebook */}
               <div className="grid grid-cols-2 gap-2.5 pt-1">

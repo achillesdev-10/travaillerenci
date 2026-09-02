@@ -186,17 +186,17 @@ export default function ReportsAdminClient({
       )}
 
       {/* Tableau */}
-      <div className="rounded-3xl border border-slate-800 bg-slate-950 overflow-hidden shadow-xl">
+      <div className="rounded-3xl border border-slate-800 bg-slate-950 shadow-xl">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse min-w-[500px]">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-900/50 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                <th className="py-4 px-6">Contenu signalé</th>
-                <th className="py-4 px-6">Motif</th>
-                <th className="py-4 px-6">Signalé par</th>
-                <th className="py-4 px-6">Date</th>
-                <th className="py-4 px-6">Statut</th>
-                <th className="py-4 px-6 text-right">Actions</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6 sticky left-0 z-10 bg-slate-900/50">Contenu signalé</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6">Motif</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6 hidden lg:table-cell">Signalé par</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6 hidden sm:table-cell">Date</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6">Statut</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-sm">
@@ -212,9 +212,9 @@ export default function ReportsAdminClient({
                   const reasonBadge = REPORT_REASON_LABELS[report.reason];
                   return (
                     <tr key={report.id} className="hover:bg-slate-900/40 transition-colors align-top">
-                      <td className="py-4 px-6 max-w-xs">
-                        <div className="flex items-center gap-2">
-                          <span className={`shrink-0 inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold ${typeBadge.className}`}>
+                      <td className="py-3 px-3 sm:py-4 sm:px-6 max-w-xs sticky left-0 z-10 bg-slate-950 hover:bg-slate-900/40">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <span className={`shrink-0 inline-flex items-center rounded-full border px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-bold ${typeBadge.className}`}>
                             {typeBadge.label}
                           </span>
                           {report.content ? (
@@ -222,34 +222,34 @@ export default function ReportsAdminClient({
                               href={report.content.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="font-bold text-white truncate hover:text-primary dark:hover:text-emerald-400 transition-colors"
+                              className="font-bold text-white truncate text-[13px] sm:text-sm hover:text-primary dark:hover:text-emerald-400 transition-colors"
                               title={report.content.title}
                             >
                               {report.content.title}
                             </a>
                           ) : (
-                            <span className="text-slate-500 italic truncate">
-                              Contenu supprimé (id : {report.item_id.slice(0, 8)})
+                            <span className="text-slate-500 italic truncate text-[13px] sm:text-sm">
+                              Contenu supprimé
                             </span>
                           )}
                         </div>
                         {report.content && (
-                          <div className="text-xs text-slate-400 truncate mt-0.5">
+                          <div className="text-[10px] sm:text-xs text-slate-400 truncate mt-0.5">
                             {report.content.subtitle}
                           </div>
                         )}
                       </td>
-                      <td className="py-4 px-6 max-w-xs">
-                        <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold ${reasonBadge.className}`}>
+                      <td className="py-3 px-3 sm:py-4 sm:px-6 max-w-xs">
+                        <span className={`inline-flex items-center rounded-full border px-2 sm:px-2.5 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-bold ${reasonBadge.className}`}>
                           {reasonBadge.label}
                         </span>
                         {report.details && (
-                          <p className="text-xs text-slate-400 mt-1.5 leading-relaxed whitespace-pre-wrap break-words">
+                          <p className="text-xs text-slate-400 mt-1.5 leading-relaxed whitespace-pre-wrap break-words hidden sm:block">
                             {report.details}
                           </p>
                         )}
                       </td>
-                      <td className="py-4 px-6 text-xs text-slate-300">
+                      <td className="py-3 px-3 sm:py-4 sm:px-6 text-xs text-slate-300 hidden lg:table-cell">
                         {report.reporter_email ? (
                           <>
                             <div className="truncate max-w-[180px]">{report.reporter_email}</div>
@@ -263,7 +263,7 @@ export default function ReportsAdminClient({
                           <span className="text-slate-500">Anonyme</span>
                         )}
                       </td>
-                      <td className="py-4 px-6 text-xs text-slate-400 whitespace-nowrap">
+                      <td className="py-3 px-3 sm:py-4 sm:px-6 text-xs text-slate-400 whitespace-nowrap hidden sm:table-cell">
                         {formatReportDate(report.created_at)}
                         {report.resolved_by && report.resolved_at && report.status !== 'pending' && (
                           <div className="text-[10px] text-slate-500 mt-0.5">
@@ -271,8 +271,8 @@ export default function ReportsAdminClient({
                           </div>
                         )}
                       </td>
-                      <td className="py-4 px-6">
-                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${
+                      <td className="py-3 px-3 sm:py-4 sm:px-6">
+                        <span className={`inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold border ${
                           report.status === 'resolved'
                             ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
                             : report.status === 'dismissed'
@@ -282,40 +282,42 @@ export default function ReportsAdminClient({
                           <span className={`h-1.5 w-1.5 rounded-full ${
                             report.status === 'resolved' ? 'bg-emerald-400' : report.status === 'dismissed' ? 'bg-slate-400' : 'bg-amber-400'
                           }`} />
-                          {report.status === 'resolved' ? 'Résolu' : report.status === 'dismissed' ? 'Classé' : 'En attente'}
+                          {report.status === 'resolved' ? 'Résolu' : report.status === 'dismissed' ? 'Classé' : 'Attente'}
                         </span>
                       </td>
-                      <td className="py-4 px-6 text-right space-x-2 whitespace-nowrap">
-                        {report.status !== 'resolved' && (
-                          <button
-                            type="button"
-                            disabled={isMutating === report.id}
-                            onClick={() => handleStatus(report, 'resolved')}
-                            className="px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-xs font-bold border border-emerald-500/20 disabled:opacity-50 disabled:cursor-wait"
-                          >
-                            Résoudre
-                          </button>
-                        )}
-                        {report.status !== 'dismissed' && (
-                          <button
-                            type="button"
-                            disabled={isMutating === report.id}
-                            onClick={() => handleStatus(report, 'dismissed')}
-                            className="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 text-xs font-semibold disabled:opacity-50 disabled:cursor-wait"
-                          >
-                            Classer
-                          </button>
-                        )}
-                        {report.status !== 'pending' && (
-                          <button
-                            type="button"
-                            disabled={isMutating === report.id}
-                            onClick={() => handleStatus(report, 'pending')}
-                            className="px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 text-xs font-semibold border border-amber-500/20 disabled:opacity-50 disabled:cursor-wait"
-                          >
-                            Rouvrir
-                          </button>
-                        )}
+                      <td className="py-3 px-3 sm:py-4 sm:px-6 text-right">
+                        <div className="flex flex-wrap items-center justify-end gap-1 sm:gap-2">
+                          {report.status !== 'resolved' && (
+                            <button
+                              type="button"
+                              disabled={isMutating === report.id}
+                              onClick={() => handleStatus(report, 'resolved')}
+                              className="px-2 sm:px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-[10px] sm:text-xs font-bold border border-emerald-500/20 disabled:opacity-50 disabled:cursor-wait"
+                            >
+                              Résoudre
+                            </button>
+                          )}
+                          {report.status !== 'dismissed' && (
+                            <button
+                              type="button"
+                              disabled={isMutating === report.id}
+                              onClick={() => handleStatus(report, 'dismissed')}
+                              className="px-2 sm:px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 text-[10px] sm:text-xs font-semibold disabled:opacity-50 disabled:cursor-wait"
+                            >
+                              Classer
+                            </button>
+                          )}
+                          {report.status !== 'pending' && (
+                            <button
+                              type="button"
+                              disabled={isMutating === report.id}
+                              onClick={() => handleStatus(report, 'pending')}
+                              className="px-2 sm:px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 text-[10px] sm:text-xs font-semibold border border-amber-500/20 disabled:opacity-50 disabled:cursor-wait"
+                            >
+                              Rouvrir
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );

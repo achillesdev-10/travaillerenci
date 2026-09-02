@@ -948,7 +948,7 @@ export default function AdminDashboardClient({
         </div>
 
         {/* ===== Vue cartes (mobile < md) ===== */}
-        <div className="mt-5 grid gap-3 md:hidden">
+        <div className="mt-5 grid gap-3 lg:hidden">
           {pageOffers.length === 0 ? (
             <p className="rounded-2xl border border-white/[0.06] bg-slate-950/60 px-4 py-10 text-center text-sm text-slate-500">
               Aucune offre ne correspond aux filtres actuels.
@@ -1036,12 +1036,12 @@ export default function AdminDashboardClient({
         </div>
 
         {/* ===== Table desktop (≥ md) ===== */}
-        <div className="mt-5 hidden overflow-hidden rounded-2xl border border-white/[0.06] md:block">
+        <div className="mt-5 hidden rounded-2xl border border-white/[0.06] lg:block">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-white/[0.06] text-left">
+            <table className="min-w-[600px] divide-y divide-white/[0.06] text-left">
               <thead className="bg-slate-950/80">
                 <tr className="text-[11px] uppercase tracking-[0.16em] text-slate-500">
-                  <th className="px-4 py-4">
+                  <th className="px-3 py-3 sm:px-4 sm:py-4 sticky left-0 z-10 bg-slate-950/80">
                     <input
                       type="checkbox"
                       checked={allVisibleSelected}
@@ -1060,13 +1060,13 @@ export default function AdminDashboardClient({
                       className="h-4 w-4 rounded border-white/20 bg-slate-900 text-emerald-500 focus:ring-emerald-500"
                     />
                   </th>
-                  <th className="px-4 py-4">Offre</th>
-                  <th className="px-4 py-4">Ville</th>
-                  <th className="px-4 py-4">Statut</th>
-                  <th className="px-4 py-4">Ajoutée le</th>
-                  <th className="px-4 py-4">Date limite</th>
-                  <th className="px-4 py-4">Clics</th>
-                  <th className="px-4 py-4">Source</th>
+                  <th className="px-3 py-3 sm:px-4 sm:py-4 sticky left-8 sm:left-10 z-10 bg-slate-950/80">Offre</th>
+                  <th className="px-3 py-3 sm:px-4 sm:py-4 hidden lg:table-cell">Ville</th>
+                  <th className="px-3 py-3 sm:px-4 sm:py-4">Statut</th>
+                  <th className="px-3 py-3 sm:px-4 sm:py-4 hidden md:table-cell">Ajoutée le</th>
+                  <th className="px-3 py-3 sm:px-4 sm:py-4 hidden lg:table-cell">Date limite</th>
+                  <th className="px-3 py-3 sm:px-4 sm:py-4 hidden md:table-cell">Clics</th>
+                  <th className="px-3 py-3 sm:px-4 sm:py-4 hidden sm:table-cell">Source</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.06] bg-slate-900/40">
@@ -1093,7 +1093,7 @@ export default function AdminDashboardClient({
                           : "hover:bg-white/[0.03]"
                       }`}
                     >
-                      <td className="px-4 py-4">
+                      <td className="px-3 py-3 sm:px-4 sm:py-4 sticky left-0 z-10 bg-slate-950 hover:bg-white/[0.03]">
                         <input
                           type="checkbox"
                           checked={isSelected}
@@ -1102,26 +1102,26 @@ export default function AdminDashboardClient({
                           className="mt-1 h-4 w-4 rounded border-white/20 bg-slate-900 text-emerald-500 focus:ring-emerald-500"
                         />
                       </td>
-                      <td className="px-4 py-4">
-                        <div className="min-w-[240px]">
+                      <td className="px-3 py-3 sm:px-4 sm:py-4 sticky left-8 sm:left-10 z-10 bg-slate-950 hover:bg-white/[0.03]">
+                        <div className="min-w-[180px] sm:min-w-[240px]">
                           <p className="font-medium text-white">{offer.title}</p>
                           <p className="mt-1 text-sm text-slate-400">{offer.company}</p>
                         </div>
                       </td>
-                      <td className="px-4 py-4 text-sm text-slate-300">{offer.city}</td>
-                      <td className="px-4 py-4">
+                      <td className="px-3 py-3 sm:px-4 sm:py-4 text-sm text-slate-300 hidden lg:table-cell">{offer.city}</td>
+                      <td className="px-3 py-3 sm:px-4 sm:py-4">
                         <span
-                          className={`inline-flex rounded-full border px-3 py-1 text-xs font-medium ${statusClasses(
+                          className={`inline-flex rounded-full border px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-medium ${statusClasses(
                             offer.status,
                           )}`}
                         >
                           {offer.status}
                         </span>
                       </td>
-                      <td className="whitespace-nowrap px-4 py-4 text-sm text-slate-300">
+                      <td className="whitespace-nowrap px-3 py-3 sm:px-4 sm:py-4 text-sm text-slate-300 hidden md:table-cell">
                         {formatShortDate(offer.createdAt)}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-4 text-sm">
+                      <td className="whitespace-nowrap px-3 py-3 sm:px-4 sm:py-4 text-sm hidden lg:table-cell">
                         {offer.deadline ? (
                           <span
                             className={
@@ -1144,10 +1144,10 @@ export default function AdminDashboardClient({
                           <span className="text-slate-600">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-4 text-sm font-medium text-white">
+                      <td className="px-3 py-3 sm:px-4 sm:py-4 text-sm font-medium text-white hidden md:table-cell">
                         {offer.clicks}
                       </td>
-                      <td className="px-4 py-4 text-sm">
+                      <td className="px-3 py-3 sm:px-4 sm:py-4 text-sm hidden sm:table-cell">
                         {offer.sourceUrl ? (
                           <a
                             href={offer.sourceUrl}

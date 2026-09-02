@@ -353,17 +353,17 @@ export default function EntreprendreAdminClient({
       </div>
 
       {/* Table */}
-      <div className="rounded-3xl border border-slate-800 bg-slate-950 overflow-hidden shadow-xl">
+      <div className="rounded-3xl border border-slate-800 bg-slate-950 shadow-xl">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse min-w-[520px]">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-900/50 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                <th className="py-4 px-6">Article</th>
-                <th className="py-4 px-6">Secteur</th>
-                <th className="py-4 px-6">Statut</th>
-                <th className="py-4 px-6">Stats</th>
-                <th className="py-4 px-6">Publié le</th>
-                <th className="py-4 px-6 text-right">Actions</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6 sticky left-0 z-10 bg-slate-900/50">Article</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6 hidden lg:table-cell">Secteur</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6">Statut</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6 hidden md:table-cell">Stats</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6 hidden sm:table-cell">Publié le</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-6 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-sm">
@@ -374,53 +374,55 @@ export default function EntreprendreAdminClient({
                   const badge = STATUS_BADGES[article.status];
                   return (
                     <tr key={article.id} className="hover:bg-slate-900/40 transition-colors">
-                      <td className="py-4 px-6">
+                      <td className="py-3 px-3 sm:py-4 sm:px-6 sticky left-0 z-10 bg-slate-950 hover:bg-slate-900/40">
                         <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <div className="font-bold text-white truncate max-w-xs">{article.title}</div>
+                          <div className="flex items-center gap-1.5 sm:gap-2">
+                            <div className="font-bold text-white truncate max-w-[160px] sm:max-w-xs">{article.title}</div>
                             {article.featured && <span className="text-amber-400 text-xs">⭐</span>}
                           </div>
-                          <div className="text-xs text-slate-400 truncate">/entreprendre/{article.slug}</div>
+                          <div className="text-[10px] sm:text-xs text-slate-400 truncate">/entreprendre/{article.slug}</div>
                         </div>
                       </td>
-                      <td className="py-4 px-6">
-                        <span className="inline-flex rounded-full bg-slate-800 px-2.5 py-1 text-[10px] font-semibold text-slate-300">
+                      <td className="py-3 px-3 sm:py-4 sm:px-6 hidden lg:table-cell">
+                        <span className="inline-flex rounded-full bg-slate-800 px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] font-semibold text-slate-300">
                           {SECTOR_LABELS[article.sector as EntreprendreSector] || article.sector}
                         </span>
                       </td>
-                      <td className="py-4 px-6">
-                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${badge.className}`}>
+                      <td className="py-3 px-3 sm:py-4 sm:px-6">
+                        <span className={`inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold border ${badge.className}`}>
                           <span className={`h-1.5 w-1.5 rounded-full ${badge.dot}`} />
                           {badge.label}
                         </span>
                       </td>
-                      <td className="py-4 px-6 text-xs text-slate-300 whitespace-nowrap">
+                      <td className="py-3 px-3 sm:py-4 sm:px-6 text-xs text-slate-300 whitespace-nowrap hidden md:table-cell">
                         👁 {article.view_count} · 👍 {article.helpful_count}
                       </td>
-                      <td className="py-4 px-6 text-xs text-slate-300 whitespace-nowrap">
+                      <td className="py-3 px-3 sm:py-4 sm:px-6 text-xs text-slate-300 whitespace-nowrap hidden sm:table-cell">
                         {formatDate(article.status === 'published' ? article.published_at : article.updated_at)}
                       </td>
-                      <td className="py-4 px-6 text-right space-x-1.5 whitespace-nowrap">
-                        {article.status === 'published' && (
-                          <a href={`/entreprendre/${article.slug}`} target="_blank" rel="noreferrer"
-                            className="px-2.5 py-1.5 rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 text-xs font-semibold">Voir</a>
-                        )}
-                        {article.status !== 'published' && (
-                          <button type="button" onClick={() => handleQuickStatus(article, 'published')}
-                            className="px-2.5 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-xs font-bold border border-emerald-500/20">Publier</button>
-                        )}
-                        {article.status === 'published' && (
-                          <button type="button" onClick={() => handleQuickStatus(article, 'draft')}
-                            className="px-2.5 py-1.5 rounded-xl bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 text-xs font-bold border border-amber-500/20">Dépublier</button>
-                        )}
-                        <button type="button" onClick={() => handleToggleFeatured(article)}
-                          className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold ${article.featured ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}>
-                          {article.featured ? '⭐' : '☆'}
-                        </button>
-                        <button type="button" onClick={() => openEditModal(article)}
-                          className="px-2.5 py-1.5 rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 text-xs font-semibold">Éditer</button>
-                        <button type="button" onClick={() => handleDelete(article.id)}
-                          className="px-2.5 py-1.5 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 text-xs font-semibold">Supprimer</button>
+                      <td className="py-3 px-3 sm:py-4 sm:px-6 text-right">
+                        <div className="flex flex-wrap items-center justify-end gap-1 sm:gap-1.5">
+                          {article.status === 'published' && (
+                            <a href={`/entreprendre/${article.slug}`} target="_blank" rel="noreferrer"
+                              className="px-2 sm:px-2.5 py-1.5 rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 text-[10px] sm:text-xs font-semibold">Voir</a>
+                          )}
+                          {article.status !== 'published' && (
+                            <button type="button" onClick={() => handleQuickStatus(article, 'published')}
+                              className="px-2 sm:px-2.5 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-[10px] sm:text-xs font-bold border border-emerald-500/20">Publier</button>
+                          )}
+                          {article.status === 'published' && (
+                            <button type="button" onClick={() => handleQuickStatus(article, 'draft')}
+                              className="px-2 sm:px-2.5 py-1.5 rounded-xl bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 text-[10px] sm:text-xs font-bold border border-amber-500/20">Dépublier</button>
+                          )}
+                          <button type="button" onClick={() => handleToggleFeatured(article)}
+                            className={`px-2 sm:px-2.5 py-1.5 rounded-xl text-[10px] sm:text-xs font-semibold ${article.featured ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}>
+                            {article.featured ? '⭐' : '☆'}
+                          </button>
+                          <button type="button" onClick={() => openEditModal(article)}
+                            className="px-2 sm:px-2.5 py-1.5 rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 text-[10px] sm:text-xs font-semibold">Éditer</button>
+                          <button type="button" onClick={() => handleDelete(article.id)}
+                            className="px-2 sm:px-2.5 py-1.5 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 text-[10px] sm:text-xs font-semibold">Supprimer</button>
+                        </div>
                       </td>
                     </tr>
                   );

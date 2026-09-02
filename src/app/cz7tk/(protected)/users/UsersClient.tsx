@@ -327,7 +327,7 @@ export default function UsersClient({ initialData }: UsersClientProps) {
         </div>
 
         {/* ===== Vue cartes (mobile < md) ===== */}
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 md:hidden">
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:hidden">
           {filteredUsers.length === 0 ? (
             <p className="rounded-2xl border border-white/[0.06] bg-slate-950/60 px-4 py-10 text-center text-sm text-slate-500 sm:col-span-2">
               Aucun utilisateur ne correspond aux filtres actuels.
@@ -375,45 +375,48 @@ export default function UsersClient({ initialData }: UsersClientProps) {
         </div>
 
         {/* ===== Table desktop (≥ md) ===== */}
-        <div className="mt-5 hidden overflow-hidden rounded-2xl border border-white/[0.06] md:block">
+        <div className="mt-5 hidden rounded-2xl border border-white/[0.06] lg:block">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-white/[0.06] text-left">
               <thead className="bg-slate-950/80">
                 <tr className="text-[11px] uppercase tracking-[0.16em] text-slate-500">
-                  <th className="px-4 py-4">Utilisateur</th>
-                  <th className="px-4 py-4">Email</th>
-                  <th className="px-4 py-4">Rôle</th>
-                  <th className="px-4 py-4">Titre / Site</th>
-                  <th className="px-4 py-4">Inscrit le</th>
+                  <th className="px-3 py-3 sm:px-4 sm:py-4 sticky left-0 z-10 bg-slate-950/80">Utilisateur</th>
+                  <th className="px-3 py-3 sm:px-4 sm:py-4 hidden md:table-cell">Email</th>
+                  <th className="px-3 py-3 sm:px-4 sm:py-4">Rôle</th>
+                  <th className="px-3 py-3 sm:px-4 sm:py-4 hidden lg:table-cell">Titre / Site</th>
+                  <th className="px-3 py-3 sm:px-4 sm:py-4 hidden sm:table-cell">Inscrit le</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.06] bg-slate-900/40">
                 {filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-4 py-10 text-center text-sm text-slate-500">
+                    <td colSpan={5} className="px-3 sm:px-4 py-10 text-center text-sm text-slate-500">
                       Aucun utilisateur ne correspond aux filtres actuels.
                     </td>
                   </tr>
                 ) : null}
                 {filteredUsers.map((user) => (
                   <tr key={user.id} className="transition hover:bg-white/[0.03]">
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-3">
+                    <td className="px-3 sm:px-4 py-3 sm:py-4 sticky left-0 z-10 bg-slate-950 hover:bg-white/[0.03]">
+                      <div className="flex items-center gap-2 sm:gap-3">
                         <Avatar name={user.name} email={user.email} />
-                        <span className="font-medium text-white">{user.name ?? "—"}</span>
+                        <div className="min-w-0">
+                          <span className="font-medium text-white text-[13px] sm:text-sm block truncate">{user.name ?? "—"}</span>
+                          <span className="text-[10px] sm:text-xs text-slate-400 block truncate lg:hidden">{user.email}</span>
+                        </div>
                       </div>
                     </td>
-                    <td className="px-4 py-4 text-sm text-slate-300">{user.email}</td>
-                    <td className="px-4 py-4">
+                    <td className="px-3 sm:px-4 py-3 sm:py-4 text-sm text-slate-300 hidden md:table-cell">{user.email}</td>
+                    <td className="px-3 sm:px-4 py-3 sm:py-4">
                       <span
-                        className={`inline-flex rounded-full border px-3 py-1 text-xs font-medium ${roleClasses(
+                        className={`inline-flex rounded-full border px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-medium ${roleClasses(
                           user.role,
                         )}`}
                       >
                         {roleLabel(user.role)}
                       </span>
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="px-3 sm:px-4 py-3 sm:py-4 hidden lg:table-cell">
                       {user.headline ? (
                         <span className="block max-w-[260px] truncate text-sm text-slate-400">
                           {user.headline}
@@ -431,7 +434,7 @@ export default function UsersClient({ initialData }: UsersClientProps) {
                         <span className="text-sm text-slate-600">—</span>
                       )}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-sm text-slate-300">
+                    <td className="whitespace-nowrap px-3 sm:px-4 py-3 sm:py-4 text-sm text-slate-300 hidden sm:table-cell">
                       {formatDate(user.created_at)}
                     </td>
                   </tr>
