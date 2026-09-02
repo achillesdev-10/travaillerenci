@@ -85,6 +85,13 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${inter.variable} ${poppins.variable}`} suppressHydrationWarning>
       <head>
+        {/* Preload hero image for better LCP */}
+        <link
+          rel="preload"
+          href="/images/hero-banner.jpg"
+          as="image"
+          fetchPriority="high"
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `
