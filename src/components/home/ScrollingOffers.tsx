@@ -8,9 +8,7 @@ interface ScrollingOffersProps {
   offers: JobOfferSchema[];
 }
 
-// Cartes blanches avec ombre subtile pour tous les blocs
-const CARD_CLASS = 'bg-white border-gray-100 shadow-md hover:shadow-lg';
-const DARK_CARD_CLASS = 'bg-slate-900 border-slate-800 shadow-md hover:shadow-lg';
+
 
 export default function ScrollingOffers({ offers }: ScrollingOffersProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -19,6 +17,10 @@ export default function ScrollingOffers({ offers }: ScrollingOffersProps) {
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
+
+    // Respect prefers-reduced-motion
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) return;
 
     let animId: number;
     let scrollPos = 0;
@@ -80,7 +82,7 @@ export default function ScrollingOffers({ offers }: ScrollingOffersProps) {
             <Link
               key={`${offer.id}-${i}`}
               href={`/jobs/${offer.id}`}
-              className={`shrink-0 w-[280px] sm:w-[320px] rounded-2xl border p-4 transition-all duration-200 group dark:${DARK_CARD_CLASS} ${CARD_CLASS}`}
+              className="shrink-0 w-[280px] sm:w-[320px] rounded-2xl border border-gray-100 bg-white shadow-md hover:shadow-lg dark:border-slate-800 dark:bg-slate-900 p-4 transition-all duration-200 group"
             >
               <div className="flex items-start justify-between gap-2 mb-2">
                 <h3 className="text-[13px] font-bold text-black dark:text-white leading-snug line-clamp-2 group-hover:text-primary transition-colors">

@@ -10,7 +10,7 @@ import type { JobOfferSchema } from '@/types';
 import { formatDate, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
 import { jobDefaultImage } from '@/lib/images';
-import CoverImage from '@/components/content/CoverImage';
+import { getJobThumbnail } from '@/lib/jobThumbnails';
 import ShareButton from '@/components/ShareButton';
 
 export const revalidate = 300;
@@ -62,11 +62,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   // URL canonique = URL réellement servie et indexée (l'ID). Les slugs legacy
   // redirigent en 308 vers cette URL (voir findJob + permanentRedirect).
   const canonicalUrl = `${getSiteUrl()}/jobs/${job.id}`;
-  const ogImage = jobDefaultImage(job.category);
+  const ogImage = getJobThumbnail(job);
+  const locationStr = job.location || "Côte d'Ivoire";
   return {
-    title: job.seo_title || `${job.title} — ${job.company} | TravaillerEnCi`,
-    description: desc,
-    keywords: job.seo_keywords || undefined,
+    title: `${job.title} à ${locationStr} | TravaillerEnCi`,
+    description: `Découvrez cette offre d'emploi pour le poste de ${job.title} à ${locationStr}. Consultez les missions, le profil recherché et les modalités de candidature.`,
+    keywords: job.seo_keywords || [job.title, job.company, job.location, job.contract_type, 'emploi', 'Côte d\'Ivoire', 'Abidjan'].filter(Boolean).join(', '),
     alternates: {
       canonical: canonicalUrl,
     },
@@ -74,15 +75,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       type: 'article',
       url: canonicalUrl,
       siteName: 'TravaillerEnCi',
-      title: `${job.title} chez ${job.company}`,
+      title: `${job.title} — ${job.company} | TravaillerEnCi`,
       description: desc,
       locale: 'fr_CI',
-      images: [{ url: ogImage, width: 1200, height: 800, alt: job.title }],
-      tags: [job.contract_type, job.company, job.location],
+      images: [{ url: ogImage, width: 1200, height: 800, alt: `${job.title} chez ${job.company}` }],
+      tags: [job.contract_type, job.company, job.location, "Côte d'Ivoire"],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${job.title} chez ${job.company}`,
+      title: `${job.title} — ${job.company} | TravaillerEnCi`,
       description: desc,
       images: [ogImage],
     },
@@ -210,10 +211,10 @@ export default async function JobDetailPage({ params }: PageProps) {
       {/* ============= HERO / HEADER DU POSTE ============= */}
       <section className="bg-primary/5 dark:bg-primary/10 border-b border-gray-100 dark:border-slate-800">
         <div className="container mx-auto px-4 pt-4 sm:pt-8 pb-6 max-w-4xl">
-          {/* Bannière photo par défaut selon la catégorie */}
-          <div className="relative h-40 sm:h-56 overflow-hidden rounded-2xl sm:rounded-3xl shadow-lg mb-5 sm:mb-6">
-            <CoverImage
-              src={jobDefaultImage(job.category)}
+          {/* Thumbnail with intelligent fallback */}
+          <div className="relative h-40 sm:h-56 overflow-hidden rounded-2xl sm:rounded-3xl shadow-lg mb-5 sm:mb-6 bg-gradient-to-br from-orange-400 to-amber-500">
+            <img
+              src={getJobThumbnail(job)}
               alt=""
               className="h-full w-full object-cover"
             />

@@ -40,6 +40,18 @@ html:focus-within {
   scroll-behavior: smooth;
 }
 
+/* Global focus-visible ring for accessibility */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Remove default outline for mouse/touch users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--color-background);

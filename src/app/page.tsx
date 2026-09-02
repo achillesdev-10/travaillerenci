@@ -20,6 +20,16 @@ import { getSiteUrl } from '@/lib/site';
 
 export const revalidate = 60;
 
+// Major cities in Côte d'Ivoire for job discovery by location
+const CITIES = [
+  { name: 'Abidjan' },
+  { name: 'Bouaké' },
+  { name: 'Yamoussoukro' },
+  { name: 'San-Pédro' },
+  { name: 'Korhogo' },
+  { name: 'Daloa' },
+];
+
 const QUICK_LINKS = [
   {
     label: 'Offres d\u2019emploi',
@@ -245,7 +255,7 @@ export default async function HomePage({
   };
 
   return (
-    <main className="flex-1 min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors">
+    <main id="main-content" className="flex-1 min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors">
       {/* JSON-LD (SEO) : WebSite + SearchAction */}
       <script
         type="application/ld+json"
@@ -532,6 +542,38 @@ export default async function HomePage({
                   {sector.name}
                 </div>
               </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* ======================================================================== */}
+      {/*   EMPLOIS PAR VILLE — navigation par localisation                        */}
+      {/* ======================================================================== */}
+      <section className="container mx-auto px-4 mt-10 sm:mt-14 max-w-6xl">
+        <SectionHeading
+          kicker="Par ville"
+          title="Trouvez un emploi près de chez vous"
+          actionHref="/jobs"
+          actionLabel="Toutes les villes"
+        />
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3">
+          {CITIES.map((city, i) => (
+            <Link
+              key={city.name}
+              href={`/jobs?city=${encodeURIComponent(city.name)}`}
+              className="group flex items-center gap-2.5 rounded-xl border border-gray-100 bg-white px-3.5 py-3 shadow-sm transition-all duration-200 hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md animate-fade-in-up dark:border-slate-800 dark:bg-slate-900"
+              style={{ animationDelay: `${i * 40}ms` }}
+            >
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary dark:text-emerald-400">
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+              </span>
+              <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-200 group-hover:text-primary transition-colors truncate">
+                {city.name}
+              </span>
             </Link>
           ))}
         </div>
