@@ -21,6 +21,7 @@
     "db:sync-all": "tsx scripts/sync-all-to-supabase.ts",
     "test:exam-phase": "tsx scripts/test-exam-phase.ts",
     "test:assistant": "node --require ./scripts/__stubs/server-only-stub.cjs --import tsx scripts/test-assistant.ts",
+    "test": "tsx tests/jobThumbnails.test.ts",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:prod": "playwright test --config playwright.prod.config.ts",

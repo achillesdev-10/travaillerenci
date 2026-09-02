@@ -13,9 +13,7 @@
 import type { JobOfferSchema, ContentCategory } from '@/types';
 
 // ---------------------------------------------------------------------------
-//  Category slug → local SVG placeholder image
-//  These load instantly from public/images/categories/ and provide a
-//  visually distinct fallback for each job category.
+//  Category slug -> local SVG placeholder image
 // ---------------------------------------------------------------------------
 const CATEGORY_IMAGES: Record<string, string> = {
   informatique: '/images/categories/informatique.svg',
@@ -38,12 +36,11 @@ const CATEGORY_IMAGES: Record<string, string> = {
   agriculture: '/images/categories/industrie.svg',
   securite: '/images/categories/securite.svg',
   telecoms: '/images/categories/telecoms.svg',
+  telecommunications: '/images/categories/telecoms.svg',
 };
 
 // ---------------------------------------------------------------------------
-//  French keyword → category mapping
-//  Each entry: { keywords: string[], category: string }
-//  Keywords are checked case-insensitively against `title + company + description`.
+//  French keyword -> category mapping
 // ---------------------------------------------------------------------------
 interface KeywordMapping {
   keywords: string[];
@@ -77,7 +74,7 @@ const KEYWORD_MAPPINGS: KeywordMapping[] = [
   // Comptabilité / Finance
   {
     keywords: [
-      'comptable', 'comptabilité', 'accountant', 'audit', 'finance',
+      'comptable', 'comptabilité', 'accountant', 'audit', 'auditeur', 'finance',
       'financier', 'trésorier', 'gestionnaire', 'budget', 'contrôle',
       'commissaire', 'expert comptable', 'paye', 'paie', 'fiscal',
       'impôt', 'sage', 'quickbooks', 'compta',
@@ -163,7 +160,7 @@ const KEYWORD_MAPPINGS: KeywordMapping[] = [
   {
     keywords: [
       'chauffeur', 'conducteur', 'driver', 'livreur', 'transport',
-      'logistique', 'expédition', 'fret', 'marine', ' maritime',
+      'logistique', 'expédition', 'fret', 'maritime',
       'cariste', 'magasinier', 'manutentionnaire', 'routier',
       'motard', 'taxis', 'vlm', 'permis', 'livraison',
     ],
@@ -172,7 +169,7 @@ const KEYWORD_MAPPINGS: KeywordMapping[] = [
   // Hôtellerie / Restauration
   {
     keywords: [
-      'serveur', 'serveuse', 'cuisinier', 'chef', 'restaurant',
+      'serveur', 'serveuse', 'cuisinier', 'chef cuisinier', 'restaurant',
       'hôtel', 'hotel', 'hôtellerie', 'restauration', 'barman',
       'bartender', 'réceptionniste', 'pâtissier', 'plongeur',
       'hotellerie', 'animation', 'guide touristique',
@@ -192,7 +189,7 @@ const KEYWORD_MAPPINGS: KeywordMapping[] = [
   {
     keywords: [
       'sécurité', 'security', 'vigile', 'gardien', 'agent sécurité',
-      'surveillant', 'sûreté', 'protection', 'gardiennage',      "forces de l'ordre",
+      'surveillant', 'sûreté', 'protection', 'gardiennage',
       'police', 'gendarmerie', 'pompiers',
     ],
     category: 'securite',
@@ -201,15 +198,15 @@ const KEYWORD_MAPPINGS: KeywordMapping[] = [
   {
     keywords: [
       'télécom', 'télécommunications', 'telecom', 'antenne',
-      'opérateur télécom', 'mobile', 'réseau', 'téléphonie',
-      'fiber', 'fibre', '4g', '5g',
+      'opérateur télécom', 'téléphonie',
+      'fibre', '4g', '5g',
     ],
     category: 'telecommunications',
   },
 ];
 
 // ---------------------------------------------------------------------------
-//  Accent / diacritics normalization helper
+//  Accent / diacritics normalization
 // ---------------------------------------------------------------------------
 function stripAccents(s: string): string {
   return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -217,16 +214,27 @@ function stripAccents(s: string): string {
 
 // ---------------------------------------------------------------------------
 //  Core: match keywords against text
+//  Uses split-on-non-alpha to find whole-word matches, avoiding regex
+//  boundary issues with Unicode/accented characters.
 // ---------------------------------------------------------------------------
+function isWholeWordMatch(text: string, keyword: string): boolean {
+  // For single-word keywords, check if it exists as a complete token
+  if (!keyword.includes(' ')) {
+    const tokens = text.split(/[^a-z0-9]+/).filter(Boolean);
+    return tokens.includes(keyword);
+  }
+  // For multi-word keywords, check if the phrase appears in the text
+  // (already normalized) surrounded by non-alphanumeric chars or boundaries
+  return text.includes(keyword);
+}
+
 function matchCategory(text: string): string | null {
   const normalized = stripAccents(text.toLowerCase());
 
   for (const mapping of KEYWORD_MAPPINGS) {
     for (const keyword of mapping.keywords) {
       const kw = stripAccents(keyword.toLowerCase());
-      // Use word-boundary check: ensure we match whole words
-      const regex = new RegExp(`\b${kw.replace(/[.*+?^${}()|[\]\-]/g, '\\$&')}\b`);
-      if (regex.test(normalized)) {
+      if (isWholeWordMatch(normalized, kw)) {
         return mapping.category;
       }
     }
@@ -240,16 +248,9 @@ function matchCategory(text: string): string | null {
 
 /**
  * Returns the best thumbnail URL for a job offer.
- *
- * Fallback hierarchy:
- *   1. Explicit job image (if `job.image_url` exists in the future)
- *   2. Company-provided image (if `job.company_logo` exists in the future)
- *   3. Profession-specific image (keyword matching on title + company + description)
- *   4. Category-based image
- *   5. Generic fallback
  */
 export function getJobThumbnail(job: JobOfferSchema): string {
-  // 1. Explicit image (future-proof: some CMS may add an image field)
+  // 1. Explicit image (future-proof)
   const jobObj = job as unknown as Record<string, unknown>;
   if (typeof jobObj.image_url === 'string' && jobObj.image_url) {
     return jobObj.image_url;
@@ -270,7 +271,7 @@ export function getJobThumbnail(job: JobOfferSchema): string {
     return CATEGORY_IMAGES[matchedCategory];
   }
 
-  // 4. Category-based fallback (use local SVG placeholders)
+  // 4. Category-based fallback
   const category = job.category as ContentCategory | undefined;
   switch (category) {
     case 'internship':
