@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0e7490"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1050" cy="80" r="180" fill="#fff" opacity="0.05"/>
+  <circle cx="100" cy="530" r="140" fill="#fff" opacity="0.05"/>
+  <!-- Open book -->
+  <path d="M380 280 Q600 240 600 310 L600 430 Q600 370 380 400 Z" fill="#fff" opacity="0.18"/>
+  <path d="M820 280 Q600 240 600 310 L600 430 Q600 370 820 400 Z" fill="#fff" opacity="0.14"/>
+  <!-- Book lines -->
+  <line x1="420" y1="310" x2="580" y2="285" stroke="#fff" stroke-width="1.5" opacity="0.2"/>
+  <line x1="420" y1="340" x2="580" y2="315" stroke="#fff" stroke-width="1.5" opacity="0.2"/>
+  <line x1="420" y1="370" x2="580" y2="345" stroke="#fff" stroke-width="1.5" opacity="0.2"/>
+  <line x1="620" y1="285" x2="780" y2="310" stroke="#fff" stroke-width="1.5" opacity="0.2"/>
+  <line x1="620" y1="315" x2="780" y2="340" stroke="#fff" stroke-width="1.5" opacity="0.2"/>
+  <!-- Graduation cap -->
+  <polygon points="510,200 600,160 690,200" fill="#f59e0b" opacity="0.4"/>
+  <path d="M510,200 L510,230 L600,250 L690,230 L690,200" fill="none" stroke="#f59e0b" stroke-width="2.5" opacity="0.35"/>
+  <line x1="600" y1="160" x2="600" y2="175" stroke="#fbbf24" stroke-width="2" opacity="0.5"/>
+  <circle cx="600" cy="180" r="5" fill="#fbbf24" opacity="0.5"/>
+  <text x="600" y="560" font-family="Poppins, Arial, sans-serif" font-size="28" font-weight="700" fill="#fff" text-anchor="middle" opacity="0.7">Éducation</text>
+</svg>

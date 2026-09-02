@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#374151"/>
+      <stop offset="100%" stop-color="#6b7280"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1000" cy="90" r="200" fill="#fff" opacity="0.04"/>
+  <circle cx="200" cy="540" r="160" fill="#fff" opacity="0.04"/>
+  <!-- Factory building -->
+  <rect x="350" y="220" width="500" height="240" rx="6" fill="#fff" opacity="0.12"/>
+  <!-- Smokestacks -->
+  <rect x="400" y="120" width="40" height="100" rx="4" fill="#fff" opacity="0.18"/>
+  <rect x="480" y="140" width="40" height="80" rx="4" fill="#fff" opacity="0.15"/>
+  <rect x="560" y="100" width="40" height="120" rx="4" fill="#fff" opacity="0.2"/>
+  <!-- Windows -->
+  <rect x="380" y="260" width="60" height="40" rx="3" fill="#fff" opacity="0.15"/>
+  <rect x="480" y="260" width="60" height="40" rx="3" fill="#fff" opacity="0.15"/>
+  <rect x="580" y="260" width="60" height="40" rx="3" fill="#fff" opacity="0.15"/>
+  <rect x="680" y="260" width="60" height="40" rx="3" fill="#fff" opacity="0.15"/>
+  <!-- Gear -->
+  <circle cx="750" cy="400" r="40" fill="none" stroke="#fbbf24" stroke-width="4" opacity="0.25"/>
+  <circle cx="750" cy="400" r="20" fill="#fbbf24" opacity="0.15"/>
+  <text x="600" y="560" font-family="Poppins, Arial, sans-serif" font-size="28" font-weight="700" fill="#fff" text-anchor="middle" opacity="0.7">Industrie</text>
+</svg>

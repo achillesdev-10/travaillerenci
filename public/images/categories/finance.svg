@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#b45309"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="980" cy="100" r="180" fill="#fff" opacity="0.06"/>
+  <circle cx="180" cy="500" r="150" fill="#fff" opacity="0.06"/>
+  <!-- Dollar/CFA symbol -->
+  <text x="600" y="390" font-family="Georgia, serif" font-size="200" font-weight="700" fill="#fff" opacity="0.18" text-anchor="middle">₣</text>
+  <!-- Chart bars -->
+  <rect x="400" y="350" width="50" height="120" rx="4" fill="#fff" opacity="0.2"/>
+  <rect x="470" y="300" width="50" height="170" rx="4" fill="#fff" opacity="0.25"/>
+  <rect x="540" y="250" width="50" height="220" rx="4" fill="#fff" opacity="0.3"/>
+  <rect x="610" y="280" width="50" height="190" rx="4" fill="#fff" opacity="0.22"/>
+  <rect x="680" y="220" width="50" height="250" rx="4" fill="#fff" opacity="0.28"/>
+  <rect x="750" y="310" width="50" height="160" rx="4" fill="#fff" opacity="0.2"/>
+  <text x="600" y="560" font-family="Poppins, Arial, sans-serif" font-size="28" font-weight="700" fill="#fff" text-anchor="middle" opacity="0.7">Banque / Finance</text>
+</svg>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#064e3b"/>
+      <stop offset="100%" stop-color="#009639"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="950" cy="120" r="180" fill="#fff" opacity="0.06"/>
+  <circle cx="200" cy="520" r="140" fill="#fff" opacity="0.06"/>
+  <!-- Briefcase icon -->
+  <rect x="440" y="220" width="320" height="200" rx="16" fill="#fff" opacity="0.15"/>
+  <rect x="530" y="180" width="140" height="50" rx="10" fill="none" stroke="#fff" stroke-width="4" opacity="0.2"/>
+  <line x1="440" y1="320" x2="760" y2="320" stroke="#fff" stroke-width="3" opacity="0.15"/>
+  <circle cx="600" cy="320" r="12" fill="#fbbf24" opacity="0.35"/>
+  <!-- Decorative dots -->
+  <circle cx="300" cy="280" r="10" fill="#34d399" opacity="0.2"/>
+  <circle cx="900" cy="350" r="14" fill="#34d399" opacity="0.15"/>
+  <text x="600" y="560" font-family="Poppins, Arial, sans-serif" font-size="28" font-weight="700" fill="#fff" text-anchor="middle" opacity="0.7">TravaillerEnCi</text>
+</svg>

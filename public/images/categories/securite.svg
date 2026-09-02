@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#475569"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="980" cy="100" r="180" fill="#fff" opacity="0.04"/>
+  <circle cx="200" cy="520" r="150" fill="#fff" opacity="0.04"/>
+  <!-- Shield -->
+  <path d="M600 120 L780 190 L780 340 Q780 440 600 500 Q420 440 420 340 L420 190 Z" fill="#fff" opacity="0.12" stroke="#fff" stroke-width="3" stroke-opacity="0.18"/>
+  <!-- Checkmark -->
+  <path d="M520 310 L575 365 L690 250" fill="none" stroke="#34d399" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+  <!-- Decorative dots -->
+  <circle cx="300" cy="250" r="10" fill="#fbbf24" opacity="0.2"/>
+  <circle cx="920" cy="380" r="14" fill="#fbbf24" opacity="0.15"/>
+  <text x="600" y="560" font-family="Poppins, Arial, sans-serif" font-size="28" font-weight="700" fill="#fff" text-anchor="middle" opacity="0.7">Sécurité</text>
+</svg>

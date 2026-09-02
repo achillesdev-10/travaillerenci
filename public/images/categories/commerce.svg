@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#be185d"/>
+      <stop offset="100%" stop-color="#ec4899"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="980" cy="100" r="180" fill="#fff" opacity="0.05"/>
+  <circle cx="200" cy="520" r="150" fill="#fff" opacity="0.05"/>
+  <!-- Shopping bags -->
+  <rect x="440" y="200" width="120" height="160" rx="8" fill="#fff" opacity="0.15"/>
+  <path d="M470 200 Q500 160 530 200" fill="none" stroke="#fff" stroke-width="3" opacity="0.2"/>
+  <rect x="640" y="220" width="100" height="140" rx="6" fill="#fff" opacity="0.12"/>
+  <path d="M665 220 Q690 190 715 220" fill="none" stroke="#fff" stroke-width="3" opacity="0.18"/>
+  <!-- Handshake -->
+  <path d="M400 380 Q500 350 600 380 Q700 350 800 380" fill="none" stroke="#fff" stroke-width="4" opacity="0.2"/>
+  <!-- Growth arrow -->
+  <path d="M350 450 L750 450" stroke="#34d399" stroke-width="3" opacity="0.3"/>
+  <polygon points="750,440 780,450 750,460" fill="#34d399" opacity="0.3"/>
+  <text x="600" y="560" font-family="Poppins, Arial, sans-serif" font-size="28" font-weight="700" fill="#fff" text-anchor="middle" opacity="0.7">Commerce</text>
+</svg>

@@ -1,13 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import Image from 'next/image';
 
 /**
- * Image de couverture avec repli gracieux : si l'URL est cassée (image supprimée,
- * hotlink bloqué, mauvais chemin…), on affiche un visuel de remplacement aux
- * couleurs du site plutôt qu'une icône d'image cassée.
+ * Image de couverture optimisée avec next/image :
+ * - Conversion automatique WebP/AVIF via l'optimiseur Next.js
+ * - Repli gracieux : si l'URL est cassée, on affiche un visuel SVG
+ *   aux couleurs du site plutôt qu'une icône d'image cassée.
+ * - Utilise le mode `fill` : le parent DOIT avoir `relative` + dimensions fixes.
  */
-const FALLBACK_URI =
+
+/** SVG de repli aux couleurs de la marque (vert → emeraude). */
+const FALLBACK_SRC =
   'data:image/svg+xml;charset=utf-8,' +
   encodeURIComponent(
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">' +
@@ -21,26 +26,47 @@ const FALLBACK_URI =
       '</svg>',
   );
 
-export default function CoverImage({
-  src,
-  alt,
-  className = '',
-}: {
+interface CoverImageProps {
   src: string;
   alt: string;
   className?: string;
-}) {
-  const [current, setCurrent] = useState<string>(src);
+}
+
+export default function CoverImage({ src, alt, className = '' }: CoverImageProps) {
+  const [imgSrc, setImgSrc] = useState(src);
+  const [hasError, setHasError] = useState(false);
+
+  const handleError = useCallback(() => {
+    if (!hasError) {
+      setHasError(true);
+      setImgSrc(FALLBACK_SRC);
+    }
+  }, [hasError]);
+
+  // Le fallback SVG est une data URI — next/image ne peut pas l'optimiser,
+  // on utilise un <img> natif dans ce cas pour éviter une erreur de build.
+  if (hasError) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={imgSrc}
+        alt={alt}
+        className={className}
+        aria-hidden={alt === '' ? 'true' : undefined}
+      />
+    );
+  }
 
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={current}
+    <Image
+      src={imgSrc}
       alt={alt}
-      loading="lazy"
+      fill
+      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+      className={`object-cover ${className}`}
+      onError={handleError}
+      unoptimized={imgSrc.startsWith('data:')}
       referrerPolicy="no-referrer"
-      onError={() => setCurrent(FALLBACK_URI)}
-      className={className}
     />
   );
 }

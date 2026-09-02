@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#065f46"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1000" cy="100" r="200" fill="#fff" opacity="0.05"/>
+  <circle cx="150" cy="550" r="160" fill="#fff" opacity="0.05"/>
+  <!-- Medical cross -->
+  <rect x="560" y="160" width="80" height="280" rx="12" fill="#fff" opacity="0.2"/>
+  <rect x="460" y="260" width="280" height="80" rx="12" fill="#fff" opacity="0.2"/>
+  <!-- Heart -->
+  <path d="M600 420 C600 420, 520 370, 520 310 C520 270, 560 250, 590 280 L600 295 L610 280 C640 250, 680 270, 680 310 C680 370, 600 420, 600 420Z" fill="#ef4444" opacity="0.35"/>
+  <!-- Decorative circles -->
+  <circle cx="300" cy="280" r="12" fill="#34d399" opacity="0.3"/>
+  <circle cx="900" cy="350" r="16" fill="#34d399" opacity="0.25"/>
+  <text x="600" y="560" font-family="Poppins, Arial, sans-serif" font-size="28" font-weight="700" fill="#fff" text-anchor="middle" opacity="0.7">Santé</text>
+</svg>

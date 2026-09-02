@@ -10,33 +10,34 @@
  *   5. Generic TravaillerEnCi fallback
  */
 
-import { IMAGES } from '@/lib/images';
 import type { JobOfferSchema, ContentCategory } from '@/types';
 
 // ---------------------------------------------------------------------------
-//  Category slug → representative image
+//  Category slug → local SVG placeholder image
+//  These load instantly from public/images/categories/ and provide a
+//  visually distinct fallback for each job category.
 // ---------------------------------------------------------------------------
 const CATEGORY_IMAGES: Record<string, string> = {
-  informatique: IMAGES.it,
-  administration: IMAGES.examAdmin,
-  comptabilite: IMAGES.banque,
-  finance: IMAGES.banque,
-  banque: IMAGES.banque,
-  commerce: IMAGES.commerce,
-  marketing: IMAGES.commerce,
-  communication: IMAGES.commerce,
-  'ressources-humaines': IMAGES.community,
-  sante: IMAGES.sante,
-  education: IMAGES.education,
-  btp: IMAGES.btp,
-  industrie: IMAGES.industrie,
-  transport: IMAGES.transport,
-  logistique: IMAGES.transport,
-  hotellerie: IMAGES.commerce,
-  restauration: IMAGES.commerce,
-  agriculture: IMAGES.industrie,
-  securite: IMAGES.examSecurite,
-  telecoms: IMAGES.it,
+  informatique: '/images/categories/informatique.svg',
+  administration: '/images/categories/generic.svg',
+  comptabilite: '/images/categories/finance.svg',
+  finance: '/images/categories/finance.svg',
+  banque: '/images/categories/finance.svg',
+  commerce: '/images/categories/commerce.svg',
+  marketing: '/images/categories/commerce.svg',
+  communication: '/images/categories/commerce.svg',
+  'ressources-humaines': '/images/categories/generic.svg',
+  sante: '/images/categories/sante.svg',
+  education: '/images/categories/education.svg',
+  btp: '/images/categories/btp.svg',
+  industrie: '/images/categories/industrie.svg',
+  transport: '/images/categories/transport.svg',
+  logistique: '/images/categories/transport.svg',
+  hotellerie: '/images/categories/restauration.svg',
+  restauration: '/images/categories/restauration.svg',
+  agriculture: '/images/categories/industrie.svg',
+  securite: '/images/categories/securite.svg',
+  telecoms: '/images/categories/telecoms.svg',
 };
 
 // ---------------------------------------------------------------------------
@@ -269,24 +270,24 @@ export function getJobThumbnail(job: JobOfferSchema): string {
     return CATEGORY_IMAGES[matchedCategory];
   }
 
-  // 4. Category-based fallback
+  // 4. Category-based fallback (use local SVG placeholders)
   const category = job.category as ContentCategory | undefined;
   switch (category) {
     case 'internship':
-      return IMAGES.internship;
+      return '/images/categories/education.svg';
     case 'scholarship':
-      return IMAGES.scholarship;
+      return '/images/categories/education.svg';
     case 'exam':
-      return IMAGES.concours;
+      return '/images/categories/generic.svg';
   }
 
   // 5. Contract-type heuristic
   if (job.contract_type === 'Stage') {
-    return IMAGES.internship;
+    return '/images/categories/education.svg';
   }
 
   // 6. Generic fallback
-  return IMAGES.jobs;
+  return '/images/categories/generic.svg';
 }
 
 /**
