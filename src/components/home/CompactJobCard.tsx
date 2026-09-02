@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import type { JobOfferSchema } from '@/types';
 import { formatRelativeTime } from '@/lib/utils';
 import SaveButton from '@/components/saved/SaveButton';
@@ -21,11 +22,13 @@ export default function CompactJobCard({ job }: { job: JobOfferSchema }) {
       <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm shadow-black/5 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:border-primary/25 group-hover:shadow-md active:scale-[0.99]">
         {/* Thumbnail with gradient fallback */}
         <div className="relative h-24 sm:h-28 overflow-hidden bg-gradient-to-br from-orange-400 to-amber-500">
-          <img
+          <Image
             src={getJobThumbnail(job)}
             alt=""
-            loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            unoptimized={getJobThumbnail(job).startsWith('data:')}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/35 to-transparent" aria-hidden="true" />
         </div>

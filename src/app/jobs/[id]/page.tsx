@@ -10,7 +10,6 @@ import PWAInstallCTA from '@/components/concours/PWAInstallCTA';
 import type { JobOfferSchema } from '@/types';
 import { formatDate, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
-import { jobDefaultImage } from '@/lib/images';
 import { getJobThumbnail } from '@/lib/jobThumbnails';
 import ShareButton from '@/components/ShareButton';
 
