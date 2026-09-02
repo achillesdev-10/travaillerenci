@@ -476,12 +476,12 @@ export default async function HomePage({
             >
               {/* Photo de fond + voile sombre (l'image ne charge pas ? la couleur de repli reste visible) */}
               <div className={`absolute inset-0 ${link.color}`} aria-hidden="true" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={link.image}
                 alt=""
-                loading="lazy"
-                className="absolute inset-0 h-full w-full object-cover opacity-90 transition-transform duration-500 group-hover:scale-105"
+                fill
+                sizes="(min-width: 1024px) 33vw, 50vw"
+                className="object-cover opacity-90 transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/30 to-slate-900/10" aria-hidden="true" />
               <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-white/15 transition-transform duration-500 group-hover:scale-150" aria-hidden="true" />
@@ -661,12 +661,12 @@ export default async function HomePage({
               style={{ animationDelay: `${i * 90}ms` }}
             >
               <div className="relative h-36 sm:h-40 overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={step.image}
                   alt={step.title}
-                  loading="lazy"
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" aria-hidden="true" />
                 <span className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white text-primary font-black font-[var(--font-display)] shadow-lg">
@@ -699,12 +699,12 @@ export default async function HomePage({
       {/* ======================================================================== */}
       <section className="container mx-auto px-4 pb-16 sm:pb-24 max-w-6xl">
         <div className="relative overflow-hidden rounded-3xl bg-slate-900 dark:bg-slate-900 text-white shadow-xl">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={IMAGES.community}
             alt=""
-            loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover opacity-30"
+            fill
+            sizes="100vw"
+            className="object-cover opacity-30"
             aria-hidden="true"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-900/70 to-slate-900/40" aria-hidden="true" />

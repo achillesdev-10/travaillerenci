@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { Metadata } from 'next';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
@@ -213,10 +214,13 @@ export default async function JobDetailPage({ params }: PageProps) {
         <div className="container mx-auto px-4 pt-4 sm:pt-8 pb-6 max-w-4xl">
           {/* Thumbnail with intelligent fallback */}
           <div className="relative h-40 sm:h-56 overflow-hidden rounded-2xl sm:rounded-3xl shadow-lg mb-5 sm:mb-6 bg-gradient-to-br from-orange-400 to-amber-500">
-            <img
+            <Image
               src={getJobThumbnail(job)}
               alt=""
-              className="h-full w-full object-cover"
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 768px, 896px"
+              className="object-cover"
+              unoptimized={getJobThumbnail(job).startsWith('data:')}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" aria-hidden="true" />
           </div>
