@@ -110,8 +110,6 @@ export default async function JobDetailPage({ params }: PageProps) {
       !Number.isNaN(deadline.getTime()) &&
       // eslint-disable-next-line react-hooks/purity
       deadline.getTime() < Date.now());
-  const hasApplyLink = Boolean(job.apply_link);
-  const hasApplyEmail = Boolean(job.apply_email);
   // Ville « propre » pour le lien de maillage interne (avant la virgule / le tiret).
   const jobCity = (job.location || '').split(',')[0].split(' - ')[0].trim();
 
@@ -332,60 +330,6 @@ export default async function JobDetailPage({ params }: PageProps) {
                 <SimpleMarkdown text={job.description} />
               </div>
             </div>
-
-            {/* Comment postuler — procédure visible dans le corps de l'article */}
-            {(hasApplyLink || hasApplyEmail) && (
-              <div className="mt-6 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm shadow-black/5 p-5 sm:p-8">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 font-[var(--font-display)]">
-                  Comment postuler ?
-                </h2>
-                <ol className="space-y-3 text-sm sm:text-base text-gray-700 dark:text-gray-300">
-                  {hasApplyEmail && (
-                    <li className="flex gap-3">
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:text-emerald-400 text-xs font-black">1</span>
-                      <span>
-                        Envoyez votre candidature par email à{' '}
-                        <a
-                          href={`mailto:${job.apply_email}?subject=${encodeURIComponent(`Candidature : ${job.title} (TravaillerEnCi)`)}`}
-                          className="font-semibold text-primary dark:text-emerald-400 hover:underline"
-                        >
-                          {job.apply_email}
-                        </a>{' '}
-                        en précisant l'intitulé du poste dans l'objet du message.
-                      </span>
-                    </li>
-                  )}
-                  {hasApplyLink && (
-                    <li className="flex gap-3">
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:text-emerald-400 text-xs font-black">
-                        {hasApplyEmail ? 2 : 1}
-                      </span>
-                      <span>
-                        Postulez directement en ligne via le{' '}
-                        <a
-                          href={job.apply_link!}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-semibold text-primary dark:text-emerald-400 hover:underline"
-                        >
-                          lien officiel de l'annonce
-                        </a>
-                        . Suivez les instructions du recruteur jusqu'à la confirmation de votre candidature.
-                      </span>
-                    </li>
-                  )}
-                  <li className="flex gap-3">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:text-emerald-400 text-xs font-black">
-                      {hasApplyLink && hasApplyEmail ? 3 : 2}
-                    </span>
-                    <span>
-                      La candidature est <strong>gratuite</strong> : TravaillerEnCi ne perçoit jamais de
-                      frais pour postuler à une offre. Méfiez-vous de toute demande de paiement.
-                    </span>
-                  </li>
-                </ol>
-              </div>
-            )}
 
             {/* Mention anti-arnaque — postuler est gratuit */}
             <SafetyNotice
