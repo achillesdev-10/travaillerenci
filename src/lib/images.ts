@@ -18,20 +18,22 @@ export const IMAGES = {
   // Héro — photo choisie par l'équipe ; le dégradé de la section hero
   // s'affiche dessus.
   hero: 'https://i.postimg.cc/44VsVKqw/2150690154.jpg',
-  // Offres d'emploi / bureau
-  jobs: UNSPLASH('photo-1521737711867-e3b97375f902', 1000),
-  jobsAlt: UNSPLASH('photo-1497366216548-37526070297c', 1000),
+  // Offres d'emploi / bureau — w=800 : ces images sont affichées entre ~170 px
+  // (cartes mobiles) et ~740 px (carrousel desktop) ; le w=1000 d'origine
+  // téléchargeait ~32 Ko de trop par image (audit Lighthouse).
+  jobs: UNSPLASH('photo-1521737711867-e3b97375f902', 800),
+  jobsAlt: UNSPLASH('photo-1497366216548-37526070297c', 800),
   // Stages / étudiants
-  internship: UNSPLASH('photo-1523240795612-9a054b0db644', 1000),
+  internship: UNSPLASH('photo-1523240795612-9a054b0db644', 800),
   // Bourses / études / diplôme
-  scholarship: UNSPLASH('photo-1541339907198-e08756dedf3f', 1000),
+  scholarship: UNSPLASH('photo-1541339907198-e08756dedf3f', 800),
   // Concours administratifs
-  concours: UNSPLASH('photo-1524178232363-1fb2b075b655', 1000),
+  concours: UNSPLASH('photo-1524178232363-1fb2b075b655', 800),
   // CV / candidature
-  cv: UNSPLASH('photo-1586281380349-632531db7ed4', 1000),
+  cv: UNSPLASH('photo-1586281380349-632531db7ed4', 800),
   // Blog / conseils
-  blog: UNSPLASH('photo-1499750310107-5fef28a66643', 1000),
-  blogAlt: UNSPLASH('photo-1454165804606-c3d57bc86b40', 1000),
+  blog: UNSPLASH('photo-1499750310107-5fef28a66643', 800),
+  blogAlt: UNSPLASH('photo-1454165804606-c3d57bc86b40', 800),
   // Secteurs
   it: UNSPLASH('photo-1518770660439-4636190af475', 800),
   banque: UNSPLASH('photo-1560472354-b33ff0c44a43', 800),
@@ -45,10 +47,10 @@ export const IMAGES = {
   community: UNSPLASH('photo-1529156069898-49953e39b3ac', 1200),
   // Catégories de concours (administratif, sécurité, militaire, autre…)
   // NB : santé et enseignement réutilisent IMAGES.sante / IMAGES.education.
-  examAdmin: UNSPLASH('photo-1497366811353-6870744d04b2', 1000),
-  examSecurite: UNSPLASH('photo-1557804506-669a67965ba0', 1000),
-  examMilitaire: UNSPLASH('photo-1521791136064-7986c2920216', 1000),
-  examAutre: UNSPLASH('photo-1456513080510-7bf3a84b82f8', 1000),
+  examAdmin: UNSPLASH('photo-1497366811353-6870744d04b2', 800),
+  examSecurite: UNSPLASH('photo-1557804506-669a67965ba0', 800),
+  examMilitaire: UNSPLASH('photo-1521791136064-7986c2920216', 800),
+  examAutre: UNSPLASH('photo-1456513080510-7bf3a84b82f8', 800),
 } as const;
 
 // -----------------------------------------------------------------------------

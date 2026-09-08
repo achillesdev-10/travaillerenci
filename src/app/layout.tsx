@@ -20,11 +20,11 @@ const poppins = Poppins({
   display: 'swap',
 });
 
-// Viewport mobile + PWA : désactive le zoom intempestif sur mobile.
+// Viewport mobile + PWA. NB : plus de maximumScale=1 — il empêchait le zoom
+// utilisateur (échec d'accessibilité) pour un gain de confort inexistant.
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#059669' },
     { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
@@ -89,13 +89,11 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${inter.variable} ${poppins.variable}`} suppressHydrationWarning>
       <head>
-        {/* Preload hero image for better LCP */}
-        <link
-          rel="preload"
-          href="/images/hero-banner.jpg"
-          as="image"
-          fetchPriority="high"
-        />
+        {/* NB : plus de preload manuel de /images/hero-banner.jpg — il
+            téléchargeait le JPG brut (~142 Ko) sur TOUTES les tailles d'écran
+            alors que l'image est masquée sur mobile (hidden lg:block).
+            next/image avec `priority` émet déjà son propre preload vers la
+            version optimisée (AVIF/WebP) uniquement quand l'image est affichée. */}
         <script
           dangerouslySetInnerHTML={{
             __html: `

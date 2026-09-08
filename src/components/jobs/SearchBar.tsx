@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useTransition, useMemo } from 'react';
-import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { REGIONS_CI, JOB_TYPES } from '@/lib/constants';
 import { cn, debounce } from '@/lib/utils';
 
@@ -11,6 +11,8 @@ interface SearchBarProps {
   initialKeyword?: string;
   initialLocation?: string;
   initialContract?: string;
+  /** Query string actuelle de l'URL (pour préserver les autres params). */
+  searchQuery?: string;
   onSearch?: (filters: { q: string; city: string; contract: string }) => void;
 }
 
@@ -30,11 +32,11 @@ export default function SearchBar({
   initialKeyword = '',
   initialLocation = '',
   initialContract = '',
+  searchQuery = '',
   onSearch,
 }: SearchBarProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   const [keyword, setKeyword] = useState(initialKeyword);
   const [location, setLocation] = useState(initialLocation);
@@ -45,9 +47,12 @@ export default function SearchBar({
   // On stocke les valeurs "fraîches" dans un seul ref, mis à jour via
   // useEffect (jamais pendant le render). Le debounce ne lit le ref que
   // lorsqu'il se déclenche (setTimeout), donc hors render.
-  const latestRef = useRef({ searchParams, pathname, compact, onSearch });
+  // NB : useSearchParams est évité ici (il suspendrait le rendu SSR et
+  // retarderait l'affichage de la barre, élément LCP). Les params courants
+  // sont passés par le serveur via `searchQuery`.
+  const latestRef = useRef({ searchQuery, pathname, compact, onSearch });
   useEffect(() => {
-    latestRef.current = { searchParams, pathname, compact, onSearch };
+    latestRef.current = { searchQuery, pathname, compact, onSearch };
   });
 
   // ── Debounced navigation — créé UNE SEULE FOIS ─────────────────────────
@@ -57,8 +62,8 @@ export default function SearchBar({
     () =>
       // eslint-disable-next-line react-hooks/refs
       debounce((q: string, c: string, ct: string) => {
-        const { searchParams: sp, pathname: pn, compact: cp, onSearch: os } = latestRef.current;
-        const params = new URLSearchParams(sp.toString());
+        const { searchQuery: sq, pathname: pn, compact: cp, onSearch: os } = latestRef.current;
+        const params = new URLSearchParams(sq);
         if (q) params.set('q', q); else params.delete('q');
         if (c) params.set('city', c); else params.delete('city');
         if (ct) params.set('contract', ct); else params.delete('contract');
@@ -75,7 +80,7 @@ export default function SearchBar({
     // Annule la navigation debounced en attente pour éviter une double
     // navigation (le submit gère lui-même l'URL avec les valeurs actuelles).
     pushFilters.cancel();
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(latestRef.current.searchQuery);
     if (keyword) params.set('q', keyword); else params.delete('q');
     if (location) params.set('city', location); else params.delete('city');
     if (contract) params.set('contract', contract); else params.delete('contract');
@@ -124,7 +129,7 @@ export default function SearchBar({
               setKeyword(e.target.value);
               pushFilters(e.target.value, location, contract);
             }}
-            className="w-full pl-2 pr-3 sm:pl-3 sm:pr-4 py-3 sm:py-3.5 rounded-xl bg-gray-50/80 border border-transparent focus:bg-white focus:border-primary/40 focus:ring-2 focus:ring-primary/15 outline-none text-sm sm:text-base placeholder:text-gray-400 transition-colors"
+            className="w-full pl-2 pr-3 sm:pl-3 sm:pr-4 py-3 sm:py-3.5 rounded-xl bg-gray-50/80 border border-transparent focus:bg-white focus:border-primary/40 focus:ring-2 focus:ring-primary/15 outline-none text-sm sm:text-base placeholder:text-gray-600 transition-colors"
           />
         </div>
 

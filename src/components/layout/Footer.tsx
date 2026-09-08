@@ -35,7 +35,7 @@ export default function Footer() {
                 <span className="text-white">En</span>
                 <span className="text-white">Ci</span>
               </div>
-              <div className="text-[9px] uppercase tracking-widest text-gray-500 mt-0.5">
+              <div className="text-[9px] uppercase tracking-widest text-gray-400 mt-0.5">
                 L’emploi en Côte d’Ivoire
               </div>
             </div>
@@ -51,7 +51,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 mt-6 pt-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400">
             <div className="flex items-center gap-4">
               <p>
                 © {new Date().getFullYear()} TravaillerenCi — Tous droits réservés.
@@ -65,7 +65,7 @@ export default function Footer() {
           </div>
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mt-3 pt-3 border-t border-gray-800/50">
             {LEGAL_LINKS.map((link) => (
-              <Link key={link.href} href={link.href} className="text-[11px] text-gray-500 hover:text-gray-300 transition-colors">
+              <Link key={link.href} href={link.href} className="text-[11px] text-gray-400 hover:text-gray-300 transition-colors">
                 {link.label}
               </Link>
             ))}

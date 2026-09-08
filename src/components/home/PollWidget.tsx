@@ -175,7 +175,7 @@ export default function PollWidget() {
           <h2 className="font-[var(--font-display)] text-base font-extrabold text-gray-900 dark:text-white">
             Sondage
           </h2>
-          <p className="text-[11px] uppercase tracking-widest text-gray-400">
+          <p className="text-[11px] uppercase tracking-widest text-gray-600">
             {total > 0 ? `${total} vote${total > 1 ? 's' : ''}` : 'Donnez votre avis'}
           </p>
         </div>

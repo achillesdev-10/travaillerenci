@@ -52,6 +52,35 @@ export async function logoutCurrentUser(): Promise<void> {
 }
 
 // -----------------------------------------------------------------------------
+// Session partagée en cache
+// -----------------------------------------------------------------------------
+
+let cachedUserPromise: Promise<StoredUser | null> | null = null;
+let cachedUserResolvedAt = 0;
+const USER_CACHE_TTL = 5 * 60 * 1000; // 5 min
+
+/**
+ * Version en cache de fetchCurrentUser (TTL 5 min).
+ *
+ * Utilisée par les composants répétés (bouton « Sauvegarder » sur chaque
+ * carte d'offre) : au lieu de N appels /api/auth/me + N appels
+ * /api/saved/status au chargement d'une page de listing, un seul appel
+ * partagé suffit, et les visiteurs anonymes n'appellent plus du tout
+ * /api/saved/status.
+ */
+export function fetchCurrentUserCached(): Promise<StoredUser | null> {
+  const now = Date.now();
+  if (cachedUserPromise && now - cachedUserResolvedAt < USER_CACHE_TTL) {
+    return cachedUserPromise;
+  }
+  cachedUserPromise = fetchCurrentUser().then((user) => {
+    cachedUserResolvedAt = Date.now();
+    return user;
+  });
+  return cachedUserPromise;
+}
+
+// -----------------------------------------------------------------------------
 // Migration des anciens comptes simulés (localStorage)
 // -----------------------------------------------------------------------------
 

@@ -46,7 +46,7 @@ export default function CompactJobCard({ job }: { job: JobOfferSchema }) {
                 Vérifié
               </span>
             )}
-            <span className="ml-auto text-[10px] font-medium text-gray-400">
+            <span className="ml-auto text-[10px] font-medium text-gray-500">
               {formatRelativeTime(job.created_at)}
             </span>
             <SaveButton itemType={savedType(job)} itemId={job.id} variant="icon" />

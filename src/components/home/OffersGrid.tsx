@@ -5,7 +5,9 @@ import Link from 'next/link';
 import CompactJobCard from '@/components/home/CompactJobCard';
 import type { JobOfferSchema } from '@/types';
 
-const PAGE_SIZE = 20;
+// 12 offres initiales au lieu de 20 : réduit le DOM de la grille sans
+// changer l'UX (bouton « Voir plus » présent).
+const PAGE_SIZE = 12;
 
 export default function OffersGrid({ jobs }: { jobs: JobOfferSchema[] }) {
   const [visible, setVisible] = useState(PAGE_SIZE);

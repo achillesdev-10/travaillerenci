@@ -81,7 +81,7 @@ export default function Header() {
                 <span className="text-black dark:text-white">TravaillerEn</span>
                 <span className="text-black dark:text-white">Ci</span>
               </div>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground -mt-0.5">
+              <div className="text-[10px] uppercase tracking-widest text-gray-600 -mt-0.5">
                 L'emploi en Côte d'Ivoire
               </div>
             </div>

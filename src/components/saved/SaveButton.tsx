@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { fetchCurrentUser } from '@/lib/clientAuth';
+import { fetchCurrentUser, fetchCurrentUserCached } from '@/lib/clientAuth';
 import type { SavedItemType } from '@/services/savedItemsService';
 import { cn } from '@/lib/utils';
 
@@ -36,17 +36,31 @@ export default function SaveButton({
   const [checked, setChecked] = useState(false);
 
   // État initial (statut anonyme → false).
+  // Optimisation : pour les visiteurs anonymes (majorité du trafic sur les
+  // listings), on ne lance PAS /api/saved/status — une requête par carte
+  // au chargement (l'API renvoie saved:false sans session de toute façon).
   useEffect(() => {
     let cancelled = false;
-    fetch(`/api/saved/status?item_type=${itemType}&item_id=${encodeURIComponent(itemId)}`, {
-      cache: 'no-store',
-    })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (!cancelled && data) setSaved(Boolean(data.saved));
+    fetchCurrentUserCached()
+      .then((user) => {
+        if (cancelled) return;
+        if (!user) {
+          setChecked(true);
+          return;
+        }
+        return fetch(`/api/saved/status?item_type=${itemType}&item_id=${encodeURIComponent(itemId)}`, {
+          cache: 'no-store',
+        })
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data) => {
+            if (!cancelled && data) setSaved(Boolean(data.saved));
+          })
+          .catch(() => undefined)
+          .finally(() => {
+            if (!cancelled) setChecked(true);
+          });
       })
-      .catch(() => undefined)
-      .finally(() => {
+      .catch(() => {
         if (!cancelled) setChecked(true);
       });
     return () => {

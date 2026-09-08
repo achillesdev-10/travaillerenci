@@ -193,23 +193,31 @@ export default function AssistantFloat() {
     const header = document.querySelector('header');
     if (!header) return;
 
+    // Les mesures de layout (getBoundingClientRect) sont groupées dans une
+    // seule lecture par frame (rAF) au lieu d'être relues à chaque scroll /
+    // resize — évite les forced reflows répétés (audit Lighthouse).
+    let rafId = 0;
     const update = () => {
-      const headerBottom = header.getBoundingClientRect().bottom;
-      // Hauteur effective du panneau — miroir du style inline (clamp 65vh).
-      const panelHeight = Math.min(Math.max(window.innerHeight * 0.65, 320), 540);
-      const widgetTop = open
-        ? window.innerHeight - 84 - panelHeight // bottom: 5.25rem (84px)
-        : window.innerHeight - 20 - 56; // bottom-5 (20px) + h-14 (56px)
-      setHeaderOverlap(widgetTop < headerBottom);
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        const headerBottom = header.getBoundingClientRect().bottom;
+        // Hauteur effective du panneau — miroir du style inline (clamp 65vh).
+        const panelHeight = Math.min(Math.max(window.innerHeight * 0.65, 320), 540);
+        const widgetTop = open
+          ? window.innerHeight - 84 - panelHeight // bottom: 5.25rem (84px)
+          : window.innerHeight - 20 - 56; // bottom-5 (20px) + h-14 (56px)
+        setHeaderOverlap(widgetTop < headerBottom);
+      });
     };
 
     update();
-    window.addEventListener('resize', update);
+    window.addEventListener('resize', update, { passive: true });
     window.addEventListener('scroll', update, { passive: true });
     // Le menu mobile fait varier la hauteur du header → re-mesure.
     const ro = new ResizeObserver(update);
     ro.observe(header);
     return () => {
+      cancelAnimationFrame(rafId);
       window.removeEventListener('resize', update);
       window.removeEventListener('scroll', update);
       ro.disconnect();
@@ -359,7 +367,10 @@ export default function AssistantFloat() {
         aria-label={open ? "Fermer l'assistant" : "Ouvrir l'assistant TravaillerenCi"}
         title="Assistant IA TravaillerenCi"
         className={cn(
-          'group fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-white shadow-xl shadow-primary/30 transition-all duration-300 hover:scale-105 hover:shadow-primary/50 active:scale-95',
+          // transition-[opacity,transform] uniquement : `visibility`
+          // (classe invisible) bascule instantanément, sans animation —
+          // corrige l'audit « animation non composée sur visibility ».
+          'group fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-white shadow-xl shadow-primary/30 transition-[opacity,transform] duration-300 hover:scale-105 hover:shadow-primary/50 active:scale-95',
           visible && !footerVisible && !headerOverlap
             ? 'translate-y-0 opacity-100'
             : 'invisible translate-y-16 opacity-0 pointer-events-none',

@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import SearchBar from '@/components/jobs/SearchBar';
@@ -47,6 +46,12 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
   const keyword = resolvedParams.q || '';
   const city = resolvedParams.city || '';
   const page = Math.max(1, Number(resolvedParams.page) || 1);
+
+  // Query string transmise au SearchBar (évite useSearchParams → Suspense
+  // → rendu différé de la barre de recherche après hydratation).
+  const searchQuery = new URLSearchParams(
+    { q: keyword, city } as Record<string, string>,
+  ).toString();
 
   const { rows: stages, total } = await JobOfferSchemaService.list({
     category: 'internship',
@@ -130,9 +135,11 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
 
         {/* Barre de recherche */}
         <div className="mb-8">
-          <Suspense fallback={<SearchBarSkeleton />}>
-            <SearchBar initialKeyword={keyword} initialLocation={city} />
-          </Suspense>
+          <SearchBar
+            initialKeyword={keyword}
+            initialLocation={city}
+            searchQuery={searchQuery}
+          />
         </div>
 
         <div className="mb-6 flex items-center justify-between">
@@ -262,17 +269,3 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
   );
 }
 
-function SearchBarSkeleton() {
-  return (
-    <div className="w-full bg-white dark:bg-slate-900 border border-border rounded-2xl shadow-md shadow-black/5 p-4 sm:p-6 animate-pulse">
-      <div className="grid gap-3 grid-cols-1 md:grid-cols-12">
-        <div className="md:col-span-6 h-[52px] bg-gray-100 dark:bg-slate-800 rounded-xl" />
-        <div className="md:col-span-4 grid grid-cols-2 gap-3">
-          <div className="h-[52px] bg-gray-100 dark:bg-slate-800 rounded-xl" />
-          <div className="h-[52px] bg-gray-100 dark:bg-slate-800 rounded-xl" />
-        </div>
-        <div className="md:col-span-2 h-[52px] bg-gray-100 dark:bg-slate-800 rounded-xl" />
-      </div>
-    </div>
-  );
-}

@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Suspense, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import CoverImage from '@/components/content/CoverImage';
 import SearchBar from '@/components/jobs/SearchBar';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
@@ -9,7 +9,7 @@ import { BlogService } from '@/services/blogService';
 import type { JobOfferSchema, JobContractType } from '@/types';
 import NewsTicker, { type TickerItem } from '@/components/home/NewsTicker';
 import HomeCarousel from '@/components/home/HomeCarousel';
-import PollWidget from '@/components/home/PollWidget';
+import PollWidget from '@/components/home/PollWidgetLazy';
 import OffersGrid from '@/components/home/OffersGrid';
 import ScrollingOffers from '@/components/home/ScrollingOffers';
 import ForumSection from '@/components/home/ForumSection';
@@ -171,6 +171,11 @@ export default async function HomePage({
   const location = (sp?.city || '').trim();
   const contract = (sp?.contract || '').trim() as JobContractType;
 
+  // Query string courante transmise au SearchBar (évite useSearchParams,
+  // qui suspendrait le rendu SSR et retarderait l'affichage de la barre
+  // — élément LCP — dans le HTML initial).
+  const searchQuery = new URLSearchParams({ q: keyword, city: location, contract } as Record<string, string>).toString();
+
   const [jobs, examRows, blogRows, bourseRows] = await Promise.all([
     JobOfferSchemaService.list({
       keyword: keyword || undefined,
@@ -203,6 +208,9 @@ export default async function HomePage({
   // doit rester sur les dernières opportunités publiées (re-fetch ciblé).
   const carousel = await buildCarouselSlides({
     withOgImages: false,
+    // 6 slides max : chaque slide cachée (opacity-0) reste dans le DOM pour
+    // le SEO — moins de slides = moins de nœuds DOM inutiles.
+    maxSlides: 6,
     offers: keyword || location || contract ? undefined : (jobsList as JobOfferSchema[]),
     exams: examRows.rows,
     posts: blogRows.rows,
@@ -338,15 +346,16 @@ export default async function HomePage({
             </div>
           </div>
 
-          {/* Barre de recherche pleine largeur */}
+          {/* Barre de recherche pleine largeur — rendue dans le HTML initial
+              (pas de Suspense : la barre est l'élément LCP et ne doit pas
+              dépendre de l'hydratation pour s'afficher) */}
           <div className="mt-8 sm:mt-10 max-w-4xl mx-auto">
-            <Suspense fallback={<SearchBarSkeleton />}>
-              <SearchBar
-                initialKeyword={keyword}
-                initialLocation={location}
-                initialContract={contract}
-              />
-            </Suspense>
+            <SearchBar
+              initialKeyword={keyword}
+              initialLocation={location}
+              initialContract={contract}
+              searchQuery={searchQuery}
+            />
 
             <div className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-3 sm:gap-5 text-[12px] sm:text-sm text-gray-500 dark:text-gray-400">
               <Stat
@@ -588,7 +597,9 @@ export default async function HomePage({
       {/*   DÉFILANT D'OFFRES — carrousel horizontal qui défile lentement          */}
       {/* ======================================================================== */}
       <section className="container mx-auto px-4 mt-10 sm:mt-14 max-w-6xl">
-        <ScrollingOffers offers={jobsList.slice(0, 20)} />
+        {/* 8 offres max (doublées pour la boucle CSS) : suffisant pour le
+            défilé et divise par ~3 le nombre de cartes dans le DOM. */}
+        <ScrollingOffers offers={jobsList.slice(0, 8)} />
       </section>
 
       {/* ======================================================================== */}
@@ -732,7 +743,7 @@ export default async function HomePage({
             <h2 className="font-[var(--font-display)] text-2xl sm:text-4xl font-extrabold mb-3">
               Prêt à décrocher votre prochain job ?
             </h2>
-            <p className="mx-auto max-w-2xl text-sm sm:text-base text-white/90 mb-6">
+            <p className="mx-auto max-w-2xl text-sm sm:text-base text-white mb-6">
               Créez un CV professionnel en quelques minutes avec notre générateur IA,
               puis postulez aux meilleures offres en Côte d'Ivoire.
             </p>
@@ -896,21 +907,6 @@ function Stat({ icon, label }: { icon: ReactNode; label: string }) {
       <span aria-hidden="true">{icon}</span>
       {label}
     </span>
-  );
-}
-
-function SearchBarSkeleton() {
-  return (
-    <div className="w-full bg-white dark:bg-slate-900 border border-border rounded-2xl shadow-md shadow-black/5 p-4 sm:p-6 animate-pulse">
-      <div className="grid gap-3 grid-cols-1 md:grid-cols-12">
-        <div className="md:col-span-6 h-[52px] bg-gray-100 dark:bg-slate-800 rounded-xl" />
-        <div className="md:col-span-4 grid grid-cols-2 gap-3">
-          <div className="h-[52px] bg-gray-100 dark:bg-slate-800 rounded-xl" />
-          <div className="h-[52px] bg-gray-100 dark:bg-slate-800 rounded-xl" />
-        </div>
-        <div className="md:col-span-2 h-[52px] bg-gray-100 dark:bg-slate-800 rounded-xl" />
-      </div>
-    </div>
   );
 }
 

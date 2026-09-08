@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CarouselSlide } from '@/lib/homeCarousel';
@@ -13,18 +14,26 @@ const TYPE_LABEL: Record<CarouselSlide['type'], string> = {
 };
 
 function faviconUrl(domain: string): string {
-  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=96`;
+  // sz=32 au lieu de 96 : le favicon n'est affiché qu'à ~14-16 px,
+  // le télécharger en 96 px était du gaspillage (audit images Lighthouse).
+  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=32`;
 }
 
 function SlideMedia({ slide }: { slide: CarouselSlide }) {
   if (slide.image) {
+    // Optimisation via next/image UNIQUEMENT pour les URLs Unsplash connues :
+    // les cover_image des articles scrapés peuvent être des URLs arbitraires
+    // (http, chemins relatifs, data: URI…) que l'optimiseur ne sait pas traiter
+    // — dans ce cas on rend l'image brute (comportement identique à avant).
+    const optimize = slide.image.startsWith('https://images.unsplash.com');
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
+      <Image
         src={slide.image}
         alt={slide.title}
-        loading="lazy"
-        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+        fill
+        sizes="(min-width: 1024px) 560px, 92vw"
+        unoptimized={!optimize}
+        className="object-cover transition-transform duration-700 group-hover:scale-105"
       />
     );
   }
@@ -105,7 +114,11 @@ export default function HomeCarousel({ slides }: { slides: CarouselSlide[] }) {
             className={`absolute inset-0 transition-opacity duration-700 ${
               i === current ? 'opacity-100 z-10' : 'opacity-0 z-0'
             }`}
-            aria-hidden={i !== current}
+            aria-hidden={i !== current || undefined}
+            // Slides inactives : invisibles mais présentes dans le DOM (SEO).
+            // `inert` retire leurs liens du parcours clavier — corrige
+            // l'audit « aria-hidden ne doit pas contenir d'éléments focusables ».
+            inert={i !== current || undefined}
           >
             <Link href={s.href} className="block h-full w-full">
               <SlideMedia slide={s} />
@@ -113,16 +126,17 @@ export default function HomeCarousel({ slides }: { slides: CarouselSlide[] }) {
 
               <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6">
                 <div className="flex flex-wrap items-center gap-2 mb-2">
-                  <span className="inline-flex items-center rounded-full bg-orange-500 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-white shadow">
+                  <span className="inline-flex items-center rounded-full bg-orange-700 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-white shadow">
                     {TYPE_LABEL[s.type]}
                   </span>
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-semibold text-white backdrop-blur">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                    <Image
                       src={faviconUrl(s.fallback.domain)}
                       alt=""
+                      width={14}
+                      height={14}
+                      unoptimized
                       className="h-3.5 w-3.5 rounded-sm"
-                      loading="lazy"
                     />
                     <span className="max-w-[140px] truncate sm:max-w-[200px]">{s.fallback.domain}</span>
                   </span>
@@ -170,18 +184,24 @@ export default function HomeCarousel({ slides }: { slides: CarouselSlide[] }) {
         )}
       </div>
 
-      {/* Indicateurs */}
+      {/* Indicateurs — zone cliquable de 24x24 px (audit cible tactile),
+          le point visuel reste petit */}
       {slides.length > 1 && (
-        <div className="absolute bottom-2 left-1/2 z-20 flex -translate-x-1/2 gap-1.5 sm:bottom-3">
+        <div className="absolute bottom-1 left-1/2 z-20 flex -translate-x-1/2 gap-0.5 sm:bottom-2">
           {slides.map((s, i) => (
             <button
               key={s.id}
               onClick={() => go(i)}
               aria-label={`Aller à la slide ${i + 1}`}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === current ? 'w-6 bg-white' : 'w-1.5 bg-white/50 hover:bg-white/80'
-              }`}
-            />
+              aria-current={i === current}
+              className="flex h-6 w-6 items-center justify-center"
+            >
+              <span
+                className={`block h-1.5 rounded-full transition-all duration-300 ${
+                  i === current ? 'w-4 bg-white' : 'w-1.5 bg-white/50 hover:bg-white/80'
+                }`}
+              />
+            </button>
           ))}
         </div>
       )}

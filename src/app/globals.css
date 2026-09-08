@@ -3,8 +3,12 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-primary: #009639;
-  --color-primary-dark: #007a2e;
+  /* Vert identitaire foncé (#009639 → #007a2e) : le blanc sur
+     #009639 ne passait que 3,9:1 (échec AA pour les petits textes — audit
+     contraste Lighthouse). #007a2e atteint ~5,4:1 (AA large + normal,
+     y compris sur fonds gris clairs comme bg-gray-50). */
+  --color-primary: #007a2e;
+  --color-primary-dark: #006a25;
   --color-primary-light: #33ab60;
   --color-secondary: #F77F00;
   --color-secondary-dark: #d96f00;
@@ -102,6 +106,13 @@ html.dark body {
   .animate-marquee:hover {
     animation-play-state: paused;
   }
+  .animate-marquee-vertical {
+    /* Défilement vertical continu (section Q&R) — transform pur, composé. */
+    animation: marqueeVertical 55s linear infinite;
+  }
+  .animate-marquee-vertical:hover {
+    animation-play-state: paused;
+  }
   .animate-fade-in-up {
     animation: fadeInUp 0.7s ease-out both;
   }
@@ -124,6 +135,10 @@ html.dark body {
   @keyframes marquee {
     from { transform: translateX(0); }
     to   { transform: translateX(-50%); }
+  }
+  @keyframes marqueeVertical {
+    from { transform: translateY(0); }
+    to   { transform: translateY(-50%); }
   }
   @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(18px); }
