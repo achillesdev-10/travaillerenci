@@ -52,6 +52,10 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
+  // Vérification Google Search Console.
+  verification: {
+    google: 'qown3j10djegGM1_rUBX5J10pt2PHSSNi3ifSP3ujhc',
+  },
   icons: {
     icon: [
       { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
