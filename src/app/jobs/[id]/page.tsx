@@ -12,6 +12,10 @@ import { formatDate, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
 import { getJobThumbnail } from '@/lib/jobThumbnails';
 import ShareButton from '@/components/ShareButton';
+import {
+  ApplicationClickTracker,
+  EventTracker,
+} from '@/components/analytics/EventTracker';
 
 export const revalidate = 300;
 
@@ -185,6 +189,9 @@ export default async function JobDetailPage({ params }: PageProps) {
 
   return (
     <main className="flex-1 min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors">
+      {/* Mesures (§22) : vue de fiche + clic sur les boutons de candidature */}
+      <EventTracker event="job_view" label={job.id} />
+      <ApplicationClickTracker />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPostingJsonLd) }}
@@ -482,6 +489,7 @@ function ApplyBox({
       <div className="flex items-stretch gap-2 min-w-0">
         {hasEmail ? (
           <a
+            data-apply={job.id}
             href={`mailto:${job.apply_email}?subject=${encodeURIComponent(`Candidature : ${job.title} (TravaillerEnCi)`)}`}
             className="flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 px-3 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-[13px] shadow-md shadow-primary/25 active:scale-[0.99] transition-all truncate"
           >
@@ -494,6 +502,7 @@ function ApplyBox({
         ) : null}
         {hasLink ? (
           <a
+            data-apply={job.id}
             href={job.apply_link!}
             target="_blank"
             rel="noopener noreferrer"
@@ -553,6 +562,7 @@ function ApplyActions({ job }: { job: JobOfferSchema }) {
     <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 w-full min-w-0">
       {hasLink ? (
         <a
+          data-apply={job.id}
           href={job.apply_link!}
           target="_blank"
           rel="noopener noreferrer"
@@ -570,6 +580,7 @@ function ApplyActions({ job }: { job: JobOfferSchema }) {
         </a>
       ) : hasEmail ? (
         <a
+          data-apply={job.id}
           href={`mailto:${job.apply_email}?subject=${encodeURIComponent(`Candidature : ${job.title} (TravaillerEnCi)`)}`}
           className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-[13px] sm:text-sm shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.99] transition-all w-full min-w-0 truncate"
         >
@@ -583,6 +594,7 @@ function ApplyActions({ job }: { job: JobOfferSchema }) {
 
       {hasLink && hasEmail ? (
         <a
+          data-apply={job.id}
           href={`mailto:${job.apply_email}?subject=${encodeURIComponent(`Candidature : ${job.title} (TravaillerEnCi)`)}`}
           className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-800 dark:text-gray-200 font-semibold text-[13px] sm:text-sm transition-all w-full min-w-0 truncate"
         >

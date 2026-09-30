@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/userSession';
 import { CandidateProfileService } from '@/services/candidateProfileService';
+import { recordEvent } from '@/services/analyticsService';
+import { computeProfileCompletion } from '@/lib/profileCompletion';
+import { PROFILE_COMPLETE_THRESHOLD } from '@/lib/analyticsEvents';
 
 export const runtime = 'nodejs';
 
@@ -41,6 +44,7 @@ export async function PUT(request: Request) {
 
   // Les whitelists (secteurs, niveaux, contrats) sont appliquées dans
   // CandidateProfileService.upsert (source unique, commune avec l'inscription).
+  const before = await CandidateProfileService.get(user.id);
   const profile = await CandidateProfileService.upsert(user.id, {
     city: typeof body.city === 'string' ? body.city : undefined,
     diploma: typeof body.diploma === 'string' ? body.diploma : undefined,
@@ -59,6 +63,40 @@ export async function PUT(request: Request) {
       { error: "Impossible d'enregistrer le profil pour le moment." },
       { status: 500 },
     );
+  }
+
+  // ── Mesures (§22) ──────────────────────────────────────────────────────
+  const completion = computeProfileCompletion({
+    email: user.email,
+    city: profile.city,
+    jobTitle: profile.job_title,
+    sectors: profile.sectors,
+    diploma: profile.diploma,
+    experienceLevel: profile.experience_level,
+    skills: profile.skills,
+    contractTypes: profile.contract_types,
+    phone: profile.phone,
+    bio: profile.bio,
+    resumeUrl: profile.resume_url,
+  });
+
+  // Profil jugé exploitable (recommandations + alertes) — enregistré une seule fois.
+  if (completion.percent >= PROFILE_COMPLETE_THRESHOLD) {
+    await recordEvent({
+      event: 'profile_complete',
+      label: String(completion.percent),
+      userId: user.id,
+      path: '/dashboard/candidate',
+    });
+  }
+
+  // Ajout d'un CV (lien) : le champ était vide, il ne l'est plus.
+  if (!before?.resume_url && profile.resume_url) {
+    await recordEvent({
+      event: 'cv_upload',
+      userId: user.id,
+      path: '/dashboard/candidate',
+    });
   }
 
   return NextResponse.json({ profile });

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { fetchCurrentUser, fetchCurrentUserCached } from '@/lib/clientAuth';
 import type { SavedItemType } from '@/services/savedItemsService';
 import { cn } from '@/lib/utils';
+import { trackEvent } from '@/lib/analyticsClient';
 
 interface SaveButtonProps {
   itemType: SavedItemType;
@@ -94,14 +95,20 @@ export default function SaveButton({
             `/api/saved?item_type=${itemType}&item_id=${encodeURIComponent(itemId)}`,
             { method: 'DELETE' },
           );
-          if (res.ok) setSaved(false);
+          if (res.ok) {
+            setSaved(false);
+            trackEvent('job_unsave', { label: itemId });
+          }
         } else {
           const res = await fetch('/api/saved', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ item_type: itemType, item_id: itemId }),
           });
-          if (res.ok) setSaved(true);
+          if (res.ok) {
+            setSaved(true);
+            trackEvent('job_save', { label: itemId });
+          }
         }
       } finally {
         setBusy(false);

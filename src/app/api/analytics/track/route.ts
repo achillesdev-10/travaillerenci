@@ -6,6 +6,9 @@ import {
   getSupabaseClient,
   isSupabaseConfigured,
 } from "@/lib/supabase";
+import { getSessionUser } from "@/lib/userSession";
+import { recordEvent } from "@/services/analyticsService";
+import { isAnalyticsEvent, type AnalyticsEventName } from "@/lib/analyticsEvents";
 
 const DB_PATH = path.join(process.cwd(), "data", "travaillerenci.sqlite3");
 
@@ -73,6 +76,18 @@ export async function POST(request: Request) {
     const userAgent = request.headers.get("user-agent") || "";
     if (/bot|crawl|spider|slurp|lighthouse/i.test(userAgent)) {
       return NextResponse.json({ tracked: false, bot: true });
+    }
+
+    // ── Événements produits (§22) : job_view, job_save, signup… ────────────
+    if (isAnalyticsEvent(body.event)) {
+      const session = await getSessionUser(); // JWT uniquement, sans lecture BDD
+      const ok = await recordEvent({
+        event: body.event as AnalyticsEventName,
+        label: typeof body.label === "string" ? body.label.slice(0, 200) : null,
+        path: pagePath,
+        userId: session?.userId ?? null,
+      });
+      return NextResponse.json({ tracked: ok, event: body.event });
     }
 
     const ip = request.headers.get("x-forwarded-for") || "127.0.0.1";

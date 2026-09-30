@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server';
 import { getCurrentUser } from '@/lib/userSession';
 import { AlertService } from '@/services/alertService';
 import type { AlertCreateInput, AlertPatch } from '@/types/alerts';
+import { recordEvent } from '@/services/analyticsService';
 
 export const runtime = 'nodejs';
 
@@ -44,6 +45,14 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     );
   }
+
+  // Mesure (§22) : création d'une alerte — sans donnée personnelle.
+  await recordEvent({
+    event: 'alert_create',
+    label: alert.id,
+    userId: user.id,
+    path: '/dashboard/candidate',
+  });
 
   return NextResponse.json({ alert }, { status: 201 });
 }

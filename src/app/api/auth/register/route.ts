@@ -11,6 +11,7 @@ import {
 } from '@/lib/userSession';
 import { CandidateProfileService } from '@/services/candidateProfileService';
 import { getClientIp, isRateLimited } from '@/lib/rateLimit';
+import { recordEvent } from '@/services/analyticsService';
 import { isEmailVerificationEnabled } from '@/lib/config';
 
 export const runtime = 'nodejs';
@@ -87,6 +88,14 @@ export async function POST(request: Request) {
         sectors: body.sectors ?? [],
       });
     }
+
+    // Mesure (§22) : inscription d'un nouvel utilisateur.
+    await recordEvent({
+      event: 'signup',
+      label: role,
+      userId: user.id,
+      path: '/register',
+    });
 
     // Vérification d'email ACTIVÉE : générer le jeton et envoyer le lien.
     // L'échec d'envoi (Resend non configuré, domaine de test…) ne bloque JAMAIS
