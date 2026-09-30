@@ -30,6 +30,35 @@ const CITIES = [
   { name: 'Daloa' },
 ];
 
+/** Bénéfices d'un compte candidat — section « Pourquoi créer un compte ? » (§19). */
+const ACCOUNT_BENEFITS: Array<{ icon: string; title: string; description: string }> = [
+  {
+    icon: '❤️',
+    title: 'Sauvegarder vos offres',
+    description: 'Mettez de côté les offres et stages qui vous intéressent, retrouvez-les en un clic.',
+  },
+  {
+    icon: '🔔',
+    title: 'Recevoir des alertes',
+    description: "Soyez prévenu dès qu'une offre correspond à votre métier, votre ville ou votre contrat.",
+  },
+  {
+    icon: '👤',
+    title: 'Créer votre profil candidat',
+    description: 'Ville, métier, expérience, compétences : un profil qui rend vos offres plus pertinentes.',
+  },
+  {
+    icon: '📄',
+    title: 'Retrouver votre CV',
+    description: 'Générez votre CV en ligne et conservez le lien de téléchargement à portée de main.',
+  },
+  {
+    icon: '🎯',
+    title: 'Recevoir des offres recommandées',
+    description: 'Une sélection automatique de postes qui correspondent vraiment à votre profil.',
+  },
+];
+
 const QUICK_LINKS = [
   {
     label: 'Offres d\u2019emploi',
@@ -300,6 +329,26 @@ export default async function HomePage({
                 Des <strong className="text-gray-900 dark:text-white">offres vérifiées</strong>, des entreprises de confiance,
                 et zéro spam. Postulez simplement — on s'occupe du reste.
               </p>
+
+              {/* CTA principal — de visiteur à compte (§18) */}
+              <div className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center lg:justify-start gap-3">
+                <Link
+                  href="/register"
+                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white shadow-lg shadow-primary/25 transition-transform hover:-translate-y-0.5 hover:brightness-110"
+                >
+                  Créer mon profil
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M5 12h14" />
+                    <path d="m12 5 7 7-7 7" />
+                  </svg>
+                </Link>
+                <Link
+                  href="/jobs"
+                  className="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white/80 px-5 py-3 text-sm font-bold text-gray-800 backdrop-blur transition-colors hover:border-primary/50 hover:text-primary dark:border-slate-700 dark:bg-slate-900/80 dark:text-gray-100"
+                >
+                  Voir les offres
+                </Link>
+              </div>
             </div>
 
             {/* Colonne illustration (desktop uniquement) — bannière locale + badges flottants */}
@@ -730,6 +779,66 @@ export default async function HomePage({
               </p>
             </div>
             <SocialLinks size="md" className="gap-3 sm:gap-4 justify-center" />
+          </div>
+        </div>
+      </section>
+
+      {/* ======================================================================== */}
+      {/*   POURQUOI CRÉER UN COMPTE — bénéfices (§19)                           */}
+      {/* ======================================================================== */}
+      <section className="container mx-auto px-4 pb-16 sm:pb-24 max-w-6xl" aria-labelledby="pourquoi-compte">
+        <div className="rounded-3xl border border-gray-200 bg-white p-6 sm:p-10 dark:border-slate-800 dark:bg-slate-900">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-primary dark:text-emerald-400 mb-1">
+            Votre espace personnel
+          </p>
+          <h2
+            id="pourquoi-compte"
+            className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white font-[var(--font-display)] leading-tight mb-2"
+          >
+            Pourquoi créer un compte ?
+          </h2>
+          <p className="max-w-2xl text-sm text-gray-600 dark:text-gray-300 mb-6">
+            Gratuitement, votre compte transforme la recherche en routine efficace : vous ne
+            repartez jamais les mains vides.
+          </p>
+
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {ACCOUNT_BENEFITS.map((benefit) => (
+              <li
+                key={benefit.title}
+                className="flex gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-slate-800 dark:bg-slate-950/60"
+              >
+                <span
+                  aria-hidden="true"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-lg"
+                >
+                  {benefit.icon}
+                </span>
+                <span>
+                  <span className="block text-sm font-bold text-gray-900 dark:text-white">
+                    {benefit.title}
+                  </span>
+                  <span className="mt-0.5 block text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                    {benefit.description}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-6 flex flex-col sm:flex-row items-center gap-3">
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-extrabold text-white shadow-lg shadow-primary/20 transition-transform hover:-translate-y-0.5 hover:brightness-110"
+            >
+              Créer mon compte gratuitement
+            </Link>
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-6 py-3 text-sm font-bold text-gray-700 transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:text-gray-200"
+            >
+              J'ai déjà un compte
+            </Link>
           </div>
         </div>
       </section>
