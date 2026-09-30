@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import type { EntreprendreComment, EntreprendreCommentStatus } from '@/types/entreprendre';
 
 const STATUS_TABS: Array<{ value: EntreprendreCommentStatus | 'all'; label: string; activeClass: string }> = [
@@ -91,11 +92,11 @@ export default function CommentsAdminClient({
       {/* Header */}
       <div>
         <div className="flex items-center gap-3 mb-2">
-          <a href="/cz7tk/entreprendre" className="text-slate-400 hover:text-white transition-colors">
+          <Link href="/cz7tk/entreprendre" className="text-slate-400 hover:text-white transition-colors">
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <path d="M19 12H5" /><path d="m12 19-7-7 7-7" />
             </svg>
-          </a>
+          </Link>
           <h1 className="text-2xl lg:text-3xl font-extrabold tracking-tight text-white font-[var(--font-display)]">
             Modération des commentaires
           </h1>

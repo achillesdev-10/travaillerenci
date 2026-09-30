@@ -6,6 +6,7 @@ import CompactJobCard from '@/components/home/CompactJobCard';
 import type { JobOfferSchema } from '@/types';
 import { getSiteUrl } from '@/lib/site';
 import { cn } from '@/lib/utils';
+import { CITY_SEO, METIER_SEO } from '@/lib/jobSeo';
 
 export async function generateMetadata({
   searchParams,
@@ -265,6 +266,42 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
             )}
           </nav>
         )}
+
+        {/* Maillage interne : pages SEO villes / métiers (même verticale) */}
+        <section className="mt-12 space-y-6" aria-label="Explorer les offres par ville et par métier">
+          <div>
+            <h2 className="mb-3 font-[var(--font-display)] text-lg font-bold text-gray-900 dark:text-white">
+              {category === 'internship' ? 'Stages par ville' : 'Offres par ville'}
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {CITY_SEO.map((city) => (
+                <Link
+                  key={city.slug}
+                  href={`/${category === 'internship' ? 'stages' : 'emplois'}-${city.slug}`}
+                  className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                >
+                  {city.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h2 className="mb-3 font-[var(--font-display)] text-lg font-bold text-gray-900 dark:text-white">
+              Offres par métier
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {METIER_SEO.map((metier) => (
+                <Link
+                  key={metier.slug}
+                  href={`/${category === 'internship' ? 'stages' : 'emplois'}-${metier.slug}`}
+                  className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                >
+                  {metier.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
 
         {/* Bloc éditorial — contexte + confiance */}
         <section className="mt-12 rounded-2xl border border-gray-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">

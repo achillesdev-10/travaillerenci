@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import type { ScraperHealth, ScraperRunRecord } from "@/lib/admin-dashboard";
 
 type ScraperClientProps = {
@@ -250,12 +251,12 @@ export default function ScraperClient({
                 ? "Déclenchement..."
                 : "Déclencher une extraction"}
           </button>
-          <a
+          <Link
             href="/cz7tk/jobs"
             className="rounded-2xl border border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 px-5 py-3 text-xs font-bold transition-colors"
           >
             Voir les offres importées →
-          </a>
+          </Link>
         </div>
       </div>
 

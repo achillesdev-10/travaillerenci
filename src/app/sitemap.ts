@@ -6,6 +6,7 @@ import { BlogService } from '@/services/blogService';
 import { EntreprendreArticleService } from '@/services/entreprendreService';
 import { DIPLOMA_SEO } from '@/lib/examSeo';
 import { EXAM_CATEGORIES } from '@/lib/examConstants';
+import { eligibleSeoLandings } from '@/lib/jobSeo';
 
 export const revalidate = 86400; // 24 h
 
@@ -121,6 +122,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }))
       : [];
 
+  // Pages d'atterrissage SEO offres (villes / métiers / combinaisons) :
+  // uniquement celles dépassant le seuil d'offres réelles (aucune page vide).
+  const seoLandingEntries: MetadataRoute.Sitemap =
+    jobRes.status === 'fulfilled'
+      ? eligibleSeoLandings(jobRes.value.rows).map((landing) => ({
+          url: `${BASE_URL}/${landing.slug}`,
+          lastModified: now,
+          changeFrequency: 'daily' as const,
+          priority: 0.7,
+        }))
+      : [];
+
   return [
     ...staticEntries,
     ...categoryEntries,
@@ -130,5 +143,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...bourseEntries,
     ...blogEntries,
     ...entreprendreEntries,
+    ...seoLandingEntries,
   ];
 }

@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import type { BlogPost, BlogPostStatus } from '@/types/blog';
 import { slugify } from '@/lib/slugify';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
@@ -264,7 +265,7 @@ export default function BlogAdminClient({
           </p>
         </div>
         <div className="flex gap-2">
-          <a
+          <Link
             href="/cz7tk/blog/bulk-import"
             className="inline-flex items-center gap-2 rounded-2xl border border-slate-800 bg-slate-900 px-4 py-3 text-xs font-bold text-slate-300 hover:bg-slate-800 transition-all"
           >
@@ -274,7 +275,7 @@ export default function BlogAdminClient({
               <path d="M12 3v12" />
             </svg>
             Import CSV
-          </a>
+          </Link>
           <button
             type="button"
             onClick={openCreateModal}

@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useRef, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import type {
   EntreprendreArticle,
   EntreprendreArticleStatus,
@@ -300,12 +301,12 @@ export default function EntreprendreAdminClient({
           </p>
         </div>
         <div className="flex gap-2">
-          <a
+          <Link
             href="/cz7tk/entreprendre/comments"
             className="inline-flex items-center gap-2 rounded-2xl border border-slate-800 bg-slate-900 px-4 py-3 text-xs font-bold text-slate-300 hover:bg-slate-800 transition-all"
           >
             💬 Commentaires
-          </a>
+          </Link>
           <button
             type="button"
             onClick={openCreateModal}
