@@ -22,6 +22,28 @@ export function EventTracker({
 }
 
 /**
+ * Suit les clics sur les liens de partage sociaux : balisez les ancres avec
+ * `data-share="campagne"` et, si besoin, `data-share-network="facebook"`.
+ * Émet l'événement `share` avec le label `campagne:réseau` (§22), au même
+ * format que le composant ShareButton (`offre:natif`, `article-blog:copie`).
+ */
+export function ShareClickTracker() {
+  useEffect(() => {
+    function onClick(event: MouseEvent) {
+      const target = event.target as Element | null;
+      const anchor = target?.closest?.('a[data-share]') as HTMLAnchorElement | null;
+      if (!anchor) return;
+      const campaign = anchor.getAttribute('data-share') || 'contenu';
+      const network = anchor.getAttribute('data-share-network') || 'lien';
+      trackEvent('share', { label: `${campaign}:${network}` });
+    }
+    document.addEventListener('click', onClick, { passive: true });
+    return () => document.removeEventListener('click', onClick);
+  }, []);
+  return null;
+}
+
+/**
  * Suit les clics sur les boutons de candidature : balisez les liens avec
  * `data-apply="application_click"` (attribut rendu côté serveur).
  *

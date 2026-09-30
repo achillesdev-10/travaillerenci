@@ -9,6 +9,7 @@ import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import { SITE_CONFIG } from '@/lib/constants';
 import { IMAGES } from '@/lib/images';
 import { buildShareUrl } from '@/lib/shareUtm';
+import { ShareClickTracker } from '@/components/analytics/EventTracker';
 import { articleSector } from '@/lib/relatedContent';
 import { METIER_SEO, landingForOffer } from '@/lib/jobSeo';
 import type { JobOfferSchema } from '@/types';
@@ -157,11 +158,14 @@ export default async function BlogArticlePage({
                 </div>
               </div>
               <div className="ml-auto flex items-center gap-2">
+                <ShareClickTracker />
                 <a
                   href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
                   target="_blank"
                   rel="noreferrer"
                   aria-label="Partager sur Facebook"
+                  data-share="article-blog"
+                  data-share-network="facebook"
                   className="w-9 h-9 rounded-full bg-gray-100 dark:bg-slate-800 hover:bg-primary hover:text-white flex items-center justify-center transition-colors"
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -173,6 +177,8 @@ export default async function BlogArticlePage({
                   target="_blank"
                   rel="noreferrer"
                   aria-label="Partager sur WhatsApp"
+                  data-share="article-blog"
+                  data-share-network="whatsapp"
                   className="w-9 h-9 rounded-full bg-gray-100 dark:bg-slate-800 hover:bg-primary hover:text-white flex items-center justify-center transition-colors"
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">

@@ -23,6 +23,7 @@ import { getSiteUrl } from '@/lib/site';
 import { examDefaultImage } from '@/lib/images';
 import CoverImage from '@/components/content/CoverImage';
 import ShareButton from '@/components/ShareButton';
+import { ShareClickTracker } from '@/components/analytics/EventTracker';
 import type { Exam } from '@/types/exam';
 
 export const revalidate = 300;
@@ -367,10 +368,13 @@ export default async function ConcoursDetailPage({ params }: PageProps) {
 
               {/* Partage WhatsApp / Facebook */}
               <div className="grid grid-cols-2 gap-2.5 pt-1">
+                <ShareClickTracker />
                 <a
                   href={`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`}
                   target="_blank"
                   rel="noopener noreferrer"
+                  data-share="concours"
+                  data-share-network="whatsapp"
                   className="flex items-center justify-center gap-2 rounded-xl bg-[#25D366]/10 px-4 py-3 text-sm font-semibold text-[#128C7E] transition-colors hover:bg-[#25D366]/20"
                 >
                   WhatsApp
@@ -379,6 +383,8 @@ export default async function ConcoursDetailPage({ params }: PageProps) {
                   href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`}
                   target="_blank"
                   rel="noopener noreferrer"
+                  data-share="concours"
+                  data-share-network="facebook"
                   className="flex items-center justify-center gap-2 rounded-xl bg-[#1877F2]/10 px-4 py-3 text-sm font-semibold text-[#1877F2] transition-colors hover:bg-[#1877F2]/20"
                 >
                   Facebook
