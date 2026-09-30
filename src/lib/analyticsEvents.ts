@@ -19,6 +19,7 @@ export const ANALYTICS_EVENTS = [
   'application_click',
   'search',
   'share',
+  'newsletter_subscribe',
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENTS)[number];

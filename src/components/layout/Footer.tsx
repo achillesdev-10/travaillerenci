@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import SocialLinks from '@/components/layout/SocialLinks';
 import PWAInstallCTA from '@/components/concours/PWAInstallCTA';
+import NewsletterForm from '@/components/layout/NewsletterForm';
 
 const NAV_LINKS = [
   { label: 'Offres d’emploi', href: '/jobs' },
@@ -48,6 +49,11 @@ export default function Footer() {
               </Link>
             ))}
           </nav>
+        </div>
+
+        {/* Newsletter (§20) — inscription seule, aucun envoi automatisé à ce jour */}
+        <div className="border-t border-gray-800/60 pt-5 lg:border-0 lg:pt-0 lg:shrink-0">
+          <NewsletterForm />
         </div>
 
         <div className="border-t border-gray-800 mt-6 pt-4">

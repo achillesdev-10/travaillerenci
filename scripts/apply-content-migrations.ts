@@ -73,6 +73,8 @@ const MIGRATIONS: Array<{ table: string; label: string; file: string }> = [
   { table: 'saved_items', label: '0016 (sauvegardes)', file: 'supabase/migrations/0016_saved_items.sql' },
   { table: 'alerts', label: '0017 (alertes candidat)', file: 'supabase/migrations/0017_alerts.sql' },
   { table: 'reports', label: '0018 (signalements)', file: 'supabase/migrations/0018_reports.sql' },
+  // Newsletter : architecture d'envoi préparatoire (§20), table dédiée.
+  { table: 'newsletter_subscribers', label: '0029 (newsletter)', file: 'supabase/migrations/0029_newsletter_subscribers.sql' },
 ];
 
 async function runSql(query: string): Promise<{ ok: boolean; data?: unknown; error?: string }> {
