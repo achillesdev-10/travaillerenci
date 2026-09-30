@@ -360,6 +360,7 @@ export default async function BourseDetailPage({ params }: PageProps) {
                   title={bourse.title}
                   text={`${bourse.title} — ${bourse.company} (${bourse.location || 'International'}) — Consultez cette bourse sur TravaillerEnCi`}
                   url={canonicalUrl}
+                  campaign="bourse"
                   className="w-full justify-center"
                 />
               </div>

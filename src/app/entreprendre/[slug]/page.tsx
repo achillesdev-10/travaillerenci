@@ -6,6 +6,7 @@ import CoverImage from '@/components/content/CoverImage';
 import { EntreprendreArticleService } from '@/services/entreprendreService';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import { SITE_CONFIG } from '@/lib/constants';
+import { buildShareUrl } from '@/lib/shareUtm';
 import { IMAGES } from '@/lib/images';
 import type { EntreprendreSector, BudgetRange } from '@/types/entreprendre';
 import ArticleHelpfulVote from '@/components/entreprendre/ArticleHelpfulVote';
@@ -176,7 +177,11 @@ export default async function EntreprendreArticlePage({
   });
   const similar = similarArticles.filter((a) => a.id !== article.id).slice(0, 3);
 
-  const shareUrl = `${SITE_CONFIG.url}/entreprendre/${article.slug}`;
+  const shareUrl = buildShareUrl(
+    `${SITE_CONFIG.url}/entreprendre/${article.slug}`,
+    'article-entreprendre',
+    SITE_CONFIG.url,
+  );
 
   // JSON-LD
   const jsonLd = {
@@ -275,6 +280,7 @@ export default async function EntreprendreArticlePage({
                   title={article.title}
                   text={`${article.title} — ${shareUrl}`}
                   url={shareUrl}
+                  campaign="article-entreprendre"
                   variant="icon"
                 />
                 <a
@@ -394,6 +400,7 @@ export default async function EntreprendreArticlePage({
             title={article.title}
             text={`${article.title} — ${shareUrl}`}
             url={shareUrl}
+            campaign="article-entreprendre"
           />
         </div>
 

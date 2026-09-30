@@ -12,6 +12,7 @@ import { formatDate, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
 import { getJobThumbnail } from '@/lib/jobThumbnails';
 import ShareButton from '@/components/ShareButton';
+import { buildShareUrl } from '@/lib/shareUtm';
 import {
   ApplicationClickTracker,
   EventTracker,
@@ -297,9 +298,10 @@ export default async function JobDetailPage({ params }: PageProps) {
                   title={`${job.title} chez ${job.company}`}
                   text={`${job.title} chez ${job.company} (${job.location}) — Consultez l'offre complète sur TravaillerEnCi`}
                   url={`${getSiteUrl()}/jobs/${job.id}`}
+                  campaign="offre"
                 />
                 <a
-                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`*${job.title}* chez *${job.company}* (${job.location})\n\nConsultez l'offre complète sur TravaillerEnCi : ${getSiteUrl()}/jobs/${job.id}`)}`}
+                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`*${job.title}* chez *${job.company}* (${job.location})\n\nConsultez l'offre complète sur TravaillerEnCi : ${buildShareUrl(`${getSiteUrl()}/jobs/${job.id}`, 'offre', getSiteUrl())}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-emerald-600/20 transition-all"

@@ -5,6 +5,7 @@ import SimpleMarkdown from '@/components/content/SimpleMarkdown';
 import CoverImage from '@/components/content/CoverImage';
 import { BlogService } from '@/services/blogService';
 import { SITE_CONFIG } from '@/lib/constants';
+import { buildShareUrl } from '@/lib/shareUtm';
 import { IMAGES } from '@/lib/images';
 
 export const dynamic = 'force-dynamic';
@@ -58,7 +59,11 @@ export default async function BlogArticlePage({
   });
   const relatedPosts = related.filter((p) => p.id !== post.id).slice(0, 2);
 
-  const shareUrl = `${SITE_CONFIG.url}/blog/${post.slug}`;
+  const shareUrl = buildShareUrl(
+    `${SITE_CONFIG.url}/blog/${post.slug}`,
+    'article-blog',
+    SITE_CONFIG.url,
+  );
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-slate-950">

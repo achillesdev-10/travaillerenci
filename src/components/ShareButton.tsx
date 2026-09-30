@@ -1,11 +1,15 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { buildShareUrl } from '@/lib/shareUtm';
+import { trackEvent } from '@/lib/analyticsClient';
 
 interface ShareButtonProps {
   title: string;
   text: string;
   url?: string;
+  /** Identifiant de campagne UTM — type d'objet partagé (offre, article…). */
+  campaign?: string;
   /** Show icon only (compact) or icon + label */
   variant?: 'icon' | 'default';
   className?: string;
@@ -15,11 +19,14 @@ interface ShareButtonProps {
  * Composant de partage réutilisable.
  * - Si navigator.share est supporté (mobile / PWA) → partage natif.
  * - Sinon (desktop) → copie l'URL dans le presse-papier avec toast de confirmation.
+ * - L'URL partagée porte des paramètres UTM (§21) et l'action alimente
+ *   l'événement analytics `share` (§22).
  */
 export default function ShareButton({
   title,
   text,
   url,
+  campaign = 'contenu',
   variant = 'default',
   className = '',
 }: ShareButtonProps) {
@@ -28,22 +35,29 @@ export default function ShareButton({
   const shareUrl = url || (typeof window !== 'undefined' ? window.location.href : '');
 
   const handleShare = useCallback(async () => {
+    const target = buildShareUrl(
+      shareUrl,
+      campaign,
+      typeof window !== 'undefined' ? window.location.origin : undefined,
+    );
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
-        await navigator.share({ title, text, url: shareUrl });
+        await navigator.share({ title, text, url: target });
+        trackEvent('share', { label: `${campaign}:natif` });
       } catch {
         // L'utilisateur a annulé le partage — pas d'erreur à afficher.
       }
     } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
       try {
-        await navigator.clipboard.writeText(shareUrl);
+        await navigator.clipboard.writeText(target);
+        trackEvent('share', { label: `${campaign}:copie` });
         setCopied(true);
         setTimeout(() => setCopied(false), 2200);
       } catch {
         // Fallback silencieux si clipboard API non disponible.
       }
     }
-  }, [title, text, shareUrl]);
+  }, [title, text, shareUrl, campaign]);
 
   return (
     <button

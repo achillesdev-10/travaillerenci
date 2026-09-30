@@ -202,6 +202,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                   title={article.title}
                   text={article.excerpt || article.title}
                   url={`${getSiteUrl()}/actualites/${article.slug}`}
+                  campaign="actualite"
                 />
               </div>
               <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -212,6 +213,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                   title={article.title}
                   text={article.excerpt || article.title}
                   url={`${getSiteUrl()}/actualites/${article.slug}`}
+                  campaign="actualite"
                 />
               </div>
             </div>

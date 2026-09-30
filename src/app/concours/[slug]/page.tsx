@@ -361,6 +361,7 @@ export default async function ConcoursDetailPage({ params }: PageProps) {
                 title={exam.title}
                 text={`Concours ${exam.title} — ${exam.organizer}`}
                 url={absoluteUrl}
+                campaign="concours"
                 className="w-full justify-center"
               />
 
