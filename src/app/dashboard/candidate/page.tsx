@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { fetchCurrentUser, type StoredUser } from '@/lib/clientAuth';
 import SetPasswordForm from '@/components/auth/SetPasswordForm';
 import ProfileSection from '@/components/dashboard/ProfileSection';
+import RecommendationsSection from '@/components/dashboard/RecommendationsSection';
 import SavedItemsSection from '@/components/dashboard/SavedItemsSection';
 import AlertsSection from '@/components/dashboard/AlertsSection';
 import NotificationsSection from '@/components/dashboard/NotificationsSection';
@@ -203,12 +204,15 @@ export default function CandidateDashboardPage() {
           </div>
         </section>
 
+        {/* ===== Offres recommandées (scoring déterministe basé sur le profil) ===== */}
+        <RecommendationsSection />
+
         {/* ===== Deux colonnes : profil + alertes | offres sauvegardées ===== */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Colonne principale (2/3) */}
           <div className="lg:col-span-2 space-y-6">
             {/* Profil d'alerte */}
-            <section aria-label="Mon profil d'alerte">
+            <section id="profil" aria-label="Mon profil d'alerte">
               <ProfileSection />
             </section>
 
