@@ -40,6 +40,8 @@ export async function PUT(request: Request) {
     contract_types?: string[];
     bio?: string;
     resume_url?: string;
+    /** Consentement de visibilité : 'private' (défaut) | 'recruiters' (§30). */
+    profile_visibility?: string;
   };
 
   // Les whitelists (secteurs, niveaux, contrats) sont appliquées dans
@@ -56,6 +58,8 @@ export async function PUT(request: Request) {
     contract_types: Array.isArray(body.contract_types) ? body.contract_types : undefined,
     bio: typeof body.bio === 'string' ? body.bio : undefined,
     resume_url: typeof body.resume_url === 'string' ? body.resume_url : undefined,
+    profile_visibility:
+      typeof body.profile_visibility === 'string' ? body.profile_visibility : undefined,
   });
 
   if (!profile) {

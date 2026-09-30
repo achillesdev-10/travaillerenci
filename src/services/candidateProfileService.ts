@@ -13,6 +13,11 @@
 
 import 'server-only';
 import { getSupabaseClient, isSupabaseConfigured } from '@/lib/supabase';
+import {
+  DEFAULT_PROFILE_VISIBILITY,
+  normalizeProfileVisibility,
+  type ProfileVisibility,
+} from '@/lib/profileVisibility';
 
 /** Slugs de secteurs acceptés (source unique — SECTORS de src/lib/constants.ts).
  *  Utilisé par l'inscription ET par PUT /api/candidate/profile. */
@@ -75,6 +80,8 @@ export interface CandidateProfile {
   contract_types: string[];
   bio: string | null;
   resume_url: string | null;
+  /** Consentement de visibilité (CVthèque future, §30) — défaut « privé ». */
+  profile_visibility: ProfileVisibility;
   created_at: string;
   updated_at: string;
 }
@@ -90,6 +97,7 @@ export interface CandidateProfilePatch {
   contract_types?: string[] | null;
   bio?: string | null;
   resume_url?: string | null;
+  profile_visibility?: string | null;
 }
 
 type DatabaseSyncInstance = {
@@ -130,13 +138,15 @@ async function getDb(): Promise<DatabaseSyncInstance | null> {
         contract_types   TEXT NOT NULL DEFAULT '[]',
         bio              TEXT,
         resume_url       TEXT,
+        profile_visibility TEXT NOT NULL DEFAULT 'private',
         created_at       TEXT NOT NULL DEFAULT (datetime('now')),
         updated_at       TEXT NOT NULL DEFAULT (datetime('now'))
       );
     `);
 
     // Migration défensive : la table peut avoir été créée avant l'ajout des
-    // colonnes 0026 (métier, expérience, compétences, contrats, bio, CV).
+    // colonnes 0026 (métier, expérience, compétences, contrats, bio, CV) et
+    // 0028 (consentement de visibilité).
     const cols = cachedDb.prepare('PRAGMA table_info(candidate_profiles)').all();
     const existing = new Set(cols.map((c: { name: string }) => String(c.name)));
     if (!existing.has('job_title')) cachedDb.exec('ALTER TABLE candidate_profiles ADD COLUMN job_title TEXT');
@@ -145,6 +155,9 @@ async function getDb(): Promise<DatabaseSyncInstance | null> {
     if (!existing.has('contract_types')) cachedDb.exec("ALTER TABLE candidate_profiles ADD COLUMN contract_types TEXT NOT NULL DEFAULT '[]'");
     if (!existing.has('bio')) cachedDb.exec('ALTER TABLE candidate_profiles ADD COLUMN bio TEXT');
     if (!existing.has('resume_url')) cachedDb.exec('ALTER TABLE candidate_profiles ADD COLUMN resume_url TEXT');
+    if (!existing.has('profile_visibility')) {
+      cachedDb.exec("ALTER TABLE candidate_profiles ADD COLUMN profile_visibility TEXT NOT NULL DEFAULT 'private'");
+    }
 
     return cachedDb;
   } catch {
@@ -184,6 +197,7 @@ function rowToProfile(row: any): CandidateProfile {
     contract_types: parseJsonArray(row.contract_types),
     bio: row.bio ?? null,
     resume_url: row.resume_url ?? null,
+    profile_visibility: normalizeProfileVisibility(row.profile_visibility),
     created_at: row.created_at ?? '',
     updated_at: row.updated_at ?? '',
   };
@@ -264,6 +278,11 @@ export class CandidateProfileService {
     const bio = patch.bio !== undefined ? text(patch.bio, MAX_BIO_LENGTH) : existing?.bio ?? null;
     const resumeUrl =
       patch.resume_url !== undefined ? text(patch.resume_url, MAX_RESUME_URL_LENGTH) : existing?.resume_url ?? null;
+    // Consentement de visibilité (§30) : défaut strict « privé ».
+    const profileVisibility =
+      patch.profile_visibility !== undefined
+        ? normalizeProfileVisibility(patch.profile_visibility)
+        : existing?.profile_visibility ?? DEFAULT_PROFILE_VISIBILITY;
 
     if (isSupabaseConfigured()) {
       const supabase = getSupabaseClient();
@@ -279,6 +298,7 @@ export class CandidateProfileService {
         contract_types: contractTypes,
         bio,
         resume_url: resumeUrl,
+        profile_visibility: profileVisibility,
         updated_at: now,
       };
       const { data, error } = await supabase
@@ -301,6 +321,7 @@ export class CandidateProfileService {
            city = $city, diploma = $diploma, sectors = $sectors, phone = $phone,
            job_title = $jobTitle, experience_level = $experienceLevel, skills = $skills,
            contract_types = $contractTypes, bio = $bio, resume_url = $resumeUrl,
+           profile_visibility = $profileVisibility,
            updated_at = $now
          WHERE user_id = $userId`,
       ).run({
@@ -314,15 +335,16 @@ export class CandidateProfileService {
         $contractTypes: JSON.stringify(contractTypes),
         $bio: bio,
         $resumeUrl: resumeUrl,
+        $profileVisibility: profileVisibility,
         $now: now,
         $userId: userId,
       });
     } else {
       db.prepare(
         `INSERT INTO candidate_profiles
-           (user_id, city, diploma, sectors, phone, job_title, experience_level, skills, contract_types, bio, resume_url, created_at, updated_at)
+           (user_id, city, diploma, sectors, phone, job_title, experience_level, skills, contract_types, bio, resume_url, profile_visibility, created_at, updated_at)
          VALUES
-           ($userId, $city, $diploma, $sectors, $phone, $jobTitle, $experienceLevel, $skills, $contractTypes, $bio, $resumeUrl, $now, $now)`,
+           ($userId, $city, $diploma, $sectors, $phone, $jobTitle, $experienceLevel, $skills, $contractTypes, $bio, $resumeUrl, $profileVisibility, $now, $now)`,
       ).run({
         $userId: userId,
         $city: city,
@@ -335,6 +357,7 @@ export class CandidateProfileService {
         $contractTypes: JSON.stringify(contractTypes),
         $bio: bio,
         $resumeUrl: resumeUrl,
+        $profileVisibility: profileVisibility,
         $now: now,
       });
     }

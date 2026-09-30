@@ -6,6 +6,12 @@ import { DIPLOMA_FILTERS } from '@/lib/examConstants';
 import { cn } from '@/lib/utils';
 import { fetchCurrentUser } from '@/lib/clientAuth';
 import { computeProfileCompletion } from '@/lib/profileCompletion';
+import {
+  DEFAULT_PROFILE_VISIBILITY,
+  PROFILE_VISIBILITY_LABELS,
+  normalizeProfileVisibility,
+  type ProfileVisibility,
+} from '@/lib/profileVisibility';
 
 interface Profile {
   city: string | null;
@@ -18,6 +24,7 @@ interface Profile {
   contract_types: string[];
   bio: string | null;
   resume_url: string | null;
+  profile_visibility: ProfileVisibility;
 }
 
 const INITIAL: Profile = {
@@ -31,6 +38,7 @@ const INITIAL: Profile = {
   contract_types: [],
   bio: null,
   resume_url: null,
+  profile_visibility: DEFAULT_PROFILE_VISIBILITY,
 };
 
 /**
@@ -70,6 +78,7 @@ export default function ProfileSection() {
             contract_types: Array.isArray(data.profile.contract_types) ? data.profile.contract_types : [],
             bio: data.profile.bio || null,
             resume_url: data.profile.resume_url || null,
+            profile_visibility: normalizeProfileVisibility(data.profile.profile_visibility),
           });
         }
         setLoaded(true);
@@ -151,6 +160,7 @@ export default function ProfileSection() {
           contract_types: profile.contract_types,
           bio: profile.bio || null,
           resume_url: profile.resume_url || null,
+          profile_visibility: profile.profile_visibility,
         }),
       });
       if (!res.ok) {
@@ -476,6 +486,64 @@ export default function ProfileSection() {
             Non exposé publiquement. Prêt pour la future CVthèque.
           </p>
         </div>
+      </div>
+
+      {/* Consentement de visibilité (§30 — CVthèque future) */}
+      <div className="rounded-2xl border border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/60 p-4">
+        <span className={labelClass}>Visibilité de mon profil</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {(Object.keys(PROFILE_VISIBILITY_LABELS) as ProfileVisibility[]).map((value) => {
+            const active = profile.profile_visibility === value;
+            return (
+              <button
+                type="button"
+                key={value}
+                onClick={() => setProfile((prev) => ({ ...prev, profile_visibility: value }))}
+                aria-pressed={active}
+                aria-label={PROFILE_VISIBILITY_LABELS[value]}
+                className={cn(
+                  'flex items-start gap-2.5 rounded-xl border px-3.5 py-3 text-left transition-all',
+                  active
+                    ? 'border-primary bg-primary/10'
+                    : 'border-gray-200 bg-white hover:border-primary/40 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-primary/40',
+                )}
+              >
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border text-[9px] font-bold',
+                    active
+                      ? 'border-primary bg-primary text-white'
+                      : 'border-gray-300 text-transparent dark:border-slate-600',
+                  )}
+                >
+                  ✓
+                </span>
+                <span className="min-w-0">
+                  <span
+                    className={cn(
+                      'block text-xs font-bold',
+                      active
+                        ? 'text-primary'
+                        : 'text-gray-700 dark:text-gray-200',
+                    )}
+                  >
+                    {PROFILE_VISIBILITY_LABELS[value]}
+                  </span>
+                  <span className="block text-[11px] text-gray-500 dark:text-slate-400 mt-0.5">
+                    {value === 'private'
+                      ? 'Par défaut. Aucun recruteur ne peut consulter votre profil.'
+                      : 'Consentement explicite : votre profil sera consultable par les recruteurs de la future CVthèque.'}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        <p className="mt-2.5 text-[11px] text-gray-500 dark:text-slate-400">
+          Votre email, votre téléphone et votre lien de CV ne sont jamais publiés. Vous
+          pouvez retirer ce consentement à tout moment en repassant en « Profil privé ».
+        </p>
       </div>
 
       <div className="flex items-center justify-end">
