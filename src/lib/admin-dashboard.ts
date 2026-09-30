@@ -6,6 +6,7 @@ import {
   getSupabaseClient,
   isSupabaseConfigured,
 } from "@/lib/supabase";
+import { getGrowthStats, type AdminGrowthStats } from "@/lib/admin-growth";
 
 export type DashboardOffer = {
   id: string;
@@ -84,6 +85,8 @@ export type AdminDashboardData = {
   offers: DashboardOffer[];
   cities: string[];
   stats: DashboardStats;
+  /** Croissance : inscrits, profils, alertes, top offres (§23). */
+  growth: AdminGrowthStats;
   scraperHealth: ScraperHealth;
   sourceHealth: Record<string, SourceHealthStats>;
   healthScore: HealthScore;
@@ -853,7 +856,7 @@ function getEntreprendreStats(db: SqliteDb): EntreprendreDashboardStats {
          ) cm ON cm.article_id = a.id
          WHERE a.status = 'published'
          ORDER BY ${orderBy}
-         LIMIT ?`,
+         LIMIT $limit`,
       )
       .all({ $limit: limit }) as SqliteRow[];
     return rows.map((r) => ({
@@ -936,9 +939,13 @@ async function getEntreprendreStatsFromSupabase(): Promise<EntreprendreDashboard
 }
 
 export async function getAdminDashboardData(pendingReports = 0): Promise<AdminDashboardData> {
+  // Stats de croissance (inscrits, profils complétés, alertes, top offres).
+  const growth = await getGrowthStats();
+
   const supabase = isSupabaseConfigured() ? getSupabaseClient() : null;
   if (supabase) {
-    return getAdminDashboardDataFromSupabase(supabase, pendingReports);
+    const data = await getAdminDashboardDataFromSupabase(supabase, pendingReports);
+    return { ...data, growth };
   }
 
   const db = openDatabase();
@@ -1065,6 +1072,7 @@ export async function getAdminDashboardData(pendingReports = 0): Promise<AdminDa
     offers,
     cities,
     stats,
+    growth,
     scraperHealth,
     sourceHealth,
     healthScore,
@@ -1208,11 +1216,15 @@ export async function applyBulkAction(action: BulkAction, ids: string[]): Promis
   throw new Error("Impossible d'archiver les offres avec le schéma actuel.");
 }
 
-/** Variante Supabase : lit les offres + stats pour la vue d'ensemble. */
+/**
+ * Variante Supabase : lit les offres + stats pour la vue d'ensemble.
+ * `growth` est ajouté par l'appelant (`getAdminDashboardData`), qui calcule
+ * les statistiques de croissance une seule fois quelle que soit la source.
+ */
 async function getAdminDashboardDataFromSupabase(
   supabase: NonNullable<ReturnType<typeof getSupabaseClient>>,
   pendingReports = 0,
-): Promise<AdminDashboardData> {
+): Promise<Omit<AdminDashboardData, "growth">> {
   // Expiration automatique (Supabase) : idem SQLite, sans faire échouer le
   // dashboard si la colonne `deadline` n'est pas encore migrée.
   try {

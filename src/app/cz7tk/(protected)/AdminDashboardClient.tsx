@@ -9,6 +9,7 @@ import type {
   DashboardOffer,
   ScraperHealth,
 } from "../../../lib/admin-dashboard";
+import type { GrowthTopOffer } from "@/lib/admin-growth";
 import type { JobOffersActivityPoint } from "@/services/jobOfferSchemaService";
 import type { Report, ReportStatus } from "@/services/reportService";
 import type { ResolvedContentItem } from "@/lib/itemResolver";
@@ -202,6 +203,47 @@ function exportCsv(offers: DashboardOffer[]) {
   URL.revokeObjectURL(url);
 }
 
+/** Classement des offres (consultées ou sauvegardées) avec rang, titre et compteur. */
+function TopOffersCard({
+  title,
+  items,
+  emptyLabel,
+}: {
+  title: string;
+  items: GrowthTopOffer[];
+  emptyLabel: string;
+}) {
+  return (
+    <article className="rounded-3xl border border-white/[0.06] bg-slate-900/60 p-5 shadow-lg shadow-black/20 backdrop-blur">
+      <h2 className="font-[var(--font-display)] text-base font-bold text-white">
+        {title}
+      </h2>
+      {items.length === 0 ? (
+        <p className="mt-4 text-sm text-slate-500">{emptyLabel}</p>
+      ) : (
+        <ol className="mt-4 space-y-2">
+          {items.map((item, index) => (
+            <li
+              key={item.id}
+              className="flex items-center justify-between gap-3 text-sm"
+            >
+              <span className="flex min-w-0 items-center gap-2">
+                <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-[10px] font-bold text-slate-400">
+                  {index + 1}
+                </span>
+                <span className="truncate text-slate-300">{item.title}</span>
+              </span>
+              <span className="shrink-0 text-xs font-semibold text-white">
+                {item.count}
+              </span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </article>
+  );
+}
+
 export default function AdminDashboardClient({
   initialData,
   activity,
@@ -217,6 +259,7 @@ export default function AdminDashboardClient({
   const [healthScore] = useState(initialData.healthScore);
   const [entreprendreStats] = useState(initialData.entreprendreStats);
   const [sourceHealth] = useState(initialData.sourceHealth);
+  const [growth, setGrowth] = useState(initialData.growth);
   const [statusFilter, setStatusFilter] =
     useState<(typeof STATUS_OPTIONS)[number]>("Toutes");
   const [cityFilter, setCityFilter] = useState("Toutes");
@@ -265,6 +308,7 @@ export default function AdminDashboardClient({
     setCities(payload.cities);
     setStats(payload.stats);
     setScraperHealth(payload.scraperHealth);
+    if (payload.growth) setGrowth(payload.growth);
   }
 
   // Sélecteurs dérivés pour les nouvelles cartes
@@ -460,6 +504,55 @@ export default function AdminDashboardClient({
         </svg>
       ),
     },
+    {
+      label: "Inscrits / semaine",
+      value: growth.newUsersThisWeek,
+      hint: `${growth.totalUsers} inscrits au total`,
+      accent: "from-violet-500 to-indigo-600",
+      icon: (
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M19 8v6" />
+          <path d="M22 11h-6" />
+        </svg>
+      ),
+    },
+    {
+      label: "Profils complétés",
+      value: growth.completedProfiles,
+      hint: `${growth.profilesCompletedThisWeek} cette semaine · seuil 70 %`,
+      accent: "from-teal-500 to-emerald-600",
+      icon: (
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <path d="m9 11 3 3L22 4" />
+        </svg>
+      ),
+    },
+    {
+      label: "Alertes actives",
+      value: growth.activeAlerts,
+      hint: `${growth.totalResumes} CV déposés`,
+      accent: "from-orange-500 to-amber-600",
+      icon: (
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+        </svg>
+      ),
+    },
+    {
+      label: "Sauvegardes",
+      value: growth.totalSavedItems,
+      hint: "Offres & stages enregistrés",
+      accent: "from-pink-500 to-rose-600",
+      icon: (
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z" />
+        </svg>
+      ),
+    },
   ];
 
   return (
@@ -567,6 +660,20 @@ export default function AdminDashboardClient({
             </article>
           );
         })}
+      </section>
+
+      {/* ===== Croissance : top offres ===== */}
+      <section className="grid gap-4 lg:grid-cols-2">
+        <TopOffersCard
+          title="Offres les plus consultées"
+          items={growth.topViewedOffers}
+          emptyLabel="Aucune consultation enregistrée pour le moment."
+        />
+        <TopOffersCard
+          title="Offres les plus sauvegardées"
+          items={growth.topSavedOffers}
+          emptyLabel="Aucune sauvegarde enregistrée pour le moment."
+        />
       </section>
 
       {/* ===== Score de santé + Entreprendre + Contenu top ===== */}
