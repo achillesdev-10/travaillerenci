@@ -136,7 +136,7 @@ export interface JobOfferSchemaFilters {
   source_website?: string;
   limit?: number;
   offset?: number;
-  order_by?: 'created_at' | 'title' | 'company';
+  order_by?: 'created_at' | 'title' | 'company' | 'clicks_count' | 'deadline';
   order_dir?: 'asc' | 'desc';
 }
 

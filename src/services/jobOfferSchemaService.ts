@@ -312,7 +312,7 @@ export class JobOfferSchemaService {
     if (company) { clauses.push('company LIKE $co'); params.$co = `%${company}%`; }
     if (source_website) { clauses.push('source_website = $sw'); params.$sw = source_website; }
     const whereSql = clauses.length > 0 ? `WHERE ${clauses.join(' AND ')}` : '';
-    const orderSafe = ['created_at', 'title', 'company'].includes(order_by!) ? order_by : 'created_at';
+    const orderSafe = ['created_at', 'title', 'company', 'clicks_count', 'deadline'].includes(order_by!) ? order_by : 'created_at';
     const dirSafe = order_dir === 'asc' ? 'ASC' : 'DESC';
     const rows = db.prepare(`SELECT * FROM job_offers ${whereSql} ORDER BY ${orderSafe} ${dirSafe} LIMIT $limit OFFSET $offset`).all({ ...params, $limit: limit, $offset: offset }).map(rowToSchema);
     const total = (db.prepare(`SELECT COUNT(*) AS total FROM job_offers ${whereSql}`).get(params) as any).total;
@@ -641,7 +641,7 @@ export class JobOfferSchemaService {
     if (typeof is_archived === 'boolean') query = query.eq('is_archived', is_archived);
     if (typeof is_expired === 'boolean') query = query.eq('is_expired', is_expired);
 
-    const orderSafe = ['created_at', 'title', 'company'].includes(order_by!) ? order_by! : 'created_at';
+    const orderSafe = ['created_at', 'title', 'company', 'clicks_count', 'deadline'].includes(order_by!) ? order_by! : 'created_at';
     const ascending = order_dir !== 'desc';
     query = query.order(orderSafe, { ascending });
 

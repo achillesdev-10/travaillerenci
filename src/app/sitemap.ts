@@ -17,6 +17,7 @@ const BASE_URL = getSiteUrl();
 const STATIC_ROUTES = [
   '',
   '/jobs',
+  '/jobs/today',
   '/stages',
   '/concours',
   '/bourses',

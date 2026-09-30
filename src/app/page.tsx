@@ -348,6 +348,12 @@ export default async function HomePage({
                 >
                   Voir les offres
                 </Link>
+                <Link
+                  href="/jobs/today"
+                  className="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white/80 px-5 py-3 text-sm font-bold text-gray-800 backdrop-blur transition-colors hover:border-primary/50 hover:text-primary dark:border-slate-700 dark:bg-slate-900/80 dark:text-gray-100"
+                >
+                  Offres du jour
+                </Link>
               </div>
             </div>
 
