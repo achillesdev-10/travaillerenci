@@ -4,6 +4,7 @@ import type { NextRequest } from 'next/server';
 import { requireAdminApi } from '@/lib/adminSession';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import type { JobContractType, JobOfferSchemaInsert, JobOfferSchemaStatus } from '@/types';
+import { VALID_SECTOR_SLUGS } from '@/lib/sectorClassifier';
 
 import type { ContentCategory } from '@/types';
 
@@ -38,6 +39,13 @@ function normalizePatch(body: Record<string, unknown>): Partial<JobOfferSchemaIn
     ALLOWED_CATEGORIES.includes(body.category as ContentCategory)
   ) {
     patch.category = body.category as ContentCategory;
+  }
+
+  if (typeof body.sector === 'string') {
+    const sector = body.sector.trim();
+    patch.sector = VALID_SECTOR_SLUGS.has(sector) ? sector : null;
+  } else if (body.sector === null) {
+    patch.sector = null;
   }
 
   if (typeof body.title === 'string') patch.title = body.title.trim();

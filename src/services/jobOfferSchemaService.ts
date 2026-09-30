@@ -226,13 +226,18 @@ function ensureSchema(db: DatabaseSyncInstance) {
   if (!existingColumns.has('category')) {
     db.exec("ALTER TABLE job_offers ADD COLUMN category TEXT NOT NULL DEFAULT 'job'");
   }
+  if (!existingColumns.has('sector')) {
+    db.exec('ALTER TABLE job_offers ADD COLUMN sector TEXT');
+  }
   db.exec("CREATE INDEX IF NOT EXISTS idx_jobs_category ON job_offers (category);");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_jobs_sector ON job_offers (sector);");
 }
 
 function rowToSchema(row: any): JobOfferSchema {
   return {
     ...row,
     category: row.category || 'job',
+    sector: row.sector ?? null,
     status: row.status || 'pending',
     deadline: row.deadline ?? null,
     is_verified: row.is_verified === 1,
@@ -246,6 +251,7 @@ function rowToSchemaFromSupabase(row: any): JobOfferSchema {
   return {
     ...row,
     category: row.category || 'job',
+    sector: row.sector ?? null,
     status: row.status || 'pending',
     deadline: row.deadline ?? null,
     is_verified: row.is_verified === true,
@@ -268,7 +274,7 @@ export class JobOfferSchemaService {
   static async list(filters: JobOfferSchemaFilters = {}): Promise<PaginatedRows<JobOfferSchema>> {
     if (isSupabaseConfigured()) return this.listSupabase(filters);
     const db = await getDb();
-    const { category, keyword, location, contract_type, status, is_verified, is_archived, is_expired, company, source_website, limit = 50, offset = 0, order_by = 'created_at', order_dir = 'desc' } = filters;
+    const { category, sector, keyword, location, contract_type, status, is_verified, is_archived, is_expired, company, source_website, limit = 50, offset = 0, order_by = 'created_at', order_dir = 'desc' } = filters;
     if (!db) return { rows: [], total: 0 };
     const clauses: string[] = [];
     const params: Record<string, unknown> = {};
@@ -277,6 +283,14 @@ export class JobOfferSchemaService {
       const placeholders = list.map((_, i) => `$ca${i}`).join(',');
       list.forEach((t, i) => (params[`$ca${i}`] = t));
       clauses.push(`category IN (${placeholders})`);
+    }
+    if (sector) {
+      const list = Array.isArray(sector) ? sector : [sector];
+      if (list.length > 0) {
+        const placeholders = list.map((_, i) => `$se${i}`).join(',');
+        list.forEach((s, i) => (params[`$se${i}`] = s));
+        clauses.push(`sector IN (${placeholders})`);
+      }
     }
     if (keyword) { clauses.push('(title LIKE $kw OR company LIKE $kw OR description LIKE $kw)'); params.$kw = `%${keyword}%`; }
     if (location) { clauses.push('location LIKE $loc'); params.$loc = `%${location}%`; }
@@ -384,6 +398,7 @@ export class JobOfferSchemaService {
   /** Colonnes autorisées pour les mises à jour (protection contre les injections SQL). */
   private static readonly UPDATE_COLUMNS = new Set([
     'category',
+    'sector',
     'title',
     'company',
     'location',
@@ -470,12 +485,12 @@ export class JobOfferSchemaService {
     const res = db
       .prepare(
         `INSERT INTO job_offers (
-          category, title, company, location, contract_type, description,
+          category, sector, title, company, location, contract_type, description,
           apply_link, apply_email, deadline, source_url, source_website, status,
           seo_title, seo_description, seo_keywords, slug, is_verified,
           created_at, updated_at
         ) VALUES (
-          $category, $title, $company, $location, $contract_type, $description,
+          $category, $sector, $title, $company, $location, $contract_type, $description,
           $apply_link, $apply_email, $deadline, $source_url, $source_website, $status,
           $seo_title, $seo_description, $seo_keywords, $slug, $is_verified,
           datetime('now'), datetime('now')
@@ -483,6 +498,7 @@ export class JobOfferSchemaService {
       )
       .get({
         $category: (data.category as string) || 'job',
+        $sector: data.sector ? String(data.sector).trim() : null,
         $title: title,
         $company: company,
         $location: location,
@@ -565,6 +581,7 @@ export class JobOfferSchemaService {
 
     const {
       category,
+      sector,
       keyword,
       location,
       contract_type,
@@ -607,6 +624,10 @@ export class JobOfferSchemaService {
     if (category) {
       const list = Array.isArray(category) ? category : [category];
       if (list.length > 0) query = query.in('category', list);
+    }
+    if (sector) {
+      const list = Array.isArray(sector) ? sector : [sector];
+      if (list.length > 0) query = query.in('sector', list);
     }
     if (contract_type) {
       const list = Array.isArray(contract_type) ? contract_type : [contract_type];
@@ -804,6 +825,7 @@ export class JobOfferSchemaService {
 
     const payload = {
       category: (data.category as string) || 'job',
+      sector: data.sector ? String(data.sector).trim() : null,
       title: String(data.title || '').trim(),
       company: String(data.company || '').trim(),
       location: String(data.location || 'Abidjan').trim(),

@@ -21,10 +21,9 @@
  *  Les scores sont additifs. À score égal, l'offre la plus récente passe
  *  devant (tri stable).
  *
- *  NB : tant que la colonne `sector` n'existe pas sur `job_offers`, la
- *  correspondance « domaine » se fait par mots-clés sur le titre + la
- *  description. Le jour où `job_offers.sector` est ajouté, il suffira de
- *  lire ce champ dans `scoreJob` (voir le TODO) sans toucher au reste.
+ *  La correspondance « domaine » utilise d'abord la colonne `job_offers.sector`
+ *  (correspondance exacte) quand elle est renseignée ; sinon elle retombe sur
+ *  une recherche par mots-clés dans le titre et la description.
  *
  *  IMPORTANT : ce module est PUR (aucun import serveur / Next). Il est
  *  directement couvert par tests/recommendationScoring.test.ts.
@@ -46,6 +45,8 @@ export interface ScorableJob {
   description?: string | null;
   location?: string | null;
   contract_type?: string | null;
+  /** Slug de métier/domaine (colonne job_offers.sector) — prioritaire s'il est renseigné. */
+  sector?: string | null;
   is_verified?: boolean | null;
   created_at?: string | null;
 }
@@ -283,29 +284,35 @@ export function scoreJob(
   now: Date = new Date(),
 ): JobScore {
   const reasons: string[] = [];
-  let score = 0;
-
   const haystack = normalizeText(`${job.title} ${job.description ?? ''}`);
   const sectorSlugs = Array.isArray(profile?.sectors) ? profile!.sectors! : [];
+  let matchedSector: string | undefined;
 
-  // TODO(future) : quand `job_offers.sector` existera, matcher directement
-  // `job.sector` contre `profile.sectors` (exact) au lieu des mots-clés.
-  if (sectorSlugs.length > 0 && haystack) {
-    for (const slug of sectorSlugs) {
-      const entry = SECTOR_KEYWORDS[slug];
-      if (!entry) continue;
-      if (entry.keywords.some((kw) => matchesKeyword(haystack, normalizeText(kw)))) {
-        score += RECOMMENDATION_WEIGHTS.sector;
-        reasons.push(`Domaine ${entry.label}`);
-        return { score: score + scoreExtras(profile, job, haystack, now, reasons), reasons, matchedSector: slug };
+  if (sectorSlugs.length > 0) {
+    // 1) Colonne `sector` renseignée → correspondance exacte (fiable).
+    if (job.sector && sectorSlugs.includes(job.sector)) {
+      matchedSector = job.sector;
+    } else if (!job.sector && haystack) {
+      // 2) Repli : mots-clés du secteur sur titre + description.
+      for (const slug of sectorSlugs) {
+        const entry = SECTOR_KEYWORDS[slug];
+        if (entry && entry.keywords.some((kw) => matchesKeyword(haystack, normalizeText(kw)))) {
+          matchedSector = slug;
+          break;
+        }
       }
     }
   }
 
-  return {
-    score: score + scoreExtras(profile, job, haystack, now, reasons),
-    reasons,
-  };
+  let score = 0;
+  if (matchedSector) {
+    score += RECOMMENDATION_WEIGHTS.sector;
+    const entry = SECTOR_KEYWORDS[matchedSector];
+    if (entry) reasons.push(`Domaine ${entry.label}`);
+  }
+
+  score += scoreExtras(profile, job, haystack, now, reasons);
+  return { score, reasons, matchedSector };
 }
 
 /** Signaux secondaires (ville, contrat, diplôme, fraîcheur, vérification). */

@@ -4,6 +4,7 @@ import type { NextRequest } from 'next/server';
 import { requireAdminApi } from '@/lib/adminSession';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import type { JobContractType, JobOfferSchemaInsert, JobOfferSchemaStatus } from '@/types';
+import { VALID_SECTOR_SLUGS } from '@/lib/sectorClassifier';
 
 import type { ContentCategory } from '@/types';
 
@@ -38,6 +39,11 @@ function normalizeInsert(body: Record<string, unknown>): Partial<JobOfferSchemaI
     ALLOWED_CATEGORIES.includes(body.category as ContentCategory)
   ) {
     data.category = body.category as ContentCategory;
+  }
+
+  if (typeof body.sector === 'string') {
+    const sector = body.sector.trim();
+    data.sector = VALID_SECTOR_SLUGS.has(sector) ? sector : null;
   }
 
   if (typeof body.title === 'string' && body.title.trim()) data.title = body.title.trim();

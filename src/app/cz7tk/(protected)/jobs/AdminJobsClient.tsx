@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import type { JobOfferSchema, JobOfferSchemaStatus, ContentCategory } from '@/types';
 import { cleanDescription } from '@/lib/descriptionCleaner';
+import { SECTORS } from '@/lib/constants';
 
 const CATEGORY_TABS: Array<{ value: ContentCategory | 'all'; label: string }> = [
   { value: 'all', label: 'Tous' },
@@ -67,6 +68,7 @@ export default function AdminJobsClient({
   const [isAiRewriting, setIsAiRewriting] = useState(false);
   const [editForm, setEditForm] = useState({
     category: 'job' as ContentCategory,
+    sector: '',
     title: '',
     company: '',
     location: '',
@@ -275,6 +277,7 @@ export default function AdminJobsClient({
     setModalNotice(null);
     setEditForm({
       category: categoryFilter !== 'all' ? categoryFilter : 'job',
+      sector: '',
       title: '',
       company: '',
       location: 'Abidjan',
@@ -297,6 +300,7 @@ export default function AdminJobsClient({
     setModalNotice(null);
     setEditForm({
       category: job.category || 'job',
+      sector: job.sector || '',
       title: job.title,
       company: job.company,
       location: job.location,
@@ -802,6 +806,27 @@ export default function AdminJobsClient({
                       <option value="archived">Archivé (Archived)</option>
                     </select>
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">
+                    Secteur / Métier
+                  </label>
+                  <select
+                    value={editForm.sector}
+                    onChange={(e) => setEditForm({ ...editForm, sector: e.target.value })}
+                    className="w-full rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white focus:outline-none focus:border-primary"
+                  >
+                    <option value="">Non classé</option>
+                    {SECTORS.map((s) => (
+                      <option key={s.slug} value={s.slug}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1 ml-1 text-[10px] text-slate-500">
+                    Alimente les pages SEO par métier et les recommandations.
+                  </p>
                 </div>
 
                 <div>

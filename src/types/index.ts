@@ -92,6 +92,8 @@ export type JobOfferSchemaStatus = 'pending' | 'published' | 'rejected' | 'archi
 export interface JobOfferSchema {
   id: string;
   category?: ContentCategory;
+  /** Slug de métier/domaine (SECTORS de src/lib/constants.ts) — null si non classé. */
+  sector?: string | null;
   title: string;
   company: string;
   location: string;
@@ -122,6 +124,7 @@ export type JobOfferSchemaInsert = Omit<JobOfferSchema, 'id' | 'created_at' | 'u
 /** Filtres supportés par les queries SQL (list / search). */
 export interface JobOfferSchemaFilters {
   category?: ContentCategory | ContentCategory[];
+  sector?: string | string[];
   keyword?: string;
   location?: string;
   contract_type?: JobContractType | JobContractType[];
