@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useTransition, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { REGIONS_CI, JOB_TYPES } from '@/lib/constants';
 import { cn, debounce } from '@/lib/utils';
+import { trackEvent } from '@/lib/analyticsClient';
 
 interface SearchBarProps {
   compact?: boolean;
@@ -25,6 +26,22 @@ const CONTRACT_OPTIONS = [
   { value: '', label: 'Tous les contrats' },
   ...JOB_TYPES.map((t) => ({ value: t.value, label: t.label })),
 ];
+
+/**
+ * Émet l'événement analytics `search` (§22) — libellé structuré
+ * `motclé|ville|contrat`, jamais de donnée personnelle.
+ */
+function trackSearchOnce(
+  lastRef: { current: string | null },
+  q: string,
+  c: string,
+  ct: string,
+) {
+  const label = [q.trim(), c, ct].filter(Boolean).join('|');
+  if (lastRef.current === label) return;
+  lastRef.current = label;
+  trackEvent('search', { label: label || undefined });
+}
 
 export default function SearchBar({
   compact = false,
@@ -55,6 +72,10 @@ export default function SearchBar({
     latestRef.current = { searchQuery, pathname, compact, onSearch };
   });
 
+  // ── Événement analytics `search` (§22) ──────────────────────────────────
+  // Une recherche = une navigation vers une nouvelle combinaison de filtres.
+  // On déduplique pour ne pas compter deux fois le submit après un debounce.
+  const lastTrackedRef = useRef<string | null>(null);
   // ── Debounced navigation — créé UNE SEULE FOIS ─────────────────────────
   // Sans debounce, chaque keystroke déclencherait un router.push immédiat.
   // Le debounce attend 350ms d'inactivité avant de naviguer.
@@ -71,6 +92,7 @@ export default function SearchBar({
         const next = `${pn}${params.toString() ? `?${params.toString()}` : ''}`;
         startTransition(() => router.push(next, { scroll: cp ? false : true }));
         if (os) os({ q, city: c, contract: ct });
+        trackSearchOnce(lastTrackedRef, q, c, ct);
       }, 350),
     [router, startTransition],
   );
@@ -88,6 +110,7 @@ export default function SearchBar({
     const next = `${pathname}${params.toString() ? `?${params.toString()}` : ''}`;
     startTransition(() => router.push(next, { scroll: !compact }));
     if (onSearch) onSearch({ q: keyword, city: location, contract });
+    trackSearchOnce(lastTrackedRef, keyword, location, contract);
   };
 
   return (
