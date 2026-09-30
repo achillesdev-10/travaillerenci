@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { Metadata } from 'next';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
+import { BlogService } from '@/services/blogService';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
 import SafetyNotice from '@/components/content/SafetyNotice';
 import SaveButton from '@/components/saved/SaveButton';
@@ -11,6 +12,9 @@ import type { JobOfferSchema } from '@/types';
 import { formatDate, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
 import { getJobThumbnail } from '@/lib/jobThumbnails';
+import { landingLinksForOffer } from '@/lib/jobSeo';
+import { classifySector } from '@/lib/sectorClassifier';
+import { pickRelatedArticles } from '@/lib/relatedContent';
 import ShareButton from '@/components/ShareButton';
 import { buildShareUrl } from '@/lib/shareUtm';
 import {
@@ -130,6 +134,33 @@ export default async function JobDetailPage({ params }: PageProps) {
     similarIds.add(s.id);
     return true;
   }).slice(0, 3);
+
+  // §33 — Maillage : liens vers les pages SEO ville / métier. Le vivier est
+  // le même que celui du sitemap → on ne relie jamais une page sous le seuil.
+  const activity = job.category === 'internship' ? ('stages' as const) : ('emplois' as const);
+  const [{ rows: vivier }, { rows: recentPosts }] = await Promise.all([
+    JobOfferSchemaService.list({
+      status: 'published',
+      is_archived: false,
+      is_expired: false,
+      category: ['job', 'internship'],
+      order_by: 'created_at',
+      order_dir: 'desc',
+      limit: 500,
+    }),
+    BlogService.list({
+      status: 'published',
+      limit: 50,
+      order_by: 'published_at',
+      order_dir: 'desc',
+    }),
+  ]);
+  const landingLinks = landingLinksForOffer(vivier, job, activity);
+
+  // §16 — OFFRE → ARTICLE : articles pertinents pour le secteur de l'offre.
+  const jobSector =
+    job.sector ?? classifySector({ title: job.title, description: job.description });
+  const relatedArticles = pickRelatedArticles(recentPosts, jobSector, 2);
 
   // JobPosting — valeurs 100 % issues des données réelles : `validThrough`
   // n'est renseigné QUE si une date limite existe dans l'annonce (jamais
@@ -365,16 +396,69 @@ export default async function JobDetailPage({ params }: PageProps) {
               </div>
             )}
 
+            {/* Articles liés au secteur de l'offre (§16) */}
+            {relatedArticles.length > 0 && (
+              <div className="mt-8 sm:mt-10">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-5 font-[var(--font-display)]">
+                  À lire avant de postuler
+                </h2>
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 list-none m-0 p-0">
+                  {relatedArticles.map((article) => (
+                    <li key={article.id}>
+                      <Link
+                        href={`/blog/${article.slug}`}
+                        className="group flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-4 transition-all hover:border-primary/30 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+                      >
+                        {article.published_at && (
+                          <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                            {formatDate(article.published_at)}
+                          </span>
+                        )}
+                        <h3 className="mt-1.5 text-sm font-bold text-gray-900 dark:text-white transition-colors group-hover:text-primary line-clamp-2">
+                          {article.title}
+                        </h3>
+                        {article.excerpt && (
+                          <p className="mt-1.5 text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
+                            {article.excerpt}
+                          </p>
+                        )}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             {/* Maillage interne — catégories principales + localisation */}
             <nav aria-label="Liens complémentaires" className="mt-8 sm:mt-10">
               <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 font-[var(--font-display)]">
                 Explorer davantage
               </h2>
               <ul className="flex flex-wrap gap-2.5 list-none m-0 p-0">
+                {landingLinks.combo && (
+                  <li>
+                    <Link
+                      href={landingLinks.combo.href}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-2 text-[12.5px] font-semibold text-primary transition-all hover:bg-primary/20"
+                    >
+                      {landingLinks.combo.label}
+                    </Link>
+                  </li>
+                )}
+                {landingLinks.metier && (
+                  <li>
+                    <Link
+                      href={landingLinks.metier.href}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                    >
+                      {landingLinks.metier.label}
+                    </Link>
+                  </li>
+                )}
                 {jobCity && (
                   <li>
                     <Link
-                      href={`/jobs?city=${encodeURIComponent(jobCity)}`}
+                      href={landingLinks.city?.href ?? `/jobs?city=${encodeURIComponent(jobCity)}`}
                       className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
                     >
                       Offres à {jobCity}

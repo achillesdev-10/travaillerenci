@@ -3,10 +3,15 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
 import CoverImage from '@/components/content/CoverImage';
+import CompactJobCard from '@/components/home/CompactJobCard';
 import { BlogService } from '@/services/blogService';
+import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import { SITE_CONFIG } from '@/lib/constants';
-import { buildShareUrl } from '@/lib/shareUtm';
 import { IMAGES } from '@/lib/images';
+import { buildShareUrl } from '@/lib/shareUtm';
+import { articleSector } from '@/lib/relatedContent';
+import { METIER_SEO, landingForOffer } from '@/lib/jobSeo';
+import type { JobOfferSchema } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,6 +63,41 @@ export default async function BlogArticlePage({
     order_dir: 'desc',
   });
   const relatedPosts = related.filter((p) => p.id !== post.id).slice(0, 2);
+
+  // §16 — BLOG → OFFRES : offres contextualisées selon le sujet de l'article.
+  // Le secteur est déduit du titre / résumé / étiquettes (classifieur pur),
+  // puis on récupère les offres publiées de ce secteur.
+  const sector = articleSector(post);
+  const metier = sector ? (METIER_SEO.find((m) => m.sector === sector) ?? null) : null;
+  const { rows: sectorOffers } = sector
+    ? await JobOfferSchemaService.list({
+        sector,
+        category: ['job', 'internship'],
+        status: 'published',
+        is_archived: false,
+        is_expired: false,
+        order_by: 'created_at',
+        order_dir: 'desc',
+        limit: 500,
+      })
+    : { rows: [] as JobOfferSchema[] };
+  const relatedOffers = sectorOffers.slice(0, 4);
+
+  // Lien contextuel : page SEO du métier si elle existe (seuil du sitemap),
+  // sinon recherche filtrée — jamais de lien vers une page vide.
+  const offersLink = metier
+    ? (landingForOffer(sectorOffers, {
+        activity: 'emplois',
+        citySlug: null,
+        metierSlug: metier.slug,
+      }) ??
+      landingForOffer(sectorOffers, {
+        activity: 'stages',
+        citySlug: null,
+        metierSlug: metier.slug,
+      }) ?? { href: `/jobs?q=${encodeURIComponent(metier.searchKeyword)}` })
+    : { href: '/jobs' };
+  const offersLinkLabel = metier ? `Voir les offres ${metier.label}` : 'Voir les offres';
 
   const shareUrl = buildShareUrl(
     `${SITE_CONFIG.url}/blog/${post.slug}`,
@@ -149,6 +189,43 @@ export default async function BlogArticlePage({
           </div>
         </article>
 
+        {/* ===== Offres liées au sujet de l'article (§16) ===== */}
+        {relatedOffers.length > 0 && (
+          <div className="mt-8 rounded-3xl border border-border bg-white dark:bg-slate-900 p-6 sm:p-7">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white font-[var(--font-display)]">
+              Offres qui pourraient vous intéresser
+            </h2>
+            <p className="mt-1.5 text-sm text-gray-600 dark:text-gray-400">
+              Les dernières offres publiées{metier ? ` dans le domaine ${metier.label.toLowerCase()}` : ''} sur
+              TravaillerenCi.
+            </p>
+            <div className="mt-4 grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+              {relatedOffers.map((job) => (
+                <CompactJobCard key={job.id} job={job} />
+              ))}
+            </div>
+            <Link
+              href={offersLink.href}
+              className="mt-4 inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-5 py-2.5 text-sm font-bold text-primary transition-colors hover:bg-primary/20"
+            >
+              {offersLinkLabel}
+              <svg
+                className="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+        )}
+
         {/* ===== CTA ===== */}
         <div className="mt-8 rounded-3xl bg-primary p-7 sm:p-9 text-center text-white shadow-xl shadow-primary/20">
           <h2 className="text-xl sm:text-2xl font-extrabold font-[var(--font-display)]">
@@ -160,10 +237,10 @@ export default async function BlogArticlePage({
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
             <Link
-              href="/jobs"
+              href={offersLink.href}
               className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-gray-900 font-bold text-sm hover:bg-gray-100 transition-colors shadow-lg"
             >
-              Voir les offres
+              {offersLinkLabel}
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14" />
                 <path d="m12 5 7 7-7 7" />

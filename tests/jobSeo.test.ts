@@ -9,8 +9,12 @@ import {
   buildJobSeoSlug,
   eligibleSeoLandings,
   filterOffersForSeo,
+  landingForOffer,
+  landingLinksForOffer,
   minOffersFor,
   parseJobSeoSlug,
+  resolveCity,
+  resolveMetier,
   seoLandingTitle,
   type SeoOfferLike,
 } from '../src/lib/jobSeo';
@@ -200,6 +204,60 @@ try {
 } catch (e) {
   assert(false, `Crash: ${e}`);
 }
+
+// ---- 9. Liens SEO depuis une offre / un article (§16 + §33) ----
+console.log('\n9. resolve / landingForOffer / landingLinksForOffer');
+assertEqual(resolveCity('Abidjan, Cocody')?.slug, 'abidjan', 'ville résolue depuis la localisation');
+assertEqual(resolveCity(null), null, 'localisation absente → null');
+assertEqual(resolveCity('Paris, France'), null, 'ville hors périmètre → null');
+assertEqual(resolveMetier('it-digital')?.slug, 'informatique', 'métier résolu depuis sector');
+assertEqual(resolveMetier(null), null, 'secteur absent → null');
+assertEqual(resolveMetier('secteur-inconnu'), null, 'secteur inconnu → null');
+
+const enoughForCity = Array.from({ length: MIN_OFFERS }, (_, i) =>
+  createOffer({ id: `city${i}`, location: 'Abidjan' }),
+);
+assertEqual(
+  landingForOffer(enoughForCity, { activity: 'emplois', citySlug: 'abidjan', metierSlug: null }),
+  { slug: 'emplois-abidjan', href: '/emplois-abidjan', label: "Offres d'emploi à Abidjan" },
+  'page ville éligible → lien',
+);
+assertEqual(
+  landingForOffer(enoughForCity.slice(0, MIN_OFFERS - 1), {
+    activity: 'emplois',
+    citySlug: 'abidjan',
+    metierSlug: null,
+  }),
+  null,
+  'sous le seuil → pas de lien (jamais de page vide)',
+);
+assertEqual(
+  landingForOffer([], { activity: 'emplois', citySlug: null, metierSlug: null }),
+  null,
+  'sans ville ni métier → null',
+);
+
+const comboVivier = Array.from({ length: MIN_COMBO_OFFERS }, (_, i) =>
+  createOffer({ id: `cv${i}`, location: 'Abidjan', sector: 'it-digital' }),
+);
+const links = landingLinksForOffer(
+  comboVivier,
+  { ...createOffer({ id: 'job', location: 'Abidjan, Riviera', sector: 'it-digital' }), sector: 'it-digital' },
+  'emplois',
+);
+assertEqual(links.city?.href, '/emplois-abidjan', 'lien ville');
+assertEqual(links.metier?.href, '/emplois-informatique', 'lien métier');
+assertEqual(links.combo?.href, '/emplois-abidjan-informatique', 'lien combinaison');
+
+const fewCombo = comboVivier.slice(0, MIN_OFFERS);
+const fewLinks = landingLinksForOffer(
+  fewCombo,
+  { ...createOffer({ id: 'job2', location: 'Abidjan', sector: 'it-digital' }), sector: 'it-digital' },
+  'emplois',
+);
+assertEqual(fewLinks.city?.href, '/emplois-abidjan', 'ville toujours éligible à 5 offres');
+assertEqual(fewLinks.metier?.href, '/emplois-informatique', 'métier toujours éligible à 5 offres');
+assertEqual(fewLinks.combo, null, 'combinaison sous le seuil strict → null');
 
 console.log('\n\n📊 Results:');
 console.log(`   ✅ Passed: ${passed}`);

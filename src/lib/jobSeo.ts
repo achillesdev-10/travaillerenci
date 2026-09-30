@@ -595,3 +595,70 @@ export function eligibleSeoLandings<T extends SeoOfferLike>(
     return filterOffersForSeo(offers, parsed).length >= minOffersFor(parsed);
   });
 }
+
+// ---------------------------------------------------------------------------
+//  Maillage depuis une page d'offre (§33) / un article (§16)
+// ---------------------------------------------------------------------------
+export interface SeoLandingLink {
+  /** Slug complet (ex : « emplois-abidjan »). */
+  slug: string;
+  /** URL relative (ex : « /emplois-abidjan »). */
+  href: string;
+  /** Libellé éditorial court (ex : « Offres d'emploi à Abidjan »). */
+  label: string;
+}
+
+/** Ville SEO correspondant à la localisation d'une offre, ou null. */
+export function resolveCity(location?: string | null): CitySeo | null {
+  if (!location) return null;
+  return CITY_SEO.find((c) => matchesCity(location, c.name)) ?? null;
+}
+
+/** Métier SEO correspondant à la colonne `sector`, ou null. */
+export function resolveMetier(sector?: string | null): MetierSeo | null {
+  if (!sector) return null;
+  return METIER_SEO.find((m) => m.sector === sector) ?? null;
+}
+
+/**
+ * Lien vers la page SEO demandée **si elle existe réellement** (même seuil
+ * que le sitemap) — sinon null : on ne crée jamais un lien vers une page
+ * qui renverrait un 404.
+ */
+export function landingForOffer<T extends SeoOfferLike>(
+  offers: T[],
+  parsed: ParsedJobSeoSlug,
+): SeoLandingLink | null {
+  if (!parsed.citySlug && !parsed.metierSlug) return null;
+  if (filterOffersForSeo(offers, parsed).length < minOffersFor(parsed)) return null;
+  const slug = buildJobSeoSlug(parsed);
+  return { slug, href: `/${slug}`, label: seoLandingTitle(parsed) };
+}
+
+/**
+ * Liens SEO complets pour une offre : ville, métier, puis combinaison
+ * ville × métier (la plus spécifique est retournée en priorité par l'appelant).
+ */
+export function landingLinksForOffer<
+  T extends SeoOfferLike & { location?: string | null; sector?: string | null },
+>(
+  offers: T[],
+  offer: T,
+  activity: JobSeoActivity,
+): { city: SeoLandingLink | null; metier: SeoLandingLink | null; combo: SeoLandingLink | null } {
+  const city = resolveCity(offer.location);
+  const metier = resolveMetier(offer.sector);
+
+  return {
+    city: city
+      ? landingForOffer(offers, { activity, citySlug: city.slug, metierSlug: null })
+      : null,
+    metier: metier
+      ? landingForOffer(offers, { activity, citySlug: null, metierSlug: metier.slug })
+      : null,
+    combo:
+      city && metier
+        ? landingForOffer(offers, { activity, citySlug: city.slug, metierSlug: metier.slug })
+        : null,
+  };
+}
