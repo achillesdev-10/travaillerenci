@@ -83,8 +83,7 @@ export class RecommendationService {
       city: profile?.city ?? null,
       diploma: profile?.diploma ?? null,
       sectors: profile?.sectors ?? [],
-      // Champ prêt pour la future migration (type de contrat recherché).
-      contractTypes: [],
+      contractTypes: profile?.contract_types ?? [],
     };
 
     const personalized = hasProfileSignals(profileForScoring);

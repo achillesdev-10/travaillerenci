@@ -31,15 +31,27 @@ export async function PUT(request: Request) {
     diploma?: string;
     sectors?: string[];
     phone?: string;
+    job_title?: string;
+    experience_level?: string;
+    skills?: string[];
+    contract_types?: string[];
+    bio?: string;
+    resume_url?: string;
   };
 
-  // La whitelist des secteurs est appliquée dans CandidateProfileService.upsert
-  // (source unique, commune avec l'inscription).
+  // Les whitelists (secteurs, niveaux, contrats) sont appliquées dans
+  // CandidateProfileService.upsert (source unique, commune avec l'inscription).
   const profile = await CandidateProfileService.upsert(user.id, {
     city: typeof body.city === 'string' ? body.city : undefined,
     diploma: typeof body.diploma === 'string' ? body.diploma : undefined,
     sectors: Array.isArray(body.sectors) ? body.sectors : undefined,
     phone: typeof body.phone === 'string' ? body.phone : undefined,
+    job_title: typeof body.job_title === 'string' ? body.job_title : undefined,
+    experience_level: typeof body.experience_level === 'string' ? body.experience_level : undefined,
+    skills: Array.isArray(body.skills) ? body.skills : undefined,
+    contract_types: Array.isArray(body.contract_types) ? body.contract_types : undefined,
+    bio: typeof body.bio === 'string' ? body.bio : undefined,
+    resume_url: typeof body.resume_url === 'string' ? body.resume_url : undefined,
   });
 
   if (!profile) {
