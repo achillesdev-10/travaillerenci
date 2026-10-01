@@ -1,8 +1,8 @@
 # Rapport final de phase — TravaillerEnCi (Master Prompt V2)
 
 > Période couverte : phase complète « Priorités 1 à 8 + sections 13 à 42 » du Master Prompt 2.
-> Branche : `main` — 14 commits en avance sur `origin/main` (non poussés).
-> Vérifications finales : `npm run lint` ✅ · `npm test` ✅ (11 suites, 285 assertions, 0 échec) · `npm run build` ✅
+> Branche : `main` — 19 commits en avance sur `origin/main` (non poussés).
+> Vérifications finales : `npm run lint` ✅ · `npm test` ✅ (11 suites, 285 assertions, 0 échec) · `npm run test:e2e` ✅ (61 tests, 0 échec) · `npm run build` ✅
 
 ---
 
@@ -115,6 +115,12 @@ Aucune donnée existante n'a été supprimée. Les équivalents SQLite sont cré
 
 - `npm test` → **11 suites, 285 assertions, 0 échec** :
   `analyticsEvents`, `jobSeo`, `jobThumbnails`, `mustSee`, `newsletter`, `profileCompletion`, `profileVisibility`, `recommendationScoring`, `relatedContent`, `sectorClassifier`, `shareUtm`.
+- **`npm run test:e2e` (Playwright) → 61 tests, 0 échec** (chaîne `chrome` système, serveur dev local, fixtures SQLite injectées puis nettoyées) :
+  `admin` (§36), `auth` (inscription / connexion / déconnexion), `blog`, `chatbot`, `cv-pdf-export`, `cv-pdf-mobile`,
+  `jobs` (recherche, filtres, fiche, `/stages`, `/jobs/today`, landing métier×ville, sitemap/robots),
+  `profile` (profil absent → incomplet → complet, §30), `responsive` (§26 : 320/360/390/412/768/1280 px,
+  fiche d'offre, dashboard, menu hamburger), `saved-alerts` (sauvegarde + alertes), `search` (débounce, soumission, état vide).
+  Couverture des cas §36 : utilisateur connecté / non connecté / sans profil / profil incomplet / profil complet.
 - Tests manuels (dev server) :
   - `POST /api/newsletter` → **201** (email valide + consentement), **400** (email invalide), **400** (consentement absent) ;
   - ré-inscription idempotente (1 seule ligne, pas de doublon d'événement) ;
@@ -128,17 +134,22 @@ Aucune donnée existante n'a été supprimée. Les équivalents SQLite sont cré
 ## 10. Résultat du build
 
 ```
-npm run lint   → 0 erreur
-npm test       → 11 suites / 285 assertions / 0 échec
-npm run build  → ✓ Compiled successfully in 46s
+npm run lint    → 0 erreur
+npm test        → 11 suites / 285 assertions / 0 échec
+npm run test:e2e → 61 tests / 0 échec
+npm run build   → ✓ Compiled successfully
 ```
 Avertissement connu et préexistant (non bloquant) : « Dynamic filesystem access causes tracing of the whole project » provenant du lancement du scraper Python (`fail(...)`), plus les warnings expérimentaux `node:sqlite`.
 
 ---
 
-## 11. Commits effectués (14, non poussés)
+## 11. Commits effectués (18, non poussés — le 19ᵉ est celui de ce rapport)
 
 ```
+de1b6bf test(e2e): ajouter la suite Playwright des parcours sections 36 et 41
+bed4ef5 fix(responsive): masquer les reseaux sociaux du header sous 2xl (section 26)
+ad1868f chore(migrations): detecter les colonnes manquantes et les erreurs d'API Supabase
+213b07c docs: ajouter le rapport final de phase (section 42)
 ecae500 feat(newsletter): preparer l'architecture newsletter et alertes email (section 20)
 f78291b feat(partage): ajouter Facebook et LinkedIn sur les fiches d'offre et tracer les partages sociaux (sections 14, 15 et 22)
 c1f46bd feat(profile): ajouter le consentement de visibilite du profil candidat (section 30)
@@ -162,7 +173,7 @@ c97b6ce feat(dashboard): ajouter les recommandations d'offres par profil
 1. **Migrations Supabase** : 0025 à 0029 doivent être appliquées sur le projet de production (aucune exécution automatique détectée).
 2. **Envoi newsletter** : non implémenté (volontaire, §20) — le double opt-in (champ `confirm_token` déjà prévu) et le job d'envoi restent à faire.
 3. **CVthèque** : aucun espace recruteur n'expose encore les profils ; le filtre `profile_visibility = 'recruiters'` devra être appliqué dès la création de cet espace.
-4. **Tests E2E** : parcours inscription / connexion / sauvegarde / alertes non automatisés (tests unitaires + smoke manuel uniquement).
+4. **Tests E2E** : la suite locale Playwright (`npm run test:e2e`, 61 tests) est verte ; la spec `chatbot.prod.spec.ts` (exécutée contre la production via `npm run test:e2e:prod`) reste un smoke à lancer manuellement. La suite n'est pas encore câblée en CI (`.github/workflows`).
 5. Rapports Lighthouse non versionnés (`lighthouse-report*.json`) : à décider (commit ou ignorer).
 6. Fichiers non versionnés restants : `Master Prompt 2.docx`.
 
@@ -173,5 +184,5 @@ c97b6ce feat(dashboard): ajouter les recommandations d'offres par profil
 1. Appliquer les migrations 0025-0029 puis redéployer et vérifier en production.
 2. Brancher l'envoi newsletter (double opt-in + digest hebdomadaire) en réutilisant le pipeline `scraper/alert_digest.py`.
 3. Construire la CVthèque recruteur avec filtre de consentement + champs premium (§29/§30) sans réécriture.
-4. Ajouter des tests E2E (Playwright) sur les 12 critères d'acceptation §41.
+4. Étendre la suite E2E aux critères §41 encore peu couverts (dashboard admin avancé, protection des CV, événements analytics) et la lancer en CI.
 5. Poursuivre le pipeline de qualité des offres (§31) : détection de doublons, normalisation, scoring de complétude.
