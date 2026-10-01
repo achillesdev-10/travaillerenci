@@ -108,6 +108,11 @@ Aucune donnée existante n'a été supprimée. Les équivalents SQLite sont cré
 - RLS Supabase fermée côté client (`candidate_profiles`, `newsletter_subscribers`) — accès serveur uniquement.
 - Aucune donnée personnelle dans l'analytics : libellés = identifiant d'objet ou source de formulaire (jamais d'email).
 - Contrôles d'accès inchangés et vérifiés : `/api/candidate/profile` et `/api/alerts` renvoient **401** sans session ; proxy `/cz7tk/*`, `/api/admin/*`, `/dashboard/*` protégés.
+- **Plus de secrets en dur** (§28) : `adminSession.ts` et `sessionToken.ts` n'utilisent plus de mot de passe/jeton par défaut embarqué — fallbacks réservés au développement local, **fail-closed en production** (login refusé sans `ADMIN_EMAIL`/`ADMIN_PASSWORD`, sessions refusées sans `ADMIN_SESSION_SECRET`).
+- **`POST /api/news` fermé par défaut** : `CRON_SECRET` obligatoire (s'il n'est pas configuré, la route renvoie systématiquement 401).
+- **Upload photo CV sous session** : `POST /api/cv/photo` exige une session utilisateur ou admin (401 `auth_required` sinon) ; le générateur anonyme conserve l'aperçu local blob: (message explicite dans `CVForm`).
+- **Modération des actualités** : le pipeline news insère désormais en `draft` ; la publication passe par `/cz7tk/actualites` (étape VALIDATION du §31), API `PATCH/DELETE /api/admin/articles/[id]` protégées par `requireAdminApi`.
+- Variables de sécurité documentées dans `.env.example` (section « fail-closed »).
 
 ---
 
@@ -128,6 +133,11 @@ Aucune donnée existante n'a été supprimée. Les équivalents SQLite sont cré
   - ré-inscription après désinscription → réactivation + renouvellement du consentement/jeton ;
   - page d'accueil, `/jobs`, `/jobs?q=…`, `/jobs/today`, article blog, `sitemap.xml` → **200** ;
   - fiche d'offre (offre injectée puis retirée) → **200** avec WhatsApp, Facebook, LinkedIn, Sauvegarder, Source, JSON-LD.
+- Tests manuels — correctifs sécurité (batch audit Master Prompt 2) :
+  - `POST /api/news` sans token / avec token invalide → **401** (fail-closed), `GET /api/news` → **200** ;
+  - `POST /api/cv/photo` sans session → **401** `auth_required` ;
+  - login admin (fallback dev) → **200** ; page `/cz7tk/actualites` → **200** ;
+  - cycle de modération complet : `PATCH/DELETE` sans session → **401**, statut invalide → **400**, `draft → published` → **200** (`published_at` renseigné), article visible sur `/actualites` puis invisible après dépublication, suppression → **200**.
 
 ---
 
@@ -143,9 +153,13 @@ Avertissement connu et préexistant (non bloquant) : « Dynamic filesystem acces
 
 ---
 
-## 11. Commits effectués (18, non poussés — le 19ᵉ est celui de ce rapport)
+## 11. Commits effectués (23, non poussés — le dernier est celui de ce rapport)
 
 ```
+f6b7a9d feat(actualites): ajouter la file de moderation admin avant publication (sections 31 et 32)
+912aaf5 fix(securite): exiger CRON_SECRET sur POST /api/news et une session sur l'upload photo CV (sections 28 et 31)
+c242133 fix(securite): supprimer les secrets embarques et rendre les sessions fail-closed en production (section 28)
+ae37e35 docs(rapport): ajouter la couverture E2E au rapport final de phase (section 42)
 de1b6bf test(e2e): ajouter la suite Playwright des parcours sections 36 et 41
 bed4ef5 fix(responsive): masquer les reseaux sociaux du header sous 2xl (section 26)
 ad1868f chore(migrations): detecter les colonnes manquantes et les erreurs d'API Supabase
@@ -176,6 +190,19 @@ c97b6ce feat(dashboard): ajouter les recommandations d'offres par profil
 4. **Tests E2E** : la suite locale Playwright (`npm run test:e2e`, 61 tests) est verte ; la spec `chatbot.prod.spec.ts` (exécutée contre la production via `npm run test:e2e:prod`) reste un smoke à lancer manuellement. La suite n'est pas encore câblée en CI (`.github/workflows`).
 5. Rapports Lighthouse non versionnés (`lighthouse-report*.json`) : à décider (commit ou ignorer).
 6. Fichiers non versionnés restants : `Master Prompt 2.docx`.
+7. **Audit Master Prompt 2 — sections encore partielles** (la sécurité §28 et la modération §31/§32 sont traitées) :
+   - §6/§7 : valeur affichée sur `/register` et invitation « sauvegarder » pour non connecté ;
+   - §8 : alertes sans filtre contrat, sans mots-clés, sans UI d'édition (API PATCH prête) ;
+   - §10 : recommandations sans scoring `skills`/expérience ni `reasons` affichées ;
+   - §12/§13/§17 : liens villes/métiers non conditionnés (404 possibles sur `/jobs` et `/stages`), canonical + OG + `BlogPosting` absents sur le blog ;
+   - §15 : libellés « Partager cette offre » / « Copier le lien » absents ;
+   - §18 : « alertes » peu mises en avant sur l'accueil, phrase centrale du §18 absente telle quelle ;
+   - §23 : « sources de trafic » absentes du dashboard admin (+ offres publiées, entreprises) ;
+   - §24 : tables `companies` / `resumes` / `candidate_skills` inexistants, doublons legacy `profiles`/`users` ;
+   - §26 : filtres, alertes et admin non testés en mobile (E2E responsive) ;
+   - §27 : contrastes en échec, labels sans `htmlFor`, `aria-describedby`/`role="alert"` absents, pas de test axe ;
+   - §29 : aucun champ `is_featured`/`plan` posé pour la future monétisation ;
+   - §33 : liens internes non conditionnés + maillage offre→entreprise absent.
 
 ---
 
