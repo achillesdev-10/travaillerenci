@@ -21,12 +21,18 @@ export {
   verifyAdminSessionToken,
 };
 
-function getExpectedAdminEmail(): string {
-  return process.env.ADMIN_EMAIL || 'achillesdev10@gmail.com';
+// Fallbacks strictement réservés au développement local. En production, si les
+// variables manquent, les identifiants sont nuls : la validation échoue toujours.
+function getExpectedAdminEmail(): string | null {
+  const email = process.env.ADMIN_EMAIL;
+  if (email) return email;
+  return process.env.NODE_ENV === 'production' ? null : 'achillesdev10@gmail.com';
 }
 
-function getExpectedAdminPassword(): string {
-  return process.env.ADMIN_PASSWORD || 'admin123456';
+function getExpectedAdminPassword(): string | null {
+  const password = process.env.ADMIN_PASSWORD;
+  if (password) return password;
+  return process.env.NODE_ENV === 'production' ? null : 'admin123456';
 }
 
 export function isAdminCredentialsConfigured(): boolean {
@@ -35,7 +41,7 @@ export function isAdminCredentialsConfigured(): boolean {
 
 export function getAdminCredentialHints() {
   return {
-    email: getExpectedAdminEmail(),
+    email: getExpectedAdminEmail() || '(non configuré)',
     configured: isAdminCredentialsConfigured(),
     sessionDurationHours: SESSION_DURATION_HOURS,
   };
@@ -45,7 +51,10 @@ export async function validateAdminCredentials(
   email: string,
   password: string
 ): Promise<boolean> {
-  return email === getExpectedAdminEmail() && password === getExpectedAdminPassword();
+  const expectedEmail = getExpectedAdminEmail();
+  const expectedPassword = getExpectedAdminPassword();
+  if (!expectedEmail || !expectedPassword) return false;
+  return email === expectedEmail && password === expectedPassword;
 }
 
 export async function getAdminSession(): Promise<AdminSession | null> {

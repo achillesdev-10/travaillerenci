@@ -23,11 +23,16 @@ export interface AdminSession {
 }
 
 export function getSessionSecret(): string {
-  return (
-    process.env.ADMIN_SESSION_SECRET ||
-    process.env.JWT_SECRET ||
-    'travaillerenci-admin-dev-secret'
-  );
+  const secret = process.env.ADMIN_SESSION_SECRET || process.env.JWT_SECRET;
+  if (secret) return secret;
+  // Fail-closed en production : sans secret, aucune session ne peut être
+  // créée/vérifiée (la vérification attrape l'exception → null → 401).
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'ADMIN_SESSION_SECRET (ou JWT_SECRET) manquant : sessions désactivées en production.'
+    );
+  }
+  return 'travaillerenci-admin-dev-secret';
 }
 
 function bytesToBase64Url(bytes: Uint8Array): string {
