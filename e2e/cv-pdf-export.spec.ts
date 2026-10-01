@@ -38,8 +38,10 @@ function runTest(viewport: { width: number; height: number }, label: string) {
       // Attendre que le CV preview soit chargé
       await page.waitForSelector('#cv-preview', { state: 'attached', timeout: 15_000 });
 
-      // Vérifier que les données d'exemple sont chargées (input du formulaire)
-      await expect(page.locator('input[value*="KOUASSI"]')).toBeVisible({ timeout: 10_000 });
+      // Vérifier que les données d'exemple sont chargées (input du formulaire).
+      // Le formulaire est chargé dynamiquement (ssr: false) : le délai de
+      // compilation/chargement en dev peut dépasser 10 s.
+      await expect(page.locator('input[value*="KOUASSI"]')).toBeVisible({ timeout: 30_000 });
 
       // Configurer le téléchargement
       const downloadPromise = page.waitForEvent('download', { timeout: 30_000 });

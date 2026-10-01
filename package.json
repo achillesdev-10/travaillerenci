@@ -26,7 +26,9 @@
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:prod": "playwright test --config playwright.prod.config.ts",
-    "test:e2e:prod:headed": "playwright test --config playwright.prod.config.ts --headed"
+    "test:e2e:prod:headed": "playwright test --config playwright.prod.config.ts --headed",
+    "e2e:seed": "tsx e2e/fixtures.ts",
+    "e2e:seed:cleanup": "tsx e2e/fixtures.ts --cleanup"
   },
   "keywords": [
     "emploi",

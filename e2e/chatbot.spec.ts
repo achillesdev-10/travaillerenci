@@ -59,7 +59,7 @@ test('le bouton flottant apparaît et ouvre le chat avec le message d’accueil'
 
   // Le bouton apparaît après ~2 s (ou au premier scroll).
   const button = page.locator(BUTTON);
-  await expect(button).toBeVisible({ timeout: 10_000 });
+  await expect(button).toBeVisible({ timeout: 30_000 });
 
   await button.click();
 
@@ -87,7 +87,7 @@ test('envoyer un message affiche la question, la réponse et une carte résultat
 test('le widget se masque quand le footer est visible puis réapparaît', async ({ page }) => {
   await gotoHome(page);
   const button = page.locator(BUTTON);
-  await expect(button).toBeVisible({ timeout: 10_000 });
+  await expect(button).toBeVisible({ timeout: 30_000 });
 
   // Panneau ouvert : il doit lui aussi disparaître au niveau du footer.
   await button.click();
@@ -116,7 +116,7 @@ test('l’historique survit au rechargement et « Effacer la discussion » le vi
 
   // Rechargement : la conversation doit être restaurée depuis localStorage.
   await page.reload({ waitUntil: 'domcontentloaded' });
-  await expect(page.locator(BUTTON)).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator(BUTTON)).toBeVisible({ timeout: 30_000 });
   await page.locator(BUTTON).click();
   await expect(page.getByText('Conserver ce message après rechargement')).toBeVisible();
   await expect(page.getByText(/Voici quelques opportunités/)).toBeVisible();

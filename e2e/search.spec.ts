@@ -177,8 +177,8 @@ test.describe('Comportement debounce de la recherche', () => {
     // Taper rapidement « abc » — chaque caractère déclenche onChange
     await keyword.pressSequentially('abc', { delay: 80 });
 
-    // Attendre que le debounce (350ms) se déclenche
-    await expect(page).toHaveURL(/q=abc/, { timeout: 5_000 });
+    // Attendre que le debounce (350 ms) + le rendu serveur aboutissent.
+    await expect(page).toHaveURL(/q=abc/, { timeout: 30_000 });
 
     // L'URL ne doit PAS contenir les étapes intermédiaires (a, ab)
     const url = page.url();

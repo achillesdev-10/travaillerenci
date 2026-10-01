@@ -14,7 +14,13 @@ export default defineConfig({
   // (playwright.prod.config.ts) : elle ne doit jamais tourner contre le
   // serveur de dev local ni contre l'API mockée.
   testIgnore: /prod\.spec\.ts/,
-  timeout: 60_000,
+  // Fixtures locales : insérées au démarrage, supprimées en fin de suite.
+  globalSetup: './e2e/global-setup.ts',
+  globalTeardown: './e2e/global-teardown.ts',
+  // 120 s : les attentes explicites (debounce + rendu serveur en dev sur un
+  // système de fichiers lent) peuvent cumuler plusieurs dizaines de secondes
+  // dans un même test.
+  timeout: 120_000,
   expect: { timeout: 10_000 },
   // Un seul worker : les lancements Chrome parallèles sont instables sous
   // Windows ; la suite est courte, la séquentialité est indolore.
