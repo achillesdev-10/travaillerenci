@@ -10,9 +10,11 @@
  *   1. Scrape les sources d'emploi CI configurées.
  *   2. Filtre les articles strictement liés au marché de l'emploi, formation, concours.
  *   3. Réécrit via l'API Gemini : correction style, structuration H2/H3, méta SEO.
- *   4. Insère dans la table `articles` avec statut `published`.
+ *   4. Insère dans la table `articles` avec statut `draft` : la publication
+ *      sur /actualites exige une validation administrateur (cz7tk/actualites).
  *
- *  Sécurité : le POST est protégé par un token CRON secret (env CRON_SECRET).
+ * Sécurité : le POST exige le token CRON secret (env CRON_SECRET) — s'il n'est
+ * pas configuré, la route reste fermée (fail-closed).
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -68,11 +70,11 @@ interface ScrapedArticle {
  */
 async function processArticle(scraped: ScrapedArticle): Promise<boolean> {
   try {
-    // Vérifier si l'article existe déjà (par source_url)
+    // Vérifier si l'article existe déjà (par source_url) — tous statuts
+    // confondus, pour éviter un doublon brouillon/publié.
     const existing = await ArticleService.list({
       keyword: scraped.title,
-      status: 'published',
-      limit: 1,
+      limit: 50,
     });
     if (existing.rows.some((a) => a.source_url === scraped.source_url)) {
       return false; // Doublon
@@ -139,7 +141,7 @@ Réponds en JSON :
               category: scraped.category,
               source_url: scraped.source_url,
               author: 'TravaillerenCi (IA)',
-              status: 'published',
+              status: 'draft',
               seo_title: parsed.seo_title || null,
               seo_description: parsed.seo_description || null,
               seo_keywords: parsed.seo_keywords || null,
@@ -161,7 +163,7 @@ Réponds en JSON :
       category: scraped.category,
       source_url: scraped.source_url,
       author: 'TravaillerenCi',
-      status: 'published',
+      status: 'draft',
     });
     return !!article;
   } catch (err) {
@@ -171,11 +173,12 @@ Réponds en JSON :
 }
 
 export async function POST(request: NextRequest) {
-  // Sécurité : vérifier le token CRON
+  // Sécurité : le token CRON est OBLIGATOIRE (fail-closed : si CRON_SECRET
+  // n'est pas configuré, la route reste fermée).
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -209,7 +212,7 @@ Body: { "articles": [{ "title": "...", "content": "...", "source_url": "...", "c
   }
 
   return NextResponse.json({
-    message: `Traitement terminé : ${processed} article(s) publié(s), ${skipped} ignoré(s).`,
+    message: `Traitement terminé : ${processed} article(s) mis en attente de validation, ${skipped} ignoré(s).`,
     processed,
     skipped,
     total: articles.length,

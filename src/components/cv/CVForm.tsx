@@ -95,6 +95,12 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
       const data = await res.json();
       if (res.ok && data.url) {
         updateField('photoUrl', data.url);
+      } else if (res.status === 401 || data.code === 'auth_required') {
+        // Non connecté : l'aperçu local (blob:) est conservé pour le PDF.
+        setPhotoMessage({
+          type: 'info',
+          text: 'Connectez-vous pour enregistrer la photo en ligne — aperçu local conservé.',
+        });
       } else if (data.code === 'not_configured') {
         setPhotoMessage({
           type: 'info',

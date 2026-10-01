@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getSupabaseClient, isSupabaseConfigured } from '@/lib/supabase';
 import { getClientIp, isRateLimited } from '@/lib/rateLimit';
+import { getAdminSessionFromRequest } from '@/lib/adminSession';
+import { USER_SESSION_COOKIE, verifyUserSessionToken } from '@/lib/sessionToken';
 
 /** Bucket public dédié aux photos de CV (voir supabase/migrations/0008). */
 const BUCKET = 'cv-photos';
@@ -20,9 +22,13 @@ const PHOTO_UPLOAD_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
  * POST /api/cv/photo
  * Body : multipart/form-data avec le champ `file`.
  *
+ * Contrôle d'accès : session utilisateur ou admin requise (photo = donnée
+ * sensible, §28 sécurité). Sans session, le client conserve l'aperçu local.
+ *
  * Réponses :
  *  - 200 { url }                    → photo uploadée, URL publique Supabase
  *  - 400 { error }                  → fichier invalide (type / taille)
+ *  - 401 { error, code }            → aucune session (code: auth_required)
  *  - 429 { error }                  → trop d'uploads (rate-limit)
  *  - 501 { error, code }            → Supabase non configuré (le client
  *                                     garde alors un aperçu local blob:)
@@ -37,6 +43,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Trop d\'uploads. Réessayez dans quelques minutes.' },
         { status: 429 },
+      );
+    }
+
+    // --- Contrôle d'accès : session candidate/entreprise/admin requise ---
+    const userToken = request.cookies.get(USER_SESSION_COOKIE)?.value;
+    const [userSession, adminSession] = await Promise.all([
+      verifyUserSessionToken(userToken),
+      getAdminSessionFromRequest(request),
+    ]);
+    if (!userSession && !adminSession) {
+      return NextResponse.json(
+        {
+          error: 'Connexion requise pour enregistrer la photo en ligne.',
+          code: 'auth_required',
+        },
+        { status: 401 },
       );
     }
 
