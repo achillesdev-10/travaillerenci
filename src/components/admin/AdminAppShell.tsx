@@ -14,6 +14,7 @@ const PAGE_TITLES: Array<{ prefix: string; title: string; subtitle: string }> = 
   { prefix: "/cz7tk/users", title: "Utilisateurs", subtitle: "Candidats et entreprises inscrits" },
   { prefix: "/cz7tk/reports", title: "Signalements", subtitle: "File de modération des contenus signalés" },
   { prefix: "/cz7tk/blog", title: "Gestion du blog", subtitle: "Articles et publications" },
+  { prefix: "/cz7tk/actualites", title: "Modération Actualités", subtitle: "Validation avant publication" },
   { prefix: "/cz7tk/scraper", title: "Scraper", subtitle: "Pilote des sources d'offres" },
   { prefix: "/cz7tk/settings", title: "Paramètres", subtitle: "Configuration de la plateforme" },
 ];
