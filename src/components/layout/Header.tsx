@@ -119,8 +119,11 @@ export default function Header() {
                 <path d="m21 21-4.3-4.3" />
               </svg>
             </Link>
-            {/* Réseaux sociaux */}
-            <SocialLinks size="sm" className="gap-1.5 mr-1" />
+            {/* Réseaux sociaux : masqués sous 2xl pour éviter le débordement
+                horizontal du header entre 1024px et 1536px (§26). */}
+            <div className="hidden 2xl:block">
+              <SocialLinks size="sm" className="gap-1.5 mr-1" />
+            </div>
             {/* Bouton Mode Sombre */}
             <button
               onClick={toggleDarkMode}
@@ -144,7 +147,7 @@ export default function Header() {
               <>
                 <Link
                   href={dashboardHref}
-                  className="flex items-center gap-2 text-[13px] font-bold text-gray-800 dark:text-white px-3 py-2 bg-gray-100 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700"
+                  className="flex items-center gap-2 text-[13px] font-bold text-gray-800 dark:text-white px-3 py-2 bg-gray-100 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 min-w-0 max-w-[16rem]"
                 >
                   {user.avatar_url ? (
                     <Image
@@ -160,7 +163,7 @@ export default function Header() {
                       {(user.name || user.email || '?')[0].toUpperCase()}
                     </div>
                   )}
-                  <span>{user.name || user.email} ({user.role === 'company' ? 'Entreprise' : 'Candidat'})</span>
+                  <span className="truncate">{user.name || user.email} ({user.role === 'company' ? 'Entreprise' : 'Candidat'})</span>
                 </Link>
                 <button
                   onClick={handleLogout}
