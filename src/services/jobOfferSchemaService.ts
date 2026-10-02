@@ -178,6 +178,8 @@ function ensureSchema(db: DatabaseSyncInstance) {
       is_archived     INTEGER NOT NULL DEFAULT 0,
       is_expired      INTEGER NOT NULL DEFAULT 0,
       clicks_count    INTEGER NOT NULL DEFAULT 0,
+      is_featured     INTEGER NOT NULL DEFAULT 0,
+      featured_until  TEXT,
       created_at      TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at      TEXT NOT NULL DEFAULT (datetime('now')),
       CONSTRAINT valid_contract_type CHECK (contract_type IN ('CDI','CDD','Stage','Prestation','Alternance','Freelance')),
@@ -185,6 +187,7 @@ function ensureSchema(db: DatabaseSyncInstance) {
       CONSTRAINT valid_is_verified CHECK (is_verified IN (0,1)),
       CONSTRAINT valid_is_archived CHECK (is_archived IN (0,1)),
       CONSTRAINT valid_is_expired CHECK (is_expired IN (0,1)),
+      CONSTRAINT valid_is_featured CHECK (is_featured IN (0,1)),
       CONSTRAINT valid_apply_method CHECK (apply_link IS NOT NULL OR apply_email IS NOT NULL),
       CONSTRAINT unique_title_company UNIQUE (title, company)
     );
@@ -229,8 +232,18 @@ function ensureSchema(db: DatabaseSyncInstance) {
   if (!existingColumns.has('sector')) {
     db.exec('ALTER TABLE job_offers ADD COLUMN sector TEXT');
   }
+  // §29 — préparation monétisation : champs neutres, jamais affichés.
+  if (!existingColumns.has('is_featured')) {
+    db.exec('ALTER TABLE job_offers ADD COLUMN is_featured INTEGER NOT NULL DEFAULT 0');
+  }
+  if (!existingColumns.has('featured_until')) {
+    db.exec('ALTER TABLE job_offers ADD COLUMN featured_until TEXT');
+  }
   db.exec("CREATE INDEX IF NOT EXISTS idx_jobs_category ON job_offers (category);");
   db.exec("CREATE INDEX IF NOT EXISTS idx_jobs_sector ON job_offers (sector);");
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_jobs_featured ON job_offers (is_featured DESC, featured_until DESC);",
+  );
 }
 
 function rowToSchema(row: any): JobOfferSchema {
@@ -243,6 +256,8 @@ function rowToSchema(row: any): JobOfferSchema {
     is_verified: row.is_verified === 1,
     is_archived: row.is_archived === 1,
     is_expired: row.is_expired === 1,
+    is_featured: row.is_featured === 1,
+    featured_until: row.featured_until ?? null,
   };
 }
 
@@ -257,6 +272,8 @@ function rowToSchemaFromSupabase(row: any): JobOfferSchema {
     is_verified: row.is_verified === true,
     is_archived: row.is_archived === true,
     is_expired: row.is_expired === true,
+    is_featured: row.is_featured === true,
+    featured_until: row.featured_until ?? null,
     clicks_count: Number(row.clicks_count || 0),
   };
 }

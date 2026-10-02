@@ -129,6 +129,19 @@ const MIGRATIONS: Array<{
     file: 'supabase/migrations/0031_site_visits_source.sql',
     columns: ['source'],
   },
+  // Préparation monétisation (§29) : champs de statut neutres, sans paiement.
+  {
+    table: 'job_offers',
+    label: '0032 (offres mises en avant)',
+    file: 'supabase/migrations/0032_monetization_flags.sql',
+    columns: ['is_featured', 'featured_until'],
+  },
+  {
+    table: 'candidate_profiles',
+    label: '0032 (plan de profil)',
+    file: 'supabase/migrations/0032_monetization_flags.sql',
+    columns: ['plan'],
+  },
 ];
 
 async function runSql(query: string): Promise<{ ok: boolean; data?: unknown; error?: string }> {

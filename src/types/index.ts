@@ -113,6 +113,13 @@ export interface JobOfferSchema {
   is_verified: boolean;
   is_archived: boolean;
   is_expired: boolean;
+  /**
+   * §29 — préparation monétisation : offre « mise en avant » (aucun tri ni
+   * affichage particulier pour l'instant, aucun paiement exposé).
+   */
+  is_featured?: boolean;
+  /** Fin de la mise en avant (null = aucune). */
+  featured_until?: string | null;
   clicks_count?: number;
   created_at: string;
   updated_at: string;

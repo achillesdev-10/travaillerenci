@@ -82,6 +82,11 @@ export interface CandidateProfile {
   resume_url: string | null;
   /** Consentement de visibilité (CVthèque future, §30) — défaut « privé ». */
   profile_visibility: ProfileVisibility;
+  /**
+   * Offre du profil (§29 — préparation monétisation) : 'free' partout,
+   * 'premium' réservé à une future offre. Jamais exposé ni facturé.
+   */
+  plan: 'free' | 'premium';
   created_at: string;
   updated_at: string;
 }
@@ -139,14 +144,15 @@ async function getDb(): Promise<DatabaseSyncInstance | null> {
         bio              TEXT,
         resume_url       TEXT,
         profile_visibility TEXT NOT NULL DEFAULT 'private',
+        plan             TEXT NOT NULL DEFAULT 'free',
         created_at       TEXT NOT NULL DEFAULT (datetime('now')),
         updated_at       TEXT NOT NULL DEFAULT (datetime('now'))
       );
     `);
 
     // Migration défensive : la table peut avoir été créée avant l'ajout des
-    // colonnes 0026 (métier, expérience, compétences, contrats, bio, CV) et
-    // 0028 (consentement de visibilité).
+    // colonnes 0026 (métier, expérience, compétences, contrats, bio, CV),
+    // 0028 (consentement de visibilité) et 0032 (plan, §29).
     const cols = cachedDb.prepare('PRAGMA table_info(candidate_profiles)').all();
     const existing = new Set(cols.map((c: { name: string }) => String(c.name)));
     if (!existing.has('job_title')) cachedDb.exec('ALTER TABLE candidate_profiles ADD COLUMN job_title TEXT');
@@ -157,6 +163,9 @@ async function getDb(): Promise<DatabaseSyncInstance | null> {
     if (!existing.has('resume_url')) cachedDb.exec('ALTER TABLE candidate_profiles ADD COLUMN resume_url TEXT');
     if (!existing.has('profile_visibility')) {
       cachedDb.exec("ALTER TABLE candidate_profiles ADD COLUMN profile_visibility TEXT NOT NULL DEFAULT 'private'");
+    }
+    if (!existing.has('plan')) {
+      cachedDb.exec("ALTER TABLE candidate_profiles ADD COLUMN plan TEXT NOT NULL DEFAULT 'free'");
     }
 
     return cachedDb;
@@ -198,6 +207,7 @@ function rowToProfile(row: any): CandidateProfile {
     bio: row.bio ?? null,
     resume_url: row.resume_url ?? null,
     profile_visibility: normalizeProfileVisibility(row.profile_visibility),
+    plan: row.plan === 'premium' ? 'premium' : 'free',
     created_at: row.created_at ?? '',
     updated_at: row.updated_at ?? '',
   };
