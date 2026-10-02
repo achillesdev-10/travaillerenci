@@ -1,8 +1,8 @@
 # Rapport final de phase — TravaillerEnCi (Master Prompt V2)
 
 > Période couverte : phase complète « Priorités 1 à 8 + sections 13 à 42 » du Master Prompt 2.
-> Branche : `main` — 33 commits en avance sur `origin/main` (non poussés).
-> Vérifications finales (2026-10-02) : `npm run lint` ✅ · `npm test` ✅ (12 suites, 318 tests, 0 échec) · `npx tsc --noEmit` ✅ · `npm run test:e2e` ✅ (73 tests, 0 échec) · `npm run build` ✅
+> Branche : `main` — travaux intégrés et poussés sur `origin/main`.
+> Vérifications finales (2026-10-02) : `npm run lint` ✅ · `npm test` ✅ (12 suites, 318 tests, 0 échec) · `npx tsc --noEmit` ✅ · `npm run test:e2e` ✅ (75 tests, 0 échec) · `npm run build` ✅
 
 ---
 
@@ -160,6 +160,8 @@ Migrations sûres de bout en bout : SQLite défensif (`PRAGMA table_info` + `ALT
 - **`POST /api/news` fermé par défaut** : `CRON_SECRET` obligatoire (s'il n'est pas configuré, la route renvoie systématiquement 401).
 - **Upload photo CV sous session** : `POST /api/cv/photo` exige une session utilisateur ou admin (401 `auth_required` sinon) ; le générateur anonyme conserve l'aperçu local blob: (message explicite dans `CVForm`).
 - **Modération des actualités** : le pipeline news insère désormais en `draft` ; la publication passe par `/cz7tk/actualites` (étape VALIDATION du §31), API `PATCH/DELETE /api/admin/articles/[id]` protégées par `requireAdminApi`.
+- **Session déjà active (correctif)** : le proxy redirige `/login`, `/register` et `/reset-password` (sans `?token=`) vers le dashboard ou un `?next=` interne validé (anti open-redirect `//`, `\\`, boucle) ; `/dashboard/candidate` ↔ `/dashboard/company` est corrigé selon le rôle ; `RegisterForm` affiche un panneau « Vous êtes déjà connecté » (le formulaire est aussi celui de `/candidates`) ; `POST /api/auth/register` renvoie **409** si une session existe (avant le rate limit) ; `LoginPage` bascule côté client si une session apparaît après rendu.
+- **Quotas E2E** : `rateLimit.ts` accepte `RATE_LIMIT_MULTIPLIER` **hors production uniquement** (`NODE_ENV=production` ignore toujours la variable) — les tests partagent une seule IP locale et créeraient 429 ; valeur posée dans `playwright.config.ts` (`webServer.env`).
 - Variables de sécurité documentées dans `.env.example` (section « fail-closed »).
 
 ---
@@ -170,8 +172,8 @@ Migrations sûres de bout en bout : SQLite défensif (`PRAGMA table_info` + `ALT
   `analyticsEvents`, `jobSeo`, `jobThumbnails`, `mustSee`, `newsletter`, `profileCompletion`, `profileVisibility`, `recommendationScoring`, `relatedContent`, `sectorClassifier`, `shareUtm`, **`trafficSource`** (§23).
   (assertions `landingChipHref` §12, scoring `skills`/expérience + reasons §10, `recommendationScoring` porté à 46 tests.)
 - `python scraper/tests/test_alert_digest.py` → **26 tests, OK** (matching contrat + mots-clés §8, y compris « offre sans contrat → pas de match »).
-- **`npm run test:e2e` (Playwright) → 73 tests, 0 échec** (chaîne `chrome` système, serveur dev local, fixtures SQLite injectées puis nettoyées) :
-  `admin` (§36), `auth` (inscription / connexion / déconnexion), `blog` (liste, fiche, canonique + `BlogPosting`, maillage des étiquettes §17), `chatbot`, `cv-pdf-export`, `cv-pdf-mobile`,
+- **`npm run test:e2e` (Playwright) → 75 tests, 0 échec** (chaîne `chrome` système, serveur dev local, fixtures SQLite injectées puis nettoyées) :
+  `admin` (§36), `auth` (**inscription / connexion / déconnexion + 2 tests « déjà connecté » : `/register` et `/login` renvoient vers le dashboard, et un compte entreprise est renvoyé vers `/dashboard/candidate` → `/dashboard/company`**), `blog` (liste, fiche, canonique + `BlogPosting`, maillage des étiquettes §17), `chatbot`, `cv-pdf-export`, `cv-pdf-mobile`,
   `jobs` (recherche, filtres, fiche, `/stages`, `/jobs/today`, landing métier×ville, **§12 : tous les chips villes/métiers de `/jobs` et `/stages` répondent 200**, sitemap/robots),
   `profile` (profil absent → incomplet → complet, §30), **`responsive` (§26 : 9 tests** — 320/360/390/412/768/1280 px sur 7 pages publiques, fiche d'offre, dashboard, menu hamburger),
   **`accessibility` (§27 : 10 tests** — champs/boutons/image/structure sur 5 pages, focus clavier, message `role="alert"`, contraste ≥ 4,5:1, cible tactile ≥ 40 px, label du profil),
@@ -200,16 +202,19 @@ npm run lint        → 0 erreur
 npm test            → 12 suites / 318 tests / 0 échec
 npx tsc --noEmit    → 0 erreur
 python scraper/tests/test_alert_digest.py → 26 tests / OK
-npm run test:e2e    → 73 tests / 0 échec   (12 min, 1 worker, Chrome système)
+npm run test:e2e    → 75 tests / 0 échec   (15 min, 1 worker, Chrome système)
 npm run build       → ✓ Compiled successfully (exit 0)
 ```
 Avertissement connu et préexistant (non bloquant) : « Dynamic filesystem access causes tracing of the whole project » provenant du lancement du scraper Python (`fail(...)`), plus les warnings expérimentaux `node:sqlite`.
 
 ---
 
-## 11. Commits effectués (33 de code, non poussés — le présent rapport est le commit suivant)
+## 11. Commits effectués (36 sur cette phase, tous poussés — le présent rapport est le commit suivant)
 
 ```
+d97c036 fix(auth): rediriger les comptes connectes des pages de connexion et d inscription
+f60c5eb chore(migrations): fournir le script unique 0025-0032 a coller dans le SQL Editor
+2678317 docs(rapport): bilan final sections 6 a 29, mapping base 24 et preuves de validation
 4d70edf test(e2e): allonger les attentes de navigation de la recherche (dev lent)
 17648da feat(accessibilite): labels clavier, messages role alert et audit contraste (section 27)
 7115dae feat(monetisation): champs de statut neutres offres mises en avant et plan de profil (section 29)
@@ -245,18 +250,18 @@ ee19cbf feat(jobs): catégoriser les offres par métier via la colonne sector
 c97b6ce feat(dashboard): ajouter les recommandations d'offres par profil
 ```
 
-(Ordre décroissant ; aucun commit non poussé sur `origin/main` — `git push` à valider par vos soins.)
+(Ordre décroissant ; `git push` effectué sur `origin/main`, aucune branche non poussée.)
 
 ---
 
 ## 12. Problèmes restants à traiter
 
-1. **Migrations Supabase** : 0025 à 0032 doivent être appliquées sur le projet de production (aucune exécution automatique détectée).
+1. **Migrations Supabase** : 0025 à 0032 **appliquées en production** (script unique `supabase/APPLY-0025-0032.sql` collé dans le SQL Editor ; contrôle des 6 index OK) — reste le **redéploiement de l'application** et une vérification en production.
 2. **Envoi newsletter** : non implémenté (volontaire, §20) — le double opt-in (champ `confirm_token` déjà prévu) et le job d'envoi restent à faire.
 3. **CVthèque** : aucun espace recruteur n'expose encore les profils ; le filtre `profile_visibility = 'recruiters'` devra être appliqué dès la création de cet espace, **avec** la table `resumes` et la table `companies` (clé étrangère `job_offers.company_id`) prévues au §24 — à créer alors, sans doublon avec `profiles_company`.
-4. **Tests E2E** : la suite locale Playwright (`npm run test:e2e`, 73 tests) est verte ; la spec `chatbot.prod.spec.ts` (exécutée contre la production via `npm run test:e2e:prod`) reste un smoke à lancer manuellement. La suite n'est pas encore câblée en CI (`.github/workflows`).
+4. **Tests E2E** : la suite locale Playwright (`npm run test:e2e`, 75 tests) est verte ; la spec `chatbot.prod.spec.ts` (exécutée contre la production via `npm run test:e2e:prod`) reste un smoke à lancer manuellement. La suite n'est pas encore câblée en CI (`.github/workflows`).
 5. Rapports Lighthouse non versionnés (`lighthouse-report*.json`) : à décider (commit ou ignorer).
-6. Fichiers non versionnés restants : `Master Prompt 2.docx`, `master-prompt-2.txt`, logs `devserver.log` / `e2e-full*.log` / `build-final.log` (à ignorer via `.gitignore`).
+6. Fichiers non versionnés restants : `Master Prompt 2.docx`, `master-prompt-2.txt`, logs `devserver*.log` / `e2e-full*.log` / `build-final*.log` (à ignorer via `.gitignore`).
 7. **Audit Master Prompt 2 — état par section** :
    - §6/§7, §8, §10, §12/§13/§15/§17, §18, §23, §26, §27, §29, §31/§32 : **traités** (lignes de ce rapport + tests associés) ;
    - §24 : **traité sous forme d'audit + mapping** (§5bis) ; la création des tables `companies` / `resumes` reste délibérément reportée à l'espace recruteur pour éviter un doublon inutilisé ;
@@ -267,7 +272,7 @@ c97b6ce feat(dashboard): ajouter les recommandations d'offres par profil
 
 ## 13. Recommandations pour la prochaine phase
 
-1. Pousser les 34 commits sur `origin/main`, appliquer les migrations 0025-0032 puis redéployer et vérifier en production.
+1. Redéployer sur la production (migrations 0025-0032 déjà appliquées, commits poussés) puis vérifier le site en ligne.
 2. Brancher l'envoi newsletter (double opt-in + digest hebdomadaire) en réutilisant le pipeline `scraper/alert_digest.py`.
 3. Construire la CVthèque recruteur avec filtre de consentement + tables `companies` / `resumes` (§24, sans doublon avec `profiles_company`) + champs premium (§29) sans réécriture.
 4. Étendre la suite E2E aux critères §41 encore peu couverts (dashboard admin avancé, protection des CV, événements analytics) et la lancer en CI ; ajouter l'audit `axe-core` en complément du contrôle de contraste/labels actuel.
