@@ -47,5 +47,29 @@ test.describe('Blog (§36)', () => {
     await expect(page.getByRole('link', { name: /Voir les offres|Créer mon CV/ }).first()).toBeVisible({
       timeout: 20_000,
     });
+
+    // §13 — canonique + données structurées BlogPosting.
+    const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
+    expect(canonical).toMatch(/\/blog\/[^/]+$/);
+    const jsonLd = await page.locator('script[type="application/ld+json"]').allInnerTexts();
+    expect(jsonLd.some((s) => s.includes('"BlogPosting"'))).toBe(true);
+  });
+
+  test('§17 : les étiquettes de l’article maillent la liste filtrée', async ({ page }) => {
+    await waitForHydration(page, '/blog');
+    await page.locator('a[href^="/blog/"]').first().click();
+    await expect(page).toHaveURL(/\/blog\/[^/]+$/, { timeout: 20_000 });
+
+    const tagLink = page.locator('a[href^="/blog?tag="]').first();
+    await expect(tagLink).toBeVisible({ timeout: 20_000 });
+    const tagHref = await tagLink.getAttribute('href');
+    expect(tagHref).toMatch(/^\/blog\?tag=/);
+
+    await tagLink.click();
+    await expect(page).toHaveURL(/\/blog\?tag=/, { timeout: 20_000 });
+    await expect(page.getByText(/Étiquette/).first()).toBeVisible({ timeout: 20_000 });
+    await expect(
+      page.getByRole('link', { name: 'Voir tous les articles' }).first(),
+    ).toBeVisible({ timeout: 20_000 });
   });
 });

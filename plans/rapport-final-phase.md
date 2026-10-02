@@ -1,8 +1,8 @@
 # Rapport final de phase — TravaillerEnCi (Master Prompt V2)
 
 > Période couverte : phase complète « Priorités 1 à 8 + sections 13 à 42 » du Master Prompt 2.
-> Branche : `main` — 19 commits en avance sur `origin/main` (non poussés).
-> Vérifications finales : `npm run lint` ✅ · `npm test` ✅ (11 suites, 285 assertions, 0 échec) · `npm run test:e2e` ✅ (61 tests, 0 échec) · `npm run build` ✅
+> Branche : `main` — 26 commits en avance sur `origin/main` (non poussés).
+> Vérifications finales : `npm run lint` ✅ · `npm test` ✅ (11 suites, 290 assertions, 0 échec) · `npm run test:e2e` ✅ (63 tests, 0 échec) · `npm run build` ✅
 
 ---
 
@@ -85,8 +85,11 @@ Aucune donnée existante n'a été supprimée. Les équivalents SQLite sont cré
 ## 6. Changements SEO
 
 - Landings SEO métier + ville avec filtres d'offres réels (seuils `MIN_OFFERS` / `MIN_COMBO_OFFERS`), liés au sitemap.
+- **Maillage conditionné sans 404 (§12)** : helper `landingChipHref` dans `src/lib/jobSeo.ts` — un chip ville/métier pointe vers la landing SEO si elle atteint son seuil (même règle que le sitemap et le rendu de la landing), sinon vers la recherche filtrée de la verticale (`/jobs?city=…`, `/jobs?q=…`, `/stages?…`). Appliqué aux chips de `/jobs`, `/stages` et aux cross-liens de la page landing (vivier borné à 500, requête identique à celle de la landing).
 - `/jobs/today` ajouté au sitemap ; titre de page en `%s | travaillerenci`.
 - JSON-LD étendu : `JobPosting`, `ItemList`, `BreadcrumbList`, OpenGraph/Twitter complets sur les fiches.
+- **Blog (§13/§17)** : canonique + OpenGraph (`type: article`, dates, auteur, étiquettes) + Twitter card sur chaque article, canonique auto-référent sur `/blog` (et `/blog?tag=…`), `title` sans double marque (suffixe du layout), JSON-LD `BlogPosting` (faits réels de l'article uniquement).
+- **Étiquettes blog maillées (§17)** : les tags d'un article sont des liens vers `/blog?tag=…` ; nouveau filtre `tag` exact (élément entier) dans `BlogService.list` (SQLite + Supabase), bannière « Étiquette » + retour vers tous les articles.
 - Maillage interne bidirectionnel article ↔ offre + liens « explorer davantage » (ville/métier/secteur).
 - URLs de partage canoniques avec UTM (meilleure attribution des partages).
 
@@ -118,11 +121,12 @@ Aucune donnée existante n'a été supprimée. Les équivalents SQLite sont cré
 
 ## 9. Tests réalisés
 
-- `npm test` → **11 suites, 285 assertions, 0 échec** :
+- `npm test` → **11 suites, 290 assertions, 0 échec** :
   `analyticsEvents`, `jobSeo`, `jobThumbnails`, `mustSee`, `newsletter`, `profileCompletion`, `profileVisibility`, `recommendationScoring`, `relatedContent`, `sectorClassifier`, `shareUtm`.
-- **`npm run test:e2e` (Playwright) → 61 tests, 0 échec** (chaîne `chrome` système, serveur dev local, fixtures SQLite injectées puis nettoyées) :
-  `admin` (§36), `auth` (inscription / connexion / déconnexion), `blog`, `chatbot`, `cv-pdf-export`, `cv-pdf-mobile`,
-  `jobs` (recherche, filtres, fiche, `/stages`, `/jobs/today`, landing métier×ville, sitemap/robots),
+  (5 assertions supplémentaires sur `landingChipHref` : ville/métier éligible → landing, sous le seuil → recherche filtrée, repli `/stages`.)
+- **`npm run test:e2e` (Playwright) → 63 tests, 0 échec** (chaîne `chrome` système, serveur dev local, fixtures SQLite injectées puis nettoyées) :
+  `admin` (§36), `auth` (inscription / connexion / déconnexion), `blog` (liste, fiche, canonique + `BlogPosting`, maillage des étiquettes §17), `chatbot`, `cv-pdf-export`, `cv-pdf-mobile`,
+  `jobs` (recherche, filtres, fiche, `/stages`, `/jobs/today`, landing métier×ville, **§12 : tous les chips villes/métiers de `/jobs` et `/stages` répondent 200**, sitemap/robots),
   `profile` (profil absent → incomplet → complet, §30), `responsive` (§26 : 320/360/390/412/768/1280 px,
   fiche d'offre, dashboard, menu hamburger), `saved-alerts` (sauvegarde + alertes), `search` (débounce, soumission, état vide).
   Couverture des cas §36 : utilisateur connecté / non connecté / sans profil / profil incomplet / profil complet.
@@ -145,8 +149,8 @@ Aucune donnée existante n'a été supprimée. Les équivalents SQLite sont cré
 
 ```
 npm run lint    → 0 erreur
-npm test        → 11 suites / 285 assertions / 0 échec
-npm run test:e2e → 61 tests / 0 échec
+npm test        → 11 suites / 290 assertions / 0 échec
+npm run test:e2e → 63 tests / 0 échec
 npm run build   → ✓ Compiled successfully
 ```
 Avertissement connu et préexistant (non bloquant) : « Dynamic filesystem access causes tracing of the whole project » provenant du lancement du scraper Python (`fail(...)`), plus les warnings expérimentaux `node:sqlite`.
@@ -194,7 +198,7 @@ c97b6ce feat(dashboard): ajouter les recommandations d'offres par profil
    - §6/§7 : valeur affichée sur `/register` et invitation « sauvegarder » pour non connecté ;
    - §8 : alertes sans filtre contrat, sans mots-clés, sans UI d'édition (API PATCH prête) ;
    - §10 : recommandations sans scoring `skills`/expérience ni `reasons` affichées ;
-   - §12/§13/§17 : liens villes/métiers non conditionnés (404 possibles sur `/jobs` et `/stages`), canonical + OG + `BlogPosting` absents sur le blog ;
+   - §12/§13/§17 : ~~liens villes/métiers non conditionnés (404 possibles sur `/jobs` et `/stages`), canonical + OG + `BlogPosting` absents sur le blog~~ **traité (lot SEO)** ;
    - §15 : libellés « Partager cette offre » / « Copier le lien » absents ;
    - §18 : « alertes » peu mises en avant sur l'accueil, phrase centrale du §18 absente telle quelle ;
    - §23 : « sources de trafic » absentes du dashboard admin (+ offres publiées, entreprises) ;

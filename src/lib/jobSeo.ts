@@ -636,6 +636,32 @@ export function landingForOffer<T extends SeoOfferLike>(
 }
 
 /**
+ * Lien « sans 404 » pour un chip de maillage ville/métier (§12) : la page
+ * SEO si elle atteint son seuil (même règle que le sitemap et le rendu de
+ * la landing), sinon la recherche filtrée équivalente sur la verticale.
+ */
+export function landingChipHref<T extends SeoOfferLike>(
+  offers: T[],
+  parsed: ParsedJobSeoSlug,
+): string {
+  const landing = landingForOffer(offers, parsed);
+  if (landing) return landing.href;
+
+  const path = parsed.activity === 'stages' ? '/stages' : '/jobs';
+  const query = new URLSearchParams();
+  if (parsed.citySlug) {
+    const name = CITY_SEO_BY_SLUG[parsed.citySlug]?.name;
+    if (name) query.set('city', name);
+  }
+  if (parsed.metierSlug) {
+    const keyword = METIER_SEO_BY_SLUG[parsed.metierSlug]?.searchKeyword;
+    if (keyword) query.set('q', keyword);
+  }
+  const qs = query.toString();
+  return qs ? `${path}?${qs}` : path;
+}
+
+/**
  * Liens SEO complets pour une offre : ville, métier, puis combinaison
  * ville × métier (la plus spécifique est retournée en priorité par l'appelant).
  */

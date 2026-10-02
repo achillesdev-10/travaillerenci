@@ -37,6 +37,8 @@ export type BlogPostInsert = Omit<BlogPost, 'id' | 'created_at' | 'updated_at' |
 export interface BlogPostFilters {
   status?: BlogPostStatus | BlogPostStatus[];
   keyword?: string;
+  /** Étiquette exacte (élément entier de la liste « a, b, c »). */
+  tag?: string;
   limit?: number;
   offset?: number;
   order_by?: 'created_at' | 'published_at' | 'title';

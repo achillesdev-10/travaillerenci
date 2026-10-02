@@ -110,6 +110,45 @@ test.describe('Pages SEO (§36)', () => {
     expect(await page.locator('a[href^="/jobs/"]').count()).toBeGreaterThan(0);
   });
 
+  test('§12 : aucun chip de maillage villes/métiers ne pointe vers un 404', async ({ page }) => {
+    test.setTimeout(240_000);
+    const hrefs = new Set<string>();
+
+    // Collecte des chips sur les deux verticales (22 liens par page).
+    for (const url of ['/jobs', '/stages']) {
+      await page.goto(url);
+      await expect(page.locator('section[aria-label*="par métier"]').first()).toBeVisible({
+        timeout: 20_000,
+      });
+      const links = page.locator('section[aria-label*="par métier"] a');
+      const count = await links.count();
+      expect(count, `${url} doit exposer les chips villes/métiers`).toBeGreaterThanOrEqual(20);
+      for (let i = 0; i < count; i++) {
+        const href = await links.nth(i).getAttribute('href');
+        if (href) hrefs.add(href);
+      }
+    }
+
+    expect(hrefs.size).toBeGreaterThanOrEqual(40);
+    // Le test ne prouve quelque chose que si des landings SEO réelles sont proposées.
+    expect([...hrefs].some((h) => /^\/(emplois|stages)-/.test(h))).toBe(true);
+
+    // Chaque chip répond 200 : page SEO éligible OU recherche filtrée de repli.
+    const list = [...hrefs];
+    for (let i = 0; i < list.length; i += 8) {
+      const batch = list.slice(i, i + 8);
+      const statuses = await Promise.all(
+        batch.map(async (href) => ({
+          href,
+          status: (await page.request.get(href)).status(),
+        })),
+      );
+      for (const { href, status } of statuses) {
+        expect(status, `${href} doit répondre 200 (pas de lien vers un 404)`).toBe(200);
+      }
+    }
+  });
+
   test('sitemap.xml et robots.txt', async ({ page }) => {
     const sitemap = await page.request.get('/sitemap.xml');
     expect(sitemap.status()).toBe(200);

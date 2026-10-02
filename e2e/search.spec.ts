@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { waitForHydration } from './helpers';
 
 /**
  * Tests E2E de la barre de recherche (SearchBar) sur les pages :
@@ -10,9 +11,12 @@ import { test, expect, type Page } from '@playwright/test';
  * (debounce + URL params) et la soumission directe (Enter / clic bouton).
  */
 
-/** Navigation rapide sans attendre les images lentes. */
+/**
+ * Navigation + attente d'hydratation : le rendu statique seul ne déclenche
+ * pas les onSubmit React (course qui rendait ces tests erratiques en dev).
+ */
 async function gotoPage(page: Page, path: string): Promise<void> {
-  await page.goto(path, { waitUntil: 'domcontentloaded' });
+  await waitForHydration(page, path);
 }
 
 // =============================================================================

@@ -341,7 +341,21 @@ function buildFiltersSql(filters: BlogPostFilters) {
     clauses.push('(title LIKE $kw OR excerpt LIKE $kw OR content LIKE $kw OR tags LIKE $kw)');
     params.$kw = `%${filters.keyword}%`;
   }
+  const tagNeedle = normalizeTagNeedle(filters.tag);
+  if (tagNeedle) {
+    // Étiquettes « a, b, c » : correspondance sur un élément ENTIER —
+    // espaces supprimés des deux côtés (« intelligence artificielle » …),
+    // caractères LIKE neutralisés côté aiguille.
+    clauses.push(`(',' || replace(lower(COALESCE(tags, '')), ' ', '') || ',') LIKE $tag`);
+    params.$tag = `%,${tagNeedle},%`;
+  }
   return { whereSql: clauses.length > 0 ? `WHERE ${clauses.join(' AND ')}` : '', params };
+}
+
+/** Forme normalée (minuscules, sans espace) d'une étiquette, ou null. */
+function normalizeTagNeedle(tag?: string): string | null {
+  if (!tag) return null;
+  return tag.toLowerCase().replace(/[%_\\]/g, '').replace(/\s+/g, '') || null;
 }
 
 export class BlogService {
@@ -549,21 +563,46 @@ export class BlogService {
         query = query.or(`title.ilike.${pattern},excerpt.ilike.${pattern},content.ilike.${pattern},tags.ilike.${pattern}`);
       }
     }
+    const tagNeedle = normalizeTagNeedle(filters.tag);
+    if (tagNeedle) {
+      // Pré-réduction côté serveur ; l'égalité exacte sur l'élément entier
+      // est vérifiée ensuite en JS (voir plus bas).
+      query = query.ilike('tags', `%${String(filters.tag).trim()}%`);
+    }
     const orderBy = (['created_at', 'published_at', 'title'] as const).includes(
       (filters.order_by || 'created_at') as 'created_at' | 'published_at' | 'title'
     )
       ? filters.order_by!
       : 'created_at';
     query = query.order(orderBy, { ascending: filters.order_dir === 'asc' });
-    const safeLimit = Math.min(Math.max(filters.limit || 50, 1), 200);
-    query = query.range(filters.offset || 0, (filters.offset || 0) + safeLimit - 1);
+    // Filtre tag : on borne volontairement à 200 lignes (début à 0 pour que
+    // la pagination JS en aval reste juste) afin de pouvoir appliquer la
+    // correspondance exacte sur l'élément entier — le blog compte bien moins
+    // d'articles (§17 « qualité > quantité »).
+    const safeLimit = tagNeedle
+      ? 200
+      : Math.min(Math.max(filters.limit || 50, 1), 200);
+    const rangeStart = tagNeedle ? 0 : filters.offset || 0;
+    query = query.range(rangeStart, rangeStart + safeLimit - 1);
 
     const { data, count, error } = await query;
     if (error) {
       console.error('listSupabase (blog) error:', error.message);
       return { rows: [], total: 0 };
     }
-    return { rows: (data || []).map(normalizePostFromSupabase), total: count || 0 };
+    const rows = (data || []).map(normalizePostFromSupabase);
+    if (tagNeedle) {
+      const exact = rows.filter((post) =>
+        (post.tags || '')
+          .split(',')
+          .map((t) => normalizeTagNeedle(t))
+          .includes(tagNeedle),
+      );
+      const offset = Math.max(filters.offset || 0, 0);
+      const limit = Math.min(Math.max(filters.limit || 50, 1), 200);
+      return { rows: exact.slice(offset, offset + limit), total: exact.length };
+    }
+    return { rows, total: count || 0 };
   }
 
   private static async getByIdSupabase(id: string): Promise<BlogPost | null> {

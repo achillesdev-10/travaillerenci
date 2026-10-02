@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { BlogService } from '@/services/blogService';
 import CoverImage from '@/components/content/CoverImage';
 import type { BlogPost } from '@/types/blog';
@@ -8,26 +9,43 @@ import { IMAGES } from '@/lib/images';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata = {
-  title: 'Blog — TravaillerenCi',
-  description:
-    "Conseils emploi, actualités du marché du travail et coulisses de la plateforme : le blog TravaillerenCi pour réussir votre carrière en Côte d'Ivoire.",
-  openGraph: {
-    type: 'website',
-    locale: 'fr_CI',
-    url: `${getSiteUrl()}/blog`,
-    siteName: 'TravaillerenCi',
-    title: 'Blog — Conseils & actualités | TravaillerenCi',
-    description:
-      "Conseils emploi, actualités du marché du travail ivoirien et coulisses de la plateforme TravaillerenCi.",
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Blog — Conseils & actualités | TravaillerenCi',
-    description:
-      "Conseils emploi, actualités du marché du travail ivoirien et coulisses de la plateforme TravaillerenCi.",
-  },
-};
+interface BlogPageProps {
+  searchParams: Promise<{ tag?: string }>;
+}
+
+export async function generateMetadata({ searchParams }: BlogPageProps): Promise<Metadata> {
+  const sp = await searchParams;
+  const tag = (sp.tag || '').trim();
+  const baseTitle = 'Blog — Conseils emploi & actualités';
+  const baseDescription =
+    "Conseils emploi, actualités du marché du travail et coulisses de la plateforme : le blog TravaillerenCi pour réussir votre carrière en Côte d'Ivoire.";
+  const title = tag ? `Blog — étiquette « ${tag} »` : baseTitle;
+  const description = tag
+    ? `Articles du blog TravaillerenCi étiquetés « ${tag} » : conseils emploi, candidature et carrière en Côte d'Ivoire.`
+    : baseDescription;
+  const url = tag
+    ? `${getSiteUrl()}/blog?tag=${encodeURIComponent(tag)}`
+    : `${getSiteUrl()}/blog`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      type: 'website',
+      locale: 'fr_CI',
+      url,
+      siteName: 'TravaillerenCi',
+      title: `${title} | TravaillerenCi`,
+      description,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${title} | TravaillerenCi`,
+      description,
+    },
+  };
+}
 
 function formatDate(iso: string | null) {
   if (!iso) return '';
@@ -44,9 +62,12 @@ function tagList(tags: string | null): string[] {
     .slice(0, 3);
 }
 
-export default async function BlogPage() {
+export default async function BlogPage({ searchParams }: BlogPageProps) {
+  const sp = await searchParams;
+  const tag = (sp.tag || '').trim();
   const { rows: posts, total } = await BlogService.list({
     status: 'published',
+    ...(tag ? { tag } : {}),
     order_by: 'published_at',
     order_dir: 'desc',
     limit: 50,
@@ -76,27 +97,65 @@ export default async function BlogPage() {
 
       {/* ===== Liste des articles ===== */}
       <section className="container mx-auto px-4 py-10 sm:py-14 max-w-5xl">
+        {tag && (
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-primary/25 bg-primary/5 px-4 py-3">
+            <p className="text-sm text-gray-700 dark:text-gray-200">
+              Étiquette&nbsp;: <strong className="font-bold text-primary">#{tag}</strong>
+              {total > 0 && (
+                <span className="text-gray-500 dark:text-gray-400">
+                  {' '}
+                  — {total} article{total > 1 ? 's' : ''}
+                </span>
+              )}
+            </p>
+            <Link
+              href="/blog"
+              className="text-sm font-semibold text-primary hover:underline"
+            >
+              Voir tous les articles
+            </Link>
+          </div>
+        )}
         {posts.length === 0 ? (
           <div className="bg-white dark:bg-slate-900 border border-dashed border-border rounded-2xl p-10 sm:p-16 text-center">
             <div className="mx-auto w-16 h-16 rounded-2xl bg-gray-50 dark:bg-slate-800 flex items-center justify-center mb-5">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 text-gray-400" aria-hidden="true">
                 <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
-                <path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6Z" />
+                <path d="M18 14h-8M15 18h-10M9 6h8v4H9z" />
               </svg>
             </div>
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white font-[var(--font-display)]">
-              Aucun article publié pour le moment
-            </h2>
-            <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-2 max-w-md mx-auto">
-              Revenez bientôt : nos premiers articles sur l&apos;emploi en Côte d&apos;Ivoire
-              arrivent très vite !
-            </p>
-            <Link
-              href="/jobs"
-              className="mt-6 inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-primary text-white font-semibold text-sm shadow-md shadow-primary/20 hover:brightness-110 transition-all"
-            >
-              Voir les offres d&apos;emploi
-            </Link>
+            {tag ? (
+              <>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white font-[var(--font-display)]">
+                  Aucun article avec l&apos;étiquette «&nbsp;{tag}&nbsp;»
+                </h2>
+                <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-2 max-w-md mx-auto">
+                  Essayez une autre étiquette ou parcourez l&apos;ensemble des articles du blog.
+                </p>
+                <Link
+                  href="/blog"
+                  className="mt-6 inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-primary text-white font-semibold text-sm shadow-md shadow-primary/20 hover:brightness-110 transition-all"
+                >
+                  Voir tous les articles
+                </Link>
+              </>
+            ) : (
+              <>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white font-[var(--font-display)]">
+                  Aucun article publié pour le moment
+                </h2>
+                <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-2 max-w-md mx-auto">
+                  Revenez bientôt : nos premiers articles sur l&apos;emploi en Côte d&apos;Ivoire
+                  arrivent très vite !
+                </p>
+                <Link
+                  href="/jobs"
+                  className="mt-6 inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-primary text-white font-semibold text-sm shadow-md shadow-primary/20 hover:brightness-110 transition-all"
+                >
+                  Voir les offres d&apos;emploi
+                </Link>
+              </>
+            )}
           </div>
         ) : (
           <>

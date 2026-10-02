@@ -12,6 +12,7 @@ import {
   METIER_SEO_BY_SLUG,
   categoriesForActivity,
   filterOffersForSeo,
+  landingChipHref,
   minOffersFor,
   parseJobSeoSlug,
   seoLandingDescription,
@@ -30,9 +31,11 @@ interface PageProps {
   params: Promise<{ landing: string }>;
 }
 
-/** Offres correspondant au landing (vivier borné, mis en cache par ISR). */
-async function listOffers(parsed: ParsedJobSeoSlug): Promise<JobOfferSchema[]> {
-  const { rows } = await JobOfferSchemaService.list({
+/** Vivier borné (500) + offres filtrées correspondant au landing (ISR). */
+async function listLandingData(
+  parsed: ParsedJobSeoSlug,
+): Promise<{ vivier: JobOfferSchema[]; offers: JobOfferSchema[] }> {
+  const { rows: vivier } = await JobOfferSchemaService.list({
     category: categoriesForActivity(parsed.activity),
     status: 'published',
     is_archived: false,
@@ -41,7 +44,7 @@ async function listOffers(parsed: ParsedJobSeoSlug): Promise<JobOfferSchema[]> {
     order_dir: 'desc',
     limit: 500,
   });
-  return filterOffersForSeo(rows, parsed);
+  return { vivier, offers: filterOffersForSeo(vivier, parsed) };
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -83,7 +86,7 @@ export default async function JobSeoLandingPage({ params }: PageProps) {
   const parsed = parseJobSeoSlug(landing);
   if (!parsed) notFound();
 
-  const offers = await listOffers(parsed);
+  const { vivier, offers } = await listLandingData(parsed);
 
   // Garde-fou anti-page-pauvre : sous le seuil, la page n'existe pas (404).
   if (offers.length < minOffersFor(parsed)) notFound();
@@ -223,7 +226,11 @@ export default async function JobSeoLandingPage({ params }: PageProps) {
                 {CITY_SEO.filter((c) => c.slug !== parsed.citySlug).map((c) => (
                   <Link
                     key={c.slug}
-                    href={`/${parsed.activity}-${c.slug}`}
+                    href={landingChipHref(vivier, {
+                      activity: parsed.activity,
+                      citySlug: c.slug,
+                      metierSlug: null,
+                    })}
                     className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
                   >
                     {parsed.activity === 'stages' ? 'Stages' : 'Emplois'} {c.name}
@@ -240,7 +247,11 @@ export default async function JobSeoLandingPage({ params }: PageProps) {
                 {METIER_SEO.filter((m) => m.slug !== parsed.metierSlug).map((m) => (
                   <Link
                     key={m.slug}
-                    href={`/${parsed.activity}-${m.slug}`}
+                    href={landingChipHref(vivier, {
+                      activity: parsed.activity,
+                      citySlug: null,
+                      metierSlug: m.slug,
+                    })}
                     className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
                   >
                     {m.label}

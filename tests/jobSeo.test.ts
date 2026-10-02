@@ -9,6 +9,7 @@ import {
   buildJobSeoSlug,
   eligibleSeoLandings,
   filterOffersForSeo,
+  landingChipHref,
   landingForOffer,
   landingLinksForOffer,
   minOffersFor,
@@ -258,6 +259,37 @@ const fewLinks = landingLinksForOffer(
 assertEqual(fewLinks.city?.href, '/emplois-abidjan', 'ville toujours éligible à 5 offres');
 assertEqual(fewLinks.metier?.href, '/emplois-informatique', 'métier toujours éligible à 5 offres');
 assertEqual(fewLinks.combo, null, 'combinaison sous le seuil strict → null');
+
+// ---- 10. landingChipHref — chips de maillage sans 404 (§12) ----
+console.log('\n10. landingChipHref (chips villes/métiers)');
+assertEqual(
+  landingChipHref(enoughForCity, { activity: 'emplois', citySlug: 'abidjan', metierSlug: null }),
+  '/emplois-abidjan',
+  'ville éligible → page SEO',
+);
+assertEqual(
+  landingChipHref(
+    enoughForCity.slice(0, MIN_OFFERS - 1),
+    { activity: 'emplois', citySlug: 'abidjan', metierSlug: null },
+  ),
+  '/jobs?city=Abidjan',
+  'ville sous le seuil → recherche filtrée (jamais 404)',
+);
+assertEqual(
+  landingChipHref(comboVivier, { activity: 'emplois', citySlug: null, metierSlug: 'informatique' }),
+  '/emplois-informatique',
+  'métier éligible → page SEO',
+);
+assertEqual(
+  landingChipHref([], { activity: 'emplois', citySlug: null, metierSlug: 'informatique' }),
+  '/jobs?q=d%C3%A9veloppeur',
+  'métier sous le seuil → recherche par mot-clé',
+);
+assertEqual(
+  landingChipHref([], { activity: 'stages', citySlug: 'bouake', metierSlug: null }),
+  '/stages?city=Bouak%C3%A9',
+  'activité stages → verticale /stages',
+);
 
 console.log('\n\n📊 Results:');
 console.log(`   ✅ Passed: ${passed}`);

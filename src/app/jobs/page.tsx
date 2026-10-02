@@ -6,7 +6,13 @@ import CompactJobCard from '@/components/home/CompactJobCard';
 import type { JobOfferSchema } from '@/types';
 import { getSiteUrl } from '@/lib/site';
 import { cn } from '@/lib/utils';
-import { CITY_SEO, METIER_SEO } from '@/lib/jobSeo';
+import {
+  CITY_SEO,
+  METIER_SEO,
+  categoriesForActivity,
+  landingChipHref,
+  type JobSeoActivity,
+} from '@/lib/jobSeo';
 
 export async function generateMetadata({
   searchParams,
@@ -68,20 +74,38 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
     { q: keyword, city, contract } as Record<string, string>,
   ).toString();
 
-  const { rows: jobs, total } = await JobOfferSchemaService.list({
-    // Seuls les emplois et stages (dépôt unifié) apparaissent sur /jobs —
-    // les bourses (scholarship) et concours (exam) ont leurs propres pages.
-    category: category ? ['internship'] : ['job', 'internship'],
-    keyword,
-    location: city,
-    contract_type: contract && contract !== 'Stage' ? (contract as any) : undefined,
-    status: 'published',
-    // Les offres expirées (deadline dépassée, en attente d'archivage) ne
-    // doivent plus être présentées comme des opportunités actives.
-    is_expired: false,
-    limit: PAGE_SIZE,
-    offset: (page - 1) * PAGE_SIZE,
-  });
+  // Verticale des chips maillage : correspond au préfixe des URLs SEO
+  // (`/emplois-*` ou `/stages-*`) rendues plus bas.
+  const chipActivity: JobSeoActivity = category === 'internship' ? 'stages' : 'emplois';
+
+  // Vivier borné (500) pour calculer l'éligibilité des pages SEO villes/
+  // métiers — même requête que la page landing, afin de reproduire à
+  // l'identique sa garde-fou anti-404 (§12).
+  const [{ rows: jobs, total }, { rows: chipVivier }] = await Promise.all([
+    JobOfferSchemaService.list({
+      // Seuls les emplois et stages (dépôt unifié) apparaissent sur /jobs —
+      // les bourses (scholarship) et concours (exam) ont leurs propres pages.
+      category: category ? ['internship'] : ['job', 'internship'],
+      keyword,
+      location: city,
+      contract_type: contract && contract !== 'Stage' ? (contract as any) : undefined,
+      status: 'published',
+      // Les offres expirées (deadline dépassée, en attente d'archivage) ne
+      // doivent plus être présentées comme des opportunités actives.
+      is_expired: false,
+      limit: PAGE_SIZE,
+      offset: (page - 1) * PAGE_SIZE,
+    }),
+    JobOfferSchemaService.list({
+      category: categoriesForActivity(chipActivity),
+      status: 'published',
+      is_archived: false,
+      is_expired: false,
+      order_by: 'created_at',
+      order_dir: 'desc',
+      limit: 500,
+    }),
+  ]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
@@ -277,7 +301,11 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
               {CITY_SEO.map((city) => (
                 <Link
                   key={city.slug}
-                  href={`/${category === 'internship' ? 'stages' : 'emplois'}-${city.slug}`}
+                  href={landingChipHref(chipVivier, {
+                    activity: chipActivity,
+                    citySlug: city.slug,
+                    metierSlug: null,
+                  })}
                   className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
                 >
                   {city.name}
@@ -293,7 +321,11 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
               {METIER_SEO.map((metier) => (
                 <Link
                   key={metier.slug}
-                  href={`/${category === 'internship' ? 'stages' : 'emplois'}-${metier.slug}`}
+                  href={landingChipHref(chipVivier, {
+                    activity: chipActivity,
+                    citySlug: null,
+                    metierSlug: metier.slug,
+                  })}
                   className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
                 >
                   {metier.label}

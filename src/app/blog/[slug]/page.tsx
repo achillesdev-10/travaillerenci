@@ -24,9 +24,35 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = await BlogService.getBySlug(slug);
   if (!post || post.status !== 'published') return {};
+  const url = `${SITE_CONFIG.url}/blog/${post.slug}`;
+  const description = post.excerpt || undefined;
+  const tags = tagList(post.tags);
+  const image = post.cover_image ? absoluteImageUrl(post.cover_image) : undefined;
   return {
-    title: `${post.title} — TravaillerenCi`,
-    description: post.excerpt || undefined,
+    // Le layout racine applique le suffixe « | travaillerenci ».
+    title: post.title,
+    description,
+    keywords: tags.length > 0 ? tags : undefined,
+    alternates: { canonical: url },
+    openGraph: {
+      type: 'article',
+      locale: 'fr_CI',
+      url,
+      siteName: 'TravaillerenCi',
+      title: `${post.title} — TravaillerenCi`,
+      description,
+      publishedTime: post.published_at ?? undefined,
+      modifiedTime: post.updated_at,
+      authors: [post.author],
+      tags,
+      images: image ? [{ url: image }] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${post.title} — TravaillerenCi`,
+      description,
+      images: image ? [image] : undefined,
+    },
   };
 }
 
@@ -42,6 +68,12 @@ function tagList(tags: string | null): string[] {
     .split(',')
     .map((t) => t.trim())
     .filter(Boolean);
+}
+
+/** URL absolue (les URLs relatives ne sont pas acceptées par les crawlers OG). */
+function absoluteImageUrl(src: string): string {
+  if (/^https?:\/\//.test(src)) return src;
+  return `${SITE_CONFIG.url}/${src.replace(/^\/+/, '')}`;
 }
 
 export default async function BlogArticlePage({
@@ -106,8 +138,35 @@ export default async function BlogArticlePage({
     SITE_CONFIG.url,
   );
 
+  // §13 — Données structurées BlogPosting : uniquement des faits réels de
+  // l'article (titre, dates, auteur, éditeur) — aucune note ou claim inventée.
+  const articleUrl = `${SITE_CONFIG.url}/blog/${post.slug}`;
+  const coverImage = post.cover_image ? absoluteImageUrl(post.cover_image) : undefined;
+  const blogPostingJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    description: post.excerpt || undefined,
+    image: coverImage,
+    datePublished: post.published_at || undefined,
+    dateModified: post.updated_at,
+    author: { '@type': 'Person', name: post.author },
+    publisher: {
+      '@type': 'Organization',
+      name: SITE_CONFIG.name,
+      url: SITE_CONFIG.url,
+    },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': articleUrl },
+    keywords: tags.length > 0 ? tags.join(', ') : undefined,
+    inLanguage: 'fr-CI',
+  };
+
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-slate-950">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingJsonLd) }}
+      />
       {/* ===== Couverture ===== */}
       <div className="relative h-56 sm:h-80 lg:h-96 w-full overflow-hidden bg-slate-100 dark:bg-slate-900">
         <CoverImage
@@ -134,12 +193,13 @@ export default async function BlogArticlePage({
                 Blog
               </Link>
               {tags.map((t) => (
-                <span
+                <Link
                   key={t}
-                  className="rounded-full border border-border bg-gray-50 dark:bg-slate-800 px-3 py-1.5 font-semibold"
+                  href={`/blog?tag=${encodeURIComponent(t)}`}
+                  className="rounded-full border border-border bg-gray-50 dark:bg-slate-800 px-3 py-1.5 font-semibold text-gray-600 dark:text-gray-300 hover:border-primary/40 hover:text-primary transition-colors"
                 >
                   #{t}
-                </span>
+                </Link>
               ))}
             </div>
 
