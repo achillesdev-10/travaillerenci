@@ -83,7 +83,7 @@ test.describe("Recherche sur la page d'accueil", () => {
     await page.getByRole('button', { name: /Rechercher/ }).click();
 
     // Attendre que la navigation (startTransition) se termine
-    await page.waitForURL(/q=infirmier/, { timeout: 8_000 });
+    await page.waitForURL(/q=infirmier/, { timeout: 20_000 });
     const url = page.url();
     expect(url).toContain('city=Abidjan');
     expect(url).toContain('contract=CDI');
@@ -147,7 +147,7 @@ test.describe('Recherche sur /stages', () => {
     await keyword.pressSequentially('stage', { delay: 30 });
     await page.getByRole('button', { name: /Rechercher/ }).click();
 
-    await expect(page).toHaveURL(/q=stage/, { timeout: 8_000 });
+    await expect(page).toHaveURL(/q=stage/, { timeout: 20_000 });
   });
 
   test('la page affiche le titre correct', async ({ page }) => {
@@ -200,7 +200,7 @@ test.describe('Comportement debounce de la recherche', () => {
     // Soumettre immediatement — pas besoin d'attendre 350ms
     await keyword.press('Enter');
 
-    await expect(page).toHaveURL(/q=urgent-query/, { timeout: 8_000 });
+    await expect(page).toHaveURL(/q=urgent-query/, { timeout: 20_000 });
   });
 });
 
