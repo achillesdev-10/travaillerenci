@@ -12,6 +12,8 @@ interface ShareButtonProps {
   campaign?: string;
   /** Show icon only (compact) or icon + label */
   variant?: 'icon' | 'default';
+  /** Libellé du bouton (§15 : « Partager cette offre » sur les fiches). */
+  label?: string;
   className?: string;
 }
 
@@ -28,6 +30,7 @@ export default function ShareButton({
   url,
   campaign = 'contenu',
   variant = 'default',
+  label = 'Partager',
   className = '',
 }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
@@ -83,7 +86,7 @@ export default function ShareButton({
         <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
       </svg>
       {variant === 'default' && (
-        <span>{copied ? 'Lien copié !' : 'Partager'}</span>
+        <span>{copied ? 'Lien copié !' : label}</span>
       )}
     </button>
   );

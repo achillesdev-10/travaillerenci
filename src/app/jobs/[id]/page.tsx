@@ -16,6 +16,7 @@ import { landingLinksForOffer } from '@/lib/jobSeo';
 import { classifySector } from '@/lib/sectorClassifier';
 import { pickRelatedArticles } from '@/lib/relatedContent';
 import ShareButton from '@/components/ShareButton';
+import CopyLinkButton from '@/components/CopyLinkButton';
 import { buildShareUrl } from '@/lib/shareUtm';
 import {
   ApplicationClickTracker,
@@ -315,7 +316,16 @@ export default async function JobDetailPage({ params }: PageProps) {
               </h1>
 
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-4 sm:mb-5 text-[14px] sm:text-base">
-                <div className="text-primary dark:text-emerald-400 font-bold">{job.company}</div>
+                <div className="text-primary dark:text-emerald-400 font-bold">
+                  {/* Maillage offre → entreprise (§33) : toutes les offres de la société. */}
+                  <Link
+                    href={`/jobs?q=${encodeURIComponent(job.company)}`}
+                    className="hover:underline"
+                    title={`Toutes les offres de ${job.company} sur TravaillerEnCi`}
+                  >
+                    {job.company}
+                  </Link>
+                </div>
                 <div className="inline-flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
                   <svg className="w-4 h-4 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
@@ -332,7 +342,9 @@ export default async function JobDetailPage({ params }: PageProps) {
                   text={`${job.title} chez ${job.company} (${job.location}) — Consultez l'offre complète sur TravaillerEnCi`}
                   url={`${getSiteUrl()}/jobs/${job.id}`}
                   campaign="offre"
+                  label="Partager cette offre"
                 />
+                <CopyLinkButton url={`${getSiteUrl()}/jobs/${job.id}`} campaign="offre" />
                 <a
                   href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`*${job.title}* chez *${job.company}* (${job.location})\n\nConsultez l'offre complète sur TravaillerEnCi : ${buildShareUrl(`${getSiteUrl()}/jobs/${job.id}`, 'offre', getSiteUrl())}`)}`}
                   target="_blank"
