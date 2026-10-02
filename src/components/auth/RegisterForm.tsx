@@ -133,19 +133,30 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
       </div>
 
       {error ? (
-        <div className="rounded-2xl bg-rose-500/10 border border-rose-500/30 p-4 text-xs text-rose-600 dark:text-rose-300">
+        <div
+          role="alert"
+          className="rounded-2xl bg-rose-500/10 border border-rose-500/30 p-4 text-xs text-rose-600 dark:text-rose-300"
+        >
           {error}
         </div>
       ) : null}
 
       <div className="space-y-3">
-        <label className="block text-xs font-bold text-gray-700 dark:text-slate-400 uppercase tracking-widest">
+        <span
+          id="register-role-label"
+          className="block text-xs font-bold text-gray-700 dark:text-slate-400 uppercase tracking-widest"
+        >
           Je souhaite :
-        </label>
-        <div className="grid grid-cols-2 gap-3">
+        </span>
+        <div
+          role="group"
+          aria-labelledby="register-role-label"
+          className="grid grid-cols-2 gap-3"
+        >
           <button
             type="button"
             onClick={() => setRole('candidate')}
+            aria-pressed={role === 'candidate'}
             className={`rounded-2xl border p-4 text-left transition-all ${
               role === 'candidate'
                 ? 'border-primary bg-primary/10 text-primary dark:text-white shadow-lg shadow-primary/10'
@@ -161,6 +172,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
           <button
             type="button"
             onClick={() => setRole('company')}
+            aria-pressed={role === 'company'}
             className={`rounded-2xl border p-4 text-left transition-all ${
               role === 'company'
                 ? 'border-primary bg-primary/10 text-primary dark:text-white shadow-lg shadow-primary/10'
@@ -178,10 +190,11 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
       <form onSubmit={handleRegister} className="space-y-4 pt-2">
         {role === 'candidate' ? (
           <div>
-            <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+            <label htmlFor="register-name" className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
               Nom complet
             </label>
             <input
+              id="register-name"
               type="text"
               required
               placeholder="Koffi Kouadio"
@@ -192,10 +205,11 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
           </div>
         ) : (
           <div>
-            <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+            <label htmlFor="register-company" className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
               Nom de l’entreprise
             </label>
             <input
+              id="register-company"
               type="text"
               required
               placeholder="MTN Côte d’Ivoire"
@@ -207,10 +221,11 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
         )}
 
         <div>
-          <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+          <label htmlFor="register-email" className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
             Email professionnel ou personnel
           </label>
           <input
+            id="register-email"
             type="email"
             required
             placeholder="vous@exemple.ci"
@@ -291,10 +306,14 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
             </p>
             <div className="space-y-3.5">
               <div>
-                <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+                <label
+                  htmlFor="register-city"
+                  className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1"
+                >
                   Ville
                 </label>
                 <select
+                  id="register-city"
                   value={profileCity}
                   onChange={(e) => setProfileCity(e.target.value)}
                   className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary"
@@ -309,10 +328,14 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+                <label
+                  htmlFor="register-diploma"
+                  className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1"
+                >
                   Diplôme le plus élevé
                 </label>
                 <select
+                  id="register-diploma"
                   value={profileDiploma}
                   onChange={(e) => setProfileDiploma(e.target.value)}
                   className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary"
@@ -327,15 +350,23 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
-                  Secteurs d'intérêt
-                </label>
-                <div className="flex flex-wrap gap-1.5">
+                <span
+                  id="register-sectors-label"
+                  className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1"
+                >
+                  Secteurs d&apos;intérêt
+                </span>
+                <div
+                  role="group"
+                  aria-labelledby="register-sectors-label"
+                  className="flex flex-wrap gap-1.5"
+                >
                   {SECTORS.map((s) => (
                     <button
                       type="button"
                       key={s.slug}
                       onClick={() => toggleSector(s.slug)}
+                      aria-pressed={profileSectors.includes(s.slug)}
                       className={cn(
                         'rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all',
                         profileSectors.includes(s.slug)

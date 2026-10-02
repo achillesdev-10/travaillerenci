@@ -76,7 +76,9 @@ export default function ResetPasswordForm({ token }: { token: string }) {
       </div>
 
       {error ? (
-        <div className="rounded-2xl bg-rose-500/10 border border-rose-500/30 p-4 text-xs text-rose-600 dark:text-rose-300">
+        <div
+          role="alert"
+          className="rounded-2xl bg-rose-500/10 border border-rose-500/30 p-4 text-xs text-rose-600 dark:text-rose-300">
           {error}
         </div>
       ) : null}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface PasswordInputProps {
@@ -29,10 +29,12 @@ export default function PasswordInput({
   buttonClassName,
 }: PasswordInputProps) {
   const [visible, setVisible] = useState(false);
+  const inputId = useId();
 
   return (
     <div className={className}>
       <label
+        htmlFor={inputId}
         className={cn(
           'block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1',
           labelClassName,
@@ -42,6 +44,7 @@ export default function PasswordInput({
       </label>
       <div className="relative">
         <input
+          id={inputId}
           type={visible ? 'text' : 'password'}
           required={required}
           autoComplete={autoComplete}

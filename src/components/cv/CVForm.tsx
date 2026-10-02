@@ -231,9 +231,10 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
           </div>
 
           <div className="flex-1 min-w-0 w-full">
-            <label className={labelClass}>Photo de profil</label>
+            <label htmlFor="cv-photo" className={labelClass}>Photo de profil</label>
             <input
               ref={photoInputRef}
+              id="cv-photo"
               type="file"
               accept="image/jpeg,image/png,image/webp"
               className="hidden"
@@ -243,7 +244,16 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
               }}
             />
             <div
+              role="button"
+              tabIndex={0}
+              aria-label="Télécharger une photo de profil"
               onClick={() => photoInputRef.current?.click()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  photoInputRef.current?.click();
+                }
+              }}
               onDragOver={(e) => {
                 e.preventDefault();
                 setIsDragging(true);
@@ -303,8 +313,9 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className={labelClass}>Nom et Prénom</label>
+            <label htmlFor="cv-fullname" className={labelClass}>Nom et Prénom</label>
             <input
+              id="cv-fullname"
               type="text"
               placeholder="Ex: KOUASSI Jean-Paul"
               className={inputClass}
@@ -313,8 +324,9 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
             />
           </div>
           <div>
-            <label className={labelClass}>Titre du poste</label>
+            <label htmlFor="cv-jobtitle" className={labelClass}>Titre du poste</label>
             <input
+              id="cv-jobtitle"
               type="text"
               placeholder="Ex: Développeur Full-Stack"
               className={inputClass}
@@ -323,8 +335,9 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
             />
           </div>
           <div>
-            <label className={labelClass}>Email</label>
+            <label htmlFor="cv-email" className={labelClass}>Email</label>
             <input
+              id="cv-email"
               type="email"
               placeholder="exemple@gmail.com"
               className={inputClass}
@@ -333,8 +346,9 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
             />
           </div>
           <div>
-            <label className={labelClass}>Téléphone</label>
+            <label htmlFor="cv-phone" className={labelClass}>Téléphone</label>
             <input
+              id="cv-phone"
               type="tel"
               placeholder="+225 07 00 00 00 00"
               className={inputClass}
@@ -343,8 +357,9 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
             />
           </div>
           <div className="sm:col-span-2">
-            <label className={labelClass}>Ville</label>
+            <label htmlFor="cv-city" className={labelClass}>Ville</label>
             <input
+              id="cv-city"
               type="text"
               placeholder="Abidjan, Cocody..."
               className={inputClass}
@@ -362,6 +377,8 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
         </h2>
         <div className="relative">
           <textarea
+            id="cv-summary"
+            aria-label="Accroche professionnelle"
             rows={4}
             placeholder="Présentez-vous en quelques lignes..."
             className={inputClass + ' pr-32 resize-none'}
@@ -419,8 +436,9 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                 <div>
-                  <label className={labelClass}>Poste</label>
+                  <label htmlFor={`cv-exp-${idx}-position`} className={labelClass}>Poste</label>
                   <input
+                    id={`cv-exp-${idx}-position`}
                     type="text"
                     placeholder="Ex: Chef de projet"
                     className={inputClass}
@@ -429,8 +447,9 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
                   />
                 </div>
                 <div>
-                  <label className={labelClass}>Entreprise</label>
+                  <label htmlFor={`cv-exp-${idx}-company`} className={labelClass}>Entreprise</label>
                   <input
+                    id={`cv-exp-${idx}-company`}
                     type="text"
                     placeholder="Ex: Orange Côte d'Ivoire"
                     className={inputClass}
@@ -439,8 +458,9 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className={labelClass}>Période</label>
+                  <label htmlFor={`cv-exp-${idx}-period`} className={labelClass}>Période</label>
                   <input
+                    id={`cv-exp-${idx}-period`}
                     type="text"
                     placeholder="Ex: Jan 2022 - Aujourd'hui"
                     className={inputClass}
@@ -450,8 +470,9 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
                 </div>
               </div>
               <div className="relative">
-                <label className={labelClass}>Description</label>
+                <label htmlFor={`cv-exp-${idx}-description`} className={labelClass}>Description</label>
                 <textarea
+                  id={`cv-exp-${idx}-description`}
                   rows={3}
                   placeholder="Décrivez vos missions..."
                   className={inputClass + ' pr-32 resize-none'}
@@ -512,8 +533,9 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className={labelClass}>Diplôme</label>
+                  <label htmlFor={`cv-edu-${idx}-degree`} className={labelClass}>Diplôme</label>
                   <input
+                    id={`cv-edu-${idx}-degree`}
                     type="text"
                     placeholder="Ex: Master en Informatique"
                     className={inputClass}
@@ -522,8 +544,9 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
                   />
                 </div>
                 <div>
-                  <label className={labelClass}>École / Université</label>
+                  <label htmlFor={`cv-edu-${idx}-school`} className={labelClass}>École / Université</label>
                   <input
+                    id={`cv-edu-${idx}-school`}
                     type="text"
                     placeholder="Ex: INP-HB"
                     className={inputClass}
@@ -532,8 +555,9 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className={labelClass}>Année</label>
+                  <label htmlFor={`cv-edu-${idx}-year`} className={labelClass}>Année</label>
                   <input
+                    id={`cv-edu-${idx}-year`}
                     type="text"
                     placeholder="Ex: 2020 - 2022"
                     className={inputClass}
@@ -561,6 +585,7 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
               {skill}
               <button
                 onClick={() => removeSkill(skill)}
+                aria-label={`Supprimer la compétence ${skill}`}
                 className="ml-1 text-primary/60 hover:text-primary font-bold leading-none"
               >
                 ×
@@ -569,7 +594,9 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
           ))}
         </div>
         <input
+          id="cv-skill-input"
           type="text"
+          aria-label="Ajouter une compétence"
           placeholder="Tapez une compétence puis appuyez sur Entrée (ex: React, Java, Gestion de projet...)"
           className={inputClass}
           value={skillInput}

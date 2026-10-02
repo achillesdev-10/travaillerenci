@@ -143,7 +143,10 @@ export default function LoginPage() {
         </div>
 
         {error ? (
-          <div className="rounded-2xl bg-rose-500/10 border border-rose-500/30 p-4 text-xs text-rose-600 dark:text-rose-300">
+          <div
+            role="alert"
+            className="rounded-2xl bg-rose-500/10 border border-rose-500/30 p-4 text-xs text-rose-600 dark:text-rose-300"
+          >
             {error}
           </div>
         ) : null}
@@ -176,10 +179,11 @@ export default function LoginPage() {
               </p>
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+              <label htmlFor="forgot-email" className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
                 Email du compte
               </label>
               <input
+                id="forgot-email"
                 type="email"
                 required
                 placeholder="vous@exemple.ci"
@@ -208,13 +212,21 @@ export default function LoginPage() {
         ) : (
           <>
             <div className="space-y-3">
-              <label className="block text-xs font-bold text-gray-700 dark:text-slate-400 uppercase tracking-widest">
+              <span
+                id="login-role-label"
+                className="block text-xs font-bold text-gray-700 dark:text-slate-400 uppercase tracking-widest"
+              >
                 Connexion en tant que :
-              </label>
-              <div className="grid grid-cols-2 gap-3">
+              </span>
+              <div
+                role="group"
+                aria-labelledby="login-role-label"
+                className="grid grid-cols-2 gap-3"
+              >
                 <button
                   type="button"
                   onClick={() => setRoleOverride("candidate")}
+                  aria-pressed={roleOverride === "candidate"}
                   className={`rounded-2xl border p-3 text-center transition-all text-xs font-bold ${
                     roleOverride === "candidate"
                       ? "border-primary bg-primary/10 text-primary dark:text-white shadow-lg shadow-primary/10"
@@ -226,6 +238,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setRoleOverride("company")}
+                  aria-pressed={roleOverride === "company"}
                   className={`rounded-2xl border p-3 text-center transition-all text-xs font-bold ${
                     roleOverride === "company"
                       ? "border-primary bg-primary/10 text-primary dark:text-white shadow-lg shadow-primary/10"
@@ -239,10 +252,11 @@ export default function LoginPage() {
 
             <form onSubmit={handleLogin} className="space-y-4 pt-2">
               <div>
-                <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+                <label htmlFor="login-email" className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
                   Email
                 </label>
                 <input
+                  id="login-email"
                   type="email"
                   required
                   placeholder="vous@exemple.ci"
