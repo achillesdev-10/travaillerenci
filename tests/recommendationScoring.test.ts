@@ -197,8 +197,57 @@ console.log('\n12. Dictionnaires secteurs');
 assert(Object.keys(SECTOR_KEYWORDS).length >= 16, 'au moins 16 secteurs couverts');
 assert(
   Object.values(SECTOR_KEYWORDS).every((s) => s.label && s.keywords.length > 0),
-  'chaque secteur a un label et des mots-clés',
+  'chaque secteur a un label et des mots-clAcs',
 );
+
+// ---- 13. Compétences & expérience (section 10) ----
+console.log('\n13. scoreJob - compétences & expérience');
+const skillJob = createJob({
+  title: 'Développeur React',
+  description: 'Maîtrise de React et TypeScript exigée.',
+  created_at: '2023-01-01T00:00:00Z',
+});
+const skillScore = scoreJob({ skills: ['React', 'Node.js'] }, skillJob, NOW);
+assertEqual(skillScore.score, RECOMMENDATION_WEIGHTS.skills, 'une compétence suffit → +20');
+assert(
+  skillScore.reasons.some((r) => r.includes('React')),
+  'raison compétence listée',
+);
+assertEqual(
+  scoreJob({ skills: ['Comptabilité'] }, skillJob, NOW).score,
+  0,
+  "compétence absente de l'offre → 0",
+);
+assertEqual(
+  scoreJob({ skills: [] }, skillJob, NOW).score,
+  0,
+  'liste de compétences vide → 0',
+);
+
+const seniorJob = createJob({
+  title: 'Chef de projet informatique',
+  description: "Profil senior confirmé, 5 ans d'expérience minimum.",
+  created_at: '2023-01-01T00:00:00Z',
+});
+const expScore = scoreJob({ experienceLevel: 'Senior' }, seniorJob, NOW);
+assertEqual(expScore.score, RECOMMENDATION_WEIGHTS.experience, 'niveau senior mentionné → +10');
+assertEqual(
+  scoreJob({ experienceLevel: 'Junior' }, seniorJob, NOW).score,
+  0,
+  'niveau non demandé → 0',
+);
+assertEqual(
+  scoreJob({ experienceLevel: null }, seniorJob, NOW).score,
+  0,
+  'aucun niveau de profil → 0',
+);
+assert(
+  scoreJob({ experienceLevel: 'Senior' }, skillJob, NOW).score === 0,
+  'offre sans mention de niveau → 0',
+);
+
+assert(hasProfileSignals({ skills: ['React'] }), 'compétences seules = signal de profil');
+assert(hasProfileSignals({ experienceLevel: 'Senior' }), 'expérience seule = signal de profil');
 
 // ---------------------------------------------------------------------------
 //  Résultats

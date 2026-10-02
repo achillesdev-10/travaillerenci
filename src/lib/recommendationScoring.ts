@@ -11,8 +11,10 @@
  *  ──────────────────────────────────────────────────────────────────────────
  *    • Domaine / secteur d'intérêt correspondant … +40  (le signal le + fort)
  *    • Même ville que le profil …………………………… +25
+ *    • Compétence du profil présente dans l'offre … +20  (§10 : compétences)
  *    • Type de contrat recherché …………………………… +15  (champ profil, prêt pour
  *                                                      la future migration)
+ *    • Niveau d'expérience compatible ……………………… +10  (§10 : expérience)
  *    • Diplôme mentionné dans l'offre ……………………… +10
  *    • Offre récente (≤ 7 jours) …………………………… +8
  *    • Offre récente (≤ 30 jours) …………………………… +4
@@ -21,9 +23,18 @@
  *  Les scores sont additifs. À score égal, l'offre la plus récente passe
  *  devant (tri stable).
  *
+ *  Le bonus « compétence » est compté UNE fois par offre (les compétences
+ *  appariées sont listées dans `reasons`). Le bonus « expérience » n'est
+ *  accordé que si l'offre mentionne explicitement un niveau (junior,
+ *  confirmé, senior, manager…) compatible avec le profil.
+ *
  *  La correspondance « domaine » utilise d'abord la colonne `job_offers.sector`
  *  (correspondance exacte) quand elle est renseignée ; sinon elle retombe sur
  *  une recherche par mots-clés dans le titre et la description.
+ *
+ *  Amélioration future (architecture prévue) : remplacer/augmenter ce barème
+ *  par des poids pondérés (`RECOMMENDATION_WEIGHTS`) sans toucher aux
+ *  consommateurs — `rankJobs()` reste la seule porte d'entrée du classement.
  *
  *  IMPORTANT : ce module est PUR (aucun import serveur / Next). Il est
  *  directement couvert par tests/recommendationScoring.test.ts.
@@ -36,6 +47,10 @@ export interface RecommendationProfile {
   sectors?: string[] | null;
   /** Champs non encore persistés — préparés pour la future évolution. */
   contractTypes?: string[] | null;
+  /** Compétences saisies dans le profil (`candidate_profiles.skills`). */
+  skills?: string[] | null;
+  /** Niveau d'expérience (JOB_LEVELS : Junior, Intermédiaire, Senior…). */
+  experienceLevel?: string | null;
 }
 
 /** Sous-ensemble de l'offre nécessaire au scoring (évite un couplage fort). */
@@ -65,7 +80,9 @@ export interface JobScore {
 export const RECOMMENDATION_WEIGHTS = {
   sector: 40,
   city: 25,
+  skills: 20,
   contract: 15,
+  experience: 10,
   diploma: 10,
   fresh7d: 8,
   fresh30d: 4,
@@ -212,6 +229,21 @@ export const DIPLOMA_KEYWORDS: Record<string, string[]> = {
   other: [],
 };
 
+/**
+ * Niveau d'expérience du profil → mots-clés attendus dans l'offre (§10).
+ * Clés normalisées (normalizeText) miroirant JOB_LEVELS de constants.ts.
+ * L'offre doit MENTIONNER le niveau pour que le bonus soit accordé : absence
+ * d'information = pas de bonus (et pas de malus).
+ */
+export const EXPERIENCE_LEVEL_KEYWORDS: Record<string, string[]> = {
+  junior: ['junior', 'debutant', 'entry level', '0 a 2 ans', '1 a 3 ans'],
+  intermediaire: ['intermediaire', 'confirme', '2 a 5 ans', '3 ans d experience'],
+  senior: ['senior', 'experimente', '5 a 10 ans', '5 ans d experience'],
+  expert: ['expert', 'specialiste', '10 ans d experience', '10 ans'],
+  manager: ['manager', 'chef d equipe', 'responsable', 'lead team'],
+  'cadre dirigeant': ['directeur', 'direction', 'dga', 'general manager', 'president'],
+};
+
 // ---------------------------------------------------------------------------
 //  Utilitaires
 // ---------------------------------------------------------------------------
@@ -266,7 +298,9 @@ export function hasProfileSignals(profile: RecommendationProfile | null | undefi
     (profile.city && profile.city.trim()) ||
       (profile.sectors && profile.sectors.length > 0) ||
       (profile.diploma && profile.diploma.trim()) ||
-      (profile.contractTypes && profile.contractTypes.length > 0),
+      (profile.contractTypes && profile.contractTypes.length > 0) ||
+      (profile.skills && profile.skills.length > 0) ||
+      (profile.experienceLevel && profile.experienceLevel.trim()),
   );
 }
 
@@ -334,6 +368,30 @@ function scoreExtras(
   if (job.contract_type && contractTypes.includes(job.contract_type)) {
     score += RECOMMENDATION_WEIGHTS.contract;
     reasons.push(`Contrat ${job.contract_type}`);
+  }
+
+  // §10 — compétences : au moins une compétence du profil citée dans l'offre.
+  const profileSkills = Array.isArray(profile?.skills) ? profile!.skills! : [];
+  const matchedSkills = profileSkills
+    .map((s) => (s || '').trim())
+    .filter((s) => normalizeText(s).length >= 2)
+    .filter((s) => matchesKeyword(haystack, normalizeText(s)));
+  if (matchedSkills.length > 0) {
+    score += RECOMMENDATION_WEIGHTS.skills;
+    reasons.push(
+      matchedSkills.length === 1
+        ? `Compétence ${matchedSkills[0]}`
+        : `Compétences ${matchedSkills.slice(0, 2).join(', ')}`,
+    );
+  }
+
+  // §10 — expérience : le niveau du profil est explicitement demandé par
+  // l'offre (junior / confirmé / senior / manager…).
+  const level = normalizeText(profile?.experienceLevel);
+  const levelKeywords = level ? EXPERIENCE_LEVEL_KEYWORDS[level] ?? [] : [];
+  if (levelKeywords.length > 0 && levelKeywords.some((kw) => matchesKeyword(haystack, kw))) {
+    score += RECOMMENDATION_WEIGHTS.experience;
+    reasons.push(`Niveau ${profile!.experienceLevel!.trim()} recherché`);
   }
 
   const diplomaKeywords = profile?.diploma ? DIPLOMA_KEYWORDS[profile.diploma] ?? [] : [];

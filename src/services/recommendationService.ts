@@ -84,6 +84,8 @@ export class RecommendationService {
       diploma: profile?.diploma ?? null,
       sectors: profile?.sectors ?? [],
       contractTypes: profile?.contract_types ?? [],
+      skills: profile?.skills ?? [],
+      experienceLevel: profile?.experience_level ?? null,
     };
 
     const personalized = hasProfileSignals(profileForScoring);

@@ -5,11 +5,16 @@ import Link from 'next/link';
 import type { JobOfferSchema } from '@/types';
 import CompactJobCard from '@/components/home/CompactJobCard';
 
+/** Offre recommandée : offre + score et raisons du scoring (§10). */
+type RecommendedJob = JobOfferSchema & {
+  recommendation?: { score: number; reasons: string[] };
+};
+
 interface RecommendationsResponse {
   total: number;
   isFallback: boolean;
   profilePersonalized: boolean;
-  jobs: JobOfferSchema[];
+  jobs: RecommendedJob[];
 }
 
 /**
@@ -111,7 +116,21 @@ export default function RecommendationsSection() {
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
           {jobs.map((job) => (
-            <CompactJobCard key={job.id} job={job} />
+            <div key={job.id} className="space-y-1.5">
+              <CompactJobCard job={job} />
+              {personalized && job.recommendation?.reasons?.length ? (
+                <ul className="flex flex-wrap gap-1 px-1" aria-label="Raisons de la recommandation">
+                  {job.recommendation.reasons.map((reason) => (
+                    <li
+                      key={reason}
+                      className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary"
+                    >
+                      {reason}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
           ))}
         </div>
       )}
