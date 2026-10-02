@@ -99,6 +99,34 @@ class TestMatchesJob(unittest.TestCase):
         alert2 = {"content_types": ["job"], "city": "Korhogo", "sector": "it-digital"}
         self.assertFalse(matches_job(JOB, alert2))
 
+    def test_contract_type(self):
+        cdi = dict(JOB, contract_type="CDI")
+        self.assertTrue(matches_job(cdi, {"contract_type": "CDI"}))
+        # Casse / accents : « Préstation » vs « prestation ».
+        self.assertTrue(matches_job(dict(JOB, contract_type="Prestation"), {"contract_type": "prestation"}))
+        self.assertFalse(matches_job(cdi, {"contract_type": "CDD"}))
+        # Offre sans contrat renseigné : un critère explicite ne matche pas.
+        self.assertFalse(matches_job(JOB, {"contract_type": "CDI"}))
+        # Critère absent = tous les contrats.
+        self.assertTrue(matches_job(cdi, {}))
+        # Valeur multiple côté offre (« CDI, CDD »).
+        multi = dict(JOB, contract_type="CDI, CDD")
+        self.assertTrue(matches_job(multi, {"contract_type": "CDD"}))
+
+    def test_keywords(self):
+        self.assertTrue(matches_job(JOB, {"keywords": "react"}))
+        self.assertTrue(matches_job(JOB, {"keywords": "react, data"}))
+        self.assertFalse(matches_job(JOB, {"keywords": "comptable"}))
+        # Accents et casse : « développ » trouve « Développeur ».
+        self.assertTrue(matches_job(JOB, {"keywords": "DévelopPÉ"}))
+        # Chaîne vide = aucun filtre.
+        self.assertTrue(matches_job(JOB, {"keywords": ""}))
+        self.assertTrue(matches_job(JOB, {"keywords": None}))
+
+    def test_keywords_are_matched_anywhere_in_the_offer(self):
+        self.assertTrue(matches_job(INTERNSHIP, {"keywords": "bi, data analyst"}))
+        self.assertFalse(matches_job(INTERNSHIP, {"keywords": "marketing"}))
+
 
 class TestMatchesExam(unittest.TestCase):
     def test_content_types(self):

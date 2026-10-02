@@ -113,6 +113,13 @@ const MIGRATIONS: Array<{
   },
   // Newsletter : architecture d'envoi préparatoire (§20), table dédiée.
   { table: 'newsletter_subscribers', label: '0029 (newsletter)', file: 'supabase/migrations/0029_newsletter_subscribers.sql' },
+  // Alertes candidat : critères contrat + mots-clés (§8).
+  {
+    table: 'alerts',
+    label: '0030 (alertes : contrat + mots-clés)',
+    file: 'supabase/migrations/0030_alerts_contract_keywords.sql',
+    columns: ['contract_type', 'keywords'],
+  },
 ];
 
 async function runSql(query: string): Promise<{ ok: boolean; data?: unknown; error?: string }> {

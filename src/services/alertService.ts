@@ -25,6 +25,8 @@ import type {
 const VALID_CONTENT_TYPES: AlertContentType[] = ['job', 'internship', 'scholarship', 'exam'];
 const VALID_CHANNELS: AlertChannel[] = ['email', 'whatsapp', 'both'];
 const VALID_FREQUENCIES: AlertFrequency[] = ['immediate', 'daily'];
+/** Types de contrat filtrables (§8) — miroir de JobContractType. */
+const VALID_CONTRACTS = ['CDI', 'CDD', 'Stage', 'Prestation', 'Alternance', 'Freelance'];
 
 type DatabaseSyncInstance = {
   prepare(sql: string): StatementInstance;
@@ -60,6 +62,8 @@ async function getDb(): Promise<DatabaseSyncInstance | null> {
         city              TEXT,
         diploma           TEXT,
         sector            TEXT,
+        contract_type     TEXT,
+        keywords          TEXT,
         channels          TEXT NOT NULL DEFAULT 'email' CHECK (channels IN ('email','whatsapp','both')),
         frequency         TEXT NOT NULL DEFAULT 'immediate' CHECK (frequency IN ('immediate','daily')),
         active            INTEGER NOT NULL DEFAULT 1,
@@ -80,6 +84,12 @@ async function getDb(): Promise<DatabaseSyncInstance | null> {
       CREATE INDEX IF NOT EXISTS idx_alerts_active ON alerts (active);
       CREATE INDEX IF NOT EXISTS idx_alert_digest_alert ON alert_digest_log (alert_id);
     `);
+    // Migration défensive (§8) : la table peut précéder l'ajout des critères
+    // contrat et mots-clés (migration Supabase 0030).
+    const cols = cachedDb.prepare('PRAGMA table_info(alerts)').all();
+    const existing = new Set(cols.map((c: { name: string }) => String(c.name)));
+    if (!existing.has('contract_type')) cachedDb.exec('ALTER TABLE alerts ADD COLUMN contract_type TEXT');
+    if (!existing.has('keywords')) cachedDb.exec('ALTER TABLE alerts ADD COLUMN keywords TEXT');
     return cachedDb;
   } catch {
     return null;
@@ -111,6 +121,8 @@ function rowToAlert(row: any): AlertItem {
     city: row.city ?? null,
     diploma: row.diploma ?? null,
     sector: row.sector ?? null,
+    contract_type: row.contract_type ?? null,
+    keywords: row.keywords ?? null,
     channels: (VALID_CHANNELS as string[]).includes(row.channels) ? row.channels : 'email',
     frequency: (VALID_FREQUENCIES as string[]).includes(row.frequency) ? row.frequency : 'immediate',
     active: Boolean(row.active),
@@ -134,6 +146,15 @@ function normalizePatch(patch: AlertPatch): Record<string, unknown> {
   if (patch.city !== undefined) out.city = patch.city?.trim() || null;
   if (patch.diploma !== undefined) out.diploma = patch.diploma?.trim() || null;
   if (patch.sector !== undefined) out.sector = patch.sector?.trim() || null;
+  if (patch.contract_type !== undefined) {
+    const contract = patch.contract_type?.trim() || null;
+    out.contract_type = contract && VALID_CONTRACTS.includes(contract) ? contract : null;
+  }
+  if (patch.keywords !== undefined) {
+    // Liste de mots-clés : 200 caractères max, tels quels (le matching vit
+    // côté digest Python, insensible à la casse/aux accents).
+    out.keywords = patch.keywords?.trim().slice(0, 200) || null;
+  }
   if (patch.channels && (VALID_CHANNELS as string[]).includes(patch.channels)) out.channels = patch.channels;
   if (patch.frequency && (VALID_FREQUENCIES as string[]).includes(patch.frequency)) out.frequency = patch.frequency;
   if (typeof patch.active === 'boolean') out.active = patch.active;
@@ -171,6 +192,8 @@ export class AlertService {
       city: input.city ?? null,
       diploma: input.diploma ?? null,
       sector: input.sector ?? null,
+      contract_type: input.contract_type ?? null,
+      keywords: input.keywords ?? null,
       channels: input.channels,
       frequency: input.frequency,
     });
@@ -189,6 +212,8 @@ export class AlertService {
           city: clean.city ?? null,
           diploma: clean.diploma ?? null,
           sector: clean.sector ?? null,
+          contract_type: clean.contract_type ?? null,
+          keywords: clean.keywords ?? null,
           channels: clean.channels ?? 'email',
           frequency: clean.frequency ?? 'immediate',
           active: true,
@@ -206,8 +231,8 @@ export class AlertService {
     const db = await getDb();
     if (!db) return null;
     db.prepare(
-      `INSERT INTO alerts (user_id, label, content_types, city, diploma, sector, channels, frequency, active, unsubscribe_token, created_at, updated_at)
-       VALUES ($userId, $label, $types, $city, $diploma, $sector, $channels, $frequency, 1, $token, $now, $now)`,
+      `INSERT INTO alerts (user_id, label, content_types, city, diploma, sector, contract_type, keywords, channels, frequency, active, unsubscribe_token, created_at, updated_at)
+       VALUES ($userId, $label, $types, $city, $diploma, $sector, $contract, $keywords, $channels, $frequency, 1, $token, $now, $now)`,
     ).run({
       $userId: userId,
       $label: clean.label,
@@ -215,6 +240,8 @@ export class AlertService {
       $city: clean.city ?? null,
       $diploma: clean.diploma ?? null,
       $sector: clean.sector ?? null,
+      $contract: clean.contract_type ?? null,
+      $keywords: clean.keywords ?? null,
       $channels: clean.channels ?? 'email',
       $frequency: clean.frequency ?? 'immediate',
       $token: unsubscribeToken,

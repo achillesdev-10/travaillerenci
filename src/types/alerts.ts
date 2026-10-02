@@ -26,6 +26,10 @@ export interface AlertItem {
   diploma: string | null;
   /** Secteur d'intérêt (slug SECTORS de src/lib/constants.ts — null = tous). */
   sector: string | null;
+  /** Type de contrat recherché (CDI, CDD, Stage… — null = tous). */
+  contract_type: string | null;
+  /** Mots-clés séparés par des virgules (null = aucun filtre). */
+  keywords: string | null;
   channels: AlertChannel;
   frequency: AlertFrequency;
   active: boolean;
@@ -44,6 +48,8 @@ export interface AlertPatch {
   city?: string | null;
   diploma?: string | null;
   sector?: string | null;
+  contract_type?: string | null;
+  keywords?: string | null;
   channels?: AlertChannel;
   frequency?: AlertFrequency;
   active?: boolean;
@@ -56,6 +62,8 @@ export interface AlertCreateInput {
   city?: string | null;
   diploma?: string | null;
   sector?: string | null;
+  contract_type?: string | null;
+  keywords?: string | null;
   channels?: AlertChannel;
   frequency?: AlertFrequency;
 }

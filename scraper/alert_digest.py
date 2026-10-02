@@ -173,6 +173,34 @@ def matches_job(job: Dict[str, Any], alert: Dict[str, Any]) -> bool:
             if not any(norm(kw) in hay for kw in keywords):
                 return False
 
+    # Type de contrat recherché (§8) : correspondance sur les valeurs
+    # CDI / CDD / Stage / Prestation / Alternance / Freelance, tolérante à la
+    # casse, aux accents et aux listes éventuelles (« CDI, CDD »).
+    contract = (alert.get("contract_type") or "").strip()
+    if contract:
+        wanted = norm(contract)
+        job_contract = norm(job.get("contract_type") or "")
+        if wanted and (not job_contract or wanted not in job_contract):
+            return False
+
+    # Mots-clés libres (§8) : au moins un doit apparaître dans le titre,
+    # l'entreprise ou la description (comparaison normalisée).
+    raw_keywords = (alert.get("keywords") or "").strip()
+    if raw_keywords:
+        wanted_list = [norm(k) for k in raw_keywords.split(",") if k.strip()]
+        if wanted_list:
+            hay = norm(
+                " ".join(
+                    [
+                        str(job.get("title") or ""),
+                        str(job.get("company") or ""),
+                        str(job.get("description") or ""),
+                    ]
+                )
+            )
+            if not any(k in hay for k in wanted_list):
+                return False
+
     return True
 
 
@@ -450,6 +478,8 @@ class DataStore:
                 city              TEXT,
                 diploma           TEXT,
                 sector            TEXT,
+                contract_type     TEXT,
+                keywords          TEXT,
                 channels          TEXT NOT NULL DEFAULT 'email',
                 frequency         TEXT NOT NULL DEFAULT 'immediate',
                 active            INTEGER NOT NULL DEFAULT 1,
@@ -476,6 +506,8 @@ class DataStore:
         for column, ddl in [
             ("last_sent_at", "ALTER TABLE alerts ADD COLUMN last_sent_at TEXT"),
             ("unsubscribe_token", "ALTER TABLE alerts ADD COLUMN unsubscribe_token TEXT"),
+            ("contract_type", "ALTER TABLE alerts ADD COLUMN contract_type TEXT"),
+            ("keywords", "ALTER TABLE alerts ADD COLUMN keywords TEXT"),
         ]:
             if column not in cols:
                 self.conn.execute(ddl)

@@ -35,6 +35,8 @@ export async function POST(request: NextRequest) {
     city: typeof body.city === 'string' ? body.city : null,
     diploma: typeof body.diploma === 'string' ? body.diploma : null,
     sector: typeof body.sector === 'string' ? body.sector : null,
+    contract_type: typeof body.contract_type === 'string' ? body.contract_type : null,
+    keywords: typeof body.keywords === 'string' ? body.keywords : null,
     channels: body.channels,
     frequency: body.frequency,
   });
