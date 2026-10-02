@@ -2,8 +2,9 @@
  *  TravaillerEnCi — src/lib/admin-growth.ts
  *
  *  Statistiques de croissance du tableau de bord administrateur (§23) :
- *  inscrits, profils complétés, alertes actives, sauvegardes, CV et
- *  offres les plus consultées / les plus sauvegardées.
+ *  inscrits, profils complétés, alertes actives, sauvegardes, CV, offres
+ *  publiées, entreprises, sources de trafic et offres les plus consultées /
+ *  les plus sauvegardées.
  *
  *  • Local : SQLite (tables auto-créées par leurs services)
  *  • Prod  : Supabase (service_role)
@@ -19,6 +20,7 @@ import { DatabaseSync } from "node:sqlite";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase";
 import { computeProfileCompletion } from "@/lib/profileCompletion";
 import { PROFILE_COMPLETE_THRESHOLD } from "@/lib/analyticsEvents";
+import { normalizeSource, sourceFromPath } from "@/lib/trafficSource";
 
 export type GrowthTopOffer = {
   id: string;
@@ -37,8 +39,14 @@ export type AdminGrowthStats = {
   totalResumes: number;
   activeAlerts: number;
   totalSavedItems: number;
+  /** Offres dont le statut est « published ». */
+  publishedOffers: number;
+  /** Entreprises distinctes parmi les offres publiées. */
+  companies: number;
   topViewedOffers: GrowthTopOffer[];
   topSavedOffers: GrowthTopOffer[];
+  /** Sources de trafic (§23) : source → nombre de visites, classées. */
+  trafficSources: GrowthTopOffer[];
 };
 
 export const EMPTY_GROWTH: AdminGrowthStats = {
@@ -50,8 +58,11 @@ export const EMPTY_GROWTH: AdminGrowthStats = {
   totalResumes: 0,
   activeAlerts: 0,
   totalSavedItems: 0,
+  publishedOffers: 0,
+  companies: 0,
   topViewedOffers: [],
   topSavedOffers: [],
+  trafficSources: [],
 };
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
@@ -74,6 +85,34 @@ export function topEntries(
 function numberFromUnknown(value: unknown): number {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+/**
+ * Agrège les visites en sources de trafic (§23).
+ *
+ * Deux cas de figure :
+ *   • la colonne `site_visits.source` existe (migration 0031) → on l'utilise ;
+ *   • sinon on retombe sur le `utm_source` éventuellement présent dans le
+ *     chemin de la visite.
+ * Une visite sans information est comptée comme « direct ».
+ */
+export function trafficSourcesFromRows(
+  rows: Array<{ source?: unknown; path?: unknown }>,
+  limit = 5,
+): GrowthTopOffer[] {
+  const agg: Record<string, number> = {};
+  for (const row of rows) {
+    const explicit = String(row.source ?? "").trim();
+    const source = explicit
+      ? normalizeSource(explicit)
+      : sourceFromPath(String(row.path ?? "")) || "direct";
+    agg[source] = (agg[source] || 0) + 1;
+  }
+  return topEntries(agg, limit).map((entry) => ({
+    id: entry.key,
+    title: entry.key,
+    count: entry.value,
+  }));
 }
 
 // ---------------------------------------------------------------------------
@@ -107,6 +146,16 @@ function safeAll(db: SqliteDb, table: string, sql: string): SqliteRow[] {
   } catch {
     return [];
   }
+}
+
+/**
+ * Visites avec leur source (§23). Repli sur le chemin seul quand la colonne
+ * `source` n'existe pas encore (migration 0031 non appliquée).
+ */
+function siteVisitRows(db: SqliteDb): SqliteRow[] {
+  const withSource = safeAll(db, "site_visits", "SELECT source, path FROM site_visits");
+  if (withSource.length > 0) return withSource;
+  return safeAll(db, "site_visits", "SELECT path FROM site_visits");
 }
 
 function growthFromSqlite(): AdminGrowthStats {
@@ -203,6 +252,21 @@ function growthFromSqlite(): AdminGrowthStats {
       count: entry.value,
     }));
 
+    // Offres publiées + entreprises distinctes (§23)
+    const publishedRows = safeAll(
+      db,
+      "job_offers",
+      "SELECT company FROM job_offers WHERE status = 'published'",
+    );
+    const companies = new Set(
+      publishedRows
+        .map((row) => String(row.company || "").trim().toLowerCase())
+        .filter(Boolean),
+    ).size;
+
+    // Sources de trafic (§23)
+    const trafficSources = trafficSourcesFromRows(siteVisitRows(db));
+
     return {
       totalUsers,
       newUsersThisWeek,
@@ -212,8 +276,11 @@ function growthFromSqlite(): AdminGrowthStats {
       totalResumes,
       activeAlerts,
       totalSavedItems,
+      publishedOffers: publishedRows.length,
+      companies,
       topViewedOffers,
       topSavedOffers,
+      trafficSources,
     };
   } catch {
     return EMPTY_GROWTH;
@@ -242,7 +309,7 @@ async function growthFromSupabase(): Promise<AdminGrowthStats> {
 
   try {
     const weekAgo = new Date(Date.now() - WEEK_MS).toISOString();
-    const [usersRes, profilesRes, alertsRes, savesRes, viewedRes] =
+    const [usersRes, profilesRes, alertsRes, savesRes, viewedRes, publishedRes, visitsRes] =
       await Promise.all([
         supabase.from("users").select("id,created_at"),
         supabase
@@ -261,7 +328,19 @@ async function growthFromSupabase(): Promise<AdminGrowthStats> {
           .eq("status", "published")
           .order("clicks_count", { ascending: false })
           .limit(50),
+        supabase.from("job_offers").select("company").eq("status", "published"),
+        supabase.from("site_visits").select("source,path").limit(5000),
       ]);
+
+    // Colonnes `source` absente (migration 0031 non appliquée) → repli `path`.
+    let visitRows = (visitsRes.error ? [] : visitsRes.data || []) as Array<{
+      source?: string | null;
+      path?: string | null;
+    }>;
+    if (visitsRes.error) {
+      const fallback = await supabase.from("site_visits").select("path").limit(5000);
+      visitRows = (fallback.data || []) as Array<{ source?: string | null; path?: string | null }>;
+    }
 
     const users = (usersRes.data || []) as Array<{ id: string; created_at: string }>;
     const profiles = (profilesRes.data || []) as any[];
@@ -333,6 +412,16 @@ async function growthFromSupabase(): Promise<AdminGrowthStats> {
       totalResumes,
       activeAlerts: (alertsRes.data || []).length,
       totalSavedItems: saves.length,
+      publishedOffers: publishedRes.error ? 0 : (publishedRes.data || []).length,
+      companies: publishedRes.error
+        ? 0
+        : new Set(
+            (publishedRes.data || [])
+              .map((row: { company?: string | null }) =>
+                String(row.company || "").trim().toLowerCase(),
+              )
+              .filter(Boolean),
+          ).size,
       topViewedOffers: topEntries(viewedAgg, 5).map((entry) => ({
         id: entry.key,
         title: titles.get(entry.key) || entry.key,
@@ -343,6 +432,7 @@ async function growthFromSupabase(): Promise<AdminGrowthStats> {
         title: titleMap.get(entry.key) || entry.key,
         count: entry.value,
       })),
+      trafficSources: trafficSourcesFromRows(visitRows),
     };
   } catch (err) {
     console.error("getGrowthStats supabase error:", err);

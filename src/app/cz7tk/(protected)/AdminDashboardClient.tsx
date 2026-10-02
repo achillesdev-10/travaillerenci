@@ -553,6 +553,31 @@ export default function AdminDashboardClient({
         </svg>
       ),
     },
+    {
+      label: "Offres publiées",
+      value: growth.publishedOffers ?? 0,
+      hint: "Statut publié en ligne",
+      accent: "from-lime-500 to-emerald-600",
+      icon: (
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 4h16v12H7l-3 3Z" />
+        </svg>
+      ),
+    },
+    {
+      label: "Entreprises",
+      value: growth.companies ?? 0,
+      hint: "Recruteurs distincts publiés",
+      accent: "from-cyan-500 to-sky-600",
+      icon: (
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 21h18" />
+          <path d="M5 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16" />
+          <path d="M15 9h2a2 2 0 0 1 2 2v10" />
+          <path d="M9 7h2M9 11h2M9 15h2" />
+        </svg>
+      ),
+    },
   ];
 
   return (
@@ -662,8 +687,8 @@ export default function AdminDashboardClient({
         })}
       </section>
 
-      {/* ===== Croissance : top offres ===== */}
-      <section className="grid gap-4 lg:grid-cols-2">
+      {/* ===== Croissance : top offres + sources de trafic ===== */}
+      <section className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
         <TopOffersCard
           title="Offres les plus consultées"
           items={growth.topViewedOffers}
@@ -673,6 +698,11 @@ export default function AdminDashboardClient({
           title="Offres les plus sauvegardées"
           items={growth.topSavedOffers}
           emptyLabel="Aucune sauvegarde enregistrée pour le moment."
+        />
+        <TopOffersCard
+          title="Sources de trafic"
+          items={growth.trafficSources ?? []}
+          emptyLabel="Aucune source enregistrée — les prochaines visites afficheront utm_source ou le domaine d'origine."
         />
       </section>
 

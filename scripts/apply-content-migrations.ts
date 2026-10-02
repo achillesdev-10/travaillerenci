@@ -9,6 +9,8 @@
  *      signalements (rétention candidat).
  *    • 0025–0029 : colonne métier des offres, profil enrichi, analytics,
  *      consentement de visibilité (§30), newsletter (§20).
+ *    • 0030–0031 : critères contrat/mots-clés des alertes (§8), sources de
+ *      trafic des visites (§23).
  *
  *  Une migration est réputée « en place » si la table existe ET si toutes les
  *  colonnes déclarées sont présentes (information_schema.columns) : cela
@@ -119,6 +121,13 @@ const MIGRATIONS: Array<{
     label: '0030 (alertes : contrat + mots-clés)',
     file: 'supabase/migrations/0030_alerts_contract_keywords.sql',
     columns: ['contract_type', 'keywords'],
+  },
+  // Trafic : sources d'origine des visites (§23).
+  {
+    table: 'site_visits',
+    label: '0031 (sources de trafic)',
+    file: 'supabase/migrations/0031_site_visits_source.sql',
+    columns: ['source'],
   },
 ];
 
