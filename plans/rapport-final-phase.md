@@ -1,8 +1,8 @@
 # Rapport final de phase — TravaillerEnCi (Master Prompt V2)
 
 > Période couverte : phase complète « Priorités 1 à 8 + sections 13 à 42 » du Master Prompt 2.
-> Branche : `main` — 26 commits en avance sur `origin/main` (non poussés).
-> Vérifications finales : `npm run lint` ✅ · `npm test` ✅ (11 suites, 290 assertions, 0 échec) · `npm run test:e2e` ✅ (63 tests, 0 échec) · `npm run build` ✅
+> Branche : `main` — 33 commits en avance sur `origin/main` (non poussés).
+> Vérifications finales (2026-10-02) : `npm run lint` ✅ · `npm test` ✅ (12 suites, 318 tests, 0 échec) · `npx tsc --noEmit` ✅ · `npm run test:e2e` ✅ (73 tests, 0 échec) · `npm run build` ✅
 
 ---
 
@@ -26,10 +26,24 @@
 - Événements suivis : `job_view`, `job_save`, `job_unsave`, `signup`, `profile_complete`, `cv_upload`, `alert_create`, `application_click`, `search`, `share`, `newsletter_subscribe`.
 
 **Dashboard administrateur (section 23)**
-- Statistiques de croissance (`admin-growth.ts`) : inscriptions, profils, alertes, sauvegardes.
+- Statistiques de croissance (`admin-growth.ts`) : inscriptions, profils, alertes, sauvegardes (voir aussi les sources de trafic dans le lot final ci-dessous).
 
-**Newsletter (section 20 — fait cette session)**
+**Newsletter (section 20)**
 - Table + service + API d'inscription, désinscription en un clic, formulaire dans le pied de page. **Aucun envoi** : seuls les champs nécessaires sont posés (statuts, consentement horodaté, source, UTM, fréquence, jetons de confirmation/désinscription).
+
+**Reprise des sections restantes (lots finaux)**
+
+- **§6/§7 (inscription)** : page `/register` affiche la valeur de la plateforme ; bouton « Sauvegarder » des fiches explicite l'invitation à créer un compte pour les visiteurs non connectés.
+- **§8 (alertes)** : critères **type de contrat** et **mots-clés** ajoutés à `AlertsSection` (création + édition, chips, listes déroulantes) ; API `POST/PATCH /api/alerts` accepte `contract_type` / `keywords` ; digest `scraper/alert_digest.py` applique le matching (contrat en sous-chaîne, mots-clés ≥ 1 dans titre/entreprise/description).
+- **§10 (recommandations)** : scoring enrichi des **compétences** (20 pts) et du **niveau d'expérience** (10 pts) ; chaque recommandation affiche ses **raisons** (« Compétence React », « Profil Senior »…).
+- **§12/§13/§17 (SEO)** : chips villes/métiers conditionnés (jamais de 404), canonique + OpenGraph + Twitter + `BlogPosting` sur le blog, filtre d'étiquette `/blog?tag=…`.
+- **§15 (partage)** : libellés « **Partager cette offre** » et « **Copier le lien** » (`CopyLinkButton`).
+- **§18 (accueil)** : phrase centrale du §18 + accès directs Offres / Stages / Recherche / **Alertes** / CV / Profil.
+- **§23 (admin)** : « **Sources de trafic** » (colonnes `site_visits.source`, `src/lib/trafficSource.ts`, graphe du dashboard), **offres publiées** et **entreprises** dans le dashboard admin.
+- **§24 (base de données)** : audit du schéma existant + **mapping documenté** (§5 ci-dessous) ; aucune table dupliquée, migrations sûres (`ADD COLUMN IF NOT EXISTS`, contraintes, index).
+- **§26 (mobile first)** : suite `e2e/responsive.spec.ts` — 320/360/390/412/tablette/desktop, 7 pages publiques + fiche d'offre + dashboard + menu hamburger, **aucun débordement horizontal**.
+- **§27 (accessibilité)** : labels `htmlFor/id` + `aria-label` sur tous les champs (login, inscription, générateur de CV), groupes `role="group"`/`aria-pressed`, messages d'erreur `role="alert"` ; suite `e2e/accessibility.spec.ts` (noms accessibles, `alt`, landmark/`h1`, focus clavier, contraste ≥ 4,5:1, cible tactile ≥ 40 px).
+- **§29 (monétisation)** : champs de statut **neutres uniquement** — `job_offers.is_featured`/`featured_until`, `candidate_profiles.plan` (`free`/`premium`) ; **aucun bouton de paiement**, aucun tri ni affichage particulier.
 
 ---
 
@@ -44,7 +58,14 @@
 | Recommandations | `src/lib/recommendationScoring.ts`, `src/services/recommendationService.ts`, `src/app/api/recommendations/route.ts` |
 | Newsletter | `src/lib/newsletter.ts`, `src/services/newsletterService.ts`, `src/app/api/newsletter/route.ts`, `src/app/api/newsletter/unsubscribe/route.ts`, `src/components/layout/NewsletterForm.tsx`, `src/components/layout/Footer.tsx` |
 | Admin | `src/lib/admin-growth.ts`, `src/app/cz7tk/(protected)/AdminDashboardClient.tsx` |
+| Alertes (§8) | `src/components/dashboard/AlertsSection.tsx`, `src/services/alertService.ts`, `src/types/alerts.ts`, `src/app/api/alerts/route.ts`, `scraper/alert_digest.py`, `scraper/tests/test_alert_digest.py` |
+| Recommandations (§10) | `src/lib/recommendationScoring.ts`, `src/services/recommendationService.ts`, `src/components/dashboard/RecommendationsSection.tsx` |
+| Trafic (§23) | `src/lib/trafficSource.ts`, `src/app/api/analytics/track/route.ts`, `src/components/analytics/AnalyticsTracker.tsx`, `tests/trafficSource.test.ts` |
+| Monétisation (§29) | `src/services/jobOfferSchemaService.ts`, `src/services/candidateProfileService.ts`, `src/types/index.ts` |
+| Accessibilité (§27) | `src/app/login/page.tsx`, `src/components/auth/{RegisterForm,PasswordInput,ResetPasswordForm,SetPasswordForm}.tsx`, `src/components/cv/CVForm.tsx` |
+| Partage / accueil | `src/components/CopyLinkButton.tsx`, `src/components/ShareButton.tsx`, `src/components/saved/SaveButton.tsx`, `src/app/page.tsx`, `src/app/register/page.tsx` |
 | Outils | `scripts/apply-content-migrations.ts`, `scripts/classify-job-sectors.ts`, `package.json` (script `test`) |
+| Tests E2E | `e2e/accessibility.spec.ts` (§27), `e2e/responsive.spec.ts` (§26), `e2e/blog.spec.ts`, `e2e/jobs.spec.ts`, `e2e/search.spec.ts` |
 
 ---
 
@@ -57,9 +78,12 @@
 | `supabase/migrations/0027_create_analytics_events.sql` | table `analytics_events` |
 | `supabase/migrations/0028_add_profile_visibility.sql` | **consentement** `profile_visibility` (`private` par défaut, check contraint) |
 | `supabase/migrations/0029_newsletter_subscribers.sql` | table `newsletter_subscribers` (statut, consentement, source, UTM, fréquence, jetons, RLS fermée) |
+| `supabase/migrations/0030_alerts_contract_keywords.sql` | `alerts.contract_type` (check CDI/CDD/Stage/Prestation/Alternance/Freelance) + `alerts.keywords` (§8) |
+| `supabase/migrations/0031_site_visits_source.sql` | `site_visits.source` + index (§23 — sources de trafic) |
+| `supabase/migrations/0032_monetization_flags.sql` | `job_offers.is_featured` / `featured_until` + index, `candidate_profiles.plan` (`free`/`premium`) (§29) |
 
 Aucune donnée existante n'a été supprimée. Les équivalents SQLite sont créés automatiquement au premier accès (migrations défensives dans les services).
-**À faire côté production** : appliquer 0025 → 0029 (Supabase SQL Editor ou `supabase db push` ; 0029 est aussi référencée dans `scripts/apply-content-migrations.ts`).
+**À faire côté production** : appliquer 0025 → 0032 (Supabase SQL Editor ou `supabase db push` ; 0030 à 0032 sont aussi référencées dans `scripts/apply-content-migrations.ts`, prochain numéro de migration : **0033**).
 
 ---
 
@@ -71,14 +95,35 @@ Aucune donnée existante n'a été supprimée. Les équivalents SQLite sont cré
 - `POST /api/newsletter` — inscription (email + consentement obligatoire, rate limit 5/10 min/IP).
 - `GET /api/newsletter/unsubscribe?token=…` — désinscription en un clic (HTML de confirmation, idempotent).
 
+Aucune nouvelle route HTTP dans les lots finaux : `POST /api/alerts` (§8) et `GET /api/recommendations` (§10) existaient déjà et ont été **étendus** ; le tracking des sources (§23) passe par `POST /api/analytics/track` existant.
+
 ---
 
 ## 5. Nouvelles tables / champs
 
-- `job_offers.sector`
-- `candidate_profiles` : `job_title`, `experience_level`, `skills`, `contract_types`, `bio`, `resume_url`, **`profile_visibility`**
+- `job_offers.sector` · `job_offers.is_featured` · `job_offers.featured_until` (§29)
+- `candidate_profiles` : `job_title`, `experience_level`, `skills`, `contract_types`, `bio`, `resume_url`, **`profile_visibility`**, **`plan`** (§29)
+- `alerts` : **`contract_type`**, **`keywords`** (§8)
+- `site_visits` : **`source`** (§23)
 - `analytics_events` (table)
 - `newsletter_subscribers` (table)
+
+### 5bis. Mapping des tables du §24 (audit du schéma existant)
+
+Le §24 demande d'analyser le schéma avant toute création et d'adapter les noms au système déjà utilisé : **aucune table n'a été dupliquée**, voici la correspondance entre la liste de référence et le schéma réel (SQLite local + Supabase) :
+
+| Référence §24 | Table(s) réelle(s) | Statut / décision |
+|---|---|---|
+| `users` | `users` (auth maison, `userRepository`), Supabase `public.users` (0011) + `password_reset_tokens`, `verify_email_tokens` | ✅ existante, inchangée |
+| `profiles` | `public.profiles` (0002) + `public.profiles_candidate` / `public.profiles_company` ; côté SQLite : `candidate_profiles` (service) | ✅ existante — **ne pas recréer** |
+| `resumes` | **pas de table** : CV côté client (générateur + export PDF), lien `candidate_profiles.resume_url`, bucket `cv_photos` (0008) | ⚠️ colonne `resume_url` suffisant pour l'instant ; table `resumes` à créer **avec** l'espace recruteur (CVthèque) |
+| `saved_jobs` | `public.saved_items` (0016, type `job` / `article`) | ✅ nom adapté au système existant |
+| `job_alerts` | `public.alerts` + `public.alert_digest_log` (0017) | ✅ existante, enrichie en 0030 |
+| `candidate_skills` | colonne `candidate_profiles.skills` (JSON array, 0026) | ✅ relation portée par le profil — table dédiée inutile tant qu'aucun recruteur ne filtre par compétence |
+| `companies` | **pas de table** : `public.profiles_company` (0002) + `job_offers.company` (texte) | ⚠️ **relation à créer** dans la phase recruteur (clé étrangère `job_offers.company_id`) — en évitant le doublon avec `profiles_company` |
+| `company_profiles` | `public.profiles_company` (0002) | ✅ existante, inchangée |
+
+Migrations sûres de bout en bout : SQLite défensif (`PRAGMA table_info` + `ALTER TABLE … IF NOT EXISTS`) doublé du SQL Supabase ; **aucune suppression de colonne ni de ligne**.
 
 ---
 
@@ -121,15 +166,18 @@ Aucune donnée existante n'a été supprimée. Les équivalents SQLite sont cré
 
 ## 9. Tests réalisés
 
-- `npm test` → **11 suites, 290 assertions, 0 échec** :
-  `analyticsEvents`, `jobSeo`, `jobThumbnails`, `mustSee`, `newsletter`, `profileCompletion`, `profileVisibility`, `recommendationScoring`, `relatedContent`, `sectorClassifier`, `shareUtm`.
-  (5 assertions supplémentaires sur `landingChipHref` : ville/métier éligible → landing, sous le seuil → recherche filtrée, repli `/stages`.)
-- **`npm run test:e2e` (Playwright) → 63 tests, 0 échec** (chaîne `chrome` système, serveur dev local, fixtures SQLite injectées puis nettoyées) :
+- `npm test` → **12 suites, 318 tests, 0 échec** :
+  `analyticsEvents`, `jobSeo`, `jobThumbnails`, `mustSee`, `newsletter`, `profileCompletion`, `profileVisibility`, `recommendationScoring`, `relatedContent`, `sectorClassifier`, `shareUtm`, **`trafficSource`** (§23).
+  (assertions `landingChipHref` §12, scoring `skills`/expérience + reasons §10, `recommendationScoring` porté à 46 tests.)
+- `python scraper/tests/test_alert_digest.py` → **26 tests, OK** (matching contrat + mots-clés §8, y compris « offre sans contrat → pas de match »).
+- **`npm run test:e2e` (Playwright) → 73 tests, 0 échec** (chaîne `chrome` système, serveur dev local, fixtures SQLite injectées puis nettoyées) :
   `admin` (§36), `auth` (inscription / connexion / déconnexion), `blog` (liste, fiche, canonique + `BlogPosting`, maillage des étiquettes §17), `chatbot`, `cv-pdf-export`, `cv-pdf-mobile`,
   `jobs` (recherche, filtres, fiche, `/stages`, `/jobs/today`, landing métier×ville, **§12 : tous les chips villes/métiers de `/jobs` et `/stages` répondent 200**, sitemap/robots),
-  `profile` (profil absent → incomplet → complet, §30), `responsive` (§26 : 320/360/390/412/768/1280 px,
-  fiche d'offre, dashboard, menu hamburger), `saved-alerts` (sauvegarde + alertes), `search` (débounce, soumission, état vide).
+  `profile` (profil absent → incomplet → complet, §30), **`responsive` (§26 : 9 tests** — 320/360/390/412/768/1280 px sur 7 pages publiques, fiche d'offre, dashboard, menu hamburger),
+  **`accessibility` (§27 : 10 tests** — champs/boutons/image/structure sur 5 pages, focus clavier, message `role="alert"`, contraste ≥ 4,5:1, cible tactile ≥ 40 px, label du profil),
+  `saved-alerts` (sauvegarde + alertes §36), `search` (débounce, soumission, état vide).
   Couverture des cas §36 : utilisateur connecté / non connecté / sans profil / profil incomplet / profil complet.
+- `npm run lint` → 0 erreur ; `npx tsc --noEmit` → 0 erreur ; `npm run build` → ✓ Compiled successfully.
 - Tests manuels (dev server) :
   - `POST /api/newsletter` → **201** (email valide + consentement), **400** (email invalide), **400** (consentement absent) ;
   - ré-inscription idempotente (1 seule ligne, pas de doublon d'événement) ;
@@ -148,18 +196,31 @@ Aucune donnée existante n'a été supprimée. Les équivalents SQLite sont cré
 ## 10. Résultat du build
 
 ```
-npm run lint    → 0 erreur
-npm test        → 11 suites / 290 assertions / 0 échec
-npm run test:e2e → 63 tests / 0 échec
-npm run build   → ✓ Compiled successfully
+npm run lint        → 0 erreur
+npm test            → 12 suites / 318 tests / 0 échec
+npx tsc --noEmit    → 0 erreur
+python scraper/tests/test_alert_digest.py → 26 tests / OK
+npm run test:e2e    → 73 tests / 0 échec   (12 min, 1 worker, Chrome système)
+npm run build       → ✓ Compiled successfully (exit 0)
 ```
 Avertissement connu et préexistant (non bloquant) : « Dynamic filesystem access causes tracing of the whole project » provenant du lancement du scraper Python (`fail(...)`), plus les warnings expérimentaux `node:sqlite`.
 
 ---
 
-## 11. Commits effectués (23, non poussés — le dernier est celui de ce rapport)
+## 11. Commits effectués (33 de code, non poussés — le présent rapport est le commit suivant)
 
 ```
+4d70edf test(e2e): allonger les attentes de navigation de la recherche (dev lent)
+17648da feat(accessibilite): labels clavier, messages role alert et audit contraste (section 27)
+7115dae feat(monetisation): champs de statut neutres offres mises en avant et plan de profil (section 29)
+bb4fe28 feat(admin): offres publiees, entreprises et sources de trafic du dashboard (section 23)
+aece22c feat(recommandations): scorer competences et experience, afficher les raisons (section 10)
+5f6846c feat(alertes): critere contrat et mots-cles des alertes candidat (section 8)
+36187e2 feat(home): afficher la phrase centrale et les acces directs offres/stages/recherche/alertes/CV/profil (section 18)
+96cbda0 feat(partage): ajouter les libelles Partager cette offre et Copier le lien (section 15)
+3f6c695 feat(auth): afficher la valeur de l'inscription et inviter les visiteurs a sauvegarder (sections 6 et 7)
+66c52a2 feat(seo): conditionner les chips villes/metiers et bloguer le blog (sections 12, 13 et 17)
+42b913b docs(rapport): integrer les correctifs de securite et la moderation actualites au rapport final
 f6b7a9d feat(actualites): ajouter la file de moderation admin avant publication (sections 31 et 32)
 912aaf5 fix(securite): exiger CRON_SECRET sur POST /api/news et une session sur l'upload photo CV (sections 28 et 31)
 c242133 fix(securite): supprimer les secrets embarques et rendre les sessions fail-closed en production (section 28)
@@ -184,36 +245,30 @@ ee19cbf feat(jobs): catégoriser les offres par métier via la colonne sector
 c97b6ce feat(dashboard): ajouter les recommandations d'offres par profil
 ```
 
+(Ordre décroissant ; aucun commit non poussé sur `origin/main` — `git push` à valider par vos soins.)
+
 ---
 
 ## 12. Problèmes restants à traiter
 
-1. **Migrations Supabase** : 0025 à 0029 doivent être appliquées sur le projet de production (aucune exécution automatique détectée).
+1. **Migrations Supabase** : 0025 à 0032 doivent être appliquées sur le projet de production (aucune exécution automatique détectée).
 2. **Envoi newsletter** : non implémenté (volontaire, §20) — le double opt-in (champ `confirm_token` déjà prévu) et le job d'envoi restent à faire.
-3. **CVthèque** : aucun espace recruteur n'expose encore les profils ; le filtre `profile_visibility = 'recruiters'` devra être appliqué dès la création de cet espace.
-4. **Tests E2E** : la suite locale Playwright (`npm run test:e2e`, 61 tests) est verte ; la spec `chatbot.prod.spec.ts` (exécutée contre la production via `npm run test:e2e:prod`) reste un smoke à lancer manuellement. La suite n'est pas encore câblée en CI (`.github/workflows`).
+3. **CVthèque** : aucun espace recruteur n'expose encore les profils ; le filtre `profile_visibility = 'recruiters'` devra être appliqué dès la création de cet espace, **avec** la table `resumes` et la table `companies` (clé étrangère `job_offers.company_id`) prévues au §24 — à créer alors, sans doublon avec `profiles_company`.
+4. **Tests E2E** : la suite locale Playwright (`npm run test:e2e`, 73 tests) est verte ; la spec `chatbot.prod.spec.ts` (exécutée contre la production via `npm run test:e2e:prod`) reste un smoke à lancer manuellement. La suite n'est pas encore câblée en CI (`.github/workflows`).
 5. Rapports Lighthouse non versionnés (`lighthouse-report*.json`) : à décider (commit ou ignorer).
-6. Fichiers non versionnés restants : `Master Prompt 2.docx`.
-7. **Audit Master Prompt 2 — sections encore partielles** (la sécurité §28 et la modération §31/§32 sont traitées) :
-   - §6/§7 : valeur affichée sur `/register` et invitation « sauvegarder » pour non connecté ;
-   - §8 : alertes sans filtre contrat, sans mots-clés, sans UI d'édition (API PATCH prête) ;
-   - §10 : recommandations sans scoring `skills`/expérience ni `reasons` affichées ;
-   - §12/§13/§17 : ~~liens villes/métiers non conditionnés (404 possibles sur `/jobs` et `/stages`), canonical + OG + `BlogPosting` absents sur le blog~~ **traité (lot SEO)** ;
-   - §15 : libellés « Partager cette offre » / « Copier le lien » absents ;
-   - §18 : « alertes » peu mises en avant sur l'accueil, phrase centrale du §18 absente telle quelle ;
-   - §23 : « sources de trafic » absentes du dashboard admin (+ offres publiées, entreprises) ;
-   - §24 : tables `companies` / `resumes` / `candidate_skills` inexistants, doublons legacy `profiles`/`users` ;
-   - §26 : filtres, alertes et admin non testés en mobile (E2E responsive) ;
-   - §27 : contrastes en échec, labels sans `htmlFor`, `aria-describedby`/`role="alert"` absents, pas de test axe ;
-   - §29 : aucun champ `is_featured`/`plan` posé pour la future monétisation ;
-   - §33 : liens internes non conditionnés + maillage offre→entreprise absent.
+6. Fichiers non versionnés restants : `Master Prompt 2.docx`, `master-prompt-2.txt`, logs `devserver.log` / `e2e-full*.log` / `build-final.log` (à ignorer via `.gitignore`).
+7. **Audit Master Prompt 2 — état par section** :
+   - §6/§7, §8, §10, §12/§13/§15/§17, §18, §23, §26, §27, §29, §31/§32 : **traités** (lignes de ce rapport + tests associés) ;
+   - §24 : **traité sous forme d'audit + mapping** (§5bis) ; la création des tables `companies` / `resumes` reste délibérément reportée à l'espace recruteur pour éviter un doublon inutilisé ;
+   - §33 : liens internes non conditionnés partout (maillage offre → entreprise **à faire avec `companies`**) ;
+   - §41 : couverture E2E à étendre (dashboard admin avancé, protection des CV, événements analytics) et à mettre en CI.
 
 ---
 
 ## 13. Recommandations pour la prochaine phase
 
-1. Appliquer les migrations 0025-0029 puis redéployer et vérifier en production.
+1. Pousser les 34 commits sur `origin/main`, appliquer les migrations 0025-0032 puis redéployer et vérifier en production.
 2. Brancher l'envoi newsletter (double opt-in + digest hebdomadaire) en réutilisant le pipeline `scraper/alert_digest.py`.
-3. Construire la CVthèque recruteur avec filtre de consentement + champs premium (§29/§30) sans réécriture.
-4. Étendre la suite E2E aux critères §41 encore peu couverts (dashboard admin avancé, protection des CV, événements analytics) et la lancer en CI.
-5. Poursuivre le pipeline de qualité des offres (§31) : détection de doublons, normalisation, scoring de complétude.
+3. Construire la CVthèque recruteur avec filtre de consentement + tables `companies` / `resumes` (§24, sans doublon avec `profiles_company`) + champs premium (§29) sans réécriture.
+4. Étendre la suite E2E aux critères §41 encore peu couverts (dashboard admin avancé, protection des CV, événements analytics) et la lancer en CI ; ajouter l'audit `axe-core` en complément du contrôle de contraste/labels actuel.
+5. Poursuivre le pipeline de qualité des offres (§31) : détection de doublons, normalisation, scoring de complétude ; finaliser le maillage offre → entreprise (§33) dès la table `companies` créée.
