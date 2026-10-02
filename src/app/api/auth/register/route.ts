@@ -7,6 +7,7 @@ import {
 import { sendVerificationEmail, getSiteUrl } from '@/lib/email';
 import {
   attachUserSessionCookie,
+  getSessionUser,
   issueUserSessionToken,
 } from '@/lib/userSession';
 import { CandidateProfileService } from '@/services/candidateProfileService';
@@ -20,6 +21,20 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 export async function POST(request: Request) {
   try {
+    // Session déjà active : on ne crée pas un second compte « en aveugle ».
+    // Le formulaire d'inscription est masqué côté UI, on bloque ici aussi les
+    // appels API directs — sinon la session serait remplacée silencieusement.
+    // Avant le rate limit : une tentative refusée n'est pas une création.
+    const existingSession = await getSessionUser();
+    if (existingSession) {
+      return NextResponse.json(
+        {
+          error: `Vous êtes déjà connecté (${existingSession.email}). Déconnectez-vous pour créer un autre compte.`,
+        },
+        { status: 409 },
+      );
+    }
+
     // Anti-spam : création de comptes limitée par adresse IP.
     if (isRateLimited(`register:${getClientIp(request)}`)) {
       return NextResponse.json(

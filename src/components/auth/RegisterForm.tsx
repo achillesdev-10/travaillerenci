@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import PasswordInput from '@/components/auth/PasswordInput';
 import { apiRegister } from '@/lib/authApi';
+import { fetchCurrentUser, logoutCurrentUser, type StoredUser } from '@/lib/clientAuth';
 import { isGoogleAuthVisible } from '@/lib/config';
 import { REGIONS_CI, SECTORS } from '@/lib/constants';
 import { DIPLOMA_FILTERS } from '@/lib/examConstants';
@@ -31,6 +32,30 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
   const [profileSectors, setProfileSectors] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Session déjà active : le formulaire d'inscription n'a pas lieu d'être.
+  // /register est déjà redirigé par le proxy ; ce garde-fou couvre le
+  // formulaire embarqué de /candidates et une session posée après le rendu.
+  const [sessionUser, setSessionUser] = useState<StoredUser | null>(null);
+  const [sessionChecked, setSessionChecked] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchCurrentUser().then((user) => {
+      if (cancelled) return;
+      setSessionUser(user);
+      setSessionChecked(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /** Déconnexion puis rechargement : le formulaire (et l'en-tête) réapparaissent. */
+  async function switchAccount() {
+    await logoutCurrentUser();
+    window.location.reload();
+  }
 
   function toggleSector(slug: string) {
     setProfileSectors((prev) =>
@@ -115,6 +140,45 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
     } finally {
       setLoading(false);
     }
+  }
+
+  // Déjà connecté → pas de formulaire d'inscription : on oriente vers l'espace
+  // personnel (ou vers une autre session si l'utilisateur veut en changer).
+  if (sessionChecked && sessionUser) {
+    const home = sessionUser.role === 'company' ? '/dashboard/company' : '/dashboard/candidate';
+    return (
+      <div
+        className="w-full max-w-md space-y-5 rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 shadow-2xl text-center"
+        data-testid="register-already-authenticated"
+      >
+        <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary border border-primary/20">
+          Session active
+        </span>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+          Vous êtes déjà connecté
+        </h2>
+        <p className="text-sm text-gray-600 dark:text-slate-400">
+          {sessionUser.email} est connecté
+          {sessionUser.role === 'company' ? ' en tant qu’entreprise' : ''} : l’inscription est
+          inutile. Accédez à votre espace, ou déconnectez-vous pour créer un autre compte.
+        </p>
+        <div className="space-y-3">
+          <Link
+            href={home}
+            className="block w-full rounded-2xl bg-primary py-3.5 text-xs font-bold text-white hover:brightness-110 transition-all shadow-lg shadow-primary/20"
+          >
+            Accéder à mon espace
+          </Link>
+          <button
+            type="button"
+            onClick={switchAccount}
+            className="block w-full rounded-2xl border border-gray-200 dark:border-slate-700 py-3 text-xs font-bold text-gray-700 dark:text-slate-300 hover:border-primary/40 hover:text-primary transition-all"
+          >
+            Se déconnecter pour un autre compte
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (

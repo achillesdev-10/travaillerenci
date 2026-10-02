@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import PasswordInput from "@/components/auth/PasswordInput";
 import { apiForgotPassword, apiLogin } from "@/lib/authApi";
+import { fetchCurrentUser } from "@/lib/clientAuth";
 import { isGoogleAuthVisible } from "@/lib/config";
 
 export default function LoginPage() {
@@ -40,6 +41,22 @@ export default function LoginPage() {
     setError(messages[param] ?? "Une erreur est survenue.");
     // Nettoie l'URL pour ne pas réafficher l'erreur après un refresh.
     window.history.replaceState({}, "", window.location.pathname);
+  }, []);
+
+  // Déjà connecté → pas de formulaire de connexion (garde-fou complémentaire
+  // du proxy : session posée pendant que la page était ouverte, retour
+  // arrière depuis le dashboard, cache du routeur).
+  useEffect(() => {
+    let cancelled = false;
+    fetchCurrentUser().then((user) => {
+      if (cancelled || !user) return;
+      redirectToDashboard(user.role === "company" ? "company" : "candidate");
+    });
+    return () => {
+      cancelled = true;
+    };
+    // redirectToDashboard lit le ?next= courant : rien d'autre à réagir sur.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function validate(): string | null {

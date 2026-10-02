@@ -46,5 +46,9 @@ export default defineConfig({
     url: 'http://localhost:3000',
     reuseExistingServer: true,
     timeout: 120_000,
+    // Toutes les requêtes E2E partagent l'IP locale : sans relèvement du quota,
+    // les ~7 créations de comptes de la suite sont bloquées en 429 après une
+    // série de lancements rapprochés. Jamais honoré en production (NODE_ENV).
+    env: { ...process.env, RATE_LIMIT_MULTIPLIER: '20' },
   },
 });

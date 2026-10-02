@@ -14,6 +14,19 @@ const DEFAULT_MAX_REQUESTS = 10;
 
 const hits = new Map<string, number[]>();
 
+/**
+ * Multiplicateur de quota (finalement appliqué à `max`).
+ *
+ * - Jamais honoré en production : le quota dur reste celui du code.
+ * - Utile en local (suite E2E) où toutes les requêtes partagent la même IP.
+ */
+function quotaMultiplier(): number {
+  if (process.env.NODE_ENV === 'production') return 1;
+  const raw = Number(process.env.RATE_LIMIT_MULTIPLIER);
+  if (Number.isFinite(raw) && raw >= 1 && raw <= 100) return Math.floor(raw);
+  return 1;
+}
+
 /** Extrait une adresse IP depuis les en-têtes du proxy/Vercel. */
 export function getClientIp(request: Request): string {
   const forwarded = request.headers.get('x-forwarded-for');
@@ -27,9 +40,10 @@ export function isRateLimited(
   windowMs: number = DEFAULT_WINDOW_MS,
 ): boolean {
   const now = Date.now();
+  const limit = Math.max(1, Math.floor(max * quotaMultiplier()));
   const list = (hits.get(key) || []).filter((t) => now - t < windowMs);
 
-  if (list.length >= max) {
+  if (list.length >= limit) {
     hits.set(key, list);
     return true;
   }

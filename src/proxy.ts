@@ -17,6 +17,9 @@ import {
  *  — Routes pages  /cz7tk/*     → redirect 307 vers /cz7tk/login
  *  — Routes API     /api/admin/*    → 401 JSON (les fetch clients gèrent 401)
  *  — Exception      /api/admin/session → laissé ouvert (login/logout)
+ *  — Sessions        /dashboard/*    → 307 vers /login?next=… sans session
+ *  — Déjà connecté   /login, /register, /reset-password (sans ?token=)
+ *                    → 307 vers le dashboard (ou le ?next= sûr)
  *
  *  Le bypass « pas de vérification en dev » est supprimé : les routes admin
  *  sont toujours protégées, y compris en développement.
@@ -44,14 +47,15 @@ export async function proxy(request: NextRequest) {
 
   // Session utilisateur (candidat / entreprise) : cookie httpOnly signé.
   const userToken = request.cookies.get(USER_SESSION_COOKIE)?.value;
-  let hasUserSession = false;
+  let userSession: Awaited<ReturnType<typeof verifyUserSessionToken>> = null;
   if (userToken) {
     try {
-      hasUserSession = Boolean(await verifyUserSessionToken(userToken));
+      userSession = await verifyUserSessionToken(userToken);
     } catch {
-      hasUserSession = false;
+      userSession = null;
     }
   }
+  const hasUserSession = Boolean(userSession);
 
   // 2. Routes API /api/admin/* : 401 JSON (les fetch clients gèrent le code).
   if (pathname.startsWith('/api/admin/')) {
@@ -92,9 +96,62 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  // 5b. Bon espace pour le bon rôle : un compte entreprise n'a rien à faire
+  //     dans /dashboard/candidate (et inversement) — même connecté, l'utilisateur
+  //     atterrit sur SON espace.
+  if (pathname.startsWith('/dashboard/company') && userSession?.role === 'candidate') {
+    return NextResponse.redirect(new URL('/dashboard/candidate', request.url));
+  }
+  if (pathname.startsWith('/dashboard/candidate') && userSession?.role === 'company') {
+    return NextResponse.redirect(new URL('/dashboard/company', request.url));
+  }
+
+  // 6. Pages d'authentification : un utilisateur DÉJÀ connecté ne doit jamais
+  //    revoir le formulaire de connexion ni celui d'inscription (retour arrière,
+  //    lien « S'inscrire » cliqué alors que la session est active, cache client).
+  if (pathname === '/login' || pathname === '/register' || pathname === '/reset-password') {
+    if (userSession) {
+      // Un lien de réinitialisation (?token=…) reste utilisable même connecté :
+      // c'est le chemin légitime pour changer son propre mot de passe.
+      const hasToken = request.nextUrl.searchParams.has('token');
+      if (pathname === '/reset-password' && hasToken) {
+        return NextResponse.next();
+      }
+      const destination = safeAuthAwareNext(
+        request.nextUrl.searchParams.get('next'),
+        userSession.role,
+      );
+      return NextResponse.redirect(new URL(destination, request.url));
+    }
+  }
+
   return NextResponse.next();
 }
 
+/**
+ * Destination après connexion/inscription : `?next=` si et seulement si c'est
+ * un chemin interne sûr (anti open-redirect `//`, `\\` ou URL externe) et s'il
+ * ne pointe pas vers une page d'authentification (sinon boucle de redirection).
+ */
+function safeAuthAwareNext(raw: string | null, role: string | undefined): string {
+  const fallback = role === 'company' ? '/dashboard/company' : '/dashboard/candidate';
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//') || raw.includes('\\')) {
+    return fallback;
+  }
+  if (/^\/(login|register|reset-password)(\/|\?|$)/.test(raw)) {
+    return fallback;
+  }
+  if (raw.startsWith('/cz7tk')) return fallback; // session admin distincte
+  return raw;
+}
+
 export const config = {
-  matcher: ['/cz7tk/:path*', '/api/admin/:path*', '/dashboard/:path*'],
+  matcher: [
+    '/cz7tk/:path*',
+    '/api/admin/:path*',
+    '/dashboard/:path*',
+    '/login',
+    '/register',
+    '/reset-password',
+  ],
 };
