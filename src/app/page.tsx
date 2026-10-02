@@ -326,9 +326,39 @@ export default async function HomePage({
               </h1>
 
               <p className="text-[15px] sm:text-lg text-gray-600 dark:text-gray-300 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                Des <strong className="text-gray-900 dark:text-white">offres vérifiées</strong>, des entreprises de confiance,
-                et zéro spam. Postulez simplement — on s'occupe du reste.
+                <strong className="text-gray-900 dark:text-white">
+                  TravaillerEnCi vous aide à trouver des opportunités professionnelles en Côte
+                  d&apos;Ivoire.
+                </strong>{' '}
+                Des <strong className="text-gray-900 dark:text-white">offres vérifiées</strong>, des
+                entreprises de confiance, et zéro spam. Postulez simplement — on s&apos;occupe du
+                reste.
               </p>
+
+              {/* Ce que la plateforme fait pour vous (§18) — offres, stages,
+                  recherche, alertes, CV, profil candidat. */}
+              <ul
+                aria-label="Ce que vous pouvez faire sur TravaillerEnCi"
+                className="mt-4 flex flex-wrap items-center justify-center lg:justify-start gap-2"
+              >
+                {[
+                  { label: 'Offres', href: '/jobs' },
+                  { label: 'Stages', href: '/stages' },
+                  { label: 'Recherche', href: '/jobs' },
+                  { label: 'Alertes emploi', href: '/dashboard/candidate' },
+                  { label: 'Mon CV', href: '/generateur-de-cv' },
+                  { label: 'Profil candidat', href: '/register' },
+                ].map((feature) => (
+                  <li key={feature.label}>
+                    <Link
+                      href={feature.href}
+                      className="inline-flex items-center rounded-full border border-gray-200 bg-white/80 px-3 py-1.5 text-[12px] sm:text-[13px] font-semibold text-gray-700 backdrop-blur transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900/80 dark:text-gray-200"
+                    >
+                      {feature.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
 
               {/* CTA principal — de visiteur à compte (§18) */}
               <div className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center lg:justify-start gap-3">
