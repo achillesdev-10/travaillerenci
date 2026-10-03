@@ -140,7 +140,7 @@ export default function SettingsClient({ initialSettings }: SettingsClientProps)
 
       {/* ===== Tab: Taxonomies ===== */}
       {activeTab === 'taxonomies' && (
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Secteurs */}
           <div className="rounded-3xl border border-slate-800 bg-slate-950 p-6 shadow-xl">
             <h3 className="text-sm font-bold text-white mb-4">Secteurs d&apos;activité</h3>

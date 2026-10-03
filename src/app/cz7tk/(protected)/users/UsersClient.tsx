@@ -262,7 +262,7 @@ export default function UsersClient({ initialData }: UsersClientProps) {
       </section>
 
       {/* ===== Stats ===== */}
-      <section className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {statCards.map((card) => (
           <article
             key={card.label}
@@ -297,7 +297,7 @@ export default function UsersClient({ initialData }: UsersClientProps) {
             </p>
           </div>
 
-          <div className="grid w-full gap-3 sm:grid-cols-2 md:max-w-xl">
+          <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 md:max-w-xl">
             <label className="space-y-1.5 text-sm">
               <span className="text-xs font-medium text-slate-500">Rechercher</span>
               <input
@@ -327,7 +327,7 @@ export default function UsersClient({ initialData }: UsersClientProps) {
         </div>
 
         {/* ===== Vue cartes (mobile < md) ===== */}
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:hidden">
+        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:hidden">
           {filteredUsers.length === 0 ? (
             <p className="rounded-2xl border border-white/[0.06] bg-slate-950/60 px-4 py-10 text-center text-sm text-slate-500 sm:col-span-2">
               Aucun utilisateur ne correspond aux filtres actuels.

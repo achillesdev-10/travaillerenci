@@ -141,9 +141,9 @@ function ActivityChart({ activity }: { activity: JobOffersActivityPoint[] }) {
       {activity.map((point) => (
         <div
           key={point.date}
-          className="group relative flex h-full flex-1 flex-col items-center justify-end gap-1.5"
+          className="group relative flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1.5"
         >
-          <div className="relative flex w-full flex-1 items-end">
+          <div className="relative flex w-full min-w-0 flex-1 items-end">
             <div
               className="w-full rounded-t-lg bg-gradient-to-t from-emerald-600 to-emerald-400 transition-all group-hover:from-emerald-500 group-hover:to-emerald-300"
               style={{ height: `${Math.max(3, (point.total / max) * 100)}%` }}
@@ -688,7 +688,7 @@ export default function AdminDashboardClient({
       </section>
 
       {/* ===== Croissance : top offres + sources de trafic ===== */}
-      <section className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
         <TopOffersCard
           title="Offres les plus consultées"
           items={growth.topViewedOffers}
@@ -707,7 +707,7 @@ export default function AdminDashboardClient({
       </section>
 
       {/* ===== Score de santé + Entreprendre + Contenu top ===== */}
-      <section className="grid gap-4 lg:grid-cols-3">
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {/* Score de santé globale */}
         <article className="rounded-3xl border border-white/[0.06] bg-slate-900/60 p-5 shadow-lg shadow-black/20 backdrop-blur">
           <div className="flex items-center justify-between">
@@ -964,7 +964,7 @@ export default function AdminDashboardClient({
       </section>
 
       {/* ===== Santé du scraper + activité ===== */}
-      <section className="grid gap-4 xl:grid-cols-3">
+      <section className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <article className="rounded-3xl border border-white/[0.06] bg-slate-900/60 p-5 shadow-lg shadow-black/20 backdrop-blur">
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -1028,7 +1028,7 @@ export default function AdminDashboardClient({
             </p>
           </div>
 
-          <div className="grid w-full gap-3 sm:grid-cols-2 lg:max-w-2xl">
+          <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:max-w-2xl">
             <label className="space-y-1.5 text-sm">
               <span className="text-xs font-medium text-slate-500">Rechercher</span>
               <input
@@ -1085,7 +1085,7 @@ export default function AdminDashboardClient({
         </div>
 
         {/* ===== Vue cartes (mobile < md) ===== */}
-        <div className="mt-5 grid gap-3 lg:hidden">
+        <div className="mt-5 grid grid-cols-1 gap-3 lg:hidden">
           {pageOffers.length === 0 ? (
             <p className="rounded-2xl border border-white/[0.06] bg-slate-950/60 px-4 py-10 text-center text-sm text-slate-500">
               Aucune offre ne correspond aux filtres actuels.

@@ -63,13 +63,13 @@ function VisitsChart({ data }: { data: AdminAnalyticsData }) {
   }
 
   return (
-    <div className="flex h-48 items-end gap-1.5 sm:gap-2.5">
-      {data.visitsByDay.map((point) => (
+    <div className="flex h-48 items-end gap-1 sm:gap-2.5">
+      {data.visitsByDay.map((point, index) => (
         <div
           key={point.date}
-          className="group relative flex h-full flex-1 flex-col items-center justify-end gap-1.5"
+          className="group relative flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1.5"
         >
-          <div className="relative flex w-full flex-1 items-end">
+          <div className="relative flex w-full min-w-0 flex-1 items-end">
             <div
               className="w-full rounded-t-lg bg-gradient-to-t from-emerald-600 to-emerald-400 transition-all group-hover:from-emerald-500 group-hover:to-emerald-300"
               style={{ height: `${Math.max(4, (point.visits / max) * 100)}%` }}
@@ -78,7 +78,13 @@ function VisitsChart({ data }: { data: AdminAnalyticsData }) {
               {point.label} · {point.visits} visite{point.visits > 1 ? "s" : ""}
             </div>
           </div>
-          <span className="text-[10px] font-medium text-slate-500">{point.label}</span>
+          <span
+            className={`text-[10px] font-medium text-slate-500 ${
+              index % 2 === 1 ? "hidden sm:block" : ""
+            }`}
+          >
+            {point.label}
+          </span>
         </div>
       ))}
     </div>
@@ -223,7 +229,7 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
         </div>
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-2">
+      <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         {/* ===== Top pages ===== */}
         <article className="rounded-3xl border border-white/[0.06] bg-slate-900/60 p-5 shadow-lg shadow-black/20 backdrop-blur sm:p-6">
           <h2 className="font-[var(--font-display)] text-lg font-bold text-white">
