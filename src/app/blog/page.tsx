@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { BlogService } from '@/services/blogService';
+import { getCachedPosts } from '@/lib/cachedContent';
 import CoverImage from '@/components/content/CoverImage';
 import type { BlogPost } from '@/types/blog';
 import { formatDateShort } from '@/lib/utils';
@@ -65,12 +65,13 @@ function tagList(tags: string | null): string[] {
 export default async function BlogPage({ searchParams }: BlogPageProps) {
   const sp = await searchParams;
   const tag = (sp.tag || '').trim();
-  const { rows: posts, total } = await BlogService.list({
+  const { rows: posts, total } = await getCachedPosts({
     status: 'published',
     ...(tag ? { tag } : {}),
     order_by: 'published_at',
     order_dir: 'desc',
     limit: 50,
+    fields: 'card',
   });
 
   return (

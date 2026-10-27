@@ -1,7 +1,7 @@
-import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { requireAdminApi } from '@/lib/adminSession';
+import { revalidateBlogSurfaces } from '@/lib/revalidateContent';
 import { BlogService } from '@/services/blogService';
 import type { BlogPostInsert, BlogPostStatus } from '@/types/blog';
 import { slugify } from '@/lib/slugify';
@@ -95,8 +95,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    revalidatePath('/blog');
-    revalidatePath('/cz7tk/blog');
+    revalidateBlogSurfaces();
 
     return NextResponse.json({
       ok: true,

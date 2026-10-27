@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound, permanentRedirect } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense, cache } from 'react';
 import type { Metadata } from 'next';
 import { ExamService } from '@/services/examService';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
@@ -53,6 +53,9 @@ async function findExam(param: string): Promise<Exam | null> {
   return (await ExamService.getBySlug(param)) || (await ExamService.getById(param));
 }
 
+/** Déduplique l'appel entre generateMetadata et le rendu de la page. */
+const findExamCached = cache(findExam);
+
 /**
  * Meta description avec les infos clés (spec §2.1) : diplôme(s), statut,
  * dates — construite si le champ seo_description du pipeline est absent.
@@ -75,7 +78,7 @@ function buildMetaDescription(exam: Exam): string {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const exam = await findExam(slug);
+  const exam = await findExamCached(slug);
   if (!exam || exam.status !== 'published') {
     return { title: 'Concours introuvable', robots: { index: false, follow: false } };
   }
@@ -109,7 +112,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ConcoursDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const exam = await findExam(slug);
+  const exam = await findExamCached(slug);
 
   if (!exam || exam.status !== 'published') {
     notFound();
@@ -569,6 +572,7 @@ async function LinkedJobsSection({ exam }: { exam: Exam }) {
       status: 'published',
       category: ['job', 'internship'],
       limit: 3,
+      fields: 'card',
     });
     linkedJobs = [...linkedJobs, ...res.rows];
     if (linkedJobs.length >= 3) break;

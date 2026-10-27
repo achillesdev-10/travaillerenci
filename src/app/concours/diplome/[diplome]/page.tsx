@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { ExamService } from '@/services/examService';
+import { getCachedExams } from '@/lib/cachedContent';
 import CategoryIcon from '@/components/exams/CategoryIcon';
 import PhaseSection, { groupExamsByPhase, SECTION_LIMIT } from '@/components/exams/PhaseSection';
 import { getSiteUrl } from '@/lib/site';
@@ -50,12 +50,13 @@ export default async function ConcoursDiplomaPage({ params }: PageProps) {
   if (!seo) notFound();
 
   // Filtrage par diplôme EXACT (appartenance au tableau diplomas de la fiche).
-  const { rows: exams, total } = await ExamService.list({
+  const { rows: exams, total } = await getCachedExams({
     diploma: seo.value,
     status: 'published',
     limit: 200,
     order_by: 'created_at',
     order_dir: 'desc',
+    fields: 'card',
   });
 
   // Regroupement « métier » : en cours / à venir / clos & résultats.

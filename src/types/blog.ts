@@ -43,4 +43,6 @@ export interface BlogPostFilters {
   offset?: number;
   order_by?: 'created_at' | 'published_at' | 'title';
   order_dir?: 'asc' | 'desc';
+  /** `card` omet le corps Markdown de l'article (listes publiques). */
+  fields?: 'full' | 'card';
 }

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
 import type { NextRequest } from 'next/server';
 import { requireAdminApi } from '@/lib/adminSession';
+import { revalidateJobSurfaces } from '@/lib/revalidateContent';
 import {
   applyBulkAction,
   getAdminDashboardData,
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       getAdminDashboardData(),
     ]);
 
-    revalidatePath("/cz7tk");
+    revalidateJobSurfaces(ids);
 
     return NextResponse.json({
       ...payload,

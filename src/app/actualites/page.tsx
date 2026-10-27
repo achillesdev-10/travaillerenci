@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { ArticleService } from '@/services/articleService';
+import { getCachedArticles } from '@/lib/cachedContent';
 import CoverImage from '@/components/content/CoverImage';
 import type { Article, ArticleCategory } from '@/types/article';
 import { formatDateShort, formatRelativeTime, truncate } from '@/lib/utils';
@@ -79,18 +79,23 @@ export default async function ActualitesPage({ searchParams }: ActualitesPagePro
 
   const PAGE_SIZE = 12;
 
-  const { rows: articles, total } = await ArticleService.list({
-    keyword,
-    category: category ? (category as ArticleCategory) : undefined,
-    status: 'published',
-    order_by: 'published_at',
-    order_dir: 'desc',
-    limit: 500,
-  });
+  const loadPage = (targetPage: number) =>
+    getCachedArticles({
+      keyword,
+      category: category ? (category as ArticleCategory) : undefined,
+      status: 'published',
+      order_by: 'published_at',
+      order_dir: 'desc',
+      limit: PAGE_SIZE,
+      offset: (targetPage - 1) * PAGE_SIZE,
+      fields: 'card',
+    });
 
+  const { rows: firstPage, total } = await loadPage(page);
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
-  const paged = articles.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const paged =
+    safePage === page ? firstPage : (await loadPage(safePage)).rows;
 
   // Featured article = first one
   const featured = paged[0] || null;

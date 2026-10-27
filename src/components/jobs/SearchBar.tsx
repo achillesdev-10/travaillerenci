@@ -76,9 +76,9 @@ export default function SearchBar({
   // Une recherche = une navigation vers une nouvelle combinaison de filtres.
   // On déduplique pour ne pas compter deux fois le submit après un debounce.
   const lastTrackedRef = useRef<string | null>(null);
-  // ── Debounced navigation — créé UNE SEULE FOIS ─────────────────────────
-  // Sans debounce, chaque keystroke déclencherait un router.push immédiat.
-  // Le debounce attend 350ms d'inactivité avant de naviguer.
+  // ── Navigation debouncée pour les listes déroulantes ───────────────────
+  // Le mot-clé est validé via le bouton/Entrée : une navigation SSR par
+  // frappe générait trop de requêtes et de pages inutiles.
   const pushFilters = useMemo(
     () =>
       // eslint-disable-next-line react-hooks/refs
@@ -148,10 +148,7 @@ export default function SearchBar({
             placeholder={compact ? 'Poste, compétence…' : 'Ex: Développeur, Marketing, Data…'}
             autoComplete="off"
             value={keyword}
-            onChange={(e) => {
-              setKeyword(e.target.value);
-              pushFilters(e.target.value, location, contract);
-            }}
+            onChange={(e) => setKeyword(e.target.value)}
             className="w-full pl-2 pr-3 sm:pl-3 sm:pr-4 py-3 sm:py-3.5 rounded-xl bg-gray-50/80 border border-transparent focus:bg-white focus:border-primary/40 focus:ring-2 focus:ring-primary/15 outline-none text-sm sm:text-base placeholder:text-gray-600 transition-colors"
           />
         </div>

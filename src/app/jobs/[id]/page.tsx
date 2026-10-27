@@ -2,8 +2,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { Metadata } from 'next';
+import { cache } from 'react';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
-import { BlogService } from '@/services/blogService';
+import { getCachedJobVivier } from '@/lib/cachedJobVivier';
+import { getCachedPosts } from '@/lib/cachedContent';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
 import SafetyNotice from '@/components/content/SafetyNotice';
 import SaveButton from '@/components/saved/SaveButton';
@@ -47,6 +49,9 @@ async function findJob(param: string): Promise<JobOfferSchema | null> {
   return JobOfferSchemaService.getBySlug(param);
 }
 
+/** Déduplique l'appel entre generateMetadata et le rendu de la page. */
+const findJobCached = cache(findJob);
+
 /** Valeurs schema.org valides — miroir de la norme JobPosting. */
 const EMPLOYMENT_TYPE_MAP: Record<string, string> = {
   CDI: 'FULL_TIME',
@@ -59,7 +64,7 @@ const EMPLOYMENT_TYPE_MAP: Record<string, string> = {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const job = await findJob(id);
+  const job = await findJobCached(id);
   if (!job) {
     return {
       title: 'Offre introuvable',
@@ -103,7 +108,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function JobDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const job = await findJob(id);
+  const job = await findJobCached(id);
 
   if (!job) {
     notFound();
@@ -126,8 +131,18 @@ export default async function JobDetailPage({ params }: PageProps) {
 
   // Suggestions : 3 offres de la même localisation ou du même type de contrat
   const [similarByType, similarByLocation] = await Promise.all([
-    JobOfferSchemaService.list({ category: ['job', 'internship'], contract_type: job.contract_type, limit: 4 }),
-    JobOfferSchemaService.list({ category: ['job', 'internship'], location: job.location.split(',')[0].split(' - ')[0], limit: 4 }),
+    JobOfferSchemaService.list({
+      category: ['job', 'internship'],
+      contract_type: job.contract_type,
+      limit: 4,
+      fields: 'card',
+    }),
+    JobOfferSchemaService.list({
+      category: ['job', 'internship'],
+      location: job.location.split(',')[0].split(' - ')[0],
+      limit: 4,
+      fields: 'card',
+    }),
   ]);
 
   const similarIds = new Set<string>([job.id]);
@@ -140,21 +155,14 @@ export default async function JobDetailPage({ params }: PageProps) {
   // §33 — Maillage : liens vers les pages SEO ville / métier. Le vivier est
   // le même que celui du sitemap → on ne relie jamais une page sous le seuil.
   const activity = job.category === 'internship' ? ('stages' as const) : ('emplois' as const);
-  const [{ rows: vivier }, { rows: recentPosts }] = await Promise.all([
-    JobOfferSchemaService.list({
-      status: 'published',
-      is_archived: false,
-      is_expired: false,
-      category: ['job', 'internship'],
-      order_by: 'created_at',
-      order_dir: 'desc',
-      limit: 500,
-    }),
-    BlogService.list({
+  const [vivier, { rows: recentPosts }] = await Promise.all([
+    getCachedJobVivier('both'),
+    getCachedPosts({
       status: 'published',
       limit: 50,
       order_by: 'published_at',
       order_dir: 'desc',
+      fields: 'card',
     }),
   ]);
   const landingLinks = landingLinksForOffer(vivier, job, activity);

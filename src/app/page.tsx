@@ -3,9 +3,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import CoverImage from '@/components/content/CoverImage';
 import SearchBar from '@/components/jobs/SearchBar';
-import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
-import { ExamService } from '@/services/examService';
-import { BlogService } from '@/services/blogService';
+import { getCachedJobs, getCachedExams, getCachedPosts } from '@/lib/cachedContent';
 import type { JobOfferSchema, JobContractType } from '@/types';
 import NewsTicker, { type TickerItem } from '@/components/home/NewsTicker';
 import HomeCarousel from '@/components/home/HomeCarousel';
@@ -206,7 +204,7 @@ export default async function HomePage({
   const searchQuery = new URLSearchParams({ q: keyword, city: location, contract } as Record<string, string>).toString();
 
   const [jobs, examRows, blogRows, bourseRows] = await Promise.all([
-    JobOfferSchemaService.list({
+    getCachedJobs({
       keyword: keyword || undefined,
       location: location || undefined,
       contract_type: contract || undefined,
@@ -214,15 +212,29 @@ export default async function HomePage({
       limit: 60,
       order_by: 'created_at',
       order_dir: 'desc',
+      fields: 'card',
     }),
-    ExamService.list({ status: 'published', limit: 6, order_by: 'created_at', order_dir: 'desc' }),
-    BlogService.list({ status: 'published', limit: 4, order_by: 'published_at', order_dir: 'desc' }),
-    JobOfferSchemaService.list({
+    getCachedExams({
+      status: 'published',
+      limit: 6,
+      order_by: 'created_at',
+      order_dir: 'desc',
+      fields: 'card',
+    }),
+    getCachedPosts({
+      status: 'published',
+      limit: 4,
+      order_by: 'published_at',
+      order_dir: 'desc',
+      fields: 'card',
+    }),
+    getCachedJobs({
       category: 'scholarship',
       status: 'published',
       limit: 4,
       order_by: 'created_at',
       order_dir: 'desc',
+      fields: 'card',
     }),
   ]);
 

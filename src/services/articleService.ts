@@ -90,6 +90,13 @@ function ensureSchema(db: DatabaseSyncInstance) {
 // ---------------------------------------------------------------------------
 // Normalisation des lignes
 // ---------------------------------------------------------------------------
+const ARTICLE_FULL_COLUMNS =
+  'id,title,slug,excerpt,content,category,source_url,cover_image,author,status,seo_title,seo_description,seo_keywords,published_at,created_at,updated_at';
+
+/** Toutes les colonnes sauf `content` (listes publiques et similaires). */
+const ARTICLE_CARD_COLUMNS =
+  'id,title,slug,excerpt,category,source_url,cover_image,author,status,seo_title,seo_description,seo_keywords,published_at,created_at,updated_at';
+
 function rowToArticle(row: any): Article {
   return {
     id: row.id,
@@ -315,7 +322,9 @@ export class ArticleService {
       order_dir = 'desc',
     } = filters;
 
-    let query = supabase.from('articles').select('*', { count: 'exact' });
+    const columns: string =
+      filters.fields === 'card' ? ARTICLE_CARD_COLUMNS : ARTICLE_FULL_COLUMNS;
+    let query = supabase.from('articles').select(columns as any, { count: 'exact' });
 
     if (keyword) {
       const safe = keyword.replace(/[,.( )*!]/g, ' ').trim();

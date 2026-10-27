@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
+import { cache } from 'react';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
 import SafetyNotice from '@/components/content/SafetyNotice';
@@ -14,13 +15,15 @@ import ShareButton from '@/components/ShareButton';
 
 export const revalidate = 300;
 
+const getBourse = cache((id: string) => JobOfferSchemaService.getById(id));
+
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const bourse = await JobOfferSchemaService.getById(id);
+  const bourse = await getBourse(id);
   if (!bourse || bourse.category !== 'scholarship') {
     return { title: 'Bourse introuvable', robots: { index: false, follow: false } };
   }
@@ -58,7 +61,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function BourseDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const bourse = await JobOfferSchemaService.getById(id);
+  const bourse = await getBourse(id);
 
   if (!bourse || bourse.category !== 'scholarship') {
     notFound();
@@ -79,6 +82,7 @@ export default async function BourseDetailPage({ params }: PageProps) {
       status: 'published',
       location: bourse.location ? bourse.location.split(',')[0].split(' - ')[0] : undefined,
       limit: 4,
+      fields: 'card',
     }),
     JobOfferSchemaService.list({
       category: 'scholarship',
@@ -86,6 +90,7 @@ export default async function BourseDetailPage({ params }: PageProps) {
       limit: 4,
       order_by: 'created_at',
       order_dir: 'desc',
+      fields: 'card',
     }),
   ]);
   const seen = new Set<string>([bourse.id]);

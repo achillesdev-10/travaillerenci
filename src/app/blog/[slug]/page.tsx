@@ -1,20 +1,23 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
+import { cache } from 'react';
 import Link from 'next/link';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
 import CoverImage from '@/components/content/CoverImage';
 import CompactJobCard from '@/components/home/CompactJobCard';
 import { BlogService } from '@/services/blogService';
-import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
+import { getCachedPosts } from '@/lib/cachedContent';
+import { getCachedJobVivier } from '@/lib/cachedJobVivier';
 import { SITE_CONFIG } from '@/lib/constants';
 import { IMAGES } from '@/lib/images';
 import { buildShareUrl } from '@/lib/shareUtm';
 import { ShareClickTracker } from '@/components/analytics/EventTracker';
 import { articleSector } from '@/lib/relatedContent';
 import { METIER_SEO, landingForOffer } from '@/lib/jobSeo';
-import type { JobOfferSchema } from '@/types';
 
 export const dynamic = 'force-dynamic';
+
+const getPost = cache((slug: string) => BlogService.getBySlug(slug));
 
 export async function generateMetadata({
   params,
@@ -22,7 +25,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const post = await BlogService.getBySlug(slug);
+  const post = await getPost(slug);
   if (!post || post.status !== 'published') return {};
   const url = `${SITE_CONFIG.url}/blog/${post.slug}`;
   const description = post.excerpt || undefined;
@@ -82,18 +85,19 @@ export default async function BlogArticlePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = await BlogService.getBySlug(slug);
+  const post = await getPost(slug);
   if (!post || post.status !== 'published') notFound();
 
   // Incrémenter le compteur de vues (fire-and-forget)
   BlogService.incrementViewCount(post.id).catch(() => {});
 
   const tags = tagList(post.tags);
-  const { rows: related } = await BlogService.list({
+  const { rows: related } = await getCachedPosts({
     status: 'published',
     limit: 3,
     order_by: 'published_at',
     order_dir: 'desc',
+    fields: 'card',
   });
   const relatedPosts = related.filter((p) => p.id !== post.id).slice(0, 2);
 
@@ -102,18 +106,9 @@ export default async function BlogArticlePage({
   // puis on récupère les offres publiées de ce secteur.
   const sector = articleSector(post);
   const metier = sector ? (METIER_SEO.find((m) => m.sector === sector) ?? null) : null;
-  const { rows: sectorOffers } = sector
-    ? await JobOfferSchemaService.list({
-        sector,
-        category: ['job', 'internship'],
-        status: 'published',
-        is_archived: false,
-        is_expired: false,
-        order_by: 'created_at',
-        order_dir: 'desc',
-        limit: 500,
-      })
-    : { rows: [] as JobOfferSchema[] };
+  const sectorOffers = sector
+    ? (await getCachedJobVivier('both')).filter((offer) => offer.sector === sector)
+    : [];
   const relatedOffers = sectorOffers.slice(0, 4);
 
   // Lien contextuel : page SEO du métier si elle existe (seuil du sitemap),

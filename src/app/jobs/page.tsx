@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
+import { getCachedJobs } from '@/lib/cachedContent';
+import { getCachedJobVivier } from '@/lib/cachedJobVivier';
 import SearchBar from '@/components/jobs/SearchBar';
 import CompactJobCard from '@/components/home/CompactJobCard';
 import type { JobOfferSchema } from '@/types';
@@ -9,7 +10,6 @@ import { cn } from '@/lib/utils';
 import {
   CITY_SEO,
   METIER_SEO,
-  categoriesForActivity,
   landingChipHref,
   type JobSeoActivity,
 } from '@/lib/jobSeo';
@@ -81,8 +81,8 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
   // Vivier borné (500) pour calculer l'éligibilité des pages SEO villes/
   // métiers — même requête que la page landing, afin de reproduire à
   // l'identique sa garde-fou anti-404 (§12).
-  const [{ rows: jobs, total }, { rows: chipVivier }] = await Promise.all([
-    JobOfferSchemaService.list({
+  const [{ rows: jobs, total }, chipVivier] = await Promise.all([
+    getCachedJobs({
       // Seuls les emplois et stages (dépôt unifié) apparaissent sur /jobs —
       // les bourses (scholarship) et concours (exam) ont leurs propres pages.
       category: category ? ['internship'] : ['job', 'internship'],
@@ -95,16 +95,9 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
       is_expired: false,
       limit: PAGE_SIZE,
       offset: (page - 1) * PAGE_SIZE,
+      fields: 'card',
     }),
-    JobOfferSchemaService.list({
-      category: categoriesForActivity(chipActivity),
-      status: 'published',
-      is_archived: false,
-      is_expired: false,
-      order_by: 'created_at',
-      order_dir: 'desc',
-      limit: 500,
-    }),
+    getCachedJobVivier(chipActivity === 'stages' ? 'stages' : 'jobs'),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));

@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
+import { cache } from 'react';
 import { ArticleService } from '@/services/articleService';
+import { getCachedArticles } from '@/lib/cachedContent';
 import CoverImage from '@/components/content/CoverImage';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
 import ShareButton from '@/components/ShareButton';
@@ -9,6 +11,8 @@ import { formatDate, formatRelativeTime, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
 
 export const revalidate = 300;
+
+const getArticle = cache((slug: string) => ArticleService.getBySlug(slug));
 
 const CATEGORY_LABELS: Record<string, string> = {
   emploi: 'Emploi',
@@ -34,7 +38,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const article = await ArticleService.getBySlug(slug);
+  const article = await getArticle(slug);
   if (!article) {
     return {
       title: 'Article introuvable',
@@ -77,7 +81,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ArticleDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const article = await ArticleService.getBySlug(slug);
+  const article = await getArticle(slug);
 
   if (!article) {
     notFound();
@@ -118,12 +122,13 @@ export default async function ArticleDetailPage({ params }: PageProps) {
   };
 
   // Articles similaires (même catégorie)
-  const { rows: related } = await ArticleService.list({
+  const { rows: related } = await getCachedArticles({
     category: article.category,
     status: 'published',
     limit: 6,
     order_by: 'published_at',
     order_dir: 'desc',
+    fields: 'card',
   });
   const similar = related.filter((a) => a.id !== article.id).slice(0, 3);
 

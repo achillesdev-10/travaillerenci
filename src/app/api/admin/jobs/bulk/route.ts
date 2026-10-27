@@ -1,7 +1,7 @@
-import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { requireAdminApi } from '@/lib/adminSession';
+import { revalidateJobSurfaces } from '@/lib/revalidateContent';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 
 export async function POST(request: NextRequest) {
@@ -37,10 +37,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Action non reconnue.' }, { status: 400 });
     }
 
-    revalidatePath('/cz7tk');
-    revalidatePath('/cz7tk/jobs');
-    revalidatePath('/');
-    revalidatePath('/jobs');
+    revalidateJobSurfaces(ids);
 
     return NextResponse.json({ ok: true, count: ids.length });
   } catch (err) {

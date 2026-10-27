@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
+import { getCachedScholarships } from '@/lib/cachedJobVivier';
 import type { JobOfferSchema } from '@/types';
 import { formatDate, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
@@ -34,16 +34,9 @@ export const metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function BoursesPage() {
-  const { rows: bourses, total } = await JobOfferSchemaService.list({
-    category: 'scholarship',
-    status: 'published',
-    // Les bourses dont la date limite est dépassée ne doivent plus être
-    // présentées comme des opportunités actives.
-    is_expired: false,
-    limit: 100,
-    order_by: 'created_at',
-    order_dir: 'desc',
-  });
+  // Les bourses dont la date limite est dépassée ne sont pas présentées comme
+  // des opportunités actives (filtre appliqué dans le chargeur en cache).
+  const { rows: bourses, total } = await getCachedScholarships();
 
   return (
     <main className="flex-1 min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors py-8 sm:py-12">

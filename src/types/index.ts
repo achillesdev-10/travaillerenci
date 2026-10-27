@@ -145,6 +145,12 @@ export interface JobOfferSchemaFilters {
   offset?: number;
   order_by?: 'created_at' | 'title' | 'company' | 'clicks_count' | 'deadline';
   order_dir?: 'asc' | 'desc';
+  /**
+   * Projection Supabase : `card` omet les colonnes lourdes (description,
+   * coordonnées de candidature) pour les listes qui n'affichent que des cartes.
+   * Défaut : `full` (comportement historique, notamment pour l'admin).
+   */
+  fields?: 'full' | 'card';
 }
 
 /** Retour typé paginé générique (utilisé par les queries). */

@@ -19,6 +19,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { ArticleService } from '@/services/articleService';
+import { getCachedArticles } from '@/lib/cachedContent';
 import type { ArticleCategory } from '@/types/article';
 
 // ---------------------------------------------------------------------------
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
   const category = searchParams.get('category') || undefined;
   const keyword = searchParams.get('q') || undefined;
 
-  const { rows, total } = await ArticleService.list({
+  const { rows, total } = await getCachedArticles({
     keyword,
     category: category as ArticleCategory | undefined,
     status: 'published',

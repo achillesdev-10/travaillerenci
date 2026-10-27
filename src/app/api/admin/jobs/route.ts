@@ -1,7 +1,7 @@
-import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { requireAdminApi } from '@/lib/adminSession';
+import { revalidateJobSurfaces } from '@/lib/revalidateContent';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import type { JobContractType, JobOfferSchemaInsert, JobOfferSchemaStatus } from '@/types';
 import { VALID_SECTOR_SLUGS } from '@/lib/sectorClassifier';
@@ -114,10 +114,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    revalidatePath('/cz7tk');
-    revalidatePath('/cz7tk/jobs');
-    revalidatePath('/');
-    revalidatePath('/jobs');
+    revalidateJobSurfaces([created.id]);
 
     return NextResponse.json({ ok: true, job: created }, { status: 201 });
   } catch (err) {

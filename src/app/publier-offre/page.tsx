@@ -16,6 +16,7 @@ export default async function PublierOffrePage() {
     limit: 12,
     order_by: 'created_at',
     order_dir: 'desc',
+    fields: 'card',
   });
 
   return (

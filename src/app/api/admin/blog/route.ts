@@ -1,7 +1,7 @@
-import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { requireAdminApi } from '@/lib/adminSession';
+import { revalidateBlogSurfaces } from '@/lib/revalidateContent';
 import { BlogService } from '@/services/blogService';
 import type { BlogPostInsert, BlogPostStatus } from '@/types/blog';
 
@@ -36,11 +36,6 @@ function normalizeBody(body: Record<string, unknown>): Partial<BlogPostInsert> {
   else if (body.published_at === null) data.published_at = null;
 
   return data;
-}
-
-function revalidateBlogPages() {
-  revalidatePath('/blog');
-  revalidatePath('/cz7tk/blog');
 }
 
 export async function GET(request: NextRequest) {
@@ -94,8 +89,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    revalidateBlogPages();
-    revalidatePath(`/blog/${created.slug}`);
+    revalidateBlogSurfaces([created.slug]);
     return NextResponse.json({ ok: true, post: created }, { status: 201 });
   } catch (err) {
     console.error('POST /api/admin/blog error:', err);

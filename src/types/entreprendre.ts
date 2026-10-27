@@ -118,6 +118,8 @@ export interface EntreprendreArticleFilters {
   limit?: number;
   offset?: number;
   order_by?: 'published_at' | 'created_at' | 'title' | 'view_count' | 'helpful_count';
+  /** `card` omet le corps de l'article (listes publiques et similaires). */
+  fields?: 'full' | 'card';
   order_dir?: 'asc' | 'desc';
 }
 

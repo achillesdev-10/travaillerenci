@@ -1,16 +1,11 @@
-import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { requireAdminApi } from '@/lib/adminSession';
+import { revalidateArticleSurfaces } from '@/lib/revalidateContent';
 import { ArticleService } from '@/services/articleService';
 import type { ArticleInsert, ArticleStatus } from '@/types/article';
 
 const ALLOWED_STATUSES: ArticleStatus[] = ['draft', 'published', 'archived'];
-
-function revalidateArticlePages(slug?: string) {
-  revalidatePath('/actualites');
-  if (slug) revalidatePath(`/actualites/${slug}`);
-}
 
 /**
  * PATCH /api/admin/articles/[id] — changement de statut (modération).
@@ -55,7 +50,7 @@ export async function PATCH(
       );
     }
 
-    revalidateArticlePages(updated.slug);
+    revalidateArticleSurfaces([updated.slug]);
     return NextResponse.json({ ok: true, article: updated });
   } catch (err) {
     console.error('PATCH /api/admin/articles/[id] error:', err);
@@ -82,7 +77,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Article introuvable.' }, { status: 404 });
     }
 
-    revalidateArticlePages(existing?.slug);
+    revalidateArticleSurfaces([existing?.slug]);
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('DELETE /api/admin/articles/[id] error:', err);

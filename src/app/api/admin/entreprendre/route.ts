@@ -1,7 +1,7 @@
-import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { requireAdminApi } from '@/lib/adminSession';
+import { revalidateEntreprendreSurfaces } from '@/lib/revalidateContent';
 import { EntreprendreArticleService } from '@/services/entreprendreService';
 import type {
   EntreprendreArticleInsert,
@@ -52,11 +52,6 @@ function normalizeBody(body: Record<string, unknown>): Partial<EntreprendreArtic
   else if (body.published_at === null) data.published_at = null;
 
   return data;
-}
-
-function revalidatePages() {
-  revalidatePath('/entreprendre');
-  revalidatePath('/cz7tk/entreprendre');
 }
 
 export async function GET(request: NextRequest) {
@@ -110,8 +105,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Impossible de créer l\'article.' }, { status: 500 });
     }
 
-    revalidatePages();
-    revalidatePath(`/entreprendre/${created.slug}`);
+    revalidateEntreprendreSurfaces([created.slug]);
     return NextResponse.json({ ok: true, article: created }, { status: 201 });
   } catch (err) {
     console.error('POST /api/admin/entreprendre error:', err);

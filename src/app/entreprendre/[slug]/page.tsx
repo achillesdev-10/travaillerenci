@@ -1,9 +1,11 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
+import { cache } from 'react';
 import Link from 'next/link';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
 import CoverImage from '@/components/content/CoverImage';
 import { EntreprendreArticleService } from '@/services/entreprendreService';
+import { getCachedEntreprendre } from '@/lib/cachedContent';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import { SITE_CONFIG } from '@/lib/constants';
 import { buildShareUrl } from '@/lib/shareUtm';
@@ -17,6 +19,8 @@ import { ShareClickTracker } from '@/components/analytics/EventTracker';
 // ISR : revalidation toutes les heures
 export const revalidate = 3600;
 
+const getArticle = cache((slug: string) => EntreprendreArticleService.getBySlug(slug));
+
 // Génère statiquement les 50 articles les plus récents au build
 export async function generateStaticParams() {
   const { rows } = await EntreprendreArticleService.list({
@@ -24,6 +28,7 @@ export async function generateStaticParams() {
     order_by: 'published_at',
     order_dir: 'desc',
     limit: 50,
+    fields: 'card',
   });
   return rows.map((a) => ({ slug: a.slug }));
 }
@@ -64,7 +69,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const article = await EntreprendreArticleService.getBySlug(slug);
+  const article = await getArticle(slug);
   if (!article || article.status !== 'published') return {};
 
   const description =
@@ -149,7 +154,7 @@ export default async function EntreprendreArticlePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const article = await EntreprendreArticleService.getBySlug(slug);
+  const article = await getArticle(slug);
   if (!article || article.status !== 'published') notFound();
 
   const sector = (article.sector as EntreprendreSector) || 'autre';
@@ -166,15 +171,17 @@ export default async function EntreprendreArticlePage({
     limit: 3,
     order_by: 'created_at',
     order_dir: 'desc',
+    fields: 'card',
   }).catch(() => ({ rows: [], total: 0 }));
 
   // Articles similaires (même secteur)
-  const { rows: similarArticles } = await EntreprendreArticleService.list({
+  const { rows: similarArticles } = await getCachedEntreprendre({
     status: 'published',
     sector: sector,
     limit: 4,
     order_by: 'published_at',
     order_dir: 'desc',
+    fields: 'card',
   });
   const similar = similarArticles.filter((a) => a.id !== article.id).slice(0, 3);
 

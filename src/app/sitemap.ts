@@ -65,11 +65,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Concours publiés — prioritaires (module Concours Administratifs).
   const [examRes, jobRes, bourseRes, blogRes, entreprendreRes] = await Promise.allSettled([
-    ExamService.list({ status: 'published', limit: 500, order_by: 'created_at', order_dir: 'desc' }),
+    ExamService.list({
+      status: 'published',
+      limit: 500,
+      order_by: 'created_at',
+      order_dir: 'desc',
+      fields: 'card',
+    }),
     JobOfferSchemaService.list({ status: 'published', category: ['job', 'internship'], limit: 500, order_by: 'created_at', order_dir: 'desc' }),
-    JobOfferSchemaService.list({ status: 'published', category: 'scholarship', limit: 200, order_by: 'created_at', order_dir: 'desc' }),
-    BlogService.list({ status: 'published', limit: 500 }),
-    EntreprendreArticleService.list({ status: 'published', limit: 500, order_by: 'published_at', order_dir: 'desc' }),
+    JobOfferSchemaService.list({
+      status: 'published',
+      category: 'scholarship',
+      limit: 200,
+      order_by: 'created_at',
+      order_dir: 'desc',
+      fields: 'card',
+    }),
+    BlogService.list({ status: 'published', limit: 500, fields: 'card' }),
+    EntreprendreArticleService.list({
+      status: 'published',
+      limit: 500,
+      order_by: 'published_at',
+      order_dir: 'desc',
+      fields: 'card',
+    }),
   ]);
 
   const examEntries: MetadataRoute.Sitemap =

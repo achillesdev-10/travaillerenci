@@ -1,10 +1,11 @@
 import Link from 'next/link';
-import { EntreprendreArticleService } from '@/services/entreprendreService';
+import { getCachedEntreprendre } from '@/lib/cachedContent';
 import CoverImage from '@/components/content/CoverImage';
 import { getSiteUrl } from '@/lib/site';
 import { IMAGES } from '@/lib/images';
 import type {
   EntreprendreArticle,
+  EntreprendreArticleFilters,
   EntreprendreSector,
   BudgetRange,
 } from '@/types/entreprendre';
@@ -77,7 +78,7 @@ export default async function EntreprendrePage({
   const limit = 12;
   const offset = (currentPage - 1) * limit;
 
-  const filters: Parameters<typeof EntreprendreArticleService.list>[0] = {
+  const filters: EntreprendreArticleFilters = {
     status: 'published',
     order_by: 'published_at',
     order_dir: 'desc',
@@ -92,15 +93,19 @@ export default async function EntreprendrePage({
     filters.budget_range = params.budget as BudgetRange;
   }
 
-  const { rows: articles, total } = await EntreprendreArticleService.list(filters);
+  const { rows: articles, total } = await getCachedEntreprendre({
+    ...filters,
+    fields: 'card',
+  });
 
   // Articles à la une (pas de filtre, top 3)
-  const { rows: featuredArticles } = await EntreprendreArticleService.list({
+  const { rows: featuredArticles } = await getCachedEntreprendre({
     status: 'published',
     featured: true,
     order_by: 'published_at',
     order_dir: 'desc',
     limit: 3,
+    fields: 'card',
   });
 
   const totalPages = Math.max(1, Math.ceil(total / limit));

@@ -16,7 +16,7 @@
 
 import 'server-only';
 import type { JobOfferSchema } from '@/types';
-import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
+import { getCachedJobVivier } from '@/lib/cachedJobVivier';
 import { CandidateProfileService } from '@/services/candidateProfileService';
 import { SavedItemsService } from '@/services/savedItemsService';
 import {
@@ -60,17 +60,8 @@ export class RecommendationService {
 
     const profile = await CandidateProfileService.get(userId);
 
-    // Vivier : offres + stages publiés et non expirés, les plus récents d'abord.
-    const { rows: pool } = await JobOfferSchemaService.list({
-      status: 'published',
-      category: ['job', 'internship'],
-      is_archived: false,
-      is_expired: false,
-      order_by: 'created_at',
-      order_dir: 'desc',
-      limit: CANDIDATE_POOL_SIZE,
-      offset: 0,
-    });
+    // Vivier partagé : offres + stages publiés et non expirés, les plus récents d'abord.
+    const pool = (await getCachedJobVivier('both')).slice(0, CANDIDATE_POOL_SIZE);
 
     let candidates = pool;
     if (excludeSaved) {

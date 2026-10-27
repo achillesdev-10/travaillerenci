@@ -265,6 +265,7 @@ function rowToSchema(row: any): JobOfferSchema {
 function rowToSchemaFromSupabase(row: any): JobOfferSchema {
   return {
     ...row,
+    description: row.description ?? '',
     category: row.category || 'job',
     sector: row.sector ?? null,
     status: row.status || 'pending',
@@ -277,6 +278,13 @@ function rowToSchemaFromSupabase(row: any): JobOfferSchema {
     clicks_count: Number(row.clicks_count || 0),
   };
 }
+
+const JOB_OFFER_FULL_COLUMNS =
+  'id,category,sector,title,company,location,contract_type,description,apply_link,apply_email,deadline,source_url,source_website,status,seo_title,seo_description,seo_keywords,slug,is_verified,is_archived,is_expired,is_featured,featured_until,clicks_count,created_at,updated_at';
+
+/** Toutes les colonnes sauf `description` (poste le plus lourd). */
+const JOB_OFFER_CARD_COLUMNS =
+  'id,category,sector,title,company,location,contract_type,apply_link,apply_email,deadline,source_url,source_website,status,seo_title,seo_description,seo_keywords,slug,is_verified,is_archived,is_expired,is_featured,featured_until,clicks_count,created_at,updated_at';
 
 function getDayKey(date: string | Date): string {
   const value = typeof date === 'string' ? new Date(date) : date;
@@ -612,11 +620,11 @@ export class JobOfferSchemaService {
       offset = 0,
       order_by = 'created_at',
       order_dir = 'desc',
+      fields = 'full',
     } = filters;
 
-    let query = supabase
-      .from('job_offers')
-      .select('*', { count: 'exact' });
+    const columns: string = fields === 'card' ? JOB_OFFER_CARD_COLUMNS : JOB_OFFER_FULL_COLUMNS;
+    let query = supabase.from('job_offers').select(columns as any, { count: 'exact' });
 
     if (keyword) {
       // Neutralise les caractères qui casseraient la syntaxe .or() de PostgREST

@@ -1,12 +1,13 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
+import { getCachedJobs } from '@/lib/cachedContent';
+import { getCachedJobVivier } from '@/lib/cachedJobVivier';
 import SearchBar from '@/components/jobs/SearchBar';
 import CompactJobCard from '@/components/home/CompactJobCard';
 import type { JobOfferSchema } from '@/types';
 import { getSiteUrl } from '@/lib/site';
 import { cn } from '@/lib/utils';
-import { CITY_SEO, METIER_SEO, categoriesForActivity, landingChipHref } from '@/lib/jobSeo';
+import { CITY_SEO, METIER_SEO, landingChipHref } from '@/lib/jobSeo';
 
 export const metadata: Metadata = {
   title: "Offres de stage en Côte d'Ivoire — stages en entreprise à Abidjan",
@@ -57,8 +58,8 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
   // Vivier borné (500) pour calculer l'éligibilité des pages SEO villes/
   // métiers — même requête que la page landing, afin de reproduire à
   // l'identique sa garde-fou anti-404 (§12).
-  const [{ rows: stages, total }, { rows: chipVivier }] = await Promise.all([
-    JobOfferSchemaService.list({
+  const [{ rows: stages, total }, chipVivier] = await Promise.all([
+    getCachedJobs({
       category: 'internship',
       keyword,
       location: city,
@@ -67,16 +68,9 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
       is_expired: false,
       limit: PAGE_SIZE,
       offset: (page - 1) * PAGE_SIZE,
+      fields: 'card',
     }),
-    JobOfferSchemaService.list({
-      category: categoriesForActivity('stages'),
-      status: 'published',
-      is_archived: false,
-      is_expired: false,
-      order_by: 'created_at',
-      order_dir: 'desc',
-      limit: 500,
-    }),
+    getCachedJobVivier('stages'),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));

@@ -169,25 +169,22 @@ test.describe('Recherche sur /stages', () => {
 });
 
 // =============================================================================
-//  Debounce — navigation différée vs soumission immédiate
+//  Navigation diffAcrAce vs soumission immAcdiate
 // =============================================================================
 
-test.describe('Comportement debounce de la recherche', () => {
-  test("saisie rapide ne declenche qu'une seule navigation (debounce)", async ({ page }) => {
+test.describe('Validation de la recherche', () => {
+  test('la saisie rapide attend la validation avant de naviguer', async ({ page }) => {
     await gotoPage(page, '/jobs');
 
     const keyword = page.locator('#search-keyword');
 
-    // Taper rapidement « abc » — chaque caractère déclenche onChange
     await keyword.pressSequentially('abc', { delay: 80 });
+    await page.waitForTimeout(600);
 
-    // Attendre que le debounce (350 ms) + le rendu serveur aboutissent.
+    expect(page.url()).not.toMatch(/[?&]q=/);
+
+    await keyword.press('Enter');
     await expect(page).toHaveURL(/q=abc/, { timeout: 30_000 });
-
-    // L'URL ne doit PAS contenir les étapes intermédiaires (a, ab)
-    const url = page.url();
-    expect(url).not.toContain('q=a&');
-    expect(url).not.toContain('q=ab&');
   });
 
   test("appuyer sur Enter soumet immediatement sans attendre le debounce", async ({ page }) => {

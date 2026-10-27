@@ -121,6 +121,13 @@ function parseJsonArray<T>(value: unknown): T[] {
   return [];
 }
 
+const EXAM_FULL_COLUMNS =
+  'id,title,slug,organizer,category,exam_type,status,description_md,registration_start,registration_end,exam_date,results_date,age_min,age_max,age_reference_date,nationality,diplomas,min_diploma_level,positions_count,registration_fee,location,cities,documents,source_url,source_website,confidence,views_count,is_verified,seo_title,seo_description,seo_keywords,published_at,created_at,updated_at';
+
+/** Toutes les colonnes sauf `documents` (listes publiques). */
+const EXAM_CARD_COLUMNS =
+  'id,title,slug,organizer,category,exam_type,status,description_md,registration_start,registration_end,exam_date,results_date,age_min,age_max,age_reference_date,nationality,diplomas,min_diploma_level,positions_count,registration_fee,location,cities,source_url,source_website,confidence,views_count,is_verified,seo_title,seo_description,seo_keywords,published_at,created_at,updated_at';
+
 function rowToExam(row: any): Exam {
   return {
     ...row,
@@ -142,6 +149,7 @@ function rowToExam(row: any): Exam {
 function rowToExamFromSupabase(row: any): Exam {
   return {
     ...row,
+    description_md: row.description_md ?? '',
     category: (row.category as ExamCategory) || 'administratif',
     status: (row.status as ExamStatus) || 'pending',
     confidence: row.confidence || 'medium',
@@ -763,9 +771,11 @@ export class ExamService {
       offset = 0,
       order_by = 'created_at',
       order_dir = 'desc',
+      fields = 'full',
     } = filters;
 
-    let query = supabase.from('exams').select('*', { count: 'exact' });
+    const columns: string = fields === 'card' ? EXAM_CARD_COLUMNS : EXAM_FULL_COLUMNS;
+    let query = supabase.from('exams').select(columns as any, { count: 'exact' });
 
     if (keyword) {
       const safeKeyword = keyword.replace(/[,.( )*!]/g, ' ').trim();

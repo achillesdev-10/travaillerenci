@@ -116,6 +116,13 @@ function ensureSchema(db: DatabaseSyncInstance) {
 // Normalisation des lignes
 // ---------------------------------------------------------------------------
 
+const ENTREPRENDRE_FULL_COLUMNS =
+  'id,slug,title,excerpt,content,cover_image,sector,budget_range,reading_time,status,featured,view_count,helpful_count,author,meta_description,published_at,created_at,updated_at';
+
+/** Toutes les colonnes sauf `content` (listes publiques et similaires). */
+const ENTREPRENDRE_CARD_COLUMNS =
+  'id,slug,title,excerpt,cover_image,sector,budget_range,reading_time,status,featured,view_count,helpful_count,author,meta_description,published_at,created_at,updated_at';
+
 function rowToArticle(row: any): EntreprendreArticle {
   return {
     id: String(row.id),
@@ -473,7 +480,11 @@ export class EntreprendreArticleService {
     const supabase = getSupabaseClient();
     if (!supabase) return { rows: [], total: 0 };
 
-    let query = supabase.from('entreprendre_articles').select('*', { count: 'exact' });
+    const columns: string =
+      filters.fields === 'card' ? ENTREPRENDRE_CARD_COLUMNS : ENTREPRENDRE_FULL_COLUMNS;
+    let query = supabase
+      .from('entreprendre_articles')
+      .select(columns as any, { count: 'exact' });
 
     if (filters.keyword) {
       const safe = String(filters.keyword).replace(/[,.( )*!]/g, ' ').trim();

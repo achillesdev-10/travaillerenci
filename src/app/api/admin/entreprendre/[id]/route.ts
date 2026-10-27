@@ -1,7 +1,7 @@
-import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { requireAdminApi } from '@/lib/adminSession';
+import { revalidateEntreprendreSurfaces } from '@/lib/revalidateContent';
 import { EntreprendreArticleService } from '@/services/entreprendreService';
 import type {
   EntreprendreArticleInsert,
@@ -54,12 +54,6 @@ function normalizePatch(body: Record<string, unknown>): Partial<EntreprendreArti
   return patch;
 }
 
-function revalidatePages(slug?: string) {
-  revalidatePath('/entreprendre');
-  revalidatePath('/cz7tk/entreprendre');
-  if (slug) revalidatePath(`/entreprendre/${slug}`);
-}
-
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -85,7 +79,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Article introuvable.' }, { status: 404 });
     }
 
-    revalidatePages(updated.slug);
+    revalidateEntreprendreSurfaces([updated.slug]);
     return NextResponse.json({ ok: true, article: updated });
   } catch (err) {
     console.error('PATCH /api/admin/entreprendre/[id] error:', err);
@@ -110,12 +104,13 @@ export async function DELETE(
   const { id } = await params;
 
   try {
+    const existing = await EntreprendreArticleService.getById(id);
     const removed = await EntreprendreArticleService.remove(id);
     if (!removed) {
       return NextResponse.json({ error: 'Article introuvable.' }, { status: 404 });
     }
 
-    revalidatePages();
+    revalidateEntreprendreSurfaces([existing?.slug]);
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('DELETE /api/admin/entreprendre/[id] error:', err);

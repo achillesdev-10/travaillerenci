@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
-import { ExamService } from '@/services/examService';
+import { getCachedExamOrganizers, getCachedExams } from '@/lib/cachedContent';
 import ExamCard from '@/components/exams/ExamCard';
 import CategoryIcon from '@/components/exams/CategoryIcon';
 import PhaseSection, { groupExamsByPhase, SECTION_LIMIT } from '@/components/exams/PhaseSection';
@@ -96,8 +96,8 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
   const page = Math.max(1, Number(sp.page) || 1);
 
   const [, all] = await Promise.all([
-    ExamService.listOrganizers(),
-    ExamService.list({
+    getCachedExamOrganizers(),
+    getCachedExams({
       keyword,
       organizer,
       category: category ? (category as any) : undefined,
@@ -106,6 +106,7 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
       order_by: 'created_at',
       order_dir: 'desc',
       limit: phase ? 500 : 200,
+      fields: 'card',
     }),
   ]);
 

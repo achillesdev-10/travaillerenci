@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
+import { getCachedJobVivier } from '@/lib/cachedJobVivier';
 import CompactJobCard from '@/components/home/CompactJobCard';
 import type { JobOfferSchema } from '@/types';
 import { getSiteUrl } from '@/lib/site';
@@ -10,7 +10,6 @@ import {
   CITY_SEO_BY_SLUG,
   METIER_SEO,
   METIER_SEO_BY_SLUG,
-  categoriesForActivity,
   filterOffersForSeo,
   landingChipHref,
   minOffersFor,
@@ -35,15 +34,7 @@ interface PageProps {
 async function listLandingData(
   parsed: ParsedJobSeoSlug,
 ): Promise<{ vivier: JobOfferSchema[]; offers: JobOfferSchema[] }> {
-  const { rows: vivier } = await JobOfferSchemaService.list({
-    category: categoriesForActivity(parsed.activity),
-    status: 'published',
-    is_archived: false,
-    is_expired: false,
-    order_by: 'created_at',
-    order_dir: 'desc',
-    limit: 500,
-  });
+  const vivier = await getCachedJobVivier(parsed.activity === 'stages' ? 'stages' : 'jobs');
   return { vivier, offers: filterOffersForSeo(vivier, parsed) };
 }
 

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { ExamService } from '@/services/examService';
+import { getCachedExams } from '@/lib/cachedContent';
 import CategoryIcon from '@/components/exams/CategoryIcon';
 import PhaseSection, { groupExamsByPhase, SECTION_LIMIT } from '@/components/exams/PhaseSection';
 import { getSiteUrl } from '@/lib/site';
@@ -27,7 +27,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: `${seo.metaTitle} | TravaillerenCi`,
     description: seo.description,
-    keywords: seo.keywords,
     alternates: { canonical: url },
     openGraph: {
       type: 'website',
@@ -50,12 +49,13 @@ export default async function ConcoursCategoryPage({ params }: PageProps) {
   const seo = CATEGORY_SEO[category as ExamCategory];
   if (!seo) notFound();
 
-  const { rows: exams, total } = await ExamService.list({
-    category: category as ExamCategory,
+  const { rows: exams, total } = await getCachedExams({
+    category: seo.category,
     status: 'published',
     limit: 200,
     order_by: 'created_at',
     order_dir: 'desc',
+    fields: 'card',
   });
 
   // Regroupement « métier » : en cours / à venir / clos & résultats.

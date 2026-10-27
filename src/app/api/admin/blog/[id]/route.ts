@@ -1,7 +1,7 @@
-import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { requireAdminApi } from '@/lib/adminSession';
+import { revalidateBlogSurfaces } from '@/lib/revalidateContent';
 import { BlogService } from '@/services/blogService';
 import type { BlogPostInsert, BlogPostStatus } from '@/types/blog';
 
@@ -39,11 +39,6 @@ function normalizePatch(body: Record<string, unknown>): Partial<BlogPostInsert> 
   return patch;
 }
 
-function revalidateBlogPages() {
-  revalidatePath('/blog');
-  revalidatePath('/cz7tk/blog');
-}
-
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -69,8 +64,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Article introuvable.' }, { status: 404 });
     }
 
-    revalidateBlogPages();
-    revalidatePath(`/blog/${updated.slug}`);
+    revalidateBlogSurfaces([updated.slug]);
     return NextResponse.json({ ok: true, post: updated });
   } catch (err) {
     console.error('PATCH /api/admin/blog/[id] error:', err);
@@ -103,7 +97,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Article introuvable.' }, { status: 404 });
     }
 
-    revalidateBlogPages();
+    revalidateBlogSurfaces();
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('DELETE /api/admin/blog/[id] error:', err);

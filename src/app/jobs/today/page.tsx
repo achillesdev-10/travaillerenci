@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
+import { getCachedJobVivier } from '@/lib/cachedJobVivier';
 import CompactJobCard from '@/components/home/CompactJobCard';
 import ShareButton from '@/components/ShareButton';
 import {
@@ -20,7 +20,6 @@ export const revalidate = 3600;
 
 const BASE_URL = getSiteUrl();
 const PAGE_SIZE = 24;
-const VIVIER = 500;
 
 interface ReasonBadge {
   key: string;
@@ -73,18 +72,9 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-/** Vivier borné : les offres les plus récentes, déjà filtrées côté BDD. */
+/** Vivier borné partagé avec les autres pages SEO (cache 10 min). */
 async function loadVivier(): Promise<JobOfferSchema[]> {
-  const { rows } = await JobOfferSchemaService.list({
-    status: 'published',
-    is_archived: false,
-    is_expired: false,
-    category: ['job', 'internship'],
-    order_by: 'created_at',
-    order_dir: 'desc',
-    limit: VIVIER,
-  });
-  return rows;
+  return getCachedJobVivier('both');
 }
 
 export default async function JobsTodayPage() {

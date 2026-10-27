@@ -91,6 +91,8 @@ export interface ExamFilters {
   offset?: number;
   order_by?: 'created_at' | 'title' | 'organizer' | 'registration_end';
   order_dir?: 'asc' | 'desc';
+  /** `card` omet le communiqué complet et les documents (listes publiques). */
+  fields?: 'full' | 'card';
 }
 
 /** Retour paginé générique. */

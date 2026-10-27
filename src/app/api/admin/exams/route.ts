@@ -1,7 +1,7 @@
-import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { requireAdminApi } from '@/lib/adminSession';
+import { revalidateExamSurfaces } from '@/lib/revalidateContent';
 import { ExamService } from '@/services/examService';
 import { notifyExamPublished } from '@/services/whatsappNotify';
 import type { ExamCategory, ExamConfidence, ExamStatus, ExamType } from '@/types/exam';
@@ -95,10 +95,7 @@ export async function POST(request: NextRequest) {
       await notifyExamPublished(created);
     }
 
-    revalidatePath('/cz7tk/exams');
-    revalidatePath('/concours');
-    // URL SEO (slug) — les URLs legacy par ID redirigent en 308 vers le slug.
-    revalidatePath(`/concours/${created.slug || created.id}`);
+    revalidateExamSurfaces(created);
 
     return NextResponse.json({ ok: true, exam: created }, { status: 201 });
   } catch (err) {

@@ -47,6 +47,8 @@ export interface ArticleFilters {
   offset?: number;
   order_by?: 'published_at' | 'created_at' | 'title';
   order_dir?: 'asc' | 'desc';
+  /** `card` omet le corps de l'article (listes publiques et similaires). */
+  fields?: 'full' | 'card';
 }
 
 /** Retour paginé. */

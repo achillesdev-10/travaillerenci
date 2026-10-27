@@ -297,6 +297,13 @@ function rowToPost(row: any): BlogPost {
   };
 }
 
+const BLOG_FULL_COLUMNS =
+  'id,title,slug,excerpt,content,cover_image,author,tags,status,published_at,view_count,created_at,updated_at';
+
+/** Toutes les colonnes sauf `content` (listes publiques). */
+const BLOG_CARD_COLUMNS =
+  'id,title,slug,excerpt,cover_image,author,tags,status,published_at,view_count,created_at,updated_at';
+
 function normalizePostFromSupabase(row: any): BlogPost {
   return {
     id: String(row.id),
@@ -551,7 +558,9 @@ export class BlogService {
     const supabase = getSupabaseClient();
     if (!supabase) return { rows: [], total: 0 };
 
-    let query = supabase.from('blog_posts').select('*', { count: 'exact' });
+    const columns: string =
+      filters.fields === 'card' ? BLOG_CARD_COLUMNS : BLOG_FULL_COLUMNS;
+    let query = supabase.from('blog_posts').select(columns as any, { count: 'exact' });
     if (filters.status) {
       const list = Array.isArray(filters.status) ? filters.status : [filters.status];
       if (list.length > 0) query = query.in('status', list);

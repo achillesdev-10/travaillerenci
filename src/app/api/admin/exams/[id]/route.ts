@@ -1,16 +1,9 @@
-import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { requireAdminApi } from '@/lib/adminSession';
+import { revalidateExamSurfaces } from '@/lib/revalidateContent';
 import { ExamService } from '@/services/examService';
 import { notifyExamPublished } from '@/services/whatsappNotify';
-
-function revalidateExamPages(exam: { id: string; slug?: string | null }) {
-  revalidatePath('/cz7tk/exams');
-  revalidatePath('/concours');
-  // URL SEO (slug) — les URLs legacy par ID redirigent en 308 vers le slug.
-  revalidatePath(`/concours/${exam.slug || exam.id}`);
-}
 
 export async function PATCH(
   request: NextRequest,
@@ -63,7 +56,7 @@ export async function PATCH(
       await notifyExamPublished(updated);
     }
 
-    revalidateExamPages(updated);
+    revalidateExamSurfaces(updated);
     return NextResponse.json({ ok: true, exam: updated });
   } catch (err) {
     console.error('PATCH /api/admin/exams/[id] error:', err);
@@ -88,7 +81,7 @@ export async function DELETE(
     if (!removed) {
       return NextResponse.json({ error: 'Concours introuvable.' }, { status: 404 });
     }
-    revalidateExamPages({ id });
+    revalidateExamSurfaces({ id });
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('DELETE /api/admin/exams/[id] error:', err);

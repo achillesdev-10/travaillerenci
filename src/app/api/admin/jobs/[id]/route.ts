@@ -1,7 +1,7 @@
-import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { requireAdminApi } from '@/lib/adminSession';
+import { revalidateJobSurfaces } from '@/lib/revalidateContent';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import type { JobContractType, JobOfferSchemaInsert, JobOfferSchemaStatus } from '@/types';
 import { VALID_SECTOR_SLUGS } from '@/lib/sectorClassifier';
@@ -106,15 +106,6 @@ function normalizePatch(body: Record<string, unknown>): Partial<JobOfferSchemaIn
   return patch;
 }
 
-function revalidateAdminPages(jobId: string) {
-  revalidatePath('/cz7tk');
-  revalidatePath('/cz7tk/jobs');
-  revalidatePath(`/cz7tk/jobs/${jobId}`);
-  revalidatePath('/');
-  revalidatePath('/jobs');
-  revalidatePath(`/jobs/${jobId}`);
-}
-
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -140,7 +131,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Offre introuvable.' }, { status: 404 });
     }
 
-    revalidateAdminPages(id);
+    revalidateJobSurfaces([id]);
     return NextResponse.json({ ok: true, job: updated });
   } catch (err) {
     console.error('PATCH /api/admin/jobs/[id] error:', err);
@@ -180,7 +171,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Offre introuvable.' }, { status: 404 });
     }
 
-    revalidateAdminPages(id);
+    revalidateJobSurfaces([id]);
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('DELETE /api/admin/jobs/[id] error:', err);

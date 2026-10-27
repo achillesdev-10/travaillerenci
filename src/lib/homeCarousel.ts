@@ -158,9 +158,22 @@ export async function buildCarouselSlides(
         limit: 6,
         order_by: 'created_at',
         order_dir: 'desc',
+        fields: 'card',
       }),
-      ExamService.list({ status: 'published', limit: 4, order_by: 'created_at', order_dir: 'desc' }),
-      BlogService.list({ status: 'published', limit: 3, order_by: 'published_at', order_dir: 'desc' }),
+      ExamService.list({
+        status: 'published',
+        limit: 4,
+        order_by: 'created_at',
+        order_dir: 'desc',
+        fields: 'card',
+      }),
+      BlogService.list({
+        status: 'published',
+        limit: 3,
+        order_by: 'published_at',
+        order_dir: 'desc',
+        fields: 'card',
+      }),
     ]);
     offers = o.rows;
     exams = e.rows;
