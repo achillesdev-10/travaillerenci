@@ -1,0 +1,79 @@
+name: TravaillerEnCi — Sauvegarde hebdomadaire de la base (chiffrée)
+
+# Sauvegarde hebdomadaire de la base Supabase (pg_dump) :
+#  - déclenchée automatiquement le dimanche 03:30 UTC + manuellement ;
+#  - déchiffrement impossible sans BACKUP_PASSPHRASE (le repo étant public,
+#    seuls .gpg chiffrés peuvent être publiés sans exposer les données) ;
+#  - structure sauvegardée, données exclues pour les tables volumineuses et
+#    peu utiles à la restauration (visites, événements, logs) — moins d'egress,
+#    dump plus léger.
+
+on:
+  schedule:
+    # Dimanche 03:30 UTC (1×/semaine)
+    - cron: '30 3 * * 0'
+  workflow_dispatch: # Lancement manuel depuis l'onglet Actions
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install postgresql-client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends postgresql-client gpg
+
+      - name: Dump de la base (pg_dump, format custom)
+        env:
+          # Chaîne de connexion Postgres via le « Session pooler » Supabase
+          # (les runners GitHub ne gèrent que l'IPv4). Secret, jamais affiché :
+          # pas de set -x, pas d'echo, pg_dump la lit depuis une variable.
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          # Format custom (-Fc) : restaurable avec pg_restore, compressé.
+          # --no-owner / --no-privileges : la structure reste portable vers
+          # un projet de test (rôles inexistants).
+          # --exclude-table-data : garde la structure (CREATE TABLE) mais pas
+          # les données des tables volumineuses et peu utiles.
+          readonly DUMP_FILE="backup-$(date -u +%Y%m%d).dump"
+          pg_dump "$SUPABASE_DB_URL" \
+            --format=custom \
+            --no-owner \
+            --no-privileges \
+            --exclude-table-data=public.site_visits \
+            --exclude-table-data=public.analytics_events \
+            --exclude-table-data=public.alert_digest_log \
+            --exclude-table-data=public.scraper_logs \
+            --file="$DUMP_FILE"
+          echo "DUMP_FILE=$DUMP_FILE" >> "$GITHUB_ENV"
+
+      - name: Chiffrement du dump (GPG symétrique AES256)
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          # Symétrique : une seule phrase de passe au lieu d'un trousseau de
+          # clés. --batch + --pinentry-mode loopback : aucune saisie interactive
+          # sur le runner ; la phrase reste en mémoire du job uniquement.
+          gpg --symmetric \
+            --cipher-algo AES256 \
+            --batch \
+            --pinentry-mode loopback \
+            --passphrase "$BACKUP_PASSPHRASE" \
+            --output "$DUMP_FILE.gpg" \
+            "$DUMP_FILE"
+          # Supprime la copie en clair : seul le .gpg est publié en artefact.
+          rm -f "$DUMP_FILE"
+
+      - name: Upload de l'artefact chiffré (30 jours)
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ github.run_id }}
+          path: '*.gpg'
+          # Remaining jours d'exposition minimisés : 30 jours glissants,
+          # l'historique plus long doit passer par un stockage externe.
+          retention-days: 30
+          # Ne capture pas d'autres fichiers du workspace (le dump est à la racine).
+          if-no-files-found: error
