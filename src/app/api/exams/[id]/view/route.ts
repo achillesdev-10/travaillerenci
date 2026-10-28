@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { ExamService } from '@/services/examService';
+import { getClientIp, isRateLimited } from '@/lib/rateLimit';
 
 /**
  * Incrément du compteur de vues d'un concours (appelé par le composant client
@@ -11,6 +12,14 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
+
+  // Anti-spam : évite le gonflement du compteur (fonction SECURITY DEFINER
+  // côté base). 60 / 10 min par IP : largement au-dessus d'une session de
+  // consultation, très en dessous d'un flood automatisé.
+  if (isRateLimited(`exam-view:${getClientIp(request)}`, 60, 10 * 60 * 1000)) {
+    return NextResponse.json({ error: 'Trop de requêtes. Réessayez plus tard.' }, { status: 429 });
+  }
+
   try {
     const exam = await ExamService.getById(id);
     if (!exam) {

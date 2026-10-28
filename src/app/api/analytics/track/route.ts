@@ -10,6 +10,7 @@ import { getSessionUser } from "@/lib/userSession";
 import { recordEvent } from "@/services/analyticsService";
 import { isAnalyticsEvent, type AnalyticsEventName } from "@/lib/analyticsEvents";
 import { normalizeSource } from "@/lib/trafficSource";
+import { getClientIp, isRateLimited } from "@/lib/rateLimit";
 
 const DB_PATH = path.join(process.cwd(), "data", "travaillerenci.sqlite3");
 
@@ -89,6 +90,14 @@ async function trackInSupabase(pagePath: string, source: string, userAgent: stri
 
 export async function POST(request: Request) {
   try {
+    // Anti-spam : plafond très généreux (200 / 10 min par IP) — vise les floods
+    // d'insertions, jamais la navigation humaine, y compris derrière une IP
+    // partagée (cybercafé, opérateur mobile). Un refus ne bloque rien : la
+    // visite n'est simplement pas comptée.
+    if (isRateLimited(`track:${getClientIp(request)}`, 200, 10 * 60 * 1000)) {
+      return NextResponse.json({ tracked: false }, { status: 429 });
+    }
+
     const body = await request.json().catch(() => ({}));
     const pagePath = String(body.path || "/");
 
