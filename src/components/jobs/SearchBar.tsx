@@ -14,6 +14,10 @@ interface SearchBarProps {
   initialContract?: string;
   /** Query string actuelle de l'URL (pour préserver les autres params). */
   searchQuery?: string;
+  /** Chemin de destination des recherches (défaut : page courante). La
+   * page d'accueil passe '/jobs' pour rester statique/ISR — la recherche
+   * canonique du site est /jobs?q=… (JSON-LD SearchAction). */
+  targetPath?: string;
   onSearch?: (filters: { q: string; city: string; contract: string }) => void;
 }
 
@@ -50,6 +54,7 @@ export default function SearchBar({
   initialLocation = '',
   initialContract = '',
   searchQuery = '',
+  targetPath,
   onSearch,
 }: SearchBarProps) {
   const router = useRouter();
@@ -67,9 +72,9 @@ export default function SearchBar({
   // NB : useSearchParams est évité ici (il suspendrait le rendu SSR et
   // retarderait l'affichage de la barre, élément LCP). Les params courants
   // sont passés par le serveur via `searchQuery`.
-  const latestRef = useRef({ searchQuery, pathname, compact, onSearch });
+  const latestRef = useRef({ searchQuery, pathname, compact, onSearch, targetPath });
   useEffect(() => {
-    latestRef.current = { searchQuery, pathname, compact, onSearch };
+    latestRef.current = { searchQuery, pathname, compact, onSearch, targetPath };
   });
 
   // ── Événement analytics `search` (§22) ──────────────────────────────────
@@ -83,13 +88,13 @@ export default function SearchBar({
     () =>
       // eslint-disable-next-line react-hooks/refs
       debounce((q: string, c: string, ct: string) => {
-        const { searchQuery: sq, pathname: pn, compact: cp, onSearch: os } = latestRef.current;
+        const { searchQuery: sq, pathname: pn, compact: cp, onSearch: os, targetPath: tp } = latestRef.current;
         const params = new URLSearchParams(sq);
         if (q) params.set('q', q); else params.delete('q');
         if (c) params.set('city', c); else params.delete('city');
         if (ct) params.set('contract', ct); else params.delete('contract');
         params.delete('page');
-        const next = `${pn}${params.toString() ? `?${params.toString()}` : ''}`;
+        const next = `${tp || pn}${params.toString() ? `?${params.toString()}` : ''}`;
         startTransition(() => router.push(next, { scroll: cp ? false : true }));
         if (os) os({ q, city: c, contract: ct });
         trackSearchOnce(lastTrackedRef, q, c, ct);
@@ -107,7 +112,7 @@ export default function SearchBar({
     if (location) params.set('city', location); else params.delete('city');
     if (contract) params.set('contract', contract); else params.delete('contract');
     params.delete('page');
-    const next = `${pathname}${params.toString() ? `?${params.toString()}` : ''}`;
+    const next = `${targetPath || pathname}${params.toString() ? `?${params.toString()}` : ''}`;
     startTransition(() => router.push(next, { scroll: !compact }));
     if (onSearch) onSearch({ q: keyword, city: location, contract });
     trackSearchOnce(lastTrackedRef, keyword, location, contract);

@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import CoverImage from '@/components/content/CoverImage';
 import SearchBar from '@/components/jobs/SearchBar';
 import { getCachedJobs, getCachedExams, getCachedPosts } from '@/lib/cachedContent';
-import type { JobOfferSchema, JobContractType } from '@/types';
+import type { JobOfferSchema } from '@/types';
 import NewsTicker, { type TickerItem } from '@/components/home/NewsTicker';
 import HomeCarousel from '@/components/home/HomeCarousel';
 import PollWidget from '@/components/home/PollWidgetLazy';
@@ -184,30 +184,15 @@ const HOW_IT_WORKS = [
   },
 ];
 
-export default async function HomePage({
-  searchParams,
-}: {
-  searchParams?: Promise<{
-    q?: string;
-    city?: string;
-    contract?: string;
-  }>;
-}) {
-  const sp = await searchParams;
-  const keyword = (sp?.q || '').trim();
-  const location = (sp?.city || '').trim();
-  const contract = (sp?.contract || '').trim() as JobContractType;
-
-  // Query string courante transmise au SearchBar (évite useSearchParams,
-  // qui suspendrait le rendu SSR et retarderait l'affichage de la barre
-  // — élément LCP — dans le HTML initial).
-  const searchQuery = new URLSearchParams({ q: keyword, city: location, contract } as Record<string, string>).toString();
-
+export default async function HomePage() {
+  // ISR : la page d'accueil est la page la plus visitée du site (max CPU
+  // Vercel). Elle est désormais 100 % statique/ISR (revalidate = 60) :
+  // la recherche n'y est plus traitée côté serveur — la SearchBar renvoie
+  // vers /jobs?q=… (recherche canonique du site, cf. JSON-LD SearchAction).
+  // Motivation : toute lecture de `searchParams` rendait la page dynamique
+  // et re-rendait tout le HTML à chaque visite (quota CPU 94 %).
   const [jobs, examRows, blogRows, bourseRows] = await Promise.all([
     getCachedJobs({
-      keyword: keyword || undefined,
-      location: location || undefined,
-      contract_type: contract || undefined,
       status: 'published',
       limit: 60,
       order_by: 'created_at',
@@ -252,7 +237,7 @@ export default async function HomePage({
     // 6 slides max : chaque slide cachée (opacity-0) reste dans le DOM pour
     // le SEO — moins de slides = moins de nœuds DOM inutiles.
     maxSlides: 6,
-    offers: keyword || location || contract ? undefined : (jobsList as JobOfferSchema[]),
+    offers: jobsList as JobOfferSchema[],
     exams: examRows.rows,
     posts: blogRows.rows,
   });
@@ -447,12 +432,7 @@ export default async function HomePage({
               (pas de Suspense : la barre est l'élément LCP et ne doit pas
               dépendre de l'hydratation pour s'afficher) */}
           <div className="mt-8 sm:mt-10 max-w-4xl mx-auto">
-            <SearchBar
-              initialKeyword={keyword}
-              initialLocation={location}
-              initialContract={contract}
-              searchQuery={searchQuery}
-            />
+            <SearchBar targetPath="/jobs" />
 
             <div className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-3 sm:gap-5 text-[12px] sm:text-sm text-gray-500 dark:text-gray-400">
               <Stat
@@ -706,32 +686,16 @@ export default async function HomePage({
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 sm:gap-4 mt-10 sm:mt-14 mb-4 sm:mb-6">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white font-[var(--font-display)]">
-              {keyword || location || contract
-                ? `${totalKnown} résultat${totalKnown > 1 ? 's' : ''}`
-                : 'Dernières offres'}
+              Dernières offres
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {keyword || location || contract
-                ? <>Triées par : pertinence + nouveauté</>
-                : <>Les dernières opportunités publiées sur TravaillerenCi</>}
+              Les dernières opportunités publiées sur TravaillerenCi
             </p>
           </div>
-          {(keyword || location || contract) && (
-            <Link
-              href="/"
-              className="inline-flex items-center justify-center gap-1.5 self-start sm:self-auto px-3.5 py-2 text-sm rounded-lg border border-border hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-gray-200 font-medium"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 12h14" />
-                <path d="m10 5-7 7 7 7" />
-              </svg>
-              Réinitialiser
-            </Link>
-          )}
         </div>
 
         {jobsList.length === 0 ? (
-          <EmptyState keyword={keyword} location={location} contract={contract} />
+          <EmptyState />
         ) : (
           <OffersGrid jobs={jobsList as JobOfferSchema[]} />
         )}
@@ -1067,24 +1031,7 @@ function Stat({ icon, label }: { icon: ReactNode; label: string }) {
   );
 }
 
-function EmptyState({
-  keyword,
-  location,
-  contract,
-}: {
-  keyword: string;
-  location: string;
-  contract: string;
-}) {
-  const label =
-    [
-      keyword ? `"${keyword}"` : '',
-      location ? `à ${location}` : '',
-      contract ? `en ${contract}` : '',
-    ]
-      .filter(Boolean)
-      .join(' ') || 'cette zone';
-
+function EmptyState() {
   return (
     <div className="bg-white dark:bg-slate-900 border border-dashed border-border rounded-2xl p-8 sm:p-12 text-center">
       <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gray-50 dark:bg-slate-800 flex items-center justify-center mb-5">
@@ -1103,7 +1050,7 @@ function EmptyState({
         </svg>
       </div>
       <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2 font-[var(--font-display)]">
-        Aucune offre trouvée pour {label}
+        Aucune offre publiée pour le moment
       </h3>
       <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
         Essayez avec un autre mot-clé, une ville voisine, ou supprimez certains filtres.
