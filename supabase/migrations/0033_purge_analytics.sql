@@ -94,9 +94,10 @@ CREATE POLICY "site_visits_daily suppression service_role"
 
 -- ---------------------------------------------------------------------------
 --  Fonction `purge_analytics()`
---  Traite la base par lots de 5000 lignes : chaque lot est agrégé puis
---  supprimé avant le suivant, pour ne pas saturer une transaction sur une
---  base déjà grosse. Retourne les compteurs traités (à des fins de journal).
+--  Traite la base par lots de 5000 lignes : chaque lot est agrégé et supprimé
+--  en une seule instruction CTE atomique (DELETE RETURNING → INSERT) avant le
+--  suivant, pour ne pas saturer une transaction sur une base déjà grosse.
+--  Retourne les compteurs traités (à des fins de journal).
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.purge_analytics()
 RETURNS TABLE (visits_aggregated BIGINT, visits_deleted BIGINT, events_deleted BIGINT)
@@ -112,49 +113,60 @@ DECLARE
 BEGIN
     -- Les paramètres OUT d'une fonction RETURNS TABLE commencent à NULL :
     -- sans initialisation, `NULL + n` resterait NULL et la fonction retournerait
-    -- des compteurs NULL au lieu de 0. Testé le 2026-10-28.
+    -- des compteurs NULL au lieu de 0.
     visits_aggregated := 0;
     visits_deleted := 0;
     events_deleted := 0;
 
-    -- (1) Visites : agrège puis supprime, lot par lot.
+    -- (1) Visites : agrégation ET suppression en UNE seule instruction CTE —
+    -- atomique : une ligne supprimée est comptée exactement une fois, jamais
+    -- perdue ni double-comptée entre un INSERT et un DELETE séparés.
+    -- NULL source agrégé en 'direct' (convention 0031).
     LOOP
-        -- Agrégation du lot (> 90 jours), fusion avec d'éventuelles valeurs
-        -- précédentes ; NULL source agrégé en 'direct' (convention 0031).
-        INSERT INTO public.site_visits_daily (day, source, visits)
-        SELECT created_at::date AS day,
-               COALESCE(source, 'direct') AS source,
-               COUNT(*)::bigint
-        FROM (
-            SELECT created_at, source
-            FROM public.site_visits
-            WHERE created_at < v_cutoff_visits
-            LIMIT v_batch_size
-        ) batch
-        GROUP BY 1, 2
-        ON CONFLICT (day, source) DO UPDATE
-            SET visits = public.site_visits_daily.visits + EXCLUDED.visits;
+        -- Sortie dès qu'il ne reste plus AUCUNE ligne à purger. ROW_COUNT ne
+        -- peut plus servir de signal : avec la CTE, il compte les lignes
+        -- d'agrégats écrites (0 si le jour/source existait déjà), pas les
+        -- visites supprimées.
+        EXIT WHEN NOT EXISTS (
+            SELECT 1 FROM public.site_visits WHERE created_at < v_cutoff_visits
+        );
 
-        -- Suppression du lot fraîchement agrégé, avec le MÊME critère
-        -- (90 jours). Les deux opérations sont séparées par un instant :
-        -- toute nouvelle ligne a created_at = now() donc ne matche jamais
-        -- le critère — pas de comptage en double possible.
-        DELETE FROM public.site_visits
-        WHERE id IN (
+        WITH batch AS (
+            -- Les plus anciennes d'abord, 5000 lignes par passage.
             SELECT id
             FROM public.site_visits
             WHERE created_at < v_cutoff_visits
+            ORDER BY created_at
             LIMIT v_batch_size
-        );
+        ),
+        del AS (
+            DELETE FROM public.site_visits s
+            USING batch b
+            WHERE s.id = b.id
+            RETURNING s.created_at, s.source
+        ),
+        agg AS (
+            SELECT created_at::date AS day,
+                   COALESCE(source, 'direct') AS source,
+                   COUNT(*)::bigint AS visits
+            FROM del
+            GROUP BY 1, 2
+        ),
+        ins AS (
+            INSERT INTO public.site_visits_daily (day, source, visits)
+            SELECT day, source, visits
+            FROM agg
+            ON CONFLICT (day, source) DO UPDATE
+                SET visits = public.site_visits_daily.visits + EXCLUDED.visits
+        )
+        -- Compteur du lot = visites réellement supprimées (somme des groupes).
+        -- La CTE `del` n'est lue qu'une fois (via `agg`) : c'est la seule façon
+        -- fiable de référencer le RETURNING d'un DELETE.
+        SELECT COALESCE(SUM(visits), 0)::bigint INTO v_loop_rows FROM agg;
 
-        GET DIAGNOSTICS v_loop_rows = ROW_COUNT;
         visits_deleted := visits_deleted + v_loop_rows;
-
-        EXIT WHEN v_loop_rows = 0;
     END LOOP;
 
-    -- Les lignes supprimées sont exactement celles agrégées (mêmes critères,
-    -- exécutés d'affilée sur le même parc de lignes) : un seul compteur.
     visits_aggregated := visits_deleted;
 
     -- (2) Événements produits : suppression simple par lots (> 180 jours).
