@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
-import { DatabaseSync } from "node:sqlite";
 import {
   getSupabaseClient,
   isSupabaseConfigured,
@@ -16,7 +15,17 @@ const DB_PATH = path.join(process.cwd(), "data", "travaillerenci.sqlite3");
 
 export const dynamic = "force-dynamic";
 
-function ensureTable(db: InstanceType<typeof DatabaseSync>) {
+/** Shape minimal de node:sqlite.DatabaseSync (import dynamique ci-dessous). */
+type SqliteDb = {
+  exec(sql: string): void;
+  prepare(sql: string): {
+    run(...args: unknown[]): { changes: number };
+    all(...args: unknown[]): unknown[];
+  };
+  close(): void;
+};
+
+function ensureTable(db: SqliteDb) {
   db.exec(`
     CREATE TABLE IF NOT EXISTS site_visits (
       id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) || '-4' || substr(lower(hex(randomblob(2))),2) || '-' || substr('89ab',abs(random()) % 4 + 1, 1) || substr(lower(hex(randomblob(2))),2) || '-' || lower(hex(randomblob(6)))),
@@ -43,11 +52,16 @@ function hashIp(ip: string) {
   return Buffer.from(ip).toString("base64").slice(0, 16);
 }
 
-/** Écriture locale (SQLite) — utilisée hors production ou en secours. */
-function trackInSqlite(pagePath: string, source: string, userAgent: string, ip: string) {
+/** Écriture locale (SQLite) — utilisée hors production ou en secours.
+ *  Import DYNAMIQUE de node:sqlite : ce module n'existe que dans le runtime
+ *  Node 22+ ; un import statique casse le build/bundling (module natif) et
+ *  chargerait le runtime SQLite sur chaque invocation en production, où ce
+ *  chemin n'est utilisé que comme fallback en cas d'échec Supabase. */
+async function trackInSqlite(pagePath: string, source: string, userAgent: string, ip: string) {
   try {
+    const { DatabaseSync } = await import("node:sqlite");
     mkdirSync(path.dirname(DB_PATH), { recursive: true });
-    const db = new DatabaseSync(DB_PATH);
+    const db = new DatabaseSync(DB_PATH) as unknown as SqliteDb;
     ensureTable(db);
     db.prepare(
       "INSERT INTO site_visits (path, source, ip_hash, user_agent) VALUES (?, ?, ?, ?)",
@@ -134,11 +148,11 @@ export async function POST(request: Request) {
         return NextResponse.json({ tracked: true });
       }
       // Fallback : si l'écriture Supabase échoue réellement, on tente SQLite.
-      const fallbackOk = trackInSqlite(pagePath, source, userAgent, ip);
+      const fallbackOk = await trackInSqlite(pagePath, source, userAgent, ip);
       return NextResponse.json({ tracked: fallbackOk });
     }
 
-    const ok = trackInSqlite(pagePath, source, userAgent, ip);
+    const ok = await trackInSqlite(pagePath, source, userAgent, ip);
     return NextResponse.json({ tracked: ok });
   } catch (err) {
     return NextResponse.json({ tracked: false, error: String(err) }, { status: 500 });

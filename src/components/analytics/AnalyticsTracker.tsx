@@ -34,6 +34,18 @@ export default function AnalyticsTracker() {
       return;
     }
 
+    // CPU Vercel : une seule visite envoyée par page ET par session navigateur.
+    // Les re-navigations internes (retour arrière, A/R entre listes et fiches)
+    // ne déclenchent plus d'invocation /api/analytics/track inutile.
+    const visitedKey = `visit:${pathname}`;
+    try {
+      if (sessionStorage.getItem(visitedKey)) return;
+      sessionStorage.setItem(visitedKey, "1");
+    } catch {
+      // sessionStorage indisponible (navigation privée stricte) : on envoie
+      // la visite normalement plutôt que de perdre la mesure.
+    }
+
     // Fire and forget non-blocking tracking call
     fetch("/api/analytics/track", {
       method: "POST",
