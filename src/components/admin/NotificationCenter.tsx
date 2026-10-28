@@ -12,6 +12,11 @@ type Notification = {
   created_at: string;
 };
 
+// Chaque tick interroge Supabase derrière /api/admin/notifications : on
+// allonge l'intervalle (120 s au lieu de 60 s) et on suspend le polling
+// quand l'onglet admin est masqué pour économiser l'egress Supabase.
+const POLL_INTERVAL_MS = 120000;
+
 const TYPE_ICONS: Record<string, { color: string; label: string }> = {
   scraper_error: { color: "bg-rose-500", label: "❌ Scraper" },
   scraper_alert: { color: "bg-amber-500", label: "⚠️ Scraper" },
@@ -56,12 +61,35 @@ export default function NotificationCenter() {
     }
   }, []);
 
-  // Fetch on mount and every 60 seconds
+  // Fetch on mount and every 2 minutes (paused when the tab is hidden)
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 60000);
-    return () => clearInterval(interval);
+    let interval: ReturnType<typeof setInterval> | null = null;
+    const start = () => {
+      if (interval === null) interval = setInterval(fetchNotifications, POLL_INTERVAL_MS);
+    };
+    const stop = () => {
+      if (interval !== null) {
+        clearInterval(interval);
+        interval = null;
+      }
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        // Retour sur l'onglet : rafraîchit tout de suite puis relance le cycle.
+        fetchNotifications();
+        start();
+      } else {
+        stop();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    if (document.visibilityState === "visible") start();
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      stop();
+    };
   }, [fetchNotifications]);
 
   // Close on outside click

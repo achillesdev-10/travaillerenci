@@ -455,7 +455,7 @@ class ExamRepository:
                 "slug": item.slug,
             }
             if existing:
-                table.update(payload).eq("id", existing["id"]).execute()
+                table.update(payload).select("id").eq("id", existing["id"]).execute()
             else:
                 table.insert(payload).execute()
         except Exception as exc:
@@ -552,7 +552,7 @@ class ExamRepository:
         changed = int(cur.rowcount or 0) > 0
         if self.supabase is not None:
             try:
-                self.supabase.table("exams").update(clean).eq("id", exam_id).execute()
+                self.supabase.table("exams").update(clean).select("id").eq("id", exam_id).execute()
                 changed = True
             except Exception as exc:
                 _log_warning(f"Échec update Supabase exams : {exc}")
@@ -581,7 +581,7 @@ class ExamRepository:
                         "is_verified": status == "published",
                         "published_at": published_at,
                     }
-                ).eq("id", exam_id).execute()
+                ).select("id").eq("id", exam_id).execute()
                 changed = True
             except Exception as exc:
                 _log_warning(f"Échec statut Supabase exams : {exc}")
@@ -608,7 +608,7 @@ class ExamRepository:
                         "published_at": None,
                         "updated_at": datetime.now(timezone.utc).isoformat(),
                     }
-                ).eq("id", exam_id).execute()
+                ).select("id").eq("id", exam_id).execute()
                 changed = True
             except Exception as exc:
                 _log_warning(f"Échec rejet Supabase exams : {exc}")
@@ -716,6 +716,7 @@ class ExamRepository:
                     .delete()
                     .lt("created_at", cutoff)
                     .is_("registration_end", None)
+                    .select("id")
                     .execute()
                 )
                 count += len(resp.data or [])
@@ -724,6 +725,7 @@ class ExamRepository:
                     .delete()
                     .lt("created_at", cutoff)
                     .lt("registration_end", now)
+                    .select("id")
                     .execute()
                 )
                 count += len(resp.data or [])

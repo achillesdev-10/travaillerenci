@@ -380,7 +380,7 @@ class JobRepository:
             }
 
             if existing:
-                table.update(payload).eq("id", existing["id"]).execute()
+                table.update(payload).select("id").eq("id", existing["id"]).execute()
             else:
                 table.insert(payload).execute()
         except Exception as exc:
@@ -422,6 +422,7 @@ class JobRepository:
                     .update({"is_expired": True, "status": "archived", "updated_at": now})
                     .lt("deadline", now)
                     .in_("status", ["pending", "published"])
+                    .select("id")
                     .execute()
                 )
                 count = max(count, len(resp.data or []))
@@ -459,6 +460,7 @@ class JobRepository:
                     .update({"status": "published", "is_verified": True})
                     .eq("status", "pending")
                     .lt("created_at", cutoff)
+                    .select("id")
                     .execute()
                 )
                 count = max(count, len(resp.data or []))
@@ -492,6 +494,7 @@ class JobRepository:
                     .delete()
                     .lt("created_at", cutoff)
                     .is_("deadline", None)
+                    .select("id")
                     .execute()
                 )
                 count += len(resp.data or [])
@@ -500,6 +503,7 @@ class JobRepository:
                     .delete()
                     .lt("created_at", cutoff)
                     .lt("deadline", now)
+                    .select("id")
                     .execute()
                 )
                 count += len(resp.data or [])

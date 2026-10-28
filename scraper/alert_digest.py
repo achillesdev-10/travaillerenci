@@ -628,7 +628,7 @@ class DataStore:
             self.supabase.table("alert_digest_log").insert(payload).execute()
             self.supabase.table("alerts").update(
                 {"last_sent_at": now_iso, "updated_at": now_iso}
-            ).eq("id", alert_id).execute()
+            ).select("id").eq("id", alert_id).execute()
             return
         assert self.conn is not None
         self.conn.executemany(
@@ -646,7 +646,7 @@ class DataStore:
         cutoff = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
         try:
             if self.supabase is not None:
-                self.supabase.table("alert_digest_log").delete().lt("sent_at", cutoff).execute()
+                self.supabase.table("alert_digest_log").delete().lt("sent_at", cutoff).select("id").execute()
             elif self.conn is not None:
                 self.conn.execute("DELETE FROM alert_digest_log WHERE sent_at < ?", (cutoff,))
                 self.conn.commit()
