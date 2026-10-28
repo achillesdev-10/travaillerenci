@@ -5,6 +5,10 @@ on:
     # Toutes les 15 minutes : maintient la règle « publication automatique
     # après 21 minutes » même quand l'admin ne se connecte pas.
     - cron: '*/15 * * * *'
+    # Toutes les 4 heures (à H+07) : exécute aussi les étapes lourdes en lecture
+    # (cleanup-noise sur toute la table exams + digest des alertes) pour réduire
+    # l'egress Supabase — voir conditions `if:` sur ces étapes.
+    - cron: '7 */4 * * *'
   workflow_dispatch: # Déclenchement manuel depuis l'onglet Actions
 
 jobs:
@@ -46,6 +50,10 @@ jobs:
           python scraper/exams_runner.py --maintenance-only
 
       - name: Nettoyage des fiches concours hors-sujet (titres de rubrique / sans info exploitable)
+        # Étape lourde en lecture (lit toute la table exams, descriptions
+        # comprises) : on la limite aux créneaux toutes les 4 h et aux
+        # déclenchements manuels pour réduire l'egress Supabase.
+        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '7 */4 * * *'
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -67,6 +75,10 @@ jobs:
       # ne fait que journaliser (aucun impact sur le cycle de publication).
       # ==========================================================================
       - name: Notifications alertes candidat (nouveaux contenus publiés)
+        # Étape lourde en lecture (alertes, offres des dernières 24 h et
+        # concours) : on la limite aux créneaux toutes les 4 h et aux
+        # déclenchements manuels pour réduire l'egress Supabase.
+        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '7 */4 * * *'
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
