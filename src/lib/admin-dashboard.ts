@@ -1357,14 +1357,16 @@ async function getAdminDashboardDataFromSupabase(
     const weekStart = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
     const [{ count: total }, { count: today }, { count: week }] = await Promise.all([
-      supabase.from("site_visits").select("id", { count: "exact" }),
+      // head: true : on ne récupère que le compteur (`count`), AUCUNE ligne —
+      // évite de télécharger toute la table des visites à chaque dashboard.
+      supabase.from("site_visits").select("id", { count: "exact", head: true }),
       supabase
         .from("site_visits")
-        .select("id", { count: "exact" })
+        .select("id", { count: "exact", head: true })
         .gte("created_at", todayStart.toISOString()),
       supabase
         .from("site_visits")
-        .select("id", { count: "exact" })
+        .select("id", { count: "exact", head: true })
         .gte("created_at", weekStart.toISOString()),
     ]);
 

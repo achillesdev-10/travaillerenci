@@ -111,6 +111,9 @@ export async function searchOpportunities(
           is_archived: false,
           is_expired: false,
           limit: MAX_RESULTS * 2,
+          // Colonnes allégées (sans `description`) : jobToResult n'utilise que
+          // titre/société/lieu/type/date — réduit l'egress Supabase.
+          fields: 'card',
         })
       : Promise.resolve({ rows: [], total: 0 }),
     hasExams

@@ -74,7 +74,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // télécharger les communiqués complets à chaque régénération (egress).
       fields: 'slim',
     }),
-    JobOfferSchemaService.list({ status: 'published', category: ['job', 'internship'], limit: 500, order_by: 'created_at', order_dir: 'desc' }),
+    // Colonnes allégées (sans `description`) : le sitemap n'a besoin que de
+    // l'URL et des dates — réduit l'egress Supabase.
+    JobOfferSchemaService.list({ status: 'published', category: ['job', 'internship'], limit: 500, order_by: 'created_at', order_dir: 'desc', fields: 'card' }),
     JobOfferSchemaService.list({
       status: 'published',
       category: 'scholarship',
