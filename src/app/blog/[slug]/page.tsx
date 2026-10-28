@@ -6,7 +6,7 @@ import SimpleMarkdown from '@/components/content/SimpleMarkdown';
 import CoverImage from '@/components/content/CoverImage';
 import CompactJobCard from '@/components/home/CompactJobCard';
 import { BlogService } from '@/services/blogService';
-import { getCachedPosts } from '@/lib/cachedContent';
+import { getCachedPosts, getCachedPostBySlug } from '@/lib/cachedContent';
 import { getCachedJobVivier } from '@/lib/cachedJobVivier';
 import { SITE_CONFIG } from '@/lib/constants';
 import { IMAGES } from '@/lib/images';
@@ -15,9 +15,13 @@ import { ShareClickTracker } from '@/components/analytics/EventTracker';
 import { articleSector } from '@/lib/relatedContent';
 import { METIER_SEO, landingForOffer } from '@/lib/jobSeo';
 
+// Reste en rendu dynamique : le compteur de vues s'incrémente à CHAQUE visite
+// (en ISR, le code ne s'exécuterait qu'à chaque revalidation, ~5 min, et le
+// compteur 👁 de l'admin compterait faux). En échange, la lecture de
+// l'article passe par un cache 120 s par slug (cachedContent).
+// cache() dédoublonne aussi l'appel entre generateMetadata et la page.
 export const dynamic = 'force-dynamic';
-
-const getPost = cache((slug: string) => BlogService.getBySlug(slug));
+const getPost = cache((slug: string) => getCachedPostBySlug(slug));
 
 export async function generateMetadata({
   params,

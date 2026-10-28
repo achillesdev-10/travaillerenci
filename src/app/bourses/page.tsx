@@ -31,7 +31,10 @@ export const metadata = {
   },
 };
 
-export const dynamic = 'force-dynamic';
+// Aucune donnée propre au visiteur dans le rendu serveur (les bourses sont
+// tirées d'un chargeur en cache 10 min, et l'état « sauvegarder » est calculé
+// côté client) : la page HTML est servie en cache et revalidée toutes les 5 min.
+export const revalidate = 300;
 
 export default async function BoursesPage() {
   // Les bourses dont la date limite est dépassée ne sont pas présentées comme

@@ -37,6 +37,18 @@ const cachedPosts = unstable_cache(
   { revalidate: LIST_REVALIDATE, tags: ['blog'] },
 );
 
+/**
+ * Article de blog par slug : la page /blog/[slug] incrémente le compteur de
+ * vues à CHAQUE visite (effet de bord par requête) → elle reste en rendu
+ * dynamique plutôt qu'en ISR. Mettre la lecture en cache par slug (120 s)
+ * évite de re-télécharger l'article complet à chaque visite (egress Supabase).
+ */
+const cachedPostBySlug = unstable_cache(
+  (slug: string) => BlogService.getBySlug(slug),
+  ['public-blog-post'],
+  { revalidate: LIST_REVALIDATE, tags: ['blog'] },
+);
+
 const cachedArticles = unstable_cache(
   (filters: ArticleFilters) => ArticleService.list(filters),
   ['public-article-list'],
@@ -67,6 +79,10 @@ export function getCachedExamOrganizers() {
 
 export function getCachedPosts(filters: BlogPostFilters) {
   return filters.keyword ? BlogService.list(filters) : cachedPosts(filters);
+}
+
+export function getCachedPostBySlug(slug: string) {
+  return cachedPostBySlug(slug);
 }
 
 export function getCachedArticles(filters: ArticleFilters) {

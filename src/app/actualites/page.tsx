@@ -7,6 +7,9 @@ import { formatDateShort, formatRelativeTime, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
 import { IMAGES } from '@/lib/images';
 
+// Reste dynamique : la page lit searchParams (recherche q, catégorie, page)
+// pour filtrer/paginer. En échange, la liste passe par getCachedArticles
+// (cache 120 s ; les recherches libres q=… restent directes, par conception).
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {

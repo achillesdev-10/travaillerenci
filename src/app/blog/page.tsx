@@ -7,6 +7,9 @@ import { formatDateShort } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
 import { IMAGES } from '@/lib/images';
 
+// Reste dynamique : la page lit searchParams (filtre par étiquette disponible
+// ?tag=…) pour générer titres/métadonnées. En échange, la liste passe par
+// getCachedPosts (cache 120 s, invalidé par tag 'blog') → egress limité.
 export const dynamic = 'force-dynamic';
 
 interface BlogPageProps {
