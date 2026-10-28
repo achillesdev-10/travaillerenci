@@ -1357,18 +1357,36 @@ async function getAdminDashboardDataFromSupabase(
     const weekStart = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
     const [{ count: total }, { count: today }, { count: week }] = await Promise.all([
-      supabase.from("site_visits").select("id", { count: "exact" }),
+      // head: true : on ne récupère que le compteur (`count`), AUCUNE ligne —
+      // évite de télécharger toute la table des visites à chaque dashboard.
+      supabase.from("site_visits").select("id", { count: "exact", head: true }),
       supabase
         .from("site_visits")
-        .select("id", { count: "exact" })
+        .select("id", { count: "exact", head: true })
         .gte("created_at", todayStart.toISOString()),
       supabase
         .from("site_visits")
-        .select("id", { count: "exact" })
+        .select("id", { count: "exact", head: true })
         .gte("created_at", weekStart.toISOString()),
     ]);
 
-    totalVisits = numberFromUnknown(total);
+    // Purge (migration 0033) : les visites > 90 jours quittent `site_visits`
+    // pour être agrégées dans `site_visits_daily` (1 ligne par jour+source).
+    // Le total affiché = somme des agrégats + lignes actuelles, pour qu'il ne
+    // chute pas après la première purge. Les compteurs « aujourd'hui » et
+    // « cette semaine » portent sur des fenêtres ≤ 7 jours : jamais purgés.
+    let aggregatedVisits = 0;
+    try {
+      const { data: dailyAgg } = await supabase.from("site_visits_daily").select("visits");
+      for (const row of dailyAgg ?? []) {
+        aggregatedVisits += numberFromUnknown(row.visits);
+      }
+    } catch {
+      // Table d'agrégats absente (migration 0033 non appliquée) : le total
+      // reste simplement la somme des lignes `site_visits` actuelles.
+    }
+
+    totalVisits = numberFromUnknown(total) + aggregatedVisits;
     visitsToday = numberFromUnknown(today);
     visitsThisWeek = numberFromUnknown(week);
   } catch {
