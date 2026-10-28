@@ -26,7 +26,7 @@ import {
   ShareClickTracker,
 } from '@/components/analytics/EventTracker';
 
-export const revalidate = 300;
+export const revalidate = 3600;
 
 interface PageProps {
   params: Promise<{ id: string }>;

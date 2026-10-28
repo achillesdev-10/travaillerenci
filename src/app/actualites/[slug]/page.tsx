@@ -10,7 +10,7 @@ import ShareButton from '@/components/ShareButton';
 import { formatDate, formatRelativeTime, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
 
-export const revalidate = 300;
+export const revalidate = 3600;
 
 const getArticle = cache((slug: string) => ArticleService.getBySlug(slug));
 

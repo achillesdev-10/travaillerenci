@@ -13,7 +13,7 @@ import { jobDefaultImage } from '@/lib/images';
 import CoverImage from '@/components/content/CoverImage';
 import ShareButton from '@/components/ShareButton';
 
-export const revalidate = 300;
+export const revalidate = 3600;
 
 const getBourse = cache((id: string) => JobOfferSchemaService.getById(id));
 
