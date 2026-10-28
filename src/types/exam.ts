@@ -91,8 +91,12 @@ export interface ExamFilters {
   offset?: number;
   order_by?: 'created_at' | 'title' | 'organizer' | 'registration_end';
   order_dir?: 'asc' | 'desc';
-  /** `card` omet le communiqué complet et les documents (listes publiques). */
-  fields?: 'full' | 'card';
+  /** Niveau de détail des lignes renvoyées :
+   *  - `full` : tout ;
+   *  - `card` : sans les documents (listes publiques) ;
+   *  - `slim` : colonnes minimales (sitemap, assistant) — sans le communiqué
+   *    complet ni les champs secondaires, pour réduire l'egress Supabase. */
+  fields?: 'full' | 'card' | 'slim';
 }
 
 /** Retour paginé générique. */

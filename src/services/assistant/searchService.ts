@@ -118,6 +118,9 @@ export async function searchOpportunities(
           keyword: keyword || undefined,
           status: 'published',
           limit: MAX_RESULTS * 2,
+          // Colonnes minimales ( titre/organisateur/dates/villes suffisent à
+          // examToResult) : évite de télécharger les communiqués complets.
+          fields: 'slim',
         })
       : Promise.resolve({ rows: [], total: 0 }),
   ]);

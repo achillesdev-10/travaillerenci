@@ -70,7 +70,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       limit: 500,
       order_by: 'created_at',
       order_dir: 'desc',
-      fields: 'card',
+      // Colonnes minimales (slug/dates suffisent pour le sitemap) : évite de
+      // télécharger les communiqués complets à chaque régénération (egress).
+      fields: 'slim',
     }),
     JobOfferSchemaService.list({ status: 'published', category: ['job', 'internship'], limit: 500, order_by: 'created_at', order_dir: 'desc' }),
     JobOfferSchemaService.list({

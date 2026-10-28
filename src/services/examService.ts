@@ -128,6 +128,12 @@ const EXAM_FULL_COLUMNS =
 const EXAM_CARD_COLUMNS =
   'id,title,slug,organizer,category,exam_type,status,description_md,registration_start,registration_end,exam_date,results_date,age_min,age_max,age_reference_date,nationality,diplomas,min_diploma_level,positions_count,registration_fee,location,cities,source_url,source_website,confidence,views_count,is_verified,seo_title,seo_description,seo_keywords,published_at,created_at,updated_at';
 
+/** Colonnes minimales (sitemap, assistant) : celles de `card` sans le
+ *  communiqué complet (`description_md`, colonne la plus lourde) ni les champs
+ *  secondaires — lecture en lecture seule (egress Supabase). */
+const EXAM_SLIM_COLUMNS =
+  'id,title,slug,organizer,category,exam_type,status,registration_start,registration_end,exam_date,results_date,positions_count,location,cities,source_url,source_website,is_verified,seo_title,seo_description,published_at,created_at,updated_at';
+
 function rowToExam(row: any): Exam {
   return {
     ...row,
@@ -774,7 +780,12 @@ export class ExamService {
       fields = 'full',
     } = filters;
 
-    const columns: string = fields === 'card' ? EXAM_CARD_COLUMNS : EXAM_FULL_COLUMNS;
+    const columns: string =
+      fields === 'slim'
+        ? EXAM_SLIM_COLUMNS
+        : fields === 'card'
+          ? EXAM_CARD_COLUMNS
+          : EXAM_FULL_COLUMNS;
     let query = supabase.from('exams').select(columns as any, { count: 'exact' });
 
     if (keyword) {
