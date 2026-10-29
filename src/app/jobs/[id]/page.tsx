@@ -3,9 +3,15 @@ import Image from 'next/image';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { Metadata } from 'next';
 import { cache } from 'react';
-import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
+import {
+  getJobByIdCached,
+  getJobBySlugCached,
+  getSimilarJobsByCity,
+  getSimilarJobsByContract,
+} from '@/lib/cachedJobOffer';
 import { getCachedJobVivier } from '@/lib/cachedJobVivier';
-import { getCachedPosts } from '@/lib/cachedContent';
+import { getCachedPostsLong } from '@/lib/cachedContent';
+import JobExpiryBanner from '@/components/jobs/JobExpiryBanner';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
 import SafetyNotice from '@/components/content/SafetyNotice';
 import SaveButton from '@/components/saved/SaveButton';
@@ -26,7 +32,16 @@ import {
   ShareClickTracker,
 } from '@/components/analytics/EventTracker';
 
-export const revalidate = 3600;
+/**
+ * ISR 24 h : les 5 lectures BDD de la fiche (offre, 2 listes « similaires »,
+ * vivier 500, articles récents) passent par le Data Cache avec le même TTL
+ * (sinon le minimum de l'arbre rabaisserait la page). La fraîcheur à la
+ * publication / modification est officielle :
+ * revalidateJobSurfaces() → revalidateTag('job-offers') + revalidatePath
+ * (recruteur, admin, scraper); l'expiration est gérée côté client
+ * (JobExpiryBanner) pour ne pas dépendre du gel du rendu.
+ */
+export const revalidate = 86400;
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -44,9 +59,9 @@ async function findJob(param: string): Promise<JobOfferSchema | null> {
   // Un paramètre qui a la forme d'un UUID est un ID : on évite une requête
   // inutile par slug. Sinon (slug SEO legacy), on résout puis on redirige.
   if (UUID_RE.test(param)) {
-    return JobOfferSchemaService.getById(param);
+    return getJobByIdCached(param);
   }
-  return JobOfferSchemaService.getBySlug(param);
+  return getJobBySlugCached(param);
 }
 
 /** Déduplique l'appel entre generateMetadata et le rendu de la page. */
@@ -120,29 +135,13 @@ export default async function JobDetailPage({ params }: PageProps) {
   }
 
   const deadline = job.deadline ? new Date(job.deadline) : null;
-  const isExpired =
-    job.is_expired ||
-    (deadline !== null &&
-      !Number.isNaN(deadline.getTime()) &&
-      // eslint-disable-next-line react-hooks/purity
-      deadline.getTime() < Date.now());
   // Ville « propre » pour le lien de maillage interne (avant la virgule / le tiret).
   const jobCity = (job.location || '').split(',')[0].split(' - ')[0].trim();
 
   // Suggestions : 3 offres de la même localisation ou du même type de contrat
   const [similarByType, similarByLocation] = await Promise.all([
-    JobOfferSchemaService.list({
-      category: ['job', 'internship'],
-      contract_type: job.contract_type,
-      limit: 4,
-      fields: 'card',
-    }),
-    JobOfferSchemaService.list({
-      category: ['job', 'internship'],
-      location: job.location.split(',')[0].split(' - ')[0],
-      limit: 4,
-      fields: 'card',
-    }),
+    getSimilarJobsByContract({ contractType: job.contract_type }),
+    getSimilarJobsByCity({ city: job.location.split(',')[0].split(' - ')[0] }),
   ]);
 
   const similarIds = new Set<string>([job.id]);
@@ -157,7 +156,7 @@ export default async function JobDetailPage({ params }: PageProps) {
   const activity = job.category === 'internship' ? ('stages' as const) : ('emplois' as const);
   const [vivier, { rows: recentPosts }] = await Promise.all([
     getCachedJobVivier('both'),
-    getCachedPosts({
+    getCachedPostsLong({
       status: 'published',
       limit: 50,
       order_by: 'published_at',
@@ -244,18 +243,10 @@ export default async function JobDetailPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
-      {/* Bannière « offre expirée » — la date limite de candidature est dépassée */}
-      {isExpired && (
-        <div className="bg-rose-600 text-white">
-          <div className="container mx-auto max-w-4xl px-4 py-3 flex items-center gap-3 text-sm font-semibold">
-            <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M12 8v4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-            </svg>
-            Offre expirée
-            {deadline ? ` — la date limite de candidature (${formatDate(job.deadline!)}) est dépassée.` : ' — la date limite de candidature est dépassée.'}
-          </div>
-        </div>
-      )}
+      {/* Bannière « offre expirée » — pilotée côté client (ISR 24 h : le
+          rendu serveur gèle la comparaison à la date de revalidation, c'est
+          ici que l'expiration reste exacte). */}
+      <JobExpiryBanner isExpired={job.is_expired} deadline={job.deadline} />
       {/* ============= HERO / HEADER DU POSTE ============= */}
       <section className="bg-primary/5 dark:bg-primary/10 border-b border-gray-100 dark:border-slate-800">
         <div className="container mx-auto px-4 pt-4 sm:pt-8 pb-6 max-w-4xl">
@@ -573,7 +564,10 @@ export default async function JobDetailPage({ params }: PageProps) {
                   <MetaRow
                     label="Date limite"
                     value={formatDate(job.deadline)}
-                    tone={isExpired ? 'danger' : 'normal'}
+                    // Le drapeau BDD (géré par l'admin / le scraper) reste la
+                    // source serveur ; l'expiration exacte est côté client
+                    // (bannière ci-dessus).
+                    tone={job.is_expired ? 'danger' : 'normal'}
                   />
                 )}
                 <MetaRow

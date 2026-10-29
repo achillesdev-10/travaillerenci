@@ -39,9 +39,14 @@ async function loadVivier(scope: JobVivierScope): Promise<JobOfferSchema[]> {
  * Vivier partagé par toutes les pages SEO (villes, métiers, combinaisons).
  * Sans ce cache, chaque page dynamique ou revalidation ISR relançait la même
  * requête de 500 lignes complètes.
+ *
+ * TTL 24 h : /jobs/[id] est ISR 86400 et une entrée plus courte ici
+ * rabaisserait la revalidation effective de toute la page à cette durée ;
+ * la fraîcheur est assurée par revalidateTag('job-offers') à chaque
+ * publication / modification (revalidateJobSurfaces).
  */
 export const getCachedJobVivier = unstable_cache(loadVivier, ['job-vivier'], {
-  revalidate: 600,
+  revalidate: 86400,
   tags: ['job-offers', 'job-vivier'],
 });
 
