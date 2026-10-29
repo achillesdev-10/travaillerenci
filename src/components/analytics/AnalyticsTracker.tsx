@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { resolveTrafficSource } from "@/lib/trafficSource";
+import { isLikelyBot } from "@/lib/analyticsClient";
 
 /**
  * Source de trafic (§23) : calculée UNE fois par chargement de page, sur la
@@ -31,6 +32,12 @@ export default function AnalyticsTracker() {
 
   useEffect(() => {
     if (!pathname || pathname.startsWith("/cz7tk")) {
+      return;
+    }
+
+    // Perf CPU : pas d'invocation /api/analytics/track pour les robots
+    // connus (la route garde son garde-fou serveur en profondeur).
+    if (isLikelyBot()) {
       return;
     }
 
