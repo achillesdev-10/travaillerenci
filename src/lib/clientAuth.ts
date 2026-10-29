@@ -10,6 +10,8 @@
  *  via les routes serveur — rien à forger côté navigateur.
  */
 
+import { hasSessionFlagCookie } from '@/lib/sessionFlag';
+
 export type StoredUser = {
   id: string;
   email: string;
@@ -23,24 +25,108 @@ export type StoredUser = {
   avatar_url?: string | null;
 };
 
-/** Récupère l'utilisateur connecté depuis le serveur (cookie httpOnly). */
-export async function fetchCurrentUser(): Promise<StoredUser | null> {
+/** Clé sessionStorage : cache de session pour la durée de l'onglet. */
+const USER_SESSION_STORAGE_KEY = 'te_me_user';
+
+/** Durée de validité du cache sessionStorage (au-delà → revalidation serveur). */
+const USER_CACHE_TTL_MS = 30 * 60 * 1000;
+
+/**
+ * Récupère l'utilisateur connecté depuis le serveur (cookie httpOnly).
+ *
+ * Perf CPU : l'appel réseau n'est fait que si le drapeau NON sensible
+ * `te_session=1` est présent (posé à la connexion, supprimé à la
+ * déconnexion). Pour les visiteurs anonymes (la majorité du trafic),
+ * retour immédiat de null sans invoquer /api/auth/me. Le résultat est
+ * ensuite mis en sessionStorage pour la durée de l'onglet (TTL de
+ * 30 min par prudence : nom/avatar/email vérifiables au rechargement).
+ */
+export async function fetchCurrentUser(force = false): Promise<StoredUser | null> {
+  if (!hasSessionFlagCookie()) {
+    // Pas de session → on purge le cache et on retourne immédiatement.
+    persistCachedUser(null);
+    return null;
+  }
+
+  if (!force && inflightUser) return inflightUser;
+  if (!force) {
+    const cached = readCachedFreshUser();
+    if (cached) return cached;
+  }
+
+  const request = fetchCurrentUserFromServer().finally(() => {
+    inflightUser = null;
+  });
+  if (!force) inflightUser = request;
+  return request;
+}
+
+/** Promesse partagée : plusieurs composants au montage → un seul appel réseau. */
+let inflightUser: Promise<StoredUser | null> | null = null;
+
+async function fetchCurrentUserFromServer(): Promise<StoredUser | null> {
   try {
     const res = await fetch('/api/auth/me', {
       method: 'GET',
       cache: 'no-store',
       credentials: 'same-origin',
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      persistCachedUser(null);
+      return null;
+    }
     const data = (await res.json()) as { user: StoredUser | null };
+    persistCachedUser(data.user);
     return data.user;
   } catch {
     return null;
   }
 }
 
-/** Déconnecte côté serveur (supprime le cookie httpOnly). */
+/** Lit le cache sessionStorage si l'entrée existe et est fraîche. */
+function readCachedFreshUser(): StoredUser | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = sessionStorage.getItem(USER_SESSION_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { user: StoredUser | null; at: number };
+    if (!parsed?.user) {
+      sessionStorage.removeItem(USER_SESSION_STORAGE_KEY);
+      return null;
+    }
+    if (Date.now() - parsed.at > USER_CACHE_TTL_MS) return null;
+    return parsed.user;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Écrit/supprime le cache sessionStorage de la session. Ne stocke que le
+ * profil PUBLIC déjà affiché dans le Header (id, email, nom, rôle, avatar)
+ * — rien de secret : la vraie session reste un cookie httpOnly côté serveur.
+ * Utilisé aussi après login/inscription (la réponse a déjà le user).
+ */
+export function persistCachedUser(user: StoredUser | null): void {
+  if (typeof window === 'undefined') return;
+  try {
+    if (user) {
+      sessionStorage.setItem(
+        USER_SESSION_STORAGE_KEY,
+        JSON.stringify({ user, at: Date.now() }),
+      );
+    } else {
+      sessionStorage.removeItem(USER_SESSION_STORAGE_KEY);
+    }
+  } catch {
+    // sessionStorage indisponible (navigation privée stricte) : non bloquant,
+    // les pages rechargeront leur session depuis le serveur (drapeau présent).
+  }
+}
+
+/** Déconnecte côté serveur (supprime le cookie httpOnly ET le drapeau). */
 export async function logoutCurrentUser(): Promise<void> {
+  persistCachedUser(null);
   try {
     await fetch('/api/auth/logout', {
       method: 'POST',
@@ -55,29 +141,16 @@ export async function logoutCurrentUser(): Promise<void> {
 // Session partagée en cache
 // -----------------------------------------------------------------------------
 
-let cachedUserPromise: Promise<StoredUser | null> | null = null;
-let cachedUserResolvedAt = 0;
-const USER_CACHE_TTL = 5 * 60 * 1000; // 5 min
-
 /**
- * Version en cache de fetchCurrentUser (TTL 5 min).
+ * Version en cache de fetchCurrentUser.
  *
  * Utilisée par les composants répétés (bouton « Sauvegarder » sur chaque
- * carte d'offre) : au lieu de N appels /api/auth/me + N appels
- * /api/saved/status au chargement d'une page de listing, un seul appel
- * partagé suffit, et les visiteurs anonymes n'appellent plus du tout
- * /api/saved/status.
+ * carte d'offre) : fetchCurrentUser dédoublonne déjà les appels simultanés
+ * (promesse partagée), met le résultat en sessionStorage pour l'onglet et
+ * court-circuite le réseau pour les visiteurs anonymes (drapeau absent).
  */
 export function fetchCurrentUserCached(): Promise<StoredUser | null> {
-  const now = Date.now();
-  if (cachedUserPromise && now - cachedUserResolvedAt < USER_CACHE_TTL) {
-    return cachedUserPromise;
-  }
-  cachedUserPromise = fetchCurrentUser().then((user) => {
-    cachedUserResolvedAt = Date.now();
-    return user;
-  });
-  return cachedUserPromise;
+  return fetchCurrentUser();
 }
 
 // -----------------------------------------------------------------------------
