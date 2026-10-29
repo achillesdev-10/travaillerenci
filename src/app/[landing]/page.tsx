@@ -21,7 +21,14 @@ import {
   type ParsedJobSeoSlug,
 } from '@/lib/jobSeo';
 
-export const revalidate = 600;
+/**
+ * ISR 1 h : la page est 100 % statique (aucune lecture de cookies /
+ * searchParams / headers ; la seule donnée est le vivier en Data Cache,
+ * déjà partagé avec /jobs/[id]). La fraîcheur reste sous le contrôle
+ * de revalidateJobSurfaces() → revalidatePath('/[landing]', 'page') + le
+ * tag 24 h du vivier : une publication rafraîchit les landing immédiatement.
+ */
+export const revalidate = 3600;
 
 const BASE_URL = getSiteUrl();
 const PAGE_SIZE = 24;
