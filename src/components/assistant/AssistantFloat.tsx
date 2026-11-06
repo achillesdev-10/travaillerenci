@@ -193,6 +193,8 @@ export default function AssistantFloat() {
     const header = document.querySelector('header');
     if (!header) return;
 
+    const mobileNav = document.querySelector<HTMLElement>('[data-mobile-nav]');
+
     // Les mesures de layout (getBoundingClientRect) sont groupées dans une
     // seule lecture par frame (rAF) au lieu d'être relues à chaque scroll /
     // resize — évite les forced reflows répétés (audit Lighthouse).
@@ -203,9 +205,12 @@ export default function AssistantFloat() {
         const headerBottom = header.getBoundingClientRect().bottom;
         // Hauteur effective du panneau — miroir du style inline (clamp 65vh).
         const panelHeight = Math.min(Math.max(window.innerHeight * 0.65, 320), 540);
+        const navHeight = mobileNav?.getBoundingClientRect().height ?? 0;
+        const baseBottom = navHeight > 0 ? navHeight + 16 : 20;
+        const panelBottom = baseBottom + 56 + 8;
         const widgetTop = open
-          ? window.innerHeight - 84 - panelHeight // bottom: 5.25rem (84px)
-          : window.innerHeight - 20 - 56; // bottom-5 (20px) + h-14 (56px)
+          ? window.innerHeight - panelBottom - panelHeight
+          : window.innerHeight - baseBottom - 56;
         setHeaderOverlap(widgetTop < headerBottom);
       });
     };
@@ -370,7 +375,7 @@ export default function AssistantFloat() {
           // transition-[opacity,transform] uniquement : `visibility`
           // (classe invisible) bascule instantanément, sans animation —
           // corrige l'audit « animation non composée sur visibility ».
-          'group fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-white shadow-xl shadow-primary/30 transition-[opacity,transform] duration-300 hover:scale-105 hover:shadow-primary/50 active:scale-95',
+          'group fixed bottom-[calc(5rem_+_env(safe-area-inset-bottom))] right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-white shadow-xl shadow-primary/30 transition-[opacity,transform] duration-300 hover:scale-105 hover:shadow-primary/50 active:scale-95 lg:bottom-5',
           visible && !footerVisible && !headerOverlap
             ? 'translate-y-0 opacity-100'
             : 'invisible translate-y-16 opacity-0 pointer-events-none',
@@ -399,15 +404,10 @@ export default function AssistantFloat() {
       {/* ===================== FENÊTRE DE CHAT (compacte & responsive) ===================== */}
       {open && !footerVisible && !headerOverlap && (
         <div
-          className="fixed z-50 flex flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl shadow-black/25 animate-pop"
+          className="fixed bottom-[calc(9rem_+_env(safe-area-inset-bottom))] z-50 flex flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl shadow-black/25 animate-pop lg:bottom-[5.25rem]"
           style={{
-            // Ancrage en bas à droite, au-dessus du bouton : largeur plafonnée
-            // (mobile pleine largeur moins les marges, desktop 400px) et
-            // hauteur limitée pour rester compacte sur tous les écrans.
             right: '1.25rem',
-            bottom: '5.25rem',
             width: 'min(calc(100vw - 2.5rem), 400px)',
-            // Hauteur plafonnée mais jamais sous 320px (écrans paysage courts).
             height: 'clamp(320px, 65vh, 540px)',
           }}
           role="dialog"

@@ -65,6 +65,18 @@ export default function SearchBar({
   const [contract, setContract] = useState(initialContract);
   const [isPending, startTransition] = useTransition();
 
+  useEffect(() => {
+    const focusFromHash = () => {
+      if (window.location.hash !== '#search-keyword') return;
+      const input = document.getElementById('search-keyword');
+      if (input instanceof HTMLInputElement) input.focus();
+    };
+
+    focusFromHash();
+    window.addEventListener('hashchange', focusFromHash);
+    return () => window.removeEventListener('hashchange', focusFromHash);
+  }, []);
+
   // ── Latest-values ref for the debounced callback ───────────────────────
   // On stocke les valeurs "fraîches" dans un seul ref, mis à jour via
   // useEffect (jamais pendant le render). Le debounce ne lit le ref que

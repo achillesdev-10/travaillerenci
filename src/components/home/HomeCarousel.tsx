@@ -120,7 +120,7 @@ export default function HomeCarousel({ slides }: { slides: CarouselSlide[] }) {
             // l'audit « aria-hidden ne doit pas contenir d'éléments focusables ».
             inert={i !== current || undefined}
           >
-            <Link href={s.href} className="block h-full w-full">
+            <Link href={s.href} className="block h-full w-full text-white">
               <SlideMedia slide={s} />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent" />
 

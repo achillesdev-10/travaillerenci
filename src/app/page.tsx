@@ -557,7 +557,7 @@ export default async function HomePage() {
             <Link
               key={link.label}
               href={link.href}
-              className="group relative overflow-hidden rounded-2xl p-4 sm:p-5 text-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl animate-fade-in-up"
+              className="group relative overflow-hidden rounded-2xl bg-slate-900 p-4 sm:p-5 text-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl animate-fade-in-up"
               style={{ animationDelay: `${i * 60}ms` }}
             >
               {/* Photo de fond + voile sombre (l'image ne charge pas ? la couleur de repli reste visible) */}
@@ -609,7 +609,7 @@ export default async function HomePage() {
             <Link
               key={sector.q}
               href={`/jobs?q=${encodeURIComponent(sector.q)}`}
-              className="group relative overflow-hidden rounded-2xl aspect-[4/3] shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl animate-fade-in-up"
+              className="group relative overflow-hidden rounded-2xl aspect-[4/3] bg-slate-900 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl animate-fade-in-up"
               style={{ animationDelay: `${i * 60}ms` }}
             >
               <Image

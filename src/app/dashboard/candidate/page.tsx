@@ -212,12 +212,12 @@ export default function CandidateDashboardPage() {
           {/* Colonne principale (2/3) */}
           <div className="lg:col-span-2 space-y-6">
             {/* Profil d'alerte */}
-            <section id="profil" aria-label="Mon profil d'alerte">
+            <section id="profil" aria-label="Mon profil d'alerte" className="scroll-mt-24">
               <ProfileSection />
             </section>
 
             {/* Offres sauvegardées */}
-            <section aria-label="Mes offres sauvegardées">
+            <section id="favoris" aria-label="Mes offres sauvegardées" className="scroll-mt-24">
               <SavedItemsSection />
             </section>
 
