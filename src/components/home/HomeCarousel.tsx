@@ -120,7 +120,7 @@ export default function HomeCarousel({ slides }: { slides: CarouselSlide[] }) {
             // l'audit « aria-hidden ne doit pas contenir d'éléments focusables ».
             inert={i !== current || undefined}
           >
-            <Link href={s.href} className="block h-full w-full">
+            <Link href={s.href} className="block h-full w-full text-white">
               <SlideMedia slide={s} />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent" />
 
@@ -145,7 +145,7 @@ export default function HomeCarousel({ slides }: { slides: CarouselSlide[] }) {
                   {s.title}
                 </h3>
                 <p className="mt-1 text-xs sm:text-sm text-gray-200/90 truncate">{s.subtitle}</p>
-                <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-bold text-slate-900 transition-transform group-hover:gap-2.5">
+                <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-bold text-black transition-transform group-hover:gap-2.5">
                   Découvrir
                   <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
                     <path d="M5 12h14" />
@@ -163,7 +163,7 @@ export default function HomeCarousel({ slides }: { slides: CarouselSlide[] }) {
             <button
               onClick={() => go(current - 1)}
               aria-label="Slide précédente"
-              className="absolute left-2 sm:left-4 top-1/2 z-20 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-slate-800 shadow-lg opacity-0 transition-opacity group-hover:opacity-100 hover:bg-white"
+              className="absolute left-2 sm:left-4 top-1/2 z-20 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-black shadow-lg opacity-0 transition-opacity group-hover:opacity-100 hover:bg-white"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 12H5" />
@@ -173,7 +173,7 @@ export default function HomeCarousel({ slides }: { slides: CarouselSlide[] }) {
             <button
               onClick={() => go(current + 1)}
               aria-label="Slide suivante"
-              className="absolute right-2 sm:right-4 top-1/2 z-20 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-slate-800 shadow-lg opacity-0 transition-opacity group-hover:opacity-100 hover:bg-white"
+              className="absolute right-2 sm:right-4 top-1/2 z-20 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-black shadow-lg opacity-0 transition-opacity group-hover:opacity-100 hover:bg-white"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14" />

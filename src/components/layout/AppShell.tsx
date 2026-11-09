@@ -4,10 +4,8 @@ import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
 
-// Assistant : jamais critique au premier affichage (bouton invisible pendant
-// ~2 s puis chat sur demande). Chargé après hydratation → son JS/CSS (dont
-// SimpleMarkdown) sort du bundle initial de chaque page.
 const AssistantFloat = dynamic(() => import('@/components/assistant/AssistantFloat'), {
   ssr: false,
 });
@@ -27,8 +25,11 @@ export default function AppShell({
   return (
     <>
       <Header />
-      <main className="flex-1">{children}</main>
-      <Footer />
+      <div className="flex flex-1 flex-col bg-white pb-[calc(4.5rem_+_env(safe-area-inset-bottom))] dark:bg-slate-950 lg:pb-0">
+        <main className="flex-1">{children}</main>
+        <Footer />
+      </div>
+      <MobileBottomNav />
       <AssistantFloat />
     </>
   );

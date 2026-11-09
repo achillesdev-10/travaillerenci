@@ -65,6 +65,18 @@ export default function SearchBar({
   const [contract, setContract] = useState(initialContract);
   const [isPending, startTransition] = useTransition();
 
+  useEffect(() => {
+    const focusFromHash = () => {
+      if (window.location.hash !== '#search-keyword') return;
+      const input = document.getElementById('search-keyword');
+      if (input instanceof HTMLInputElement) input.focus();
+    };
+
+    focusFromHash();
+    window.addEventListener('hashchange', focusFromHash);
+    return () => window.removeEventListener('hashchange', focusFromHash);
+  }, []);
+
   // ── Latest-values ref for the debounced callback ───────────────────────
   // On stocke les valeurs "fraîches" dans un seul ref, mis à jour via
   // useEffect (jamais pendant le render). Le debounce ne lit le ref que
@@ -138,7 +150,7 @@ export default function SearchBar({
           compact ? '' : 'md:col-span-6'
         )}>
           <label htmlFor="search-keyword" className="sr-only">Mot-clé (poste, compétence, entreprise)</label>
-          <span className="flex items-center justify-center pl-3 sm:pl-4 text-gray-400 pointer-events-none">
+          <span className="flex items-center justify-center pl-3 sm:pl-4 text-black/50 pointer-events-none">
             <svg className="w-5 h-5 sm:w-[22px] sm:h-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <circle cx="11" cy="11" r="8" />
               <path d="m21 21-4.3-4.3" />
@@ -154,7 +166,7 @@ export default function SearchBar({
             autoComplete="off"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            className="w-full pl-2 pr-3 sm:pl-3 sm:pr-4 py-3 sm:py-3.5 rounded-xl bg-gray-50/80 border border-transparent focus:bg-white focus:border-primary/40 focus:ring-2 focus:ring-primary/15 outline-none text-sm sm:text-base placeholder:text-gray-600 transition-colors"
+            className="w-full pl-2 pr-3 sm:pl-3 sm:pr-4 py-3 sm:py-3.5 rounded-xl bg-brand-soft/60 border border-transparent focus:bg-white focus:border-primary/40 focus:ring-2 focus:ring-primary/15 outline-none text-sm sm:text-base placeholder:text-black/40 transition-colors"
           />
         </div>
 
@@ -169,19 +181,19 @@ export default function SearchBar({
                 setLocation(e.target.value);
                 pushFilters(keyword, e.target.value, contract);
               }}
-              className="w-full appearance-none pl-10 sm:pl-11 pr-8 py-3 sm:py-3.5 rounded-xl bg-gray-50/80 border border-transparent focus:bg-white focus:border-primary/40 focus:ring-2 focus:ring-primary/15 outline-none text-[13px] sm:text-sm text-gray-700"
+              className="w-full appearance-none pl-10 sm:pl-11 pr-8 py-3 sm:py-3.5 rounded-xl bg-brand-soft/60 border border-transparent focus:bg-white focus:border-primary/40 focus:ring-2 focus:ring-primary/15 outline-none text-[13px] sm:text-sm text-black"
             >
               {CITY_OPTIONS.map((opt) => (
                 <option key={opt.value || 'all'} value={opt.value}>{opt.label}</option>
               ))}
             </select>
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-black/50">
               <svg className="w-[18px] h-[18px] sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                 <circle cx="12" cy="10" r="3" />
               </svg>
             </span>
-            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-black/50">
               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="m6 9 6 6 6-6" />
               </svg>
@@ -198,13 +210,13 @@ export default function SearchBar({
                 setContract(e.target.value);
                 pushFilters(keyword, location, e.target.value);
               }}
-              className="w-full appearance-none pl-10 sm:pl-11 pr-8 py-3 sm:py-3.5 rounded-xl bg-gray-50/80 border border-transparent focus:bg-white focus:border-primary/40 focus:ring-2 focus:ring-primary/15 outline-none text-[13px] sm:text-sm text-gray-700"
+              className="w-full appearance-none pl-10 sm:pl-11 pr-8 py-3 sm:py-3.5 rounded-xl bg-brand-soft/60 border border-transparent focus:bg-white focus:border-primary/40 focus:ring-2 focus:ring-primary/15 outline-none text-[13px] sm:text-sm text-black"
             >
               {CONTRACT_OPTIONS.map((opt) => (
                 <option key={opt.value || 'all'} value={opt.value}>{opt.label}</option>
               ))}
             </select>
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-black/50">
               <svg className="w-[18px] h-[18px] sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <rect x="3" y="5" width="18" height="16" rx="2" />
                 <path d="M8 3v4" />
@@ -212,7 +224,7 @@ export default function SearchBar({
                 <path d="M3 11h18" />
               </svg>
             </span>
-            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-black/50">
               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="m6 9 6 6 6-6" />
               </svg>

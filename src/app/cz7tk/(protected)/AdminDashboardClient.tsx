@@ -45,7 +45,7 @@ const BULK_ACTIONS: Array<{
   {
     action: "verify",
     label: "Vérifier",
-    tone: "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25",
+    tone: "bg-brand/15 text-brand border border-brand/30 hover:bg-brand/25",
   },
   {
     action: "archive",
@@ -77,7 +77,7 @@ function isDeadlinePassed(date: string | null) {
 function statusClasses(status: DashboardOffer["status"]) {
   switch (status) {
     case "Vérifiées":
-      return "border-emerald-500/30 bg-emerald-500/10 text-emerald-300";
+      return "border-brand/30 bg-brand/10 text-brand";
     case "Expirées":
       return "border-white/10 bg-white/[0.04] text-slate-400";
     default:
@@ -101,7 +101,7 @@ function scraperStatusLabel(status: ScraperHealth["status"]) {
 function scraperStatusDot(status: ScraperHealth["status"]) {
   switch (status) {
     case "success":
-      return "bg-emerald-400";
+      return "bg-brand";
     case "running":
       return "bg-sky-400 animate-pulse";
     case "error":
@@ -114,7 +114,7 @@ function scraperStatusDot(status: ScraperHealth["status"]) {
 function scraperStatusClasses(status: ScraperHealth["status"]) {
   switch (status) {
     case "success":
-      return "border-emerald-500/30 bg-emerald-500/10 text-emerald-300";
+      return "border-brand/30 bg-brand/10 text-brand";
     case "running":
       return "border-sky-500/30 bg-sky-500/10 text-sky-300";
     case "error":
@@ -145,7 +145,7 @@ function ActivityChart({ activity }: { activity: JobOffersActivityPoint[] }) {
         >
           <div className="relative flex w-full min-w-0 flex-1 items-end">
             <div
-              className="w-full rounded-t-lg bg-gradient-to-t from-emerald-600 to-emerald-400 transition-all group-hover:from-emerald-500 group-hover:to-emerald-300"
+              className="w-full rounded-t-lg bg-gradient-to-t from-brand to-brand transition-all group-hover:from-brand group-hover:to-brand"
               style={{ height: `${Math.max(3, (point.total / max) * 100)}%` }}
             />
             <div className="pointer-events-none absolute -top-9 left-1/2 z-10 hidden -translate-x-1/2 whitespace-nowrap rounded-lg border border-white/10 bg-slate-900 px-2.5 py-1 text-[10px] font-semibold text-slate-200 shadow-xl group-hover:block">
@@ -443,7 +443,7 @@ export default function AdminDashboardClient({
       label: "Offres actives",
       value: stats.totalActiveOffers,
       hint: "En attente ou vérifiées",
-      accent: "from-emerald-500 to-teal-600",
+      accent: "from-brand to-brand-strong",
       icon: (
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
@@ -522,7 +522,7 @@ export default function AdminDashboardClient({
       label: "Profils complétés",
       value: growth.completedProfiles,
       hint: `${growth.profilesCompletedThisWeek} cette semaine · seuil 70 %`,
-      accent: "from-teal-500 to-emerald-600",
+      accent: "from-brand-strong to-brand",
       icon: (
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
@@ -557,7 +557,7 @@ export default function AdminDashboardClient({
       label: "Offres publiées",
       value: growth.publishedOffers ?? 0,
       hint: "Statut publié en ligne",
-      accent: "from-lime-500 to-emerald-600",
+      accent: "from-brand-accent to-brand",
       icon: (
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M4 4h16v12H7l-3 3Z" />
@@ -586,7 +586,7 @@ export default function AdminDashboardClient({
       <section className="rounded-3xl border border-white/[0.06] bg-gradient-to-br from-slate-900 to-slate-950 p-5 shadow-xl shadow-black/20 sm:p-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-400">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand">
               TravaillerenCi Admin
             </p>
             <div>
@@ -618,7 +618,7 @@ export default function AdminDashboardClient({
               type="button"
               onClick={handleTriggerScraper}
               disabled={isPending}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/25 transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand/25 transition hover:bg-brand disabled:cursor-not-allowed disabled:opacity-60"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 8V4" />
@@ -636,7 +636,7 @@ export default function AdminDashboardClient({
           <div
             className={`mt-5 rounded-2xl border px-4 py-3 text-sm ${
               feedback.tone === "success"
-                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                ? "border-brand/30 bg-brand/10 text-brand"
                 : "border-rose-500/30 bg-rose-500/10 text-rose-300"
             }`}
           >
@@ -672,7 +672,7 @@ export default function AdminDashboardClient({
               className="hover-lift group block rounded-3xl border border-white/[0.06] bg-slate-900/60 p-5 shadow-lg shadow-black/20 backdrop-blur transition"
             >
               {inner}
-              <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 transition group-hover:text-emerald-300">
+              <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 transition group-hover:text-brand">
                 Voir la file →
               </span>
             </Link>
@@ -723,7 +723,7 @@ export default function AdminDashboardClient({
               <div
                 className={`absolute inset-y-0 left-0 rounded-full bg-gradient-to-r transition-all ${
                   healthScore.level === "good"
-                    ? "from-emerald-500 to-emerald-400"
+                    ? "from-brand to-brand"
                     : healthScore.level === "warning"
                       ? "from-amber-500 to-amber-400"
                       : "from-rose-500 to-rose-400"
@@ -739,7 +739,7 @@ export default function AdminDashboardClient({
                 <span
                   className={`h-1.5 w-1.5 shrink-0 rounded-full ${
                     item.status === "good"
-                      ? "bg-emerald-400"
+                      ? "bg-brand"
                       : item.status === "warning"
                         ? "bg-amber-400"
                         : "bg-rose-400"
@@ -758,7 +758,7 @@ export default function AdminDashboardClient({
             <h2 className="font-[var(--font-display)] text-base font-bold text-white">Entreprendre</h2>
             <Link
               href="/cz7tk/entreprendre"
-              className="text-xs font-semibold text-emerald-400 transition hover:text-emerald-300"
+              className="text-xs font-semibold text-brand transition hover:text-brand"
             >
               Gérer →
             </Link>
@@ -817,12 +817,12 @@ export default function AdminDashboardClient({
                 const rate = Math.round(sh.success_rate * 100);
                 const barColor =
                   rate >= 90
-                    ? "from-emerald-500 to-emerald-400"
+                    ? "from-brand to-brand"
                     : rate >= 60
                       ? "from-amber-500 to-amber-400"
                       : "from-rose-500 to-rose-400";
                 const dotColor =
-                  rate >= 90 ? "bg-emerald-400" : rate >= 60 ? "bg-amber-400" : "bg-rose-400";
+                  rate >= 90 ? "bg-brand" : rate >= 60 ? "bg-amber-400" : "bg-rose-400";
                 return (
                   <div key={source}>
                     <div className="flex items-center justify-between text-sm">
@@ -882,7 +882,7 @@ export default function AdminDashboardClient({
           </div>
           <Link
             href="/cz7tk/reports"
-            className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-emerald-400 transition hover:text-emerald-300"
+            className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-brand transition hover:text-brand"
           >
             Ouvrir la file de modération
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -893,15 +893,15 @@ export default function AdminDashboardClient({
         </div>
 
         {latestReports.length === 0 ? (
-          <div className="mt-5 flex items-center gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.06] px-4 py-6">
-            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500/15">
-              <svg className="h-5 w-5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <div className="mt-5 flex items-center gap-3 rounded-2xl border border-brand/20 bg-brand/[0.06] px-4 py-6">
+            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/15">
+              <svg className="h-5 w-5 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                 <path d="m9 11 3 3L22 4" />
               </svg>
             </span>
             <div>
-              <p className="text-sm font-semibold text-emerald-300">Tout est en ordre</p>
+              <p className="text-sm font-semibold text-brand">Tout est en ordre</p>
               <p className="text-xs text-slate-500">
                 Aucun contenu signalé en attente pour le moment.
               </p>
@@ -930,7 +930,7 @@ export default function AdminDashboardClient({
                           target="_blank"
                           rel="noopener noreferrer"
                           title={report.content.title}
-                          className="block truncate font-medium text-white transition hover:text-emerald-300"
+                          className="block truncate font-medium text-white transition hover:text-brand"
                         >
                           {report.content.title}
                         </a>
@@ -1039,7 +1039,7 @@ export default function AdminDashboardClient({
                   setPage(1);
                 }}
                 placeholder="Titre, entreprise, ville..."
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-brand/50 focus:ring-2 focus:ring-brand/20"
               />
             </label>
 
@@ -1053,7 +1053,7 @@ export default function AdminDashboardClient({
                   );
                   setPage(1);
                 }}
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-500/50"
+                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition focus:border-brand/50"
               >
                 {STATUS_OPTIONS.map((option) => (
                   <option key={option} value={option} className="bg-slate-950">
@@ -1071,7 +1071,7 @@ export default function AdminDashboardClient({
                   setCityFilter(event.target.value);
                   setPage(1);
                 }}
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-500/50"
+                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition focus:border-brand/50"
               >
                 <option value="Toutes" className="bg-slate-950">Toutes</option>
                 {cities.map((city) => (
@@ -1098,7 +1098,7 @@ export default function AdminDashboardClient({
                 key={offer.id}
                 className={`rounded-2xl border p-4 transition-colors ${
                   isSelected
-                    ? "border-emerald-500/40 bg-emerald-500/[0.06]"
+                    ? "border-brand/40 bg-brand/[0.06]"
                     : "border-white/[0.08] bg-slate-950/60"
                 }`}
               >
@@ -1108,7 +1108,7 @@ export default function AdminDashboardClient({
                     checked={isSelected}
                     onChange={() => toggleSelect(offer.id)}
                     aria-label={`Sélectionner ${offer.title}`}
-                    className="mt-1 h-4 w-4 shrink-0 rounded border-white/20 bg-slate-900 text-emerald-500 focus:ring-emerald-500"
+                    className="mt-1 h-4 w-4 shrink-0 rounded border-white/20 bg-slate-900 text-brand focus:ring-brand"
                   />
                   <span
                     className={`inline-flex shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${statusClasses(
@@ -1161,7 +1161,7 @@ export default function AdminDashboardClient({
                       href={offer.sourceUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="font-semibold text-emerald-400 hover:text-emerald-300"
+                      className="font-semibold text-brand hover:text-brand"
                     >
                       Source ↗
                     </a>
@@ -1194,7 +1194,7 @@ export default function AdminDashboardClient({
                         );
                       }}
                       aria-label="Sélectionner toutes les offres visibles"
-                      className="h-4 w-4 rounded border-white/20 bg-slate-900 text-emerald-500 focus:ring-emerald-500"
+                      className="h-4 w-4 rounded border-white/20 bg-slate-900 text-brand focus:ring-brand"
                     />
                   </th>
                   <th className="px-3 py-3 sm:px-4 sm:py-4 sticky left-8 sm:left-10 z-10 bg-slate-950/80">Offre</th>
@@ -1226,7 +1226,7 @@ export default function AdminDashboardClient({
                       key={offer.id}
                       className={`align-top transition ${
                         isSelected
-                          ? "bg-emerald-500/[0.05]"
+                          ? "bg-brand/[0.05]"
                           : "hover:bg-white/[0.03]"
                       }`}
                     >
@@ -1236,7 +1236,7 @@ export default function AdminDashboardClient({
                           checked={isSelected}
                           onChange={() => toggleSelect(offer.id)}
                           aria-label={`Sélectionner ${offer.title}`}
-                          className="mt-1 h-4 w-4 rounded border-white/20 bg-slate-900 text-emerald-500 focus:ring-emerald-500"
+                          className="mt-1 h-4 w-4 rounded border-white/20 bg-slate-900 text-brand focus:ring-brand"
                         />
                       </td>
                       <td className="px-3 py-3 sm:px-4 sm:py-4 sticky left-8 sm:left-10 z-10 bg-slate-950 hover:bg-white/[0.03]">
@@ -1290,7 +1290,7 @@ export default function AdminDashboardClient({
                             href={offer.sourceUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="font-medium text-emerald-400 transition hover:text-emerald-300"
+                            className="font-medium text-brand transition hover:text-brand"
                           >
                             Ouvrir
                           </a>

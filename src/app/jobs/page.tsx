@@ -124,25 +124,25 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
   };
 
   return (
-    <main className="flex-1 min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors py-8 sm:py-12">
+    <main className="flex-1 min-h-screen bg-white dark:bg-slate-950 transition-colors py-8 sm:py-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <div className="container mx-auto px-4 max-w-6xl">
-        <nav aria-label="Fil d'Ariane" className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+        <nav aria-label="Fil d'Ariane" className="text-sm text-black dark:text-white mb-6">
           <Link href="/" className="hover:text-primary">Accueil</Link>
           <span className="mx-2" aria-hidden="true">/</span>
-          <span className="text-gray-900 dark:text-gray-200 font-medium">Offres d'emploi</span>
+          <span className="text-black dark:text-white font-medium">Offres d'emploi</span>
         </nav>
 
         <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-extrabold mb-3 font-[var(--font-display)] text-gray-900 dark:text-white">
+          <h1 className="text-3xl sm:text-4xl font-extrabold mb-3 font-[var(--font-display)] text-black dark:text-white">
             {category === 'internship'
               ? "Offres de stage en Côte d'Ivoire"
               : "Offres d'emploi en Côte d'Ivoire"}
           </h1>
-          <p className="text-gray-600 dark:text-gray-300 text-base sm:text-lg max-w-2xl">
+          <p className="text-black dark:text-white text-base sm:text-lg max-w-2xl">
             {category === 'internship'
               ? 'Trouvez le stage qui lancera votre carrière : stages en entreprise, alternances et missions de fin d\u2019études à Abidjan et à l\u2019intérieur du pays.'
               : "Trouvez l'opportunité idéale parmi nos offres vérifiées à Abidjan et à l'intérieur du pays : CDI, CDD, missions et recrutements des entreprises ivoiriennes et internationales."}
@@ -157,7 +157,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
               'inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[12.5px] font-bold transition-all',
               !category
                 ? 'border-primary bg-primary text-white shadow-md shadow-primary/20'
-                : 'border-gray-200 bg-white text-gray-600 hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300',
+                : 'border-line bg-white text-black hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white',
             )}
           >
             Offres d'emploi
@@ -168,21 +168,21 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
               'inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[12.5px] font-bold transition-all',
               category === 'internship'
                 ? 'border-primary bg-primary text-white shadow-md shadow-primary/20'
-                : 'border-gray-200 bg-white text-gray-600 hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300',
+                : 'border-line bg-white text-black hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white',
             )}
           >
             Stages
           </Link>
-          <span className="mx-1 hidden sm:inline-block w-px self-stretch bg-gray-200 dark:bg-slate-700" aria-hidden="true" />
+          <span className="mx-1 hidden sm:inline-block w-px self-stretch bg-line dark:bg-slate-700" aria-hidden="true" />
           <Link
             href="/concours"
-            className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+            className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
           >
             Concours administratifs
           </Link>
           <Link
             href="/bourses"
-            className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+            className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
           >
             Bourses d'études
           </Link>
@@ -200,7 +200,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
 
         {/* Résultats */}
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white font-[var(--font-display)]">
+          <h2 className="text-xl font-bold text-black dark:text-white font-[var(--font-display)]">
             {total} {total > 1 ? 'offres trouvées' : 'offre trouvée'}
             {keyword || city || contract ? ' (filtrées)' : ''}
           </h2>
@@ -213,16 +213,16 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
             ))}
           </div>
         ) : (
-          <div className="bg-white dark:bg-slate-900 border border-dashed border-border rounded-2xl p-8 sm:p-12 text-center">
-            <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gray-50 dark:bg-slate-800 flex items-center justify-center mb-5">
-              <svg className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white dark:bg-slate-900 border border-dashed border-line rounded-2xl p-8 sm:p-12 text-center">
+            <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-brand-soft dark:bg-slate-800 flex items-center justify-center mb-5">
+              <svg className="w-8 h-8 sm:w-10 sm:h-10 text-black dark:text-white dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
             </div>
-            <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2 font-[var(--font-display)]">
+            <h3 className="text-lg sm:text-xl font-bold text-black dark:text-white mb-2 font-[var(--font-display)]">
               Aucune offre ne correspond à vos critères
             </h3>
-            <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
+            <p className="text-sm sm:text-base text-black dark:text-white mb-6 max-w-md mx-auto">
               Essayez de modifier vos filtres, de chercher un autre mot-clé ou de réinitialiser la recherche.
             </p>
             <Link
@@ -240,7 +240,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
             {safePage > 1 && (
               <Link
                 href={filterHref({ page: String(safePage - 1) })}
-                className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-600 transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                className="rounded-xl border border-line bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
               >
                 ← Précédent
               </Link>
@@ -254,7 +254,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
               }, [])
               .map((p, i) =>
                 p === -1 ? (
-                  <span key={`gap-${i}`} className="px-1 text-gray-400">
+                  <span key={`gap-${i}`} className="px-1 text-black dark:text-white">
                     …
                   </span>
                 ) : (
@@ -266,7 +266,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
                       'rounded-xl px-4 py-2 text-sm font-semibold transition-colors',
                       p === safePage
                         ? 'bg-primary text-white shadow-md shadow-primary/20'
-                        : 'border border-gray-200 bg-white text-gray-600 hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300',
+                        : 'border border-line bg-white text-black hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white',
                     )}
                   >
                     {p}
@@ -276,7 +276,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
             {safePage < totalPages && (
               <Link
                 href={filterHref({ page: String(safePage + 1) })}
-                className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-600 transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                className="rounded-xl border border-line bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
               >
                 Suivant →
               </Link>
@@ -287,7 +287,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
         {/* Maillage interne : pages SEO villes / métiers (même verticale) */}
         <section className="mt-12 space-y-6" aria-label="Explorer les offres par ville et par métier">
           <div>
-            <h2 className="mb-3 font-[var(--font-display)] text-lg font-bold text-gray-900 dark:text-white">
+            <h2 className="mb-3 font-[var(--font-display)] text-lg font-bold text-black dark:text-white">
               {category === 'internship' ? 'Stages par ville' : 'Offres par ville'}
             </h2>
             <div className="flex flex-wrap gap-2">
@@ -299,7 +299,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
                     citySlug: city.slug,
                     metierSlug: null,
                   })}
-                  className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                  className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                 >
                   {city.name}
                 </Link>
@@ -307,7 +307,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
             </div>
           </div>
           <div>
-            <h2 className="mb-3 font-[var(--font-display)] text-lg font-bold text-gray-900 dark:text-white">
+            <h2 className="mb-3 font-[var(--font-display)] text-lg font-bold text-black dark:text-white">
               Offres par métier
             </h2>
             <div className="flex flex-wrap gap-2">
@@ -319,7 +319,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
                     citySlug: null,
                     metierSlug: metier.slug,
                   })}
-                  className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                  className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                 >
                   {metier.label}
                 </Link>
@@ -329,11 +329,11 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
         </section>
 
         {/* Bloc éditorial — contexte + confiance */}
-        <section className="mt-12 rounded-2xl border border-gray-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
-          <h2 className="mb-3 font-[var(--font-display)] text-lg font-bold text-gray-900 dark:text-white">
+        <section className="mt-12 rounded-2xl border border-line bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+          <h2 className="mb-3 font-[var(--font-display)] text-lg font-bold text-black dark:text-white">
             Pourquoi chercher un emploi sur TravaillerEnCi ?
           </h2>
-          <div className="max-w-3xl space-y-3 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+          <div className="max-w-3xl space-y-3 text-sm leading-relaxed text-black dark:text-white">
             <p>
               Chaque offre est collectée auprès des sites de recrutement actifs en Côte d'Ivoire,
               relue puis publiée avec ses informations essentielles : intitulé exact du poste,

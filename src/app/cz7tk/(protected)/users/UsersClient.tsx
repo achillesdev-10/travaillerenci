@@ -39,7 +39,7 @@ function roleLabel(role: AdminUserRole) {
 function roleClasses(role: AdminUserRole) {
   switch (role) {
     case "candidate":
-      return "border-emerald-500/30 bg-emerald-500/10 text-emerald-300";
+      return "border-brand/30 bg-brand/10 text-brand";
     case "company":
       return "border-sky-500/30 bg-sky-500/10 text-sky-300";
     case "admin":
@@ -54,7 +54,7 @@ function sourceBadge(data: AdminUsersData) {
     case "supabase":
       return {
         label: "Source : Supabase",
-        cls: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
+        cls: "border-brand/30 bg-brand/10 text-brand",
       };
     case "sqlite":
       return {
@@ -72,7 +72,7 @@ function sourceBadge(data: AdminUsersData) {
 function Avatar({ name, email }: { name: string | null; email: string }) {
   const letter = (name || email || "?").charAt(0).toUpperCase();
   return (
-    <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-sm font-bold text-white shadow-lg shadow-emerald-500/20">
+    <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand to-brand-strong text-sm font-bold text-white shadow-lg shadow-brand/20">
       {letter}
     </span>
   );
@@ -118,7 +118,7 @@ export default function UsersClient({ initialData }: UsersClientProps) {
       label: "Inscrits totaux",
       value: data.total,
       hint: "Comptes enregistrés",
-      accent: "from-emerald-500 to-teal-600",
+      accent: "from-brand to-brand-strong",
       icon: (
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="9" cy="8" r="3.5" />
@@ -185,7 +185,7 @@ export default function UsersClient({ initialData }: UsersClientProps) {
       <section className="rounded-3xl border border-white/[0.06] bg-gradient-to-br from-slate-900 to-slate-950 p-5 shadow-xl shadow-black/20 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-400">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand">
               Communauté inscrite
             </p>
             <h1 className="mt-1 font-[var(--font-display)] text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
@@ -305,7 +305,7 @@ export default function UsersClient({ initialData }: UsersClientProps) {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Email ou nom..."
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-brand/50 focus:ring-2 focus:ring-brand/20"
               />
             </label>
 
@@ -314,7 +314,7 @@ export default function UsersClient({ initialData }: UsersClientProps) {
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value as AdminUserRole | "all")}
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-500/50"
+                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition focus:border-brand/50"
               >
                 {ROLE_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value} className="bg-slate-950">
@@ -364,7 +364,7 @@ export default function UsersClient({ initialData }: UsersClientProps) {
                     href={user.website.startsWith("http") ? user.website : `https://${user.website}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="font-semibold text-emerald-400 hover:text-emerald-300"
+                    className="font-semibold text-brand hover:text-brand"
                   >
                     Site ↗
                   </a>
@@ -426,7 +426,7 @@ export default function UsersClient({ initialData }: UsersClientProps) {
                           href={user.website.startsWith("http") ? user.website : `https://${user.website}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-sm font-medium text-emerald-400 hover:text-emerald-300"
+                          className="text-sm font-medium text-brand hover:text-brand"
                         >
                           {user.website}
                         </a>

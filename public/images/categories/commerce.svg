@@ -16,7 +16,7 @@
   <!-- Handshake -->
   <path d="M400 380 Q500 350 600 380 Q700 350 800 380" fill="none" stroke="#fff" stroke-width="4" opacity="0.2"/>
   <!-- Growth arrow -->
-  <path d="M350 450 L750 450" stroke="#34d399" stroke-width="3" opacity="0.3"/>
-  <polygon points="750,440 780,450 750,460" fill="#34d399" opacity="0.3"/>
+  <path d="M350 450 L750 450" stroke="#fb923c" stroke-width="3" opacity="0.3"/>
+  <polygon points="750,440 780,450 750,460" fill="#fb923c" opacity="0.3"/>
   <text x="600" y="560" font-family="Poppins, Arial, sans-serif" font-size="28" font-weight="700" fill="#fff" text-anchor="middle" opacity="0.7">Commerce</text>
 </svg>

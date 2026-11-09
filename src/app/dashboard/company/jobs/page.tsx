@@ -19,15 +19,15 @@ type OfferStatus = 'pending' | 'published' | 'archived' | 'rejected';
 const STATUS_BADGES: Record<OfferStatus, { label: string; classes: string }> = {
   pending: {
     label: 'En attente',
-    classes: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+    classes: 'bg-brand-soft text-primary dark:bg-brand/15 dark:text-brand-accent border-brand/20',
   },
   published: {
     label: 'Publiée',
-    classes: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+    classes: 'bg-brand/10 text-brand dark:text-brand-accent border-brand/20',
   },
   archived: {
     label: 'Clôturée',
-    classes: 'bg-gray-100 text-gray-500 dark:bg-slate-800 dark:text-gray-400 border-gray-200 dark:border-slate-700',
+    classes: 'bg-gray-100 text-black dark:bg-slate-800 dark:text-white border-gray-200 dark:border-slate-700',
   },
   rejected: {
     label: 'Rejetée',
@@ -158,13 +158,13 @@ export default function CompanyJobsPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 space-y-6 text-gray-900 dark:text-slate-50">
+    <div className="max-w-5xl mx-auto px-4 py-8 space-y-6 text-black dark:text-slate-50">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <Link
             href="/dashboard/company"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-primary mb-2"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-black dark:text-white hover:text-primary mb-2"
           >
             <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -174,7 +174,7 @@ export default function CompanyJobsPage() {
           <h1 className="text-2xl lg:text-3xl font-extrabold font-[var(--font-display)]">
             Mes offres d&apos;emploi
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-sm text-black dark:text-white mt-1">
             {offers.length} offre{offers.length !== 1 ? 's' : ''} au total
           </p>
         </div>
@@ -194,7 +194,7 @@ export default function CompanyJobsPage() {
         <div
           className={`rounded-2xl p-4 text-sm font-semibold ${
             message.type === 'success'
-              ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
+              ? 'bg-brand/10 border border-brand/30 text-brand dark:text-brand-accent'
               : 'bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-300'
           }`}
         >
@@ -213,7 +213,7 @@ export default function CompanyJobsPage() {
             </svg>
           </div>
           <h2 className="text-lg font-bold mb-2">Aucune offre pour l&apos;instant</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+          <p className="text-sm text-black dark:text-white mb-6">
             Créez votre première offre pour commencer à recruter.
           </p>
           <Link
@@ -241,14 +241,14 @@ export default function CompanyJobsPage() {
                       <h3 className="font-bold text-sm text-primary">Édition de l&apos;offre</h3>
                       <button
                         onClick={() => { setEditingId(null); setEditForm(null); }}
-                        className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        className="text-xs text-gray-400 hover:text-black dark:hover:text-gray-300"
                       >
                         Annuler
                       </button>
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1 ml-1">Titre</label>
+                      <label className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1 ml-1">Titre</label>
                       <input
                         type="text"
                         value={editForm.title}
@@ -258,7 +258,7 @@ export default function CompanyJobsPage() {
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1 ml-1">Description</label>
+                      <label className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1 ml-1">Description</label>
                       <textarea
                         rows={5}
                         value={editForm.description}
@@ -269,7 +269,7 @@ export default function CompanyJobsPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1 ml-1">Ville</label>
+                        <label className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1 ml-1">Ville</label>
                         <input
                           type="text"
                           value={editForm.location}
@@ -278,7 +278,7 @@ export default function CompanyJobsPage() {
                         />
                       </div>
                       <div>
-                        <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1 ml-1">Date limite</label>
+                        <label className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1 ml-1">Date limite</label>
                         <input
                           type="date"
                           value={editForm.deadline}
@@ -290,7 +290,7 @@ export default function CompanyJobsPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1 ml-1">Lien candidature</label>
+                        <label className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1 ml-1">Lien candidature</label>
                         <input
                           type="url"
                           value={editForm.apply_link}
@@ -299,7 +299,7 @@ export default function CompanyJobsPage() {
                         />
                       </div>
                       <div>
-                        <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1 ml-1">Email candidature</label>
+                        <label className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1 ml-1">Email candidature</label>
                         <input
                           type="email"
                           value={editForm.apply_email}
@@ -312,7 +312,7 @@ export default function CompanyJobsPage() {
                     <div className="flex justify-end gap-2 pt-2">
                       <button
                         onClick={() => { setEditingId(null); setEditForm(null); }}
-                        className="px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-800 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all"
+                        className="px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-800 text-xs font-semibold text-black dark:text-white hover:bg-gray-50 dark:hover:bg-slate-800 transition-all"
                       >
                         Annuler
                       </button>
@@ -343,10 +343,10 @@ export default function CompanyJobsPage() {
                             </span>
                           )}
                         </div>
-                        <h3 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white line-clamp-1">
+                        <h3 className="font-bold text-base sm:text-lg text-black dark:text-white line-clamp-1">
                           {offer.title}
                         </h3>
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-black dark:text-white mt-1">
                           <span>{offer.location}</span>
                           <span>Publiée le {formatDate(offer.created_at)}</span>
                           {offer.deadline && (
@@ -360,7 +360,7 @@ export default function CompanyJobsPage() {
                         <Link
                           href={`/jobs/${offer.id}`}
                           target="_blank"
-                          className="px-3 py-1.5 rounded-xl border border-gray-200 dark:border-slate-800 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all"
+                          className="px-3 py-1.5 rounded-xl border border-gray-200 dark:border-slate-800 text-xs font-semibold text-black dark:text-white hover:bg-gray-50 dark:hover:bg-slate-800 transition-all"
                         >
                           Voir
                         </Link>
@@ -368,7 +368,7 @@ export default function CompanyJobsPage() {
                           <>
                             <button
                               onClick={() => startEdit(offer)}
-                              className="px-3 py-1.5 rounded-xl border border-gray-200 dark:border-slate-800 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all"
+                              className="px-3 py-1.5 rounded-xl border border-gray-200 dark:border-slate-800 text-xs font-semibold text-black dark:text-white hover:bg-gray-50 dark:hover:bg-slate-800 transition-all"
                             >
                               Éditer
                             </button>
@@ -385,7 +385,7 @@ export default function CompanyJobsPage() {
                     </div>
 
                     {/* Description tronquée */}
-                    <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-black dark:text-white line-clamp-2 leading-relaxed">
                       {offer.description.replace(/\*\*/g, '').replace(/\n/g, ' ').slice(0, 200)}…
                     </p>
                   </div>

@@ -82,8 +82,8 @@ function examsToAlerts(exams: Exam[]): TickerAlert[] {
 
 const TYPE_STYLES: Record<TickerAlert['type'], string> = {
   urgent: 'text-rose-600 dark:text-rose-400',
-  info: 'text-primary dark:text-emerald-400',
-  result: 'text-emerald-600 dark:text-emerald-400',
+  info: 'text-primary dark:text-brand-accent',
+  result: 'text-brand dark:text-brand-accent',
 };
 
 export default function ConcoursTicker({ exams }: { exams: Exam[] }) {

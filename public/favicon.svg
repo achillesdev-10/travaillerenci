@@ -1,13 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#00a83f"/>
-      <stop offset="1" stop-color="#007a2e"/>
+      <stop offset="0" stop-color="#c2410c"/>
+      <stop offset="1" stop-color="#9a3412"/>
     </linearGradient>
   </defs>
   <rect width="64" height="64" rx="14" fill="url(#bg)"/>
   <rect x="12" y="12" width="40" height="40" rx="10" fill="#ffffff"/>
-  <!-- Tricolore ivoirien : orange / blanc / vert -->
-  <rect x="18" y="19" width="11" height="26" rx="2.5" fill="#F77F00"/>
-  <rect x="35" y="19" width="11" height="26" rx="2.5" fill="#009639"/>
+  <path d="M20 20h24v6H34v18h-4V26H20z" fill="#000000"/>
+  <rect x="37" y="36" width="7" height="8" rx="2" fill="#c2410c"/>
 </svg>

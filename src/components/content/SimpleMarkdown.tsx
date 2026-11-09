@@ -99,7 +99,7 @@ export default function SimpleMarkdown({ text }: { text: string }) {
       blocks.push(
         <Tag
           key={`h-${key++}`}
-          className={`${sizes[level]} text-gray-900 dark:text-white font-[var(--font-display)]`}
+          className={`${sizes[level]} text-black dark:text-white font-[var(--font-display)]`}
           dangerouslySetInnerHTML={{ __html: inline(m[1]) }}
         />,
       );
@@ -112,7 +112,7 @@ export default function SimpleMarkdown({ text }: { text: string }) {
       blocks.push(
         <h3
           key={`h-${key++}`}
-          className="mt-6 mb-2 text-base font-bold text-gray-900 dark:text-white font-[var(--font-display)] sm:text-lg"
+          className="mt-6 mb-2 text-base font-bold text-black dark:text-white font-[var(--font-display)] sm:text-lg"
           dangerouslySetInnerHTML={{ __html: inline(trimmed.slice(2, -2)) }}
         />,
       );
@@ -166,7 +166,7 @@ function inline(src: string): string {
   // Gras
   s = s.replace(
     /\*\*([^*]+)\*\*/g,
-    '<strong class="text-gray-900 dark:text-white">$1</strong>',
+    '<strong class="text-black dark:text-white">$1</strong>',
   );
 
   // Italique

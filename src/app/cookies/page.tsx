@@ -17,24 +17,24 @@ export default function CookiesPage() {
           Retour à l&apos;accueil
         </Link>
 
-        <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white font-[var(--font-display)] mb-6">
+        <h1 className="text-3xl sm:text-4xl font-black text-black dark:text-white font-[var(--font-display)] mb-6">
           Politique de cookies
         </h1>
 
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">Dernière mise à jour : 26 août 2026</p>
+        <p className="text-sm text-black dark:text-white mb-8">Dernière mise à jour : 26 août 2026</p>
 
         <div className="prose prose-gray dark:prose-invert max-w-none space-y-8">
           <section>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Qu&apos;est-ce qu&apos;un cookie ?</h2>
-            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+            <h2 className="text-xl font-bold text-black dark:text-white">Qu&apos;est-ce qu&apos;un cookie ?</h2>
+            <p className="text-black dark:text-white leading-relaxed">
               Un cookie est un petit fichier texte déposé sur votre appareil (ordinateur, smartphone, tablette) lors de la consultation d&apos;un site web. Il permet au site de mémoriser vos actions et préférences pendant une durée déterminée.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Cookies utilisés sur TravaillerenCi</h2>
+            <h2 className="text-xl font-bold text-black dark:text-white">Cookies utilisés sur TravaillerenCi</h2>
             <div className="overflow-x-auto">
-              <table className="min-w-full text-sm text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
+              <table className="min-w-full text-sm text-black dark:text-white border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
                 <thead className="bg-gray-100 dark:bg-slate-800">
                   <tr>
                     <th className="px-4 py-3 text-left font-semibold">Cookie</th>
@@ -74,15 +74,15 @@ export default function CookiesPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Cookies tiers</h2>
-            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+            <h2 className="text-xl font-bold text-black dark:text-white">Cookies tiers</h2>
+            <p className="text-black dark:text-white leading-relaxed">
               Nous n&apos;utilisons pas de cookies publicitaires ni de cookies de suivi tiers. Aucun cookie n&apos;est partagé avec des partenaires publicitaires.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Gestion des cookies</h2>
-            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+            <h2 className="text-xl font-bold text-black dark:text-white">Gestion des cookies</h2>
+            <p className="text-black dark:text-white leading-relaxed">
               Vous pouvez gérer les cookies directement depuis les paramètres de votre navigateur. La désactivation de certains cookies peut affecter le fonctionnement du site (authentification, sauvegarde du CV).
             </p>
           </section>

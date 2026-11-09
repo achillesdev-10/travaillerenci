@@ -66,7 +66,7 @@ export default function ShareButton({
     <button
       type="button"
       onClick={handleShare}
-      className={`inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 transition-colors font-semibold text-xs sm:text-sm px-4 py-2.5 ${className}`}
+      className={`inline-flex items-center gap-2 rounded-xl border border-brand/30 bg-brand/10 text-brand dark:text-brand-accent hover:bg-brand/20 transition-colors font-semibold text-xs sm:text-sm px-4 py-2.5 ${className}`}
     >
       {/* Icône Share2 (style Lucide) */}
       <svg

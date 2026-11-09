@@ -21,7 +21,14 @@ import {
   type ParsedJobSeoSlug,
 } from '@/lib/jobSeo';
 
-export const revalidate = 600;
+/**
+ * ISR 1 h : la page est 100 % statique (aucune lecture de cookies /
+ * searchParams / headers ; la seule donnée est le vivier en Data Cache,
+ * déjà partagé avec /jobs/[id]). La fraîcheur reste sous le contrôle
+ * de revalidateJobSurfaces() → revalidatePath('/[landing]', 'page') + le
+ * tag 24 h du vivier : une publication rafraîchit les landing immédiatement.
+ */
+export const revalidate = 3600;
 
 const BASE_URL = getSiteUrl();
 const PAGE_SIZE = 24;
@@ -133,13 +140,13 @@ export default async function JobSeoLandingPage({ params }: PageProps) {
   };
 
   return (
-    <main className="flex-1 min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors py-8 sm:py-12">
+    <main className="flex-1 min-h-screen bg-brand-soft/50 dark:bg-slate-950 transition-colors py-8 sm:py-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className="container mx-auto px-4 max-w-6xl">
-        <nav aria-label="Fil d'Ariane" className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+        <nav aria-label="Fil d'Ariane" className="text-sm text-black dark:text-white mb-6">
           <Link href="/" className="hover:text-primary">
             Accueil
           </Link>
@@ -152,18 +159,18 @@ export default async function JobSeoLandingPage({ params }: PageProps) {
           <span className="mx-2" aria-hidden="true">
             /
           </span>
-          <span className="text-gray-900 dark:text-gray-200 font-medium">{title}</span>
+          <span className="text-black dark:text-white font-medium">{title}</span>
         </nav>
 
         {/* En-tête éditorial unique */}
         <div className="mb-8 rounded-2xl border border-gray-100 bg-primary/5 p-6 dark:border-slate-800 dark:bg-primary/10 sm:p-8">
-          <h1 className="mb-3 font-[var(--font-display)] text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
+          <h1 className="mb-3 font-[var(--font-display)] text-3xl font-extrabold text-black dark:text-white sm:text-4xl">
             {title}
           </h1>
           {seoLandingIntro(parsed).map((p, i) => (
             <p
               key={i}
-              className="mb-3 max-w-3xl text-base leading-relaxed text-gray-600 dark:text-gray-300"
+              className="mb-3 max-w-3xl text-base leading-relaxed text-black dark:text-white"
             >
               {p}
             </p>
@@ -172,12 +179,12 @@ export default async function JobSeoLandingPage({ params }: PageProps) {
 
         {/* Compteur + lien recherche complète */}
         <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="font-[var(--font-display)] text-xl font-bold text-gray-900 dark:text-white">
+          <h2 className="font-[var(--font-display)] text-xl font-bold text-black dark:text-white">
             {offers.length} {offers.length > 1 ? 'offres disponibles' : 'offre disponible'}
           </h2>
           <Link
             href={jobsHref}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-600 transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
           >
             Recherche avancée
             <svg
@@ -204,13 +211,13 @@ export default async function JobSeoLandingPage({ params }: PageProps) {
 
         {/* Maillage interne : autres villes / métiers */}
         <section className="mt-12 rounded-2xl border border-gray-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
-          <h2 className="mb-4 font-[var(--font-display)] text-lg font-bold text-gray-900 dark:text-white">
+          <h2 className="mb-4 font-[var(--font-display)] text-lg font-bold text-black dark:text-white">
             Explorer les autres opportunités
           </h2>
 
           <div className="space-y-5">
             <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-400">
+              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-black/50">
                 Par ville
               </p>
               <div className="flex flex-wrap gap-2">
@@ -222,7 +229,7 @@ export default async function JobSeoLandingPage({ params }: PageProps) {
                       citySlug: c.slug,
                       metierSlug: null,
                     })}
-                    className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                    className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                   >
                     {parsed.activity === 'stages' ? 'Stages' : 'Emplois'} {c.name}
                   </Link>
@@ -231,7 +238,7 @@ export default async function JobSeoLandingPage({ params }: PageProps) {
             </div>
 
             <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-400">
+              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-black/50">
                 Par métier
               </p>
               <div className="flex flex-wrap gap-2">
@@ -243,7 +250,7 @@ export default async function JobSeoLandingPage({ params }: PageProps) {
                       citySlug: null,
                       metierSlug: m.slug,
                     })}
-                    className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                    className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                   >
                     {m.label}
                   </Link>

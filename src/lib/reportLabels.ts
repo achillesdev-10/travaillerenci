@@ -13,7 +13,7 @@ export const REPORT_TYPE_BADGES: Record<
   job: { label: 'Emploi', className: 'bg-sky-500/15 text-sky-400 border-sky-500/30' },
   internship: { label: 'Stage', className: 'bg-violet-500/15 text-violet-400 border-violet-500/30' },
   scholarship: { label: 'Bourse', className: 'bg-amber-500/15 text-amber-400 border-amber-500/30' },
-  exam: { label: 'Concours', className: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' },
+  exam: { label: 'Concours', className: 'bg-brand/15 text-brand-accent border-brand/30' },
 };
 
 export const REPORT_REASON_LABELS: Record<ReportReason, { label: string; className: string }> = {

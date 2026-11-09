@@ -174,14 +174,14 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
   };
 
   const inputClass =
-    'w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all';
-  const labelClass = 'block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1.5';
-  const sectionTitleClass = 'text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4';
-  const btnSecondary = 'px-3.5 py-2 rounded-xl text-sm font-semibold border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all inline-flex items-center gap-1.5';
+    'w-full px-3.5 py-2.5 rounded-xl border border-line dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-black dark:text-white focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all';
+  const labelClass = 'block text-sm font-semibold text-black dark:text-white mb-1.5';
+  const sectionTitleClass = 'text-lg font-bold text-black dark:text-white flex items-center gap-2 mb-4';
+  const btnSecondary = 'px-3.5 py-2 rounded-xl text-sm font-semibold border border-line dark:border-slate-700 bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-brand-soft/50 dark:hover:bg-slate-700 transition-all inline-flex items-center gap-1.5';
 
   return (
     <div className="space-y-6">
-      <section className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-6 shadow-sm">
+      <section className="bg-white dark:bg-slate-900 rounded-2xl border border-line dark:border-slate-800 p-6 shadow-sm">
         <h2 className={sectionTitleClass}>
           <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-base">👤</span>
           Informations personnelles
@@ -190,7 +190,7 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
         {/* --- Photo de profil --- */}
         <div className="mb-6 flex flex-col sm:flex-row items-center gap-5">
           <div className="relative shrink-0">
-            <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-primary/15 bg-gray-100 dark:bg-slate-800 shadow-inner flex items-center justify-center">
+            <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-primary/15 bg-brand-soft dark:bg-slate-800 shadow-inner flex items-center justify-center">
               {cvData.photoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -205,7 +205,7 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
                 />
               ) : (
                 <svg
-                  className="w-12 h-12 text-gray-300 dark:text-slate-600"
+                  className="w-12 h-12 text-gray-300 dark:text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -260,7 +260,7 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
               }}
               onDragLeave={() => setIsDragging(false)}
               onDrop={handlePhotoDrop}
-              className={`flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl border-2 border-dashed border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800/50 text-sm font-semibold text-gray-600 dark:text-gray-300 cursor-pointer transition-all hover:border-primary hover:bg-primary/5 ${
+              className={`flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl border-2 border-dashed border-line dark:border-slate-600 bg-brand-soft/50 dark:bg-slate-800/50 text-sm font-semibold text-black dark:text-white cursor-pointer transition-all hover:border-primary hover:bg-primary/5 ${
                 isDragging
                   ? 'border-primary bg-primary/10 scale-[1.01] ring-2 ring-primary/20'
                   : ''
@@ -304,7 +304,7 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
                 {photoMessage.text}
               </p>
             )}
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+            <p className="text-xs text-black dark:text-white mt-2">
               Conseil : photo récente, fond neutre et visage bien visible.
               JPG, PNG ou WebP — 5 Mo max.
             </p>
@@ -370,9 +370,9 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
         </div>
       </section>
 
-      <section className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-6 shadow-sm">
+      <section className="bg-white dark:bg-slate-900 rounded-2xl border border-line dark:border-slate-800 p-6 shadow-sm">
         <h2 className={sectionTitleClass}>
-          <span className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-base">📝</span>
+          <span className="w-8 h-8 rounded-lg bg-brand-soft dark:bg-brand/15 text-brand-strong dark:text-brand-accent flex items-center justify-center text-base">📝</span>
           Accroche professionnelle
         </h2>
         <div className="relative">
@@ -388,7 +388,7 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
           <button
             onClick={() => optimizeText(cvData.summary, 'summary')}
             disabled={optimizingField === 'summary' || !cvData.summary.trim()}
-            className="absolute top-2.5 right-2.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold shadow-sm disabled:opacity-60 disabled:cursor-not-allowed hover:brightness-110 transition-all inline-flex items-center gap-1.5"
+            className="absolute top-2.5 right-2.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-brand to-brand text-white text-xs font-bold shadow-sm disabled:opacity-60 disabled:cursor-not-allowed hover:brightness-110 transition-all inline-flex items-center gap-1.5"
           >
             {optimizingField === 'summary' ? (
               <>
@@ -405,10 +405,10 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
         </div>
       </section>
 
-      <section className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-6 shadow-sm">
+      <section className="bg-white dark:bg-slate-900 rounded-2xl border border-line dark:border-slate-800 p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <h2 className={sectionTitleClass + ' mb-0'}>
-            <span className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 flex items-center justify-center text-base">💼</span>
+            <span className="w-8 h-8 rounded-lg bg-brand-soft dark:bg-brand/15 text-primary dark:text-brand-accent flex items-center justify-center text-base">💼</span>
             Expériences professionnelles
           </h2>
           <button onClick={addExperience} className={btnSecondary}>
@@ -417,14 +417,14 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
         </div>
         <div className="space-y-5">
           {cvData.experiences.length === 0 && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-6 border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-xl">
+            <p className="text-sm text-black dark:text-white text-center py-6 border-2 border-dashed border-line dark:border-slate-700 rounded-xl">
               Aucune expérience ajoutée. Cliquez sur "Ajouter" pour commencer.
             </p>
           )}
           {cvData.experiences.map((exp, idx) => (
-            <div key={exp.id} className="border border-gray-100 dark:border-slate-800 rounded-xl p-4 bg-gray-50/50 dark:bg-slate-800/30">
+            <div key={exp.id} className="border border-line dark:border-slate-800 rounded-xl p-4 bg-brand-soft/40 dark:bg-slate-800/30">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                <span className="text-xs font-bold uppercase tracking-wider text-black dark:text-white">
                   Expérience {idx + 1}
                 </span>
                 <button
@@ -482,7 +482,7 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
                 <button
                   onClick={() => optimizeText(exp.description, `exp-${exp.id}`)}
                   disabled={optimizingField === `exp-${exp.id}` || !exp.description.trim()}
-                  className="absolute top-7 right-2.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold shadow-sm disabled:opacity-60 disabled:cursor-not-allowed hover:brightness-110 transition-all inline-flex items-center gap-1.5"
+                  className="absolute top-7 right-2.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-brand to-brand text-white text-xs font-bold shadow-sm disabled:opacity-60 disabled:cursor-not-allowed hover:brightness-110 transition-all inline-flex items-center gap-1.5"
                 >
                   {optimizingField === `exp-${exp.id}` ? (
                     <>
@@ -502,10 +502,10 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
         </div>
       </section>
 
-      <section className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-6 shadow-sm">
+      <section className="bg-white dark:bg-slate-900 rounded-2xl border border-line dark:border-slate-800 p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <h2 className={sectionTitleClass + ' mb-0'}>
-            <span className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 flex items-center justify-center text-base">🎓</span>
+            <span className="w-8 h-8 rounded-lg bg-brand-soft dark:bg-brand/15 text-primary dark:text-brand-accent flex items-center justify-center text-base">🎓</span>
             Formations
           </h2>
           <button onClick={addEducation} className={btnSecondary}>
@@ -514,14 +514,14 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
         </div>
         <div className="space-y-4">
           {cvData.educations.length === 0 && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-6 border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-xl">
+            <p className="text-sm text-black dark:text-white text-center py-6 border-2 border-dashed border-line dark:border-slate-700 rounded-xl">
               Aucune formation ajoutée. Cliquez sur "Ajouter" pour commencer.
             </p>
           )}
           {cvData.educations.map((edu, idx) => (
-            <div key={edu.id} className="border border-gray-100 dark:border-slate-800 rounded-xl p-4 bg-gray-50/50 dark:bg-slate-800/30">
+            <div key={edu.id} className="border border-line dark:border-slate-800 rounded-xl p-4 bg-brand-soft/40 dark:bg-slate-800/30">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                <span className="text-xs font-bold uppercase tracking-wider text-black dark:text-white">
                   Formation {idx + 1}
                 </span>
                 <button
@@ -571,9 +571,9 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
         </div>
       </section>
 
-      <section className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-6 shadow-sm">
+      <section className="bg-white dark:bg-slate-900 rounded-2xl border border-line dark:border-slate-800 p-6 shadow-sm">
         <h2 className={sectionTitleClass}>
-          <span className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 flex items-center justify-center text-base">⚡</span>
+          <span className="w-8 h-8 rounded-lg bg-brand-soft dark:bg-brand/15 text-primary dark:text-brand-accent flex items-center justify-center text-base">⚡</span>
           Compétences
         </h2>
         <div className="flex flex-wrap gap-2 mb-3">
@@ -604,7 +604,7 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
           onKeyDown={handleSkillKeyDown}
           onBlur={() => skillInput && addSkill(skillInput)}
         />
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+        <p className="text-xs text-black dark:text-white mt-2">
           Appuyez sur Entrée ou , pour ajouter une compétence
         </p>
       </section>

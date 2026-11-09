@@ -20,7 +20,7 @@ function formatDate(date: string | null) {
 function deviceClasses(device: string | null) {
   switch (device) {
     case "Mobile":
-      return "border-emerald-500/30 bg-emerald-500/10 text-emerald-300";
+      return "border-brand/30 bg-brand/10 text-brand";
     case "Bot":
       return "border-amber-500/30 bg-amber-500/10 text-amber-300";
     case "Desktop":
@@ -35,7 +35,7 @@ function sourceBadge(data: AdminAnalyticsData) {
     case "supabase":
       return {
         label: "Source : Supabase",
-        cls: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
+        cls: "border-brand/30 bg-brand/10 text-brand",
       };
     case "sqlite":
       return {
@@ -71,7 +71,7 @@ function VisitsChart({ data }: { data: AdminAnalyticsData }) {
         >
           <div className="relative flex w-full min-w-0 flex-1 items-end">
             <div
-              className="w-full rounded-t-lg bg-gradient-to-t from-emerald-600 to-emerald-400 transition-all group-hover:from-emerald-500 group-hover:to-emerald-300"
+              className="w-full rounded-t-lg bg-gradient-to-t from-brand to-brand transition-all group-hover:from-brand group-hover:to-brand"
               style={{ height: `${Math.max(4, (point.visits / max) * 100)}%` }}
             />
             <div className="pointer-events-none absolute -top-9 left-1/2 z-10 hidden -translate-x-1/2 whitespace-nowrap rounded-lg border border-white/10 bg-slate-900 px-2.5 py-1 text-[10px] font-semibold text-slate-200 shadow-xl group-hover:block">
@@ -108,7 +108,7 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
       label: "Visites totales",
       value: data.totalVisits,
       hint: "Depuis le début du tracking",
-      accent: "from-emerald-500 to-teal-600",
+      accent: "from-brand to-brand-strong",
       icon: (
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="9" />
@@ -166,7 +166,7 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
       <section className="rounded-3xl border border-white/[0.06] bg-gradient-to-br from-slate-900 to-slate-950 p-5 shadow-xl shadow-black/20 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-400">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand">
               Mesure d'audience
             </p>
             <h1 className="mt-1 font-[var(--font-display)] text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
@@ -256,7 +256,7 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
                     </div>
                     <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.05]">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400"
+                        className="h-full rounded-full bg-gradient-to-r from-brand to-brand"
                         style={{ width: `${Math.min(100, page.share * 2)}%` }}
                       />
                     </div>
@@ -285,7 +285,7 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
             <select
               value={deviceFilter}
               onChange={(e) => setDeviceFilter(e.target.value)}
-              className="rounded-2xl border border-white/10 bg-slate-950 px-3 py-2 text-xs font-medium text-slate-200 outline-none transition focus:border-emerald-500/50"
+              className="rounded-2xl border border-white/10 bg-slate-950 px-3 py-2 text-xs font-medium text-slate-200 outline-none transition focus:border-brand/50"
             >
               <option value="all" className="bg-slate-950">Tous les appareils</option>
               <option value="Desktop" className="bg-slate-950">Desktop</option>

@@ -78,7 +78,7 @@ export default function LegacyAccountMigrator() {
   if (status === 'idle' || status === 'checking' || status === 'done') return null;
   if (status === 'error') {
     return (
-      <div className="fixed bottom-4 inset-x-4 z-[60] max-w-xl mx-auto rounded-2xl border border-rose-500/30 bg-white dark:bg-slate-900 shadow-2xl p-4 text-sm text-rose-600 dark:text-rose-300">
+      <div className="fixed bottom-[calc(4.5rem_+_env(safe-area-inset-bottom))] inset-x-4 z-[60] lg:bottom-4 max-w-xl mx-auto rounded-2xl border border-rose-500/30 bg-white dark:bg-slate-900 shadow-2xl p-4 text-sm text-rose-600 dark:text-rose-300">
         <div className="flex items-center gap-3">
           <span className="flex-1">{error}</span>
           <button
@@ -95,16 +95,16 @@ export default function LegacyAccountMigrator() {
 
   // migrated
   return (
-    <div className="fixed bottom-4 inset-x-4 z-[60] max-w-xl mx-auto rounded-2xl border border-emerald-500/30 bg-white dark:bg-slate-900 shadow-2xl p-4">
+    <div className="fixed bottom-[calc(4.5rem_+_env(safe-area-inset-bottom))] inset-x-4 z-[60] lg:bottom-4 max-w-xl mx-auto rounded-2xl border border-brand/30 bg-white dark:bg-slate-900 shadow-2xl p-4">
       <div className="flex items-center gap-3 text-sm">
-        <span className="w-9 h-9 shrink-0 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
-          <svg className="w-4.5 h-4.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <span className="w-9 h-9 shrink-0 rounded-xl bg-brand/10 border border-brand/30 flex items-center justify-center">
+          <svg className="w-4.5 h-4.5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
           </svg>
         </span>
         <div className="flex-1">
-          <div className="font-bold text-gray-900 dark:text-white">Votre compte a été migré</div>
-          <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
+          <div className="font-bold text-black dark:text-white">Votre compte a été migré</div>
+          <div className="text-xs text-black dark:text-white mt-0.5">
             Définissez un mot de passe pour sécuriser vos accès.
           </div>
         </div>
@@ -122,7 +122,7 @@ export default function LegacyAccountMigrator() {
             type="button"
             onClick={() => setStatus('done')}
             aria-label="Fermer"
-            className="shrink-0 p-2 rounded-lg text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-800"
+            className="shrink-0 p-2 rounded-lg text-black/50 hover:text-black dark:hover:text-white hover:bg-brand-soft dark:hover:bg-slate-800"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

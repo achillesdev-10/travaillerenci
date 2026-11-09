@@ -111,11 +111,11 @@ export default async function EntreprendrePage({
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-slate-950">
+    <main className="min-h-screen bg-brand-soft dark:bg-slate-950">
       {/* ===== Hero ===== */}
-      <section className="relative overflow-hidden border-b border-border/40 bg-gradient-to-br from-emerald-50 via-white to-orange-50 dark:from-emerald-950/30 dark:via-slate-950 dark:to-orange-950/20">
+      <section className="relative overflow-hidden border-b border-line/40 bg-gradient-to-br from-brand-soft via-white to-orange-50 dark:from-brand-strong/30 dark:via-slate-950 dark:to-orange-950/20">
         <div className="container mx-auto px-4 py-12 sm:py-16 relative z-10 max-w-4xl text-center">
-          <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-5">
+          <div className="inline-flex items-center gap-2 bg-brand-soft text-brand-strong dark:bg-brand/20 dark:text-brand-accent px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-5">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
               <path d="M12 2L2 7l10 5 10-5-10-5z" />
               <path d="M2 17l10 5 10-5" />
@@ -123,10 +123,10 @@ export default async function EntreprendrePage({
             </svg>
             Guides business
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-[var(--font-display)] text-gray-900 dark:text-white">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-[var(--font-display)] text-black dark:text-white">
             Entreprendre en Côte d&apos;Ivoire
           </h1>
-          <p className="mt-4 text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-4 text-base sm:text-lg text-black dark:text-white max-w-2xl mx-auto leading-relaxed">
             Guides pratiques pour lancer et développer votre activité.
             Coiffure, restauration, commerce, digital… Trouvez l&apos;inspiration
             et les clés pour réussir votre projet.
@@ -147,7 +147,7 @@ export default async function EntreprendrePage({
       {/* ===== Articles à la une ===== */}
       {featuredArticles.length > 0 && !params.sector && !params.budget && (
         <section className="container mx-auto px-4 pt-10 sm:pt-14 max-w-5xl">
-          <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white font-[var(--font-display)] mb-5">
+          <h2 className="text-lg sm:text-xl font-bold text-black dark:text-white font-[var(--font-display)] mb-5">
             ⭐ Articles à la une
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -161,14 +161,14 @@ export default async function EntreprendrePage({
       {/* ===== Liste des articles ===== */}
       <section className="container mx-auto px-4 py-10 sm:py-14 max-w-5xl">
         {articles.length === 0 ? (
-          <div className="bg-white dark:bg-slate-900 border border-dashed border-border rounded-2xl p-10 sm:p-16 text-center">
-            <div className="mx-auto w-16 h-16 rounded-2xl bg-gray-50 dark:bg-slate-800 flex items-center justify-center mb-5">
+          <div className="bg-white dark:bg-slate-900 border border-dashed border-line rounded-2xl p-10 sm:p-16 text-center">
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-brand-soft dark:bg-slate-800 flex items-center justify-center mb-5">
               <span className="text-3xl">📋</span>
             </div>
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white font-[var(--font-display)]">
+            <h2 className="text-lg sm:text-xl font-bold text-black dark:text-white font-[var(--font-display)]">
               Aucun article trouvé
             </h2>
-            <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-2 max-w-md mx-auto">
+            <p className="text-sm sm:text-base text-black dark:text-white mt-2 max-w-md mx-auto">
               {params.sector || params.budget
                 ? 'Essayez de modifier vos filtres pour voir plus de résultats.'
                 : 'Revenez bientôt : nos premiers guides arrivent très vite !'}
@@ -184,8 +184,8 @@ export default async function EntreprendrePage({
           </div>
         ) : (
           <>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-              <strong className="text-gray-800 dark:text-gray-200">{total}</strong>{' '}
+            <p className="text-sm text-black dark:text-white mb-6">
+              <strong className="text-black dark:text-gray-200">{total}</strong>{' '}
               article{total > 1 ? 's' : ''} publié{total > 1 ? 's' : ''}
             </p>
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
@@ -204,12 +204,12 @@ export default async function EntreprendrePage({
                       ...(params.budget ? { budget: params.budget } : {}),
                       page: String(currentPage - 1),
                     }).toString()}`}
-                    className="px-4 py-2 rounded-xl border border-border bg-white dark:bg-slate-900 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+                    className="px-4 py-2 rounded-xl border border-line bg-white dark:bg-slate-900 text-sm font-semibold text-black dark:text-white hover:bg-brand-soft dark:hover:bg-slate-800 transition-colors"
                   >
                     ← Précédent
                   </Link>
                 )}
-                <span className="px-4 py-2 text-sm font-semibold text-gray-500 dark:text-gray-400">
+                <span className="px-4 py-2 text-sm font-semibold text-black dark:text-white">
                   Page {currentPage} / {totalPages}
                 </span>
                 {currentPage < totalPages && (
@@ -219,7 +219,7 @@ export default async function EntreprendrePage({
                       ...(params.budget ? { budget: params.budget } : {}),
                       page: String(currentPage + 1),
                     }).toString()}`}
-                    className="px-4 py-2 rounded-xl border border-border bg-white dark:bg-slate-900 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+                    className="px-4 py-2 rounded-xl border border-line bg-white dark:bg-slate-900 text-sm font-semibold text-black dark:text-white hover:bg-brand-soft dark:hover:bg-slate-800 transition-colors"
                   >
                     Suivant →
                   </Link>
@@ -248,32 +248,32 @@ function FeaturedArticleCard({
   return (
     <Link
       href={`/entreprendre/${article.slug}`}
-      className="group flex flex-col bg-white dark:bg-slate-900 border-2 border-amber-200 dark:border-amber-800/50 rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-200"
+      className="group flex flex-col bg-white dark:bg-slate-900 border-2 border-brand/30 dark:border-brand/40 rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-200"
     >
-      <div className="relative h-28 overflow-hidden bg-gray-100 dark:bg-slate-800 sm:h-40">
+      <div className="relative h-28 overflow-hidden bg-brand-soft dark:bg-slate-800 sm:h-40">
         <CoverImage
           src={article.cover_image || IMAGES.blog}
           alt={article.title}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
-        <span className="absolute top-3 left-3 inline-flex items-center rounded-full bg-amber-400 text-amber-900 px-2.5 py-1 text-[11px] font-bold shadow-sm">
+        <span className="absolute top-3 left-3 inline-flex items-center rounded-full bg-primary text-white px-2.5 py-1 text-[11px] font-bold shadow-sm">
           ⭐ À la une
         </span>
-        <span className="absolute top-3 right-3 inline-flex items-center rounded-full bg-white/90 dark:bg-slate-950/80 backdrop-blur px-2.5 py-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 shadow-sm">
+        <span className="absolute top-3 right-3 inline-flex items-center rounded-full bg-white/90 dark:bg-slate-950/80 backdrop-blur px-2.5 py-1 text-[11px] font-bold text-brand-strong dark:text-brand-accent shadow-sm">
           {sectorLabels[sector] || sector}
         </span>
       </div>
       <div className="flex flex-col flex-1 p-3.5 sm:p-5">
-        <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 font-medium mb-2">
+        <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-black dark:text-white font-medium mb-2">
           <span>⏱ {article.reading_time} min de lecture</span>
           <span aria-hidden="true">•</span>
           <span>{formatDate(article.published_at)}</span>
         </div>
-        <h2 className="text-[13px] sm:text-lg font-bold text-gray-900 dark:text-white font-[var(--font-display)] leading-snug group-hover:text-primary transition-colors line-clamp-2">
+        <h2 className="text-[13px] sm:text-lg font-bold text-black dark:text-white font-[var(--font-display)] leading-snug group-hover:text-primary transition-colors line-clamp-2">
           {article.title}
         </h2>
         {article.excerpt && (
-          <p className="mt-1.5 sm:mt-2 text-[11.5px] sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-3 flex-1">
+          <p className="mt-1.5 sm:mt-2 text-[11.5px] sm:text-sm text-black dark:text-white leading-relaxed line-clamp-3 flex-1">
             {article.excerpt}
           </p>
         )}
@@ -300,31 +300,31 @@ function ArticleCard({
   return (
     <Link
       href={`/entreprendre/${article.slug}`}
-      className="group flex flex-col bg-white dark:bg-slate-900 border border-border rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-1 hover:border-primary/30 transition-all duration-200"
+      className="group flex flex-col bg-white dark:bg-slate-900 border border-line rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-1 hover:border-primary/30 transition-all duration-200"
     >
-      <div className="relative h-28 overflow-hidden bg-gray-100 dark:bg-slate-800 sm:h-40">
+      <div className="relative h-28 overflow-hidden bg-brand-soft dark:bg-slate-800 sm:h-40">
         <CoverImage
           src={article.cover_image || IMAGES.blog}
           alt={article.title}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
-        <span className="absolute top-3 left-3 inline-flex items-center rounded-full bg-white/90 dark:bg-slate-950/80 backdrop-blur px-2.5 py-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 shadow-sm">
+        <span className="absolute top-3 left-3 inline-flex items-center rounded-full bg-white/90 dark:bg-slate-950/80 backdrop-blur px-2.5 py-1 text-[11px] font-bold text-brand-strong dark:text-brand-accent shadow-sm">
           {sectorLabels[sector] || sector}
         </span>
       </div>
       <div className="flex flex-col flex-1 p-3.5 sm:p-5">
-        <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 font-medium mb-2">
+        <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-black dark:text-white font-medium mb-2">
           <span>⏱ {article.reading_time} min</span>
           <span aria-hidden="true">•</span>
           <span className="hidden sm:inline">{formatDate(article.published_at)}</span>
           <span aria-hidden="true">•</span>
           <span>{article.view_count} vues</span>
         </div>
-        <h2 className="text-[13px] sm:text-lg font-bold text-gray-900 dark:text-white font-[var(--font-display)] leading-snug group-hover:text-primary transition-colors line-clamp-2">
+        <h2 className="text-[13px] sm:text-lg font-bold text-black dark:text-white font-[var(--font-display)] leading-snug group-hover:text-primary transition-colors line-clamp-2">
           {article.title}
         </h2>
         {article.excerpt && (
-          <p className="mt-1.5 sm:mt-2 text-[11.5px] sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-3 flex-1">
+          <p className="mt-1.5 sm:mt-2 text-[11.5px] sm:text-sm text-black dark:text-white leading-relaxed line-clamp-3 flex-1">
             {article.excerpt}
           </p>
         )}
@@ -337,7 +337,7 @@ function ArticleCard({
             </svg>
           </span>
           {article.helpful_count > 0 && (
-            <span className="text-[10px] sm:text-[11px] text-gray-400 dark:text-gray-500">
+            <span className="text-[10px] sm:text-[11px] text-black/50 dark:text-white">
               👍 {article.helpful_count}
             </span>
           )}

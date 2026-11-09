@@ -139,7 +139,7 @@ export default function ReportsAdminClient({
           onClick={() => setStatusFilter('resolved')}
           className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 ${
             statusFilter === 'resolved'
-              ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
+              ? 'bg-brand text-slate-950 shadow-lg shadow-brand/20'
               : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
           }`}
         >
@@ -222,7 +222,7 @@ export default function ReportsAdminClient({
                               href={report.content.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="font-bold text-white truncate text-[13px] sm:text-sm hover:text-primary dark:hover:text-emerald-400 transition-colors"
+                              className="font-bold text-white truncate text-[13px] sm:text-sm hover:text-primary dark:hover:text-brand transition-colors"
                               title={report.content.title}
                             >
                               {report.content.title}
@@ -274,13 +274,13 @@ export default function ReportsAdminClient({
                       <td className="py-3 px-3 sm:py-4 sm:px-6">
                         <span className={`inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold border ${
                           report.status === 'resolved'
-                            ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                            ? 'bg-brand/15 text-brand border-brand/30'
                             : report.status === 'dismissed'
                             ? 'bg-slate-700/30 text-slate-400 border-slate-600/30'
                             : 'bg-amber-500/15 text-amber-400 border-amber-500/30'
                         }`}>
                           <span className={`h-1.5 w-1.5 rounded-full ${
-                            report.status === 'resolved' ? 'bg-emerald-400' : report.status === 'dismissed' ? 'bg-slate-400' : 'bg-amber-400'
+                            report.status === 'resolved' ? 'bg-brand' : report.status === 'dismissed' ? 'bg-slate-400' : 'bg-amber-400'
                           }`} />
                           {report.status === 'resolved' ? 'Résolu' : report.status === 'dismissed' ? 'Classé' : 'Attente'}
                         </span>
@@ -292,7 +292,7 @@ export default function ReportsAdminClient({
                               type="button"
                               disabled={isMutating === report.id}
                               onClick={() => handleStatus(report, 'resolved')}
-                              className="px-2 sm:px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-[10px] sm:text-xs font-bold border border-emerald-500/20 disabled:opacity-50 disabled:cursor-wait"
+                              className="px-2 sm:px-3 py-1.5 rounded-xl bg-brand/10 text-brand hover:bg-brand/20 text-[10px] sm:text-xs font-bold border border-brand/20 disabled:opacity-50 disabled:cursor-wait"
                             >
                               Résoudre
                             </button>

@@ -129,14 +129,14 @@ export default function AdminAppShell({
           <div className="flex items-center gap-3">
             <AdminSearch />
             <NotificationCenter />
-            <div className="hidden items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 md:inline-flex">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[11px] font-semibold text-emerald-300">Rôle Admin</span>
+            <div className="hidden items-center gap-2 rounded-full border border-brand/20 bg-brand/10 px-3 py-1.5 md:inline-flex">
+              <span className="h-2 w-2 rounded-full bg-brand animate-pulse" />
+              <span className="text-[11px] font-semibold text-brand">Rôle Admin</span>
             </div>
             <div className="hidden text-right sm:block">
               <div className="max-w-[180px] truncate text-xs font-semibold text-white">{email}</div>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-sm font-bold text-white shadow-lg shadow-emerald-500/20">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-brand to-brand-strong text-sm font-bold text-white shadow-lg shadow-brand/20">
               {email.charAt(0).toUpperCase()}
             </div>
           </div>

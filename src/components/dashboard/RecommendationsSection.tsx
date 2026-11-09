@@ -60,14 +60,14 @@ export default function RecommendationsSection() {
   return (
     <section
       aria-label="Offres recommandées pour vous"
-      className="rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 sm:p-8"
+      className="rounded-3xl border border-line dark:border-slate-800 bg-white dark:bg-slate-950 p-6 sm:p-8"
     >
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold font-[var(--font-display)] text-gray-900 dark:text-white">
+          <h2 className="text-lg font-bold font-[var(--font-display)] text-black dark:text-white">
             🎯 Offres recommandées pour vous
           </h2>
-          <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 max-w-xl">
+          <p className="text-xs text-black dark:text-white mt-1 max-w-xl">
             {!loaded
               ? 'Analyse de votre profil…'
               : personalized
@@ -92,17 +92,17 @@ export default function RecommendationsSection() {
           {Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
-              className="h-56 animate-pulse rounded-2xl border border-gray-100 bg-gray-50 dark:border-slate-800 dark:bg-slate-900"
+              className="h-56 animate-pulse rounded-2xl border border-line bg-brand-soft/50 dark:border-slate-800 dark:bg-slate-900"
             />
           ))}
         </div>
       ) : failed ? (
-        <p className="py-6 text-center text-sm text-gray-400">
+        <p className="py-6 text-center text-sm text-black/50">
           Impossible de charger vos recommandations pour le moment.
         </p>
       ) : jobs.length === 0 ? (
         <div className="py-6 text-center">
-          <p className="mx-auto mb-5 max-w-md text-sm text-gray-500 dark:text-slate-400">
+          <p className="mx-auto mb-5 max-w-md text-sm text-black dark:text-white">
             Ajoutez votre ville et vos secteurs d&apos;intérêt dans votre profil pour recevoir
             des recommandations pertinentes.
           </p>

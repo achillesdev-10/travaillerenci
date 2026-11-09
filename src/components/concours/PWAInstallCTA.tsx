@@ -13,6 +13,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -75,7 +76,7 @@ export default function PWAInstallCTA({
   // iOS : pas de `beforeinstallprompt`, on guide vers « Partager → Sur l'écran d'accueil »
   if (isIOS && !deferredPrompt) {
     return (
-      <div className={`relative ${className}`}>
+      <div className={cn('relative', className)}>
         <button
           onClick={() => setShowIOSHint((s) => !s)}
           className={
@@ -90,7 +91,7 @@ export default function PWAInstallCTA({
           {variant === 'compact' ? '' : "Télécharger l'App"}
         </button>
         {showIOSHint && (
-          <div className="absolute right-0 top-full mt-2 w-64 p-4 rounded-xl border border-border bg-white dark:bg-slate-900 shadow-xl z-50 text-sm text-gray-700 dark:text-gray-200">
+          <div className="absolute right-0 top-full mt-2 w-64 p-4 rounded-xl border border-line bg-white dark:bg-slate-900 shadow-xl z-50 text-sm text-black dark:text-white">
             <p className="font-semibold mb-1">Installer l&apos;application</p>
             <p>
               Sur iOS : touchez le bouton <strong>Partager</strong>{' '}
@@ -106,7 +107,7 @@ export default function PWAInstallCTA({
   if (variant === 'banner') {
     return (
       <div
-        className={`rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/5 via-primary/10 to-emerald-500/5 p-4 sm:p-5 ${className}`}
+        className={cn('rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/5 via-primary/10 to-brand/5 p-4 sm:p-5', className)}
       >
         <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
           <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -125,10 +126,10 @@ export default function PWAInstallCTA({
               </svg>
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-bold text-gray-900 dark:text-white leading-snug">
+              <p className="text-sm font-bold text-black dark:text-white leading-snug">
                 Restez alerté des dates de concours sur votre téléphone
               </p>
-              <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+              <p className="text-[11px] text-black dark:text-white mt-0.5">
                 Accès rapide &amp; hors-ligne • Alertes push instantanées
               </p>
             </div>
@@ -164,7 +165,7 @@ export default function PWAInstallCTA({
         onClick={handleInstall}
         aria-label="Installer l'application"
         title="Installer l'application"
-        className={`p-2 rounded-xl border border-primary/30 bg-primary/10 text-primary text-sm hover:bg-primary/20 transition-colors ${className}`}
+        className={cn('p-2 rounded-xl border border-primary/30 bg-primary/10 text-primary text-sm hover:bg-primary/20 transition-colors', className)}
       >
         📱
       </button>
@@ -174,7 +175,7 @@ export default function PWAInstallCTA({
   // Default variant: card with icon + badge
   return (
     <div
-      className={`rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-emerald-500/5 p-4 ${className}`}
+      className={cn('rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-brand/5 p-4', className)}
     >
       <div className="flex items-center gap-3 mb-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
@@ -192,14 +193,14 @@ export default function PWAInstallCTA({
           </svg>
         </div>
         <div>
-          <p className="text-sm font-bold text-gray-900 dark:text-white">
+          <p className="text-sm font-bold text-black dark:text-white">
             Installer l&apos;application
           </p>
           <div className="flex items-center gap-1.5 mt-0.5">
             <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[10px] font-bold">
               ⚡ Accès rapide
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 text-[10px] font-bold">
+            <span className="inline-flex items-center gap-1 rounded-full bg-brand/10 text-brand dark:text-brand-accent px-2 py-0.5 text-[10px] font-bold">
               📴 Hors-ligne
             </span>
           </div>

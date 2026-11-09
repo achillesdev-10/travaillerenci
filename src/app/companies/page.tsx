@@ -46,7 +46,7 @@ const OFFICIAL_SITES: OfficialSite[] = [
     domain: 'travaillerenci.com',
     url: 'https://travaillerenci.com',
     category: 'Emploi & Carrière',
-    color: '#059669',
+    color: '#C2410C',
   },
   {
     name: 'Envie d\'Emploi CI',
@@ -179,15 +179,15 @@ function SiteCard({ site }: { site: OfficialSite }) {
     >
       <SiteLogo name={site.name} domain={site.domain} color={site.color} />
       <div className="min-w-0 flex-1">
-        <h3 className="font-bold text-gray-900 dark:text-white truncate group-hover:text-primary transition-colors">
+        <h3 className="font-bold text-black dark:text-white truncate group-hover:text-primary transition-colors">
           {site.name}
         </h3>
-        <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5 truncate">
+        <div className="text-xs text-black dark:text-white mt-0.5 truncate">
           {site.domain}
         </div>
       </div>
       <span
-        className="w-8 h-8 rounded-full bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-gray-500 dark:text-slate-300 group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all"
+        className="w-8 h-8 rounded-full bg-brand-soft dark:bg-slate-800 flex items-center justify-center text-black dark:text-white group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all"
         aria-hidden="true"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -206,22 +206,22 @@ function SiteCard({ site }: { site: OfficialSite }) {
 export default function CompaniesPage() {
   return (
     <div className="container mx-auto px-4 py-12">
-      <nav className="text-sm text-gray-500 mb-8">
+      <nav className="text-sm text-black mb-8">
         <Link href="/" className="hover:text-primary">
           Accueil
         </Link>
         <span className="mx-2">/</span>
-        <span className="text-gray-900 dark:text-white font-medium">Entreprises</span>
+        <span className="text-black dark:text-white font-medium">Entreprises</span>
       </nav>
 
       <div className="mb-10 max-w-3xl">
         <span className="inline-flex rounded-full bg-orange-500/10 px-3 py-1 text-xs font-semibold text-orange-600 dark:text-orange-400 border border-orange-500/20 mb-4">
           Sites officiels vérifiés
         </span>
-        <h1 className="text-3xl md:text-4xl font-bold mb-4 font-[var(--font-display)] text-gray-900 dark:text-white">
+        <h1 className="text-3xl md:text-4xl font-bold mb-4 font-[var(--font-display)] text-black dark:text-white">
           Les sites officiels de l’emploi en Côte d’Ivoire
         </h1>
-        <p className="text-gray-600 dark:text-slate-400 text-lg">
+        <p className="text-black dark:text-white text-lg">
           La liste de référence des plateformes et portails officiels qui publient les offres
           d’emploi, les concours administratifs, les bourses d’études et les formations en
           Côte d’Ivoire. Cliquez sur un site pour y accéder directement.
@@ -233,7 +233,7 @@ export default function CompaniesPage() {
         if (sites.length === 0) return null;
         return (
           <section key={category} className="mb-10">
-            <h2 className="text-xl font-bold font-[var(--font-display)] text-gray-900 dark:text-white mb-4">
+            <h2 className="text-xl font-bold font-[var(--font-display)] text-black dark:text-white mb-4">
               {category}
             </h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -259,13 +259,13 @@ export default function CompaniesPage() {
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:to-white/20 dark:lg:to-slate-900/20" aria-hidden="true" />
           </div>
           <div className="p-8 lg:p-12 text-center lg:text-left flex flex-col items-center lg:items-start justify-center">
-            <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary dark:text-emerald-400 border border-primary/20 mb-4">
+            <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary dark:text-brand-accent border border-primary/20 mb-4">
               Espace Recruteur
             </span>
-            <h2 className="text-xl lg:text-2xl font-bold font-[var(--font-display)] text-gray-900 dark:text-white">
+            <h2 className="text-xl lg:text-2xl font-bold font-[var(--font-display)] text-black dark:text-white">
               Vous êtes une entreprise ou un recruteur ?
             </h2>
-            <p className="text-gray-600 dark:text-slate-400 mt-2 mb-6 max-w-xl text-sm leading-relaxed">
+            <p className="text-black dark:text-white mt-2 mb-6 max-w-xl text-sm leading-relaxed">
               TravaillerEnCi regroupe ici les meilleures opportunités de la Côte d’Ivoire.
               Publiez vos offres et touchez des milliers de candidats qualifiés.
             </p>

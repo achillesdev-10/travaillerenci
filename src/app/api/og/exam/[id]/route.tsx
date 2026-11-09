@@ -93,7 +93,7 @@ function OgCard({ exam, fontFamily }: { exam: Exam | null; fontFamily?: string }
         display: 'flex',
         flexDirection: 'column',
         padding: 64,
-        background: 'linear-gradient(135deg, #022c22 0%, #064e3b 55%, #134e4a 100%)',
+        background: 'linear-gradient(135deg, #431407 0%, #7c2d12 55%, #9a3412 100%)',
         color: '#ffffff',
         ...(fontFamily ? { fontFamily } : {}),
       }}
@@ -106,7 +106,7 @@ function OgCard({ exam, fontFamily }: { exam: Exam | null; fontFamily?: string }
               width: 40,
               height: 40,
               borderRadius: 12,
-              background: 'linear-gradient(135deg, #10b981, #0d9488)',
+              background: 'linear-gradient(135deg, #c2410c, #9a3412)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -116,7 +116,7 @@ function OgCard({ exam, fontFamily }: { exam: Exam | null; fontFamily?: string }
             CI
           </div>
           <span>
-            Travailleren<span style={{ color: '#34d399' }}>Ci</span>
+            Travailleren<span style={{ color: '#fdba74' }}>Ci</span>
           </span>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>

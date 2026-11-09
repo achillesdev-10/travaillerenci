@@ -18,7 +18,7 @@ type SearchResults = {
 };
 
 const CATEGORY_LABELS: Record<string, { label: string; color: string }> = {
-  offer: { label: "Offres", color: "text-emerald-400" },
+  offer: { label: "Offres", color: "text-brand" },
   blog: { label: "Blog", color: "text-sky-400" },
   entreprendre: { label: "Entreprendre", color: "text-violet-400" },
 };
@@ -138,7 +138,7 @@ export default function AdminSearch() {
                 className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
               />
               {loading && (
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-emerald-400 border-t-transparent" />
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-brand border-t-transparent" />
               )}
               <kbd className="rounded border border-white/10 bg-white/[0.06] px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">
                 ESC

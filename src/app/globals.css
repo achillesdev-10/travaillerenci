@@ -3,24 +3,32 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* Vert identitaire foncé (#009639 → #007a2e) : le blanc sur
-     #009639 ne passait que 3,9:1 (échec AA pour les petits textes — audit
-     contraste Lighthouse). #007a2e atteint ~5,4:1 (AA large + normal,
-     y compris sur fonds gris clairs comme bg-gray-50). */
-  --color-primary: #007a2e;
-  --color-primary-dark: #006a25;
-  --color-primary-light: #33ab60;
-  --color-secondary: #F77F00;
-  --color-secondary-dark: #d96f00;
-  --color-accent: #003087;
-  --color-accent-light: #1e4db3;
-  --color-ivory: #FFFAF0;
-  --color-terracotta: #E2725B;
-  --color-sand: #F5E6D3;
-  --color-forest: #2D5016;
-  --color-muted-foreground: #6b7280;
-  --color-border: #e5e7eb;
-  --color-background: #fafafa;
+  /* Identité 2026 : orange / noir / blanc.
+     `primary` est conservé comme alias de `brand` pour que les anciens
+     composants (111 fichiers) basculent d'un seul coup sans laisser de vert.
+     Le vert `success` reste uniquement fonctionnel (messages de succès). */
+  --color-primary: #c2410c;
+  --color-primary-dark: #9a3412;
+  --color-primary-light: #f97316;
+  --color-secondary: #c2410c;
+  --color-secondary-dark: #9a3412;
+  --color-accent: #c2410c;
+  --color-accent-light: #9a3412;
+  --color-brand: #c2410c;
+  --color-brand-strong: #9a3412;
+  --color-brand-soft: #fff4e9;
+  --color-brand-accent: #f97316;
+  --color-surface: #f8fafc;
+  --color-ink: #000000;
+  --color-ink-soft: #000000;
+  --color-muted: #000000;
+  --color-line: #eaeaea;
+  --color-success: #16a34a;
+  --color-success-strong: #15803d;
+  --color-danger: #dc2626;
+  --color-muted-foreground: #000000;
+  --color-border: #eaeaea;
+  --color-background: #ffffff;
   --color-card: #ffffff;
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-display: 'Poppins', system-ui, sans-serif;
@@ -28,11 +36,14 @@
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
-  --radius-2xl: 1.5rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.25rem;
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-card: 0 1px 2px 0 rgb(23 23 23 / 0.04), 0 1px 3px 0 rgb(23 23 23 / 0.06);
+  --shadow-card-hover: 0 6px 20px -8px rgb(23 23 23 / 0.18);
 }
 
 html {
@@ -46,7 +57,7 @@ html:focus-within {
 
 /* Global focus-visible ring for accessibility */
 :focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-brand);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -59,19 +70,19 @@ html:focus-within {
 body {
   font-family: var(--font-sans);
   background-color: var(--color-background);
-  color: #1f2937;
+  color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 html.dark {
-  background-color: #030712;
-  color: #f3f4f6;
+  background-color: #0a0a0a;
+  color: #ffffff;
 }
 
 html.dark body {
-  background-color: #030712 !important;
-  color: #f3f4f6 !important;
+  background-color: #0a0a0a !important;
+  color: #ffffff !important;
 }
 
 @layer utilities {

@@ -50,9 +50,9 @@ export default function NewsletterForm({ className = '' }: { className?: string 
     <form onSubmit={handleSubmit} className={cn('w-full max-w-md', className)} noValidate>
       <label
         htmlFor="newsletter-email"
-        className="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2"
+        className="mb-2 block text-[11px] font-bold uppercase tracking-widest text-muted dark:text-white"
       >
-        Newsletter
+        Votre email
       </label>
       <div className="flex gap-2">
         <input
@@ -65,24 +65,24 @@ export default function NewsletterForm({ className = '' }: { className?: string 
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           aria-label="Votre adresse email"
-          className="min-w-0 flex-1 rounded-xl border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-primary"
+          className="min-w-0 flex-1 rounded-xl border border-line bg-surface px-4 py-2.5 text-sm text-ink placeholder:text-neutral-500 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder:text-neutral-400"
         />
         <button
           type="submit"
           disabled={status === 'loading'}
-          className="shrink-0 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white hover:brightness-110 disabled:opacity-50 transition-all"
+          className="shrink-0 rounded-xl bg-brand px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-brand-strong disabled:opacity-50"
         >
           {status === 'loading' ? '…' : 'Je m’inscris'}
         </button>
       </div>
 
-      <label className="mt-2.5 flex items-start gap-2 text-[11px] leading-relaxed text-gray-500 cursor-pointer">
+      <label className="mt-2.5 flex cursor-pointer items-start gap-2 text-[11px] leading-relaxed text-muted dark:text-white">
         <input
           type="checkbox"
           required
           checked={consent}
           onChange={(e) => setConsent(e.target.checked)}
-          className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-primary"
+          className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-brand"
         />
         <span>
           J’accepte de recevoir la newsletter TravaillerEnCi (offres, concours, bourses).
@@ -96,7 +96,7 @@ export default function NewsletterForm({ className = '' }: { className?: string 
           aria-live="polite"
           className={cn(
             'mt-2 text-[11px] font-semibold',
-            status === 'success' ? 'text-emerald-400' : 'text-rose-400',
+            status === 'success' ? 'text-success-strong dark:text-brand-accent' : 'text-danger dark:text-rose-400',
           )}
         >
           {message}

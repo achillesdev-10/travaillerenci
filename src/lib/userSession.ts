@@ -8,6 +8,11 @@ import {
   verifyUserSessionToken,
   type UserSession,
 } from '@/lib/sessionToken';
+import {
+  SESSION_FLAG_COOKIE,
+  SESSION_FLAG_COOKIE_OPTIONS,
+  SESSION_FLAG_TTL_SECONDS,
+} from '@/lib/sessionFlag';
 import { findUserByEmail, toPublic, type PublicUser } from '@/lib/userRepository';
 
 export const USER_SESSION_COOKIE_NAME = USER_SESSION_COOKIE;
@@ -29,7 +34,12 @@ export async function issueUserSessionToken(user: PublicUser): Promise<string> {
   });
 }
 
-/** Pose le cookie de session httpOnly sur une réponse. */
+/**
+ * Pose le cookie de session httpOnly sur une réponse, accompagné du
+ * drapeau NON sensible `te_session=1` : c'est lui que le client lit pour
+ * savoir sans appel réseau que /api/auth/me vaut la peine d'être appelé.
+ * Le cookie httpOnly n'est jamais touché par le JavaScript (valeur réelle).
+ */
 export function attachUserSessionCookie(
   response: NextResponse,
   token: string,
@@ -38,13 +48,22 @@ export function attachUserSessionCookie(
     ...COOKIE_OPTIONS,
     maxAge: USER_SESSION_TTL_SECONDS,
   });
+  response.cookies.set(SESSION_FLAG_COOKIE, '1', {
+    ...SESSION_FLAG_COOKIE_OPTIONS,
+    // même durée que la session : le drapeau s'efface avec elle
+    maxAge: SESSION_FLAG_TTL_SECONDS,
+  });
   return response;
 }
 
-/** Supprime le cookie de session (déconnexion). */
+/** Supprime le cookie de session ET le drapeau associé (déconnexion). */
 export function clearUserSessionCookie(response: NextResponse): NextResponse {
   response.cookies.set(USER_SESSION_COOKIE, '', {
     ...COOKIE_OPTIONS,
+    maxAge: 0,
+  });
+  response.cookies.set(SESSION_FLAG_COOKIE, '', {
+    ...SESSION_FLAG_COOKIE_OPTIONS,
     maxAge: 0,
   });
   return response;

@@ -9,13 +9,13 @@ import SimpleMarkdown from '@/components/content/SimpleMarkdown';
 const STATUS_TABS: Array<{ value: ArticleStatus | 'all'; label: string; activeClass: string }> = [
   { value: 'all', label: 'Tous', activeClass: 'bg-primary text-slate-950' },
   { value: 'draft', label: 'Brouillons', activeClass: 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' },
-  { value: 'published', label: 'Publiés', activeClass: 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20' },
+  { value: 'published', label: 'Publiés', activeClass: 'bg-brand text-slate-950 shadow-lg shadow-brand/20' },
   { value: 'archived', label: 'Archivés', activeClass: 'bg-slate-700 text-white' },
 ];
 
 const STATUS_BADGES: Record<ArticleStatus, { label: string; className: string; dot: string }> = {
   draft: { label: 'Brouillon', className: 'bg-amber-500/15 text-amber-400 border-amber-500/30', dot: 'bg-amber-400' },
-  published: { label: 'Publié', className: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30', dot: 'bg-emerald-400' },
+  published: { label: 'Publié', className: 'bg-brand/15 text-brand border-brand/30', dot: 'bg-brand' },
   archived: { label: 'Archivé', className: 'bg-slate-700/30 text-slate-400 border-slate-600/30', dot: 'bg-slate-400' },
 };
 
@@ -295,7 +295,7 @@ export default function ActualitesAdminClient({
                               type="button"
                               disabled={isPending}
                               onClick={() => handleQuickStatus(article, 'published')}
-                              className="px-2 sm:px-2.5 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-[10px] sm:text-xs font-bold border border-emerald-500/20 disabled:opacity-60"
+                              className="px-2 sm:px-2.5 py-1.5 rounded-xl bg-brand/10 text-brand hover:bg-brand/20 text-[10px] sm:text-xs font-bold border border-brand/20 disabled:opacity-60"
                             >
                               Publier
                             </button>
@@ -390,7 +390,7 @@ export default function ActualitesAdminClient({
                     handleQuickStatus(previewing, 'published');
                     setPreviewing(null);
                   }}
-                  className="rounded-2xl bg-emerald-500 px-6 py-3 text-xs font-bold text-slate-950 hover:brightness-110 transition-all shadow-lg shadow-emerald-500/20"
+                  className="rounded-2xl bg-brand px-6 py-3 text-xs font-bold text-slate-950 hover:brightness-110 transition-all shadow-lg shadow-brand/20"
                 >
                   Publier
                 </button>

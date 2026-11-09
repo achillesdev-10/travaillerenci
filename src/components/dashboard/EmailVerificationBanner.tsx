@@ -58,9 +58,9 @@ export default function EmailVerificationBanner({
   }
 
   return (
-    <div className="rounded-3xl border border-amber-500/40 bg-amber-50 dark:bg-slate-900 dark:border-amber-500/30 p-5 lg:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center gap-4">
+    <div className="rounded-3xl border border-brand/40 bg-brand-soft dark:bg-slate-900 dark:border-brand/30 p-5 lg:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center gap-4">
       <div className="flex-1">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-[11px] font-bold text-amber-700 dark:text-amber-400 border border-amber-500/30 mb-3">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-soft px-3 py-1 text-[11px] font-bold text-primary dark:text-brand-accent border border-brand/30 mb-3">
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
@@ -74,14 +74,14 @@ export default function EmailVerificationBanner({
         <h2 className="text-base font-bold font-[var(--font-display)] mb-1">
           Confirmez votre adresse email
         </h2>
-        <p className="text-sm text-gray-600 dark:text-slate-400 leading-relaxed">
+        <p className="text-sm text-black dark:text-white leading-relaxed">
           Cliquez sur le lien reçu par email pour activer toutes les fonctionnalités
           (alertes, sauvegarde d'offres…). Le lien est valable 24 heures.
         </p>
         {feedback ? (
           <p
             className={`mt-2 text-xs font-semibold ${
-              status === 'error' ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
+              status === 'error' ? 'text-rose-600 dark:text-rose-400' : 'text-brand dark:text-brand-accent'
             }`}
           >
             {feedback}
@@ -92,7 +92,7 @@ export default function EmailVerificationBanner({
         type="button"
         onClick={handleResend}
         disabled={status === 'sending'}
-        className="shrink-0 rounded-xl border border-amber-500/40 bg-white dark:bg-slate-800 px-4 py-2.5 text-xs font-bold text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
+        className="shrink-0 rounded-xl border border-brand/40 bg-white dark:bg-slate-800 px-4 py-2.5 text-xs font-bold text-primary dark:text-brand-accent hover:bg-brand/10 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
       >
         {status === 'sending' ? 'Envoi…' : status === 'sent' ? 'Lien renvoyé ✓' : 'Renvoyer le lien'}
       </button>

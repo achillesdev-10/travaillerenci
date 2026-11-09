@@ -449,7 +449,7 @@ export default function ExamsAdminClient({
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
         <StatCard label="Total" value={stats.total} tone="text-white" />
         <StatCard label="En attente" value={stats.pending} tone="text-amber-400" />
-        <StatCard label="Publiés" value={stats.published} tone="text-emerald-400" />
+        <StatCard label="Publiés" value={stats.published} tone="text-brand" />
         <StatCard label="Ouverts" value={stats.openNow} tone="text-sky-400" />
         <StatCard label="Vues cumulées" value={stats.totalViews} tone="text-fuchsia-400" />
       </div>
@@ -465,7 +465,7 @@ export default function ExamsAdminClient({
                 ? tab.value === 'pending'
                   ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20'
                   : tab.value === 'published'
-                    ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
+                    ? 'bg-brand text-slate-950 shadow-lg shadow-brand/20'
                     : tab.value === 'rejected'
                       ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20'
                       : 'bg-primary text-slate-950'
@@ -586,7 +586,7 @@ export default function ExamsAdminClient({
                         <span
                           className={`inline-flex rounded-full border px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-bold ${
                             exam.confidence === 'high'
-                              ? 'border-emerald-500/30 bg-emerald-500/15 text-emerald-400'
+                              ? 'border-brand/30 bg-brand/15 text-brand'
                               : exam.confidence === 'low'
                                 ? 'border-rose-500/30 bg-rose-500/15 text-rose-400'
                                 : 'border-amber-500/30 bg-amber-500/15 text-amber-400'
@@ -599,7 +599,7 @@ export default function ExamsAdminClient({
                         <span
                           className={`inline-flex items-center gap-1.5 rounded-full border px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold ${
                             exam.status === 'published'
-                              ? 'border-emerald-500/30 bg-emerald-500/15 text-emerald-400'
+                              ? 'border-brand/30 bg-brand/15 text-brand'
                               : exam.status === 'rejected'
                                 ? 'border-rose-500/30 bg-rose-500/15 text-rose-400'
                                 : exam.status === 'archived'
@@ -610,7 +610,7 @@ export default function ExamsAdminClient({
                           <span
                             className={`h-1.5 w-1.5 rounded-full ${
                               exam.status === 'published'
-                                ? 'bg-emerald-400'
+                                ? 'bg-brand'
                                 : exam.status === 'rejected'
                                   ? 'bg-rose-400'
                                   : exam.status === 'archived'
@@ -627,7 +627,7 @@ export default function ExamsAdminClient({
                             <button
                               type="button"
                               onClick={() => handleUpdateStatus(exam, 'published')}
-                              className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-400 transition-colors hover:bg-emerald-500/20"
+                              className="rounded-xl border border-brand/20 bg-brand/10 px-3 py-1.5 text-xs font-bold text-brand transition-colors hover:bg-brand/20"
                             >
                               Valider & publier
                             </button>
@@ -921,17 +921,17 @@ function SimResultPanel({ result }: { result: SimResult }) {
     <div
       className={`mt-3 rounded-xl border px-3 py-3 text-xs ${
         ok
-          ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300'
+          ? 'border-brand/20 bg-brand/10 text-brand'
           : 'border-rose-500/30 bg-rose-500/10 text-rose-300'
       }`}
     >
       <div className="flex items-center gap-3">
-        <span className={`text-lg font-extrabold ${ok ? 'text-emerald-400' : 'text-rose-400'}`}>
+        <span className={`text-lg font-extrabold ${ok ? 'text-brand' : 'text-rose-400'}`}>
           {pct} %
         </span>
         <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-800">
           <div
-            className={`h-full rounded-full ${ok ? 'bg-emerald-400' : 'bg-rose-400'}`}
+            className={`h-full rounded-full ${ok ? 'bg-brand' : 'bg-rose-400'}`}
             style={{ width: `${pct}%` }}
           />
         </div>

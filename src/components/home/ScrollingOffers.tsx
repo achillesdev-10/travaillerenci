@@ -8,15 +8,15 @@ interface ScrollingOffersProps {
 function contractBadge(type?: string | null) {
   if (!type) return null;
   const colors: Record<string, string> = {
-    CDI: 'bg-emerald-100 text-emerald-700',
-    CDD: 'bg-orange-100 text-orange-700',
-    Stage: 'bg-sky-100 text-sky-700',
-    Alternance: 'bg-purple-100 text-purple-700',
-    Freelance: 'bg-rose-100 text-rose-700',
-    'Temps partiel': 'bg-amber-100 text-amber-700',
+    CDI: 'bg-brand-soft text-brand-strong',
+    CDD: 'bg-brand-soft text-brand-strong',
+    Stage: 'bg-brand-soft text-brand-strong',
+    Alternance: 'bg-brand-soft text-brand-strong',
+    Freelance: 'bg-brand-soft text-brand-strong',
+    'Temps partiel': 'bg-brand-soft text-brand-strong',
   };
   return (
-    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${colors[type] || 'bg-gray-100 text-gray-700'}`}>
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${colors[type] || 'bg-gray-100 text-black'}`}>
       {type}
     </span>
   );
@@ -27,7 +27,7 @@ function OfferCard({ offer }: { offer: JobOfferSchema }) {
     <Link
       href={`/jobs/${offer.id}`}
       prefetch={false}
-      className="shrink-0 w-[280px] sm:w-[320px] rounded-2xl border border-gray-100 bg-white shadow-md hover:shadow-lg dark:border-slate-800 dark:bg-slate-900 p-4 transition-all duration-200 group"
+      className="shrink-0 w-[280px] sm:w-[320px] rounded-xl border border-line bg-white dark:border-slate-800 dark:bg-slate-900 p-4 transition-colors hover:border-primary/30 group"
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <h3 className="text-[13px] font-bold text-black dark:text-white leading-snug line-clamp-2 group-hover:text-primary transition-colors">
@@ -35,10 +35,10 @@ function OfferCard({ offer }: { offer: JobOfferSchema }) {
         </h3>
         {contractBadge(offer.contract_type)}
       </div>
-      <p className="text-[11px] text-gray-700 dark:text-gray-400 mb-2 line-clamp-1">
+      <p className="text-[11px] text-black dark:text-white mb-2 line-clamp-1">
         {offer.company || 'Entreprise'}
       </p>
-      <div className="flex items-center gap-2 text-[10px] text-gray-600 dark:text-gray-500">
+      <div className="flex items-center gap-2 text-[10px] text-black dark:text-white">
         {offer.location && (
           <span className="inline-flex items-center gap-1">
             <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -72,8 +72,8 @@ export default function ScrollingOffers({ offers }: ScrollingOffersProps) {
   return (
     <div className="relative overflow-hidden group/scroller">
       {/* Fade edges */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-gray-50 to-transparent dark:from-slate-950 z-10" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-gray-50 to-transparent dark:from-slate-950 z-10" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-white to-transparent dark:from-slate-950 z-10" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-white to-transparent dark:from-slate-950 z-10" />
 
       <div
         className="flex w-max gap-4 overflow-hidden py-2 animate-marquee group-hover/scroller:[animation-play-state:paused]"

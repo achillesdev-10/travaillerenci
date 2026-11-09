@@ -95,16 +95,16 @@ export const metadata = {
 
 export default function CandidatesPage() {
   return (
-    <div className="text-gray-900 dark:text-slate-50">
+    <div className="text-black dark:text-slate-50">
       {/* Hero */}
       <section className="relative overflow-hidden bg-orange-50 dark:bg-slate-950">
         <div className="container mx-auto px-4 py-16 md:py-24">
-          <nav className="text-sm text-gray-500 mb-8">
+          <nav className="text-sm text-black mb-8">
             <Link href="/" className="hover:text-primary">
               Accueil
             </Link>
             <span className="mx-2">/</span>
-            <span className="text-gray-900 dark:text-white font-medium">Candidats</span>
+            <span className="text-black dark:text-white font-medium">Candidats</span>
           </nav>
 
           <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
@@ -116,7 +116,7 @@ export default function CandidatesPage() {
                 Votre carrière{' '}
                 <span className="text-secondary">commence ici</span>
               </h1>
-              <p className="text-lg md:text-xl text-gray-600 dark:text-slate-400 mb-8 max-w-2xl">
+              <p className="text-lg md:text-xl text-black dark:text-white mb-8 max-w-2xl">
                 Rejoignez des milliers de candidats qui trouvent chaque jour un emploi, un stage,
                 une bourse d’études ou un concours administratif en Côte d’Ivoire.
               </p>
@@ -129,7 +129,7 @@ export default function CandidatesPage() {
                 </a>
                 <Link
                   href="/jobs"
-                  className="w-full sm:w-auto bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 hover:border-primary/50 text-gray-900 dark:text-white px-8 py-4 rounded-2xl font-bold transition-all text-center"
+                  className="w-full sm:w-auto bg-white dark:bg-slate-900 border border-line dark:border-slate-700 hover:border-primary/50 text-black dark:text-white px-8 py-4 rounded-2xl font-bold transition-all text-center"
                 >
                   Voir les offres d’emploi
                 </Link>
@@ -144,7 +144,7 @@ export default function CandidatesPage() {
                   alt="Jeune professionnelle ivoirienne qui consulte des offres d'emploi"
                   className="w-full h-[380px] xl:h-[430px] object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/40 via-transparent to-transparent" aria-hidden="true" />
+                <div className="absolute inset-0 bg-gradient-to-t from-brand-strong/30 via-transparent to-transparent" aria-hidden="true" />
               </div>
               {/* Badge flottant : offres chaque jour */}
               <div className="absolute -left-6 top-8 flex items-center gap-2.5 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur px-4 py-3 shadow-lg border border-border animate-fade-in-up" style={{ animationDelay: '250ms' }}>
@@ -154,8 +154,8 @@ export default function CandidatesPage() {
                   </svg>
                 </span>
                 <div>
-                  <div className="text-sm font-extrabold text-gray-900 dark:text-white leading-none">Offres chaque jour</div>
-                  <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Vérifiées par notre équipe</div>
+                  <div className="text-sm font-extrabold text-black dark:text-white leading-none">Offres chaque jour</div>
+                  <div className="text-[11px] text-black dark:text-white mt-0.5">Vérifiées par notre équipe</div>
                 </div>
               </div>
             </div>
@@ -172,7 +172,7 @@ export default function CandidatesPage() {
                 <div className="text-2xl md:text-3xl font-black text-primary font-[var(--font-display)]">
                   {stat.value}
                 </div>
-                <div className="text-[11px] md:text-xs text-gray-500 dark:text-slate-400 mt-1">
+                <div className="text-[11px] md:text-xs text-black dark:text-white mt-1">
                   {stat.label}
                 </div>
               </div>
@@ -187,7 +187,7 @@ export default function CandidatesPage() {
           <h2 className="text-3xl font-bold font-[var(--font-display)] mb-4">
             Pourquoi rejoindre TravaillerEnCi ?
           </h2>
-          <p className="text-gray-600 dark:text-slate-400">
+          <p className="text-black dark:text-white">
             Tout ce qu’il faut pour décrocher le poste de vos rêves, au même endroit.
           </p>
         </div>
@@ -201,7 +201,7 @@ export default function CandidatesPage() {
                 {benefit.icon}
               </div>
               <h3 className="font-bold text-lg mb-2">{benefit.title}</h3>
-              <p className="text-sm text-gray-600 dark:text-slate-400 leading-relaxed">
+              <p className="text-sm text-black dark:text-white leading-relaxed">
                 {benefit.description}
               </p>
             </div>
@@ -216,7 +216,7 @@ export default function CandidatesPage() {
             <h2 className="text-3xl font-bold font-[var(--font-display)] mb-4">
               Comment ça marche ?
             </h2>
-            <p className="text-gray-600 dark:text-slate-400">
+            <p className="text-black dark:text-white">
               Trois étapes suffisent pour commencer votre recherche d’emploi.
             </p>
           </div>
@@ -239,7 +239,7 @@ export default function CandidatesPage() {
                 </div>
                 <div className="p-5">
                   <h3 className="font-bold text-lg mb-2">{step.title}</h3>
-                  <p className="text-sm text-gray-600 dark:text-slate-400 leading-relaxed">
+                  <p className="text-sm text-black dark:text-white leading-relaxed">
                     {step.description}
                   </p>
                 </div>
@@ -263,7 +263,7 @@ export default function CandidatesPage() {
       </section>
 
       {/* Inscription */}
-      <section id="inscription" className="bg-gray-50 dark:bg-slate-950 border-t border-border">
+      <section id="inscription" className="bg-brand-soft/50 dark:bg-slate-950 border-t border-border">
         <div className="container mx-auto px-4 py-16">
           <div className="grid lg:grid-cols-2 gap-12 items-center max-w-5xl mx-auto">
             <div>
@@ -273,7 +273,7 @@ export default function CandidatesPage() {
               <h2 className="text-3xl md:text-4xl font-bold font-[var(--font-display)] mb-4">
                 Prêt à lancer votre carrière ?
               </h2>
-              <p className="text-gray-600 dark:text-slate-400 text-lg mb-8">
+              <p className="text-black dark:text-white text-lg mb-8">
                 Créez votre compte en 2 minutes. C’est gratuit, sans engagement, et vous pourrez
                 commencer à postuler immédiatement.
               </p>
@@ -293,7 +293,7 @@ export default function CandidatesPage() {
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span className="text-gray-700 dark:text-slate-300">{item}</span>
+                    <span className="text-black dark:text-white">{item}</span>
                   </li>
                 ))}
               </ul>

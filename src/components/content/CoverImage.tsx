@@ -11,13 +11,13 @@ import Image from 'next/image';
  * - Utilise le mode `fill` : le parent DOIT avoir `relative` + dimensions fixes.
  */
 
-/** SVG de repli aux couleurs de la marque (vert → emeraude). */
+/** SVG de repli aux couleurs de la marque (orange). */
 const FALLBACK_SRC =
   'data:image/svg+xml;charset=utf-8,' +
   encodeURIComponent(
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">' +
       '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
-      '<stop offset="0" stop-color="#064e3b"/><stop offset="1" stop-color="#009639"/>' +
+      '<stop offset="0" stop-color="#7c2d12"/><stop offset="1" stop-color="#c2410c"/>' +
       '</linearGradient></defs>' +
       '<rect width="1200" height="630" fill="url(#g)"/>' +
       '<circle cx="600" cy="315" r="110" fill="#ffffff" opacity="0.18"/>' +

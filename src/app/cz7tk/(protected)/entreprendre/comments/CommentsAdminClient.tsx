@@ -7,13 +7,13 @@ import type { EntreprendreComment, EntreprendreCommentStatus } from '@/types/ent
 
 const STATUS_TABS: Array<{ value: EntreprendreCommentStatus | 'all'; label: string; activeClass: string }> = [
   { value: 'all', label: 'Tous', activeClass: 'bg-primary text-slate-950' },
-  { value: 'visible', label: 'Visibles', activeClass: 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20' },
+  { value: 'visible', label: 'Visibles', activeClass: 'bg-brand text-slate-950 shadow-lg shadow-brand/20' },
   { value: 'reported', label: 'Signalés', activeClass: 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' },
   { value: 'hidden', label: 'Masqués', activeClass: 'bg-slate-700 text-white' },
 ];
 
 const STATUS_BADGES: Record<EntreprendreCommentStatus, { label: string; className: string; dot: string }> = {
-  visible: { label: 'Visible', className: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30', dot: 'bg-emerald-400' },
+  visible: { label: 'Visible', className: 'bg-brand/15 text-brand border-brand/30', dot: 'bg-brand' },
   reported: { label: 'Signalé', className: 'bg-rose-500/15 text-rose-400 border-rose-500/30', dot: 'bg-rose-400' },
   hidden: { label: 'Masqué', className: 'bg-slate-700/30 text-slate-400 border-slate-600/30', dot: 'bg-slate-400' },
 };
@@ -139,7 +139,7 @@ export default function CommentsAdminClient({
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-brand flex items-center justify-center text-white text-xs font-bold shrink-0">
                           {(comment.user_display_name || 'U').charAt(0).toUpperCase()}
                         </div>
                         <div>
@@ -162,7 +162,7 @@ export default function CommentsAdminClient({
                         <button
                           type="button"
                           onClick={() => handleStatusChange(comment, 'visible')}
-                          className="px-2.5 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-xs font-bold border border-emerald-500/20"
+                          className="px-2.5 py-1.5 rounded-xl bg-brand/10 text-brand hover:bg-brand/20 text-xs font-bold border border-brand/20"
                           title="Rendre visible"
                         >✓ Approuver</button>
                       )}

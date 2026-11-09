@@ -7,6 +7,11 @@ import {
   verifyAdminSessionToken,
   verifyUserSessionToken,
 } from '@/lib/sessionToken';
+import {
+  SESSION_FLAG_COOKIE,
+  SESSION_FLAG_COOKIE_OPTIONS,
+  SESSION_FLAG_TTL_SECONDS,
+} from '@/lib/sessionFlag';
 
 /**
  *  TravaillerenCi — proxy.ts
@@ -23,6 +28,13 @@ import {
  *
  *  Le bypass « pas de vérification en dev » est supprimé : les routes admin
  *  sont toujours protégées, y compris en développement.
+ *
+ *  Perf CPU : il synchronise aussi le drapeau NON sensible `te_session`
+ *  avec le cookie de session httpOnly (`travaillerenci_session`) — le client
+ *  n'appelle /api/auth/me que si ce drapeau existe, cf. clientAuth.ts.
+ *  La couverture des sessions posées avant l'introduction du drapeau est
+ *  assurée au premier chargement de page ; le cookie httpOnly n'est jamais
+ *  touché et aucune donnée utilisateur ne transite dans le drapeau.
  */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -31,6 +43,13 @@ export async function proxy(request: NextRequest) {
   if (pathname === '/api/admin/session') {
     return NextResponse.next();
   }
+
+  // Drapeau client : la simple PRÉSENCE du cookie de session suffit (pas de
+  // crypto ici) — le calcul coûteux des jetons n'est fait que pour les
+  // surfaces qui en ont besoin (admin, dashboard, pages d'auth).
+  const hasUserSessionCookie = Boolean(request.cookies.get(USER_SESSION_COOKIE)?.value);
+  const hasSessionFlag = request.cookies.get(SESSION_FLAG_COOKIE)?.value === '1';
+  const sessionFlagMismatch = hasUserSessionCookie !== hasSessionFlag;
 
   const token =
     request.cookies.get(ADMIN_SESSION_COOKIE)?.value ||
@@ -125,7 +144,26 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  // 7. Synchronisation du drapeau client (uniquement si le couple
+  //    cookie-session / drapeau est incohérent : cas courant, aucune
+  //    surcharge ni Set-Cookie).
+  const response = NextResponse.next();
+  if (sessionFlagMismatch) {
+    if (hasUserSessionCookie) {
+      response.cookies.set(SESSION_FLAG_COOKIE, '1', {
+        ...SESSION_FLAG_COOKIE_OPTIONS,
+        maxAge: SESSION_FLAG_TTL_SECONDS,
+      });
+    } else {
+      // Drapeau orphelin (session effacée par ailleurs) : on le retire pour
+      // éviter un /api/auth/me inutile au prochain rendu.
+      response.cookies.set(SESSION_FLAG_COOKIE, '', {
+        ...SESSION_FLAG_COOKIE_OPTIONS,
+        maxAge: 0,
+      });
+    }
+  }
+  return response;
 }
 
 /**
@@ -147,6 +185,10 @@ function safeAuthAwareNext(raw: string | null, role: string | undefined): string
 
 export const config = {
   matcher: [
+    // Pages publiques (la majorité du trafic) : uniquement pour la
+    // synchronisation du drapeau, ZÉRO crypto pour les visiteurs sans cookies.
+    '/((?!api/|_next/static|_next/image|favicon|icons/|manifest\\.|sitemap\\.|robots\\.|sw\\.js).*)',
+    // Surfaces protégées existantes : garde admin / dashboard / auth.
     '/cz7tk/:path*',
     '/api/admin/:path*',
     '/dashboard/:path*',

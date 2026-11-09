@@ -113,7 +113,7 @@ export default function SettingsClient({ initialSettings }: SettingsClientProps)
       {feedback && (
         <div className={`rounded-2xl border px-4 py-3 text-sm ${
           feedback.tone === 'success'
-            ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+            ? 'border-brand/30 bg-brand/10 text-brand'
             : 'border-rose-500/30 bg-rose-500/10 text-rose-300'
         }`}>
           {feedback.text}
@@ -228,7 +228,7 @@ export default function SettingsClient({ initialSettings }: SettingsClientProps)
                     type="button"
                     onClick={() => toggleSource(key)}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      settings.scraper_sources[key] !== false ? 'bg-emerald-500' : 'bg-slate-700'
+                      settings.scraper_sources[key] !== false ? 'bg-brand' : 'bg-slate-700'
                     }`}
                   >
                     <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${

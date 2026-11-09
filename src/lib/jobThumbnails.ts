@@ -299,7 +299,7 @@ export function getJobThumbnailGradient(category?: string | null): string {
     case 'internship':
       return 'from-sky-400 to-blue-600';
     case 'scholarship':
-      return 'from-emerald-400 to-teal-600';
+      return 'from-brand-accent to-brand-strong';
     case 'exam':
       return 'from-indigo-400 to-blue-700';
     default:

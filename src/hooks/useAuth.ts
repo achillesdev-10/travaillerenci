@@ -23,6 +23,7 @@ import {
 import {
   fetchCurrentUser,
   logoutCurrentUser,
+  persistCachedUser,
   type StoredUser,
 } from '@/lib/clientAuth';
 
@@ -97,7 +98,9 @@ export function useAuth(): UseAuthReturn {
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const current = await fetchCurrentUser();
+      // force = true : on ignore le cache sessionStorage pour revenir à la
+      // vérité serveur (changement de nom / avatar / vérification email…).
+      const current = await fetchCurrentUser(true);
       setUser(current);
     } finally {
       setLoading(false);
@@ -120,7 +123,9 @@ export function useAuth(): UseAuthReturn {
         return { ok: false as const, error: result.error };
       }
 
-      // Session posée par le serveur → on recharge l'état côté client.
+      // Session posée par le serveur → on met à jour l'état ET le cache
+      // sessionStorage (évite un /api/auth/me de plus après connexion).
+      persistCachedUser(result.data.user);
       setUser(result.data.user);
       return {
         ok: true as const,
@@ -151,7 +156,8 @@ export function useAuth(): UseAuthReturn {
         return { ok: true as const, email_verified: false };
       }
 
-      // Sinon, la session est active → on met à jour l'état.
+      // Sinon, la session est active → on met à jour l'état ET le cache.
+      persistCachedUser(result.data.user);
       setUser(result.data.user);
       return { ok: true as const, email_verified: true };
     },

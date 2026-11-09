@@ -162,20 +162,20 @@ export default function PollWidget() {
   return (
     <section
       aria-label="Sondage"
-      className="rounded-2xl sm:rounded-3xl border border-orange-100 bg-white p-5 sm:p-6 shadow-sm dark:bg-slate-900 dark:border-slate-800"
+      className="rounded-2xl sm:rounded-3xl border border-line dark:border-slate-800 bg-white p-5 sm:p-6 shadow-sm dark:bg-slate-900 dark:border-slate-800"
     >
       <div className="mb-4 flex items-center gap-2">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500 text-white shadow-md shadow-orange-500/30">
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ width: 18, height: 18 }}>
             <path d="M10 12.5 8.5 14a2 2 0 1 1-3-3L8 8.5a2 2 0 0 1 2.8 0l1.2 1.2" />
             <path d="M14 11.5l1.5-1.5a2 2 0 1 1 3 3l-2.5 2.5a2 2 0 0 1-2.8 0l-1.2-1.2" />
           </svg>
         </span>
         <div>
-          <h2 className="font-[var(--font-display)] text-base font-extrabold text-gray-900 dark:text-white">
+          <h2 className="font-[var(--font-display)] text-base font-extrabold text-black dark:text-white">
             Sondage
           </h2>
-          <p className="text-[11px] uppercase tracking-widest text-gray-600">
+          <p className="text-[11px] uppercase tracking-widest text-black">
             {total > 0 ? `${total} vote${total > 1 ? 's' : ''}` : 'Donnez votre avis'}
           </p>
         </div>
@@ -184,12 +184,12 @@ export default function PollWidget() {
       {loading ? (
         <div className="space-y-2.5">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-10 animate-pulse rounded-xl bg-gray-100 dark:bg-slate-800" />
+            <div key={i} className="h-10 animate-pulse rounded-xl bg-brand-soft dark:bg-slate-800" />
           ))}
         </div>
       ) : poll ? (
         <>
-          <p className="mb-3 text-sm font-semibold text-gray-800 dark:text-gray-100">
+          <p className="mb-3 text-sm font-semibold text-black dark:text-white">
             {poll.question}
           </p>
 
@@ -204,7 +204,7 @@ export default function PollWidget() {
                     <button
                       onClick={() => vote(i)}
                       disabled={submitting !== null}
-                      className="group flex w-full items-center justify-between gap-2 rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-left text-[13px] font-medium text-gray-700 transition-all hover:border-primary/40 hover:bg-primary/5 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800/60 dark:text-gray-200 dark:hover:bg-slate-800"
+                      className="group flex w-full items-center justify-between gap-2 rounded-xl border border-line bg-white px-3.5 py-2.5 text-left text-[13px] font-medium text-black transition-all hover:border-primary/40 hover:bg-primary/5 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800/60 dark:text-white dark:hover:bg-slate-800"
                     >
                       <span className="flex items-center gap-2">
                         <span className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-gray-300 transition-colors group-hover:border-primary dark:border-slate-600">
@@ -235,7 +235,7 @@ export default function PollWidget() {
                         style={{ width: `${pct}%` }}
                       />
                       <div className="relative flex items-center justify-between gap-2 text-[13px]">
-                        <span className="flex items-center gap-2 font-medium text-gray-700 dark:text-gray-200">
+                        <span className="flex items-center gap-2 font-medium text-black dark:text-white">
                           {option}
                           {isVoted && (
                             <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-white">
@@ -253,17 +253,17 @@ export default function PollWidget() {
           </div>
 
           {hasVoted && (
-            <div className="mt-3 flex items-center justify-between gap-2 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/40 px-3.5 py-2.5">
+            <div className="mt-3 flex items-center justify-between gap-2 rounded-xl bg-brand-soft dark:bg-brand/15 border border-brand/20 dark:border-brand/25 px-3.5 py-2.5">
               <div className="flex items-center gap-2">
-                <svg className="h-4 w-4 text-emerald-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                <svg className="h-4 w-4 text-brand shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 6 9 17l-5-5" />
                 </svg>
-                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                <span className="text-xs font-semibold text-brand-strong dark:text-brand-accent">
                   Merci pour votre vote !
                 </span>
               </div>
               {countdown !== null && (
-                <span className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                <span className="text-[10px] font-mono font-bold text-brand dark:text-brand-accent">
                   {Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, '0')}
                 </span>
               )}
@@ -271,7 +271,7 @@ export default function PollWidget() {
           )}
         </>
       ) : (
-        <p className="text-sm text-gray-500">Le sondage est momentanément indisponible.</p>
+        <p className="text-sm text-black">Le sondage est momentanément indisponible.</p>
       )}
     </section>
   );

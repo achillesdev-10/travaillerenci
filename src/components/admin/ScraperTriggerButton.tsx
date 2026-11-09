@@ -30,7 +30,7 @@ export default function ScraperTriggerButton() {
         status === 'loading'
           ? 'bg-slate-800 text-slate-400 cursor-not-allowed'
           : status === 'success'
-          ? 'bg-emerald-500 text-slate-950'
+          ? 'bg-brand text-slate-950'
           : status === 'error'
           ? 'bg-rose-500 text-white'
           : 'bg-white text-slate-950 hover:bg-slate-200 active:scale-[0.98]'

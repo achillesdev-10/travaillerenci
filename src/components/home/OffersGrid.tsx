@@ -38,7 +38,7 @@ export default function OffersGrid({ jobs }: { jobs: JobOfferSchema[] }) {
         ) : null}
         <Link
           href="/jobs"
-          className="inline-flex items-center gap-2 px-5 sm:px-6 py-3 rounded-xl bg-white dark:bg-slate-900 border border-border hover:border-primary/30 hover:shadow-sm text-gray-800 dark:text-gray-200 hover:text-primary font-semibold text-sm sm:text-base transition-colors"
+          className="inline-flex items-center gap-2 px-5 sm:px-6 py-3 rounded-xl bg-white dark:bg-slate-900 border border-border hover:border-primary/30 hover:shadow-sm text-black dark:text-gray-200 hover:text-primary font-semibold text-sm sm:text-base transition-colors"
         >
           Voir toutes les offres
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">

@@ -18,7 +18,7 @@ const CATEGORY_BADGES: Record<ContentCategory, { label: string; className: strin
   job: { label: 'Emploi', className: 'bg-sky-500/15 text-sky-400 border-sky-500/30' },
   internship: { label: 'Stage', className: 'bg-violet-500/15 text-violet-400 border-violet-500/30' },
   scholarship: { label: 'Bourse', className: 'bg-amber-500/15 text-amber-400 border-amber-500/30' },
-  exam: { label: 'Concours', className: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' },
+  exam: { label: 'Concours', className: 'bg-brand/15 text-brand border-brand/30' },
 };
 
 /** ISO 8601 → valeur pour un <input type="datetime-local">. */
@@ -469,7 +469,7 @@ export default function AdminJobsClient({
           onClick={() => setStatusFilter('published')}
           className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
             statusFilter === 'published'
-              ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
+              ? 'bg-brand text-slate-950 shadow-lg shadow-brand/20'
               : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
           }`}
         >
@@ -646,7 +646,7 @@ export default function AdminJobsClient({
                     <td className="py-3 px-3 sm:py-4 sm:px-6">
                       <span className={`inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold border ${
                         job.status === 'published'
-                          ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                          ? 'bg-brand/15 text-brand border-brand/30'
                           : job.status === 'rejected'
                           ? 'bg-rose-500/15 text-rose-400 border-rose-500/30'
                           : job.status === 'archived'
@@ -654,7 +654,7 @@ export default function AdminJobsClient({
                           : 'bg-amber-500/15 text-amber-400 border-amber-500/30'
                       }`}>
                         <span className={`h-1.5 w-1.5 rounded-full ${
-                          job.status === 'published' ? 'bg-emerald-400' : job.status === 'rejected' ? 'bg-rose-400' : job.status === 'archived' ? 'bg-slate-400' : 'bg-amber-400'
+                          job.status === 'published' ? 'bg-brand' : job.status === 'rejected' ? 'bg-rose-400' : job.status === 'archived' ? 'bg-slate-400' : 'bg-amber-400'
                         }`} />
                         {job.status === 'published' ? 'Publiée' : job.status === 'rejected' ? 'Rejetée' : job.status === 'archived' ? 'Archivée' : 'En attente'}
                       </span>
@@ -665,7 +665,7 @@ export default function AdminJobsClient({
                           <button
                             type="button"
                             onClick={() => handleUpdateStatus(job, 'published')}
-                            className="px-2 sm:px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-[10px] sm:text-xs font-bold border border-emerald-500/20"
+                            className="px-2 sm:px-3 py-1.5 rounded-xl bg-brand/10 text-brand hover:bg-brand/20 text-[10px] sm:text-xs font-bold border border-brand/20"
                           >
                             Publier
                           </button>
@@ -713,7 +713,7 @@ export default function AdminJobsClient({
               </span>
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto">
-              <button onClick={() => handleBulkAction('publish')} className="flex-1 sm:flex-none px-4 py-2.5 rounded-2xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-xs font-bold border border-emerald-500/20">Publier</button>
+              <button onClick={() => handleBulkAction('publish')} className="flex-1 sm:flex-none px-4 py-2.5 rounded-2xl bg-brand/10 text-brand hover:bg-brand/20 text-xs font-bold border border-brand/20">Publier</button>
               <button onClick={() => handleBulkAction('clean')} className="flex-1 sm:flex-none px-4 py-2.5 rounded-2xl bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 text-xs font-bold border border-sky-500/20">Nettoyer</button>
               <button onClick={() => handleBulkAction('archive')} className="flex-1 sm:flex-none px-4 py-2.5 rounded-2xl bg-slate-800 text-slate-300 hover:bg-slate-700 text-xs font-bold border border-slate-700">Archiver</button>
               <button onClick={() => handleBulkAction('delete')} className="flex-1 sm:flex-none px-4 py-2.5 rounded-2xl bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 text-xs font-bold border border-rose-500/20">Supprimer</button>

@@ -1,11 +1,16 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { Metadata } from 'next';
 import { cache } from 'react';
-import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
+import {
+  getJobByIdCached,
+  getJobBySlugCached,
+  getSimilarJobsByCity,
+  getSimilarJobsByContract,
+} from '@/lib/cachedJobOffer';
 import { getCachedJobVivier } from '@/lib/cachedJobVivier';
-import { getCachedPosts } from '@/lib/cachedContent';
+import { getCachedPostsLong } from '@/lib/cachedContent';
+import JobExpiryBanner from '@/components/jobs/JobExpiryBanner';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
 import SafetyNotice from '@/components/content/SafetyNotice';
 import SaveButton from '@/components/saved/SaveButton';
@@ -26,7 +31,16 @@ import {
   ShareClickTracker,
 } from '@/components/analytics/EventTracker';
 
-export const revalidate = 3600;
+/**
+ * ISR 24 h : les 5 lectures BDD de la fiche (offre, 2 listes « similaires »,
+ * vivier 500, articles récents) passent par le Data Cache avec le même TTL
+ * (sinon le minimum de l'arbre rabaisserait la page). La fraîcheur à la
+ * publication / modification est officielle :
+ * revalidateJobSurfaces() → revalidateTag('job-offers') + revalidatePath
+ * (recruteur, admin, scraper); l'expiration est gérée côté client
+ * (JobExpiryBanner) pour ne pas dépendre du gel du rendu.
+ */
+export const revalidate = 86400;
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -44,9 +58,9 @@ async function findJob(param: string): Promise<JobOfferSchema | null> {
   // Un paramètre qui a la forme d'un UUID est un ID : on évite une requête
   // inutile par slug. Sinon (slug SEO legacy), on résout puis on redirige.
   if (UUID_RE.test(param)) {
-    return JobOfferSchemaService.getById(param);
+    return getJobByIdCached(param);
   }
-  return JobOfferSchemaService.getBySlug(param);
+  return getJobBySlugCached(param);
 }
 
 /** Déduplique l'appel entre generateMetadata et le rendu de la page. */
@@ -120,29 +134,13 @@ export default async function JobDetailPage({ params }: PageProps) {
   }
 
   const deadline = job.deadline ? new Date(job.deadline) : null;
-  const isExpired =
-    job.is_expired ||
-    (deadline !== null &&
-      !Number.isNaN(deadline.getTime()) &&
-      // eslint-disable-next-line react-hooks/purity
-      deadline.getTime() < Date.now());
   // Ville « propre » pour le lien de maillage interne (avant la virgule / le tiret).
   const jobCity = (job.location || '').split(',')[0].split(' - ')[0].trim();
 
   // Suggestions : 3 offres de la même localisation ou du même type de contrat
   const [similarByType, similarByLocation] = await Promise.all([
-    JobOfferSchemaService.list({
-      category: ['job', 'internship'],
-      contract_type: job.contract_type,
-      limit: 4,
-      fields: 'card',
-    }),
-    JobOfferSchemaService.list({
-      category: ['job', 'internship'],
-      location: job.location.split(',')[0].split(' - ')[0],
-      limit: 4,
-      fields: 'card',
-    }),
+    getSimilarJobsByContract({ contractType: job.contract_type }),
+    getSimilarJobsByCity({ city: job.location.split(',')[0].split(' - ')[0] }),
   ]);
 
   const similarIds = new Set<string>([job.id]);
@@ -157,7 +155,7 @@ export default async function JobDetailPage({ params }: PageProps) {
   const activity = job.category === 'internship' ? ('stages' as const) : ('emplois' as const);
   const [vivier, { rows: recentPosts }] = await Promise.all([
     getCachedJobVivier('both'),
-    getCachedPosts({
+    getCachedPostsLong({
       status: 'published',
       limit: 50,
       order_by: 'published_at',
@@ -230,7 +228,7 @@ export default async function JobDetailPage({ params }: PageProps) {
   };
 
   return (
-    <main className="flex-1 min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors">
+    <main className="flex-1 min-h-screen bg-white dark:bg-slate-950 transition-colors">
       {/* Mesures (§22) : vue de fiche + clic sur les boutons de candidature */}
       <EventTracker event="job_view" label={job.id} />
       <ApplicationClickTracker />
@@ -244,36 +242,15 @@ export default async function JobDetailPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
-      {/* Bannière « offre expirée » — la date limite de candidature est dépassée */}
-      {isExpired && (
-        <div className="bg-rose-600 text-white">
-          <div className="container mx-auto max-w-4xl px-4 py-3 flex items-center gap-3 text-sm font-semibold">
-            <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M12 8v4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-            </svg>
-            Offre expirée
-            {deadline ? ` — la date limite de candidature (${formatDate(job.deadline!)}) est dépassée.` : ' — la date limite de candidature est dépassée.'}
-          </div>
-        </div>
-      )}
+      {/* Bannière « offre expirée » — pilotée côté client (ISR 24 h : le
+          rendu serveur gèle la comparaison à la date de revalidation, c'est
+          ici que l'expiration reste exacte). */}
+      <JobExpiryBanner isExpired={job.is_expired} deadline={job.deadline} />
       {/* ============= HERO / HEADER DU POSTE ============= */}
-      <section className="bg-primary/5 dark:bg-primary/10 border-b border-gray-100 dark:border-slate-800">
+      <section className="bg-brand-soft/40 dark:bg-primary/10 border-b border-line dark:border-slate-800">
         <div className="container mx-auto px-4 pt-4 sm:pt-8 pb-6 max-w-4xl">
-          {/* Thumbnail with intelligent fallback */}
-          <div className="relative h-40 sm:h-56 overflow-hidden rounded-2xl sm:rounded-3xl shadow-lg mb-5 sm:mb-6 bg-gradient-to-br from-orange-400 to-amber-500">
-            <Image
-              src={getJobThumbnail(job)}
-              alt=""
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 768px, 896px"
-              className="object-cover"
-              unoptimized={getJobThumbnail(job).startsWith('data:')}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" aria-hidden="true" />
-          </div>
-
           <nav aria-label="Fil d'Ariane" className="mb-4 sm:mb-6">
-            <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] sm:text-sm text-gray-500 dark:text-gray-400">
+            <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] sm:text-sm text-black dark:text-white">
               <li>
                 <Link href="/" className="hover:text-primary hover:underline">
                   Accueil
@@ -289,7 +266,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                 </Link>
               </li>
               <li aria-hidden="true">/</li>
-              <li className="text-gray-700 dark:text-gray-200 font-medium truncate max-w-[60vw]">
+              <li className="text-black dark:text-white font-medium truncate max-w-[60vw]">
                 {job.title}
               </li>
             </ol>
@@ -299,7 +276,7 @@ export default async function JobDetailPage({ params }: PageProps) {
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-3">
                 {job.is_verified ? (
-                  <span className="inline-flex items-center gap-1.5 bg-primary/10 text-primary dark:text-emerald-400 px-3 py-1 rounded-full text-xs sm:text-sm font-bold">
+                  <span className="inline-flex items-center gap-1.5 bg-primary/10 text-primary dark:text-brand-accent px-3 py-1 rounded-full text-xs sm:text-sm font-bold">
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
                       <path d="M9 12l2 2 4-4" />
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
@@ -307,24 +284,24 @@ export default async function JobDetailPage({ params }: PageProps) {
                     Offre vérifiée TravaillerEnCi
                   </span>
                 ) : (
-                  <span className="inline-flex items-center bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-gray-400 px-3 py-1 rounded-full text-xs sm:text-sm font-semibold">
+                  <span className="inline-flex items-center bg-brand-soft dark:bg-slate-800 text-black dark:text-white px-3 py-1 rounded-full text-xs sm:text-sm font-semibold">
                     Non vérifiée
                   </span>
                 )}
-                <span className="inline-flex items-center bg-accent/10 text-accent dark:text-blue-400 px-3 py-1 rounded-full text-xs sm:text-sm font-bold">
+                <span className="inline-flex items-center bg-primary/10 text-primary dark:text-primary px-3 py-1 rounded-full text-xs sm:text-sm font-bold">
                   {job.contract_type}
                 </span>
-                <span className="text-[11px] sm:text-xs text-gray-400 dark:text-gray-500 ml-auto sm:ml-0">
+                <span className="text-[11px] sm:text-xs text-black dark:text-white dark:text-white ml-auto sm:ml-0">
                   Publiée le {formatDate(job.created_at)}
                 </span>
               </div>
 
-              <h1 className="text-[26px] sm:text-3xl lg:text-4xl font-extrabold text-gray-900 dark:text-white leading-tight mb-2 font-[var(--font-display)]">
+              <h1 className="text-[26px] sm:text-3xl lg:text-4xl font-extrabold text-black dark:text-white leading-tight mb-2 font-[var(--font-display)]">
                 {job.title}
               </h1>
 
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-4 sm:mb-5 text-[14px] sm:text-base">
-                <div className="text-primary dark:text-emerald-400 font-bold">
+                <div className="text-primary dark:text-brand-accent font-bold">
                   {/* Maillage offre → entreprise (§33) : toutes les offres de la société. */}
                   <Link
                     href={`/jobs?q=${encodeURIComponent(job.company)}`}
@@ -334,8 +311,8 @@ export default async function JobDetailPage({ params }: PageProps) {
                     {job.company}
                   </Link>
                 </div>
-                <div className="inline-flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
-                  <svg className="w-4 h-4 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <div className="inline-flex items-center gap-1.5 text-black dark:text-white">
+                  <svg className="w-4 h-4 text-black dark:text-white dark:text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                     <circle cx="12" cy="10" r="3" />
                   </svg>
@@ -359,7 +336,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                   rel="noopener noreferrer"
                   data-share="offre"
                   data-share-network="whatsapp"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-emerald-600/20 transition-all"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-strong text-white font-bold text-xs sm:text-sm shadow-md shadow-brand/20 transition-all"
                 >
                   <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                     <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
@@ -373,7 +350,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                   aria-label="Partager sur Facebook"
                   data-share="offre"
                   data-share-network="facebook"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 hover:border-primary/40 hover:text-primary transition-colors dark:border-slate-700 dark:bg-slate-900 dark:text-gray-400"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-white text-black hover:border-primary/40 hover:text-primary transition-colors dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                 >
                   <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                     <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
@@ -386,7 +363,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                   aria-label="Partager sur LinkedIn"
                   data-share="offre"
                   data-share-network="linkedin"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 hover:border-primary/40 hover:text-primary transition-colors dark:border-slate-700 dark:bg-slate-900 dark:text-gray-400"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-white text-black hover:border-primary/40 hover:text-primary transition-colors dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                 >
                   <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                     <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124zM7.119 20.452H3.555V9h3.564v11.452zM22 0H2C.895 0 0 .895 0 2v20c0 1.105.895 2 2 2h20c1.105 0 2-.895 2-2V2c0-1.105-.895-2-2-2z" />
@@ -412,11 +389,11 @@ export default async function JobDetailPage({ params }: PageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Colonne gauche — description */}
           <article className="lg:col-span-2 order-2 lg:order-1">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm shadow-black/5 p-5 sm:p-8">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 font-[var(--font-display)]">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-line dark:border-slate-800  p-5 sm:p-8">
+              <h2 className="text-lg sm:text-xl font-bold text-black dark:text-white mb-4 font-[var(--font-display)]">
                 À propos de ce poste
               </h2>
-              <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 leading-relaxed">
+              <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none text-black dark:text-white leading-relaxed">
                 <SimpleMarkdown text={job.description} />
               </div>
             </div>
@@ -433,7 +410,7 @@ export default async function JobDetailPage({ params }: PageProps) {
             {/* Offres similaires */}
             {similar.length > 0 && (
               <div className="mt-8 sm:mt-10">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-5 font-[var(--font-display)]">
+                <h2 className="text-lg sm:text-xl font-bold text-black dark:text-white mb-4 sm:mb-5 font-[var(--font-display)]">
                   Offres similaires qui pourraient vous intéresser
                 </h2>
                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 list-none m-0 p-0">
@@ -449,7 +426,7 @@ export default async function JobDetailPage({ params }: PageProps) {
             {/* Articles liés au secteur de l'offre (§16) */}
             {relatedArticles.length > 0 && (
               <div className="mt-8 sm:mt-10">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-5 font-[var(--font-display)]">
+                <h2 className="text-lg sm:text-xl font-bold text-black dark:text-white mb-4 sm:mb-5 font-[var(--font-display)]">
                   À lire avant de postuler
                 </h2>
                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 list-none m-0 p-0">
@@ -457,18 +434,18 @@ export default async function JobDetailPage({ params }: PageProps) {
                     <li key={article.id}>
                       <Link
                         href={`/blog/${article.slug}`}
-                        className="group flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-4 transition-all hover:border-primary/30 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+                        className="group flex h-full flex-col rounded-2xl border border-line bg-white p-4 transition-all hover:border-primary/30 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
                       >
                         {article.published_at && (
-                          <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                          <span className="text-[11px] font-medium text-black dark:text-white">
                             {formatDate(article.published_at)}
                           </span>
                         )}
-                        <h3 className="mt-1.5 text-sm font-bold text-gray-900 dark:text-white transition-colors group-hover:text-primary line-clamp-2">
+                        <h3 className="mt-1.5 text-sm font-bold text-black dark:text-white transition-colors group-hover:text-primary line-clamp-2">
                           {article.title}
                         </h3>
                         {article.excerpt && (
-                          <p className="mt-1.5 text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
+                          <p className="mt-1.5 text-xs text-black dark:text-white line-clamp-2">
                             {article.excerpt}
                           </p>
                         )}
@@ -481,7 +458,7 @@ export default async function JobDetailPage({ params }: PageProps) {
 
             {/* Maillage interne — catégories principales + localisation */}
             <nav aria-label="Liens complémentaires" className="mt-8 sm:mt-10">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 font-[var(--font-display)]">
+              <h2 className="text-lg sm:text-xl font-bold text-black dark:text-white mb-4 font-[var(--font-display)]">
                 Explorer davantage
               </h2>
               <ul className="flex flex-wrap gap-2.5 list-none m-0 p-0">
@@ -499,7 +476,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                   <li>
                     <Link
                       href={landingLinks.metier.href}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
                       {landingLinks.metier.label}
                     </Link>
@@ -509,7 +486,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                   <li>
                     <Link
                       href={landingLinks.city?.href ?? `/jobs?city=${encodeURIComponent(jobCity)}`}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
                       Offres à {jobCity}
                     </Link>
@@ -519,7 +496,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                   <li>
                     <Link
                       href="/stages"
-                      className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
                       Tous les stages
                     </Link>
@@ -528,7 +505,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                   <li>
                     <Link
                       href="/jobs"
-                      className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
                       Toutes les offres d'emploi
                     </Link>
@@ -537,7 +514,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                 <li>
                   <Link
                     href="/concours"
-                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                   >
                     Concours administratifs
                   </Link>
@@ -545,7 +522,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                 <li>
                   <Link
                     href="/bourses"
-                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                   >
                     Bourses d'études
                   </Link>
@@ -563,8 +540,8 @@ export default async function JobDetailPage({ params }: PageProps) {
               <ApplyBox job={job} variant="vertical" />
             </div>
 
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm p-5 text-sm">
-              <h3 className="font-bold text-gray-900 dark:text-white mb-4">Informations utiles</h3>
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-line dark:border-slate-800 shadow-sm p-5 text-sm">
+              <h3 className="font-bold text-black dark:text-white mb-4">Informations utiles</h3>
               <dl className="space-y-3.5">
                 <MetaRow label="Entreprise" value={job.company} />
                 <MetaRow label="Ville" value={job.location} />
@@ -573,7 +550,10 @@ export default async function JobDetailPage({ params }: PageProps) {
                   <MetaRow
                     label="Date limite"
                     value={formatDate(job.deadline)}
-                    tone={isExpired ? 'danger' : 'normal'}
+                    // Le drapeau BDD (géré par l'admin / le scraper) reste la
+                    // source serveur ; l'expiration exacte est côté client
+                    // (bannière ci-dessus).
+                    tone={job.is_expired ? 'danger' : 'normal'}
                   />
                 )}
                 <MetaRow
@@ -599,7 +579,10 @@ export default async function JobDetailPage({ params }: PageProps) {
       </section>
 
       {/* ============= STICKY CTA MOBILE BAS DE PAGE ============= */}
-      <div className="lg:hidden sticky bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t border-gray-200 dark:border-slate-800 px-3 py-3 safe-bottom">
+      <div
+        className="lg:hidden sticky bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t border-line dark:border-slate-800 px-3 py-3 safe-bottom"
+        style={{ bottom: 'calc(4rem + 1px + env(safe-area-inset-bottom))' }}
+      >
         <ApplyBox job={job} variant="compact" />
       </div>
     </main>
@@ -657,8 +640,8 @@ function ApplyBox({
 
   if (variant === 'horizontal') {
     return (
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded-2xl border border-gray-100 dark:border-slate-800 p-3 sm:p-4 shadow-sm">
-        <div className="text-[13px] sm:text-sm text-gray-500 dark:text-gray-400 flex-1">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded-2xl border border-line dark:border-slate-800 p-3 sm:p-4 shadow-sm">
+        <div className="text-[13px] sm:text-sm text-black dark:text-white flex-1">
           Prêt à postuler ? Choisissez votre méthode :
         </div>
         <ApplyActions job={job} />
@@ -667,9 +650,9 @@ function ApplyBox({
   }
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm shadow-black/5 p-5">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-line dark:border-slate-800  p-5">
       <div className="flex items-center gap-2 mb-4">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary dark:text-emerald-400 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary dark:text-brand-accent flex items-center justify-center">
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
             <path d="M20 7h-3a2 2 0 0 1-2-2V2" />
             <path d="M9 18a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h5l5 5v9a2 2 0 0 1-2 2h-1" />
@@ -677,12 +660,12 @@ function ApplyBox({
           </svg>
         </div>
         <div>
-          <div className="font-bold text-gray-900 dark:text-white">Postuler maintenant</div>
-          <div className="text-xs text-gray-500 dark:text-gray-400">1 à 2 minutes</div>
+          <div className="font-bold text-black dark:text-white">Postuler maintenant</div>
+          <div className="text-xs text-black dark:text-white">1 à 2 minutes</div>
         </div>
       </div>
       <ApplyActions job={job} />
-      <p className="mt-4 text-[11px] text-gray-400 leading-relaxed">
+      <p className="mt-4 text-[11px] text-black dark:text-white leading-relaxed">
         En postulant, vous acceptez que vos informations soient transmises à {job.company}.
         TravaillerEnCi n'est pas l'employeur et ne participe pas au processus de recrutement.
       </p>
@@ -732,7 +715,7 @@ function ApplyActions({ job }: { job: JobOfferSchema }) {
         <a
           data-apply={job.id}
           href={`mailto:${job.apply_email}?subject=${encodeURIComponent(`Candidature : ${job.title} (TravaillerEnCi)`)}`}
-          className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-800 dark:text-gray-200 font-semibold text-[13px] sm:text-sm transition-all w-full min-w-0 truncate"
+          className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-line dark:border-slate-700 hover:bg-brand-soft dark:hover:bg-slate-700 text-black dark:text-white font-semibold text-[13px] sm:text-sm transition-all w-full min-w-0 truncate"
         >
           <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="5" width="18" height="14" rx="2" />
@@ -763,7 +746,7 @@ function MetaRow({
       href={href}
       target={external ? '_blank' : undefined}
       rel={external ? 'noopener noreferrer' : undefined}
-      className="font-medium text-primary dark:text-emerald-400 hover:underline inline-flex items-center gap-1"
+      className="font-medium text-primary dark:text-brand-accent hover:underline inline-flex items-center gap-1"
     >
       {value}
       {external && (
@@ -775,14 +758,14 @@ function MetaRow({
     </a>
   ) : (
     <span
-      className={`font-medium ${tone === 'danger' ? 'text-rose-500' : 'text-gray-800 dark:text-gray-200'}`}
+      className={`font-medium ${tone === 'danger' ? 'text-rose-500' : 'text-black dark:text-white'}`}
     >
       {value}
     </span>
   );
   return (
     <div className="flex items-start justify-between gap-4">
-      <dt className="text-gray-500 dark:text-gray-400 shrink-0">{label}</dt>
+      <dt className="text-black dark:text-white shrink-0">{label}</dt>
       <dd className="text-right break-words">{ValueComp}</dd>
     </div>
   );
@@ -792,29 +775,29 @@ function MiniJobCard({ job }: { job: JobOfferSchema }) {
   return (
     <Link
       href={`/jobs/${job.id}`}
-      className="group block bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800 hover:border-primary/25 hover:shadow-md p-4 transition-all"
+      className="group block bg-white dark:bg-slate-900 rounded-xl border border-line dark:border-slate-800 hover:border-primary/25 hover:shadow-md p-4 transition-all"
     >
       <div className="flex flex-wrap items-center gap-1.5 mb-2">
         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-bold ${
           job.is_verified
-            ? 'bg-primary/10 text-primary dark:text-emerald-400'
-            : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-gray-400'
+            ? 'bg-primary/10 text-primary dark:text-brand-accent'
+            : 'bg-brand-soft dark:bg-slate-800 text-black dark:text-white'
         }`}>
           {job.is_verified ? '✓ Vérifié' : job.contract_type}
         </span>
         {job.is_verified ? (
-          <span className="inline-flex items-center bg-accent/10 text-accent dark:text-blue-400 px-2 py-0.5 rounded-full text-[10.5px] font-bold">
+          <span className="inline-flex items-center bg-primary/10 text-primary dark:text-primary px-2 py-0.5 rounded-full text-[10.5px] font-bold">
             {job.contract_type}
           </span>
         ) : null}
       </div>
-      <h3 className="font-bold text-[14px] leading-snug text-gray-900 dark:text-white line-clamp-2 mb-1 group-hover:text-primary dark:group-hover:text-emerald-400 transition-colors">
+      <h3 className="font-bold text-[14px] leading-snug text-black dark:text-white line-clamp-2 mb-1 group-hover:text-primary dark:group-hover:text-brand-accent transition-colors">
         {job.title}
       </h3>
-      <div className="text-[13px] text-primary dark:text-emerald-400 font-semibold mb-0.5 truncate">
+      <div className="text-[13px] text-primary dark:text-brand-accent font-semibold mb-0.5 truncate">
         {job.company}
       </div>
-      <div className="text-[12px] text-gray-500 dark:text-gray-400 truncate">{job.location}</div>
+      <div className="text-[12px] text-black dark:text-white truncate">{job.location}</div>
     </Link>
   );
 }
