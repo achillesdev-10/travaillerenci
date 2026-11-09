@@ -254,7 +254,7 @@ export default function CVGeneratorPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <section className="relative overflow-hidden border-b border-gray-100 dark:border-slate-800 bg-primary/5 dark:bg-primary/10">
+      <section className="relative overflow-hidden border-b border-line dark:border-slate-800 bg-primary/5 dark:bg-primary/10">
         <div className="container mx-auto px-4 py-10 md:py-14 relative">
           <div className="grid lg:grid-cols-[1fr_420px] lg:items-center gap-8">
             <div>
@@ -274,7 +274,7 @@ export default function CVGeneratorPage() {
                 pour maximiser vos chances auprès des recruteurs ivoiriens.
               </p>
               </div>
-              <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 dark:bg-slate-800/70 border border-gray-200 dark:border-slate-700 shadow-sm">
+              <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 dark:bg-slate-800/70 border border-line dark:border-slate-700 shadow-sm">
                 {saveState === 'saving' ? (
                   <>
                     <svg className="w-3.5 h-3.5 animate-spin text-primary" fill="none" viewBox="0 0 24 24">
@@ -292,7 +292,7 @@ export default function CVGeneratorPage() {
                   </>
                 ) : (
                   <>
-                    <svg className="w-3.5 h-3.5 text-gray-400 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3.5 h-3.5 text-black/50 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a2 2 0 012-2h8l6 6v10a2 2 0 01-2 2H6a2 2 0 01-2-2V5z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 3v6h6M9 13h6M9 17h4" />
                     </svg>
@@ -303,7 +303,7 @@ export default function CVGeneratorPage() {
               <div className="flex flex-wrap gap-3 mt-6">
                 <button
                   onClick={resetCV}
-                className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold text-black dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all shadow-sm inline-flex items-center gap-2"
+                className="px-4 py-2.5 rounded-xl border border-line dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold text-black dark:text-white hover:bg-brand-soft/50 dark:hover:bg-slate-700 transition-all shadow-sm inline-flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -351,7 +351,7 @@ export default function CVGeneratorPage() {
 
       {/* Mode toggle : CV / Lettre de motivation */}
       <div className="container mx-auto px-4 pt-6 max-w-6xl">
-        <div className="inline-flex p-1.5 rounded-xl bg-gray-100 dark:bg-slate-800 w-full sm:w-auto">
+        <div className="inline-flex p-1.5 rounded-xl bg-brand-soft dark:bg-slate-800 w-full sm:w-auto">
           <button
             onClick={() => setMode('cv')}
             className={`flex-1 sm:flex-none px-5 py-2.5 rounded-lg text-sm font-bold transition-all inline-flex items-center justify-center gap-2 ${
@@ -393,7 +393,7 @@ export default function CVGeneratorPage() {
       ) : (
       <section className="container mx-auto px-4 py-6 md:py-8">
         <div className="lg:hidden mb-5">
-          <div className="inline-flex p-1.5 rounded-xl bg-gray-100 dark:bg-slate-800 w-full">
+          <div className="inline-flex p-1.5 rounded-xl bg-brand-soft dark:bg-slate-800 w-full">
             <button
               onClick={() => setActiveTab('edit')}
               className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-bold transition-all inline-flex items-center justify-center gap-2 ${
@@ -430,7 +430,7 @@ export default function CVGeneratorPage() {
               {hydrated && <CVFormDynamic cvData={cvData} onChange={setCVData} />}
 
               {/* Aperçu lettre de motivation — lien vers le mode lettre */}
-              <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50/60 p-4 dark:border-blue-900/30 dark:bg-blue-950/20">
+              <div className="mt-4 rounded-xl border border-brand/20 bg-brand-soft p-4 dark:border-brand/30 dark:bg-brand/10">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-base">✉️</span>
                   <h3 className="text-sm font-bold text-black dark:text-white">Lettre de motivation</h3>
@@ -440,7 +440,7 @@ export default function CVGeneratorPage() {
                 </p>
                 <button
                   onClick={() => setMode('letter')}
-                  className="inline-flex items-center gap-1.5 text-[12px] font-bold text-blue-600 dark:text-blue-400 hover:gap-2.5 transition-all"
+                  className="inline-flex items-center gap-1.5 text-[12px] font-bold text-primary dark:text-brand-accent hover:gap-2.5 transition-all"
                 >
                   Ouvrir le générateur de lettre
                   <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
@@ -453,13 +453,13 @@ export default function CVGeneratorPage() {
 
           <div className={`lg:col-span-7 ${activeTab === 'edit' ? 'hidden lg:block' : ''}`}>
             <div className="lg:sticky lg:top-24">
-              <div className="bg-gray-100 dark:bg-slate-800/50 rounded-2xl p-3 md:p-6 border border-gray-200 dark:border-slate-800 shadow-inner">
+              <div className="bg-brand-soft dark:bg-slate-800/50 rounded-2xl p-3 md:p-6 border border-line dark:border-slate-800 shadow-inner">
                 <div className="text-center text-xs text-black dark:text-white mb-3 font-semibold">
                   Format A4 — Aperçu en temps réel
                 </div>
                 <div
                   ref={previewShellRef}
-                  className="overflow-auto max-h-[70vh] lg:max-h-[calc(100vh-14rem)] custom-scrollbar rounded-xl shadow-inner bg-slate-200/50 dark:bg-slate-900 p-4"
+                  className="overflow-auto max-h-[70vh] lg:max-h-[calc(100vh-14rem)] custom-scrollbar rounded-xl shadow-inner bg-brand-soft dark:bg-slate-900 p-4"
                 >
                   {/* Boîte aux dimensions compensées : largeur/hauteur du CV
                       visuel réel. Sans elle, le transform scale() fait déborder

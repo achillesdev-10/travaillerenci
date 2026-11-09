@@ -46,11 +46,11 @@ const CATEGORY_LABELS: Record<ArticleCategory, string> = {
 
 const CATEGORY_COLORS: Record<ArticleCategory, string> = {
   emploi: 'bg-primary/10 text-primary dark:text-brand-accent',
-  formation: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-  concours: 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
-  economie: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
-  carriere: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-  guide: 'bg-brand/10 text-brand dark:text-brand-accent',
+  formation: 'bg-primary/10 text-primary dark:text-brand-accent',
+  concours: 'bg-primary/10 text-primary dark:text-brand-accent',
+  economie: 'bg-primary/10 text-primary dark:text-brand-accent',
+  carriere: 'bg-primary/10 text-primary dark:text-brand-accent',
+  guide: 'bg-primary/10 text-primary dark:text-brand-accent',
 };
 
 const FILTER_OPTIONS: { value: string; label: string }[] = [
@@ -113,7 +113,7 @@ export default async function ActualitesPage({ searchParams }: ActualitesPagePro
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-slate-950">
+    <main className="min-h-screen bg-white dark:bg-slate-950">
       {/* ===== En-tête ===== */}
       <section className="relative overflow-hidden border-b border-border/40 bg-primary/5 dark:bg-primary/10">
         <div className="container mx-auto px-4 py-12 sm:py-16 relative z-10 max-w-4xl text-center">
@@ -141,7 +141,7 @@ export default async function ActualitesPage({ searchParams }: ActualitesPagePro
             <label htmlFor="news-search" className="sr-only">
               Rechercher une actualité
             </label>
-            <span className="pointer-events-none flex items-center justify-center pl-3 text-gray-400 absolute inset-y-0 left-0">
+            <span className="pointer-events-none flex items-center justify-center pl-3 text-black/50 dark:text-white/50 absolute inset-y-0 left-0">
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8" />
                 <path d="m21 21-4.3-4.3" />
@@ -153,7 +153,7 @@ export default async function ActualitesPage({ searchParams }: ActualitesPagePro
               type="search"
               defaultValue={keyword}
               placeholder="Rechercher un article..."
-              className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm outline-none transition-colors focus:border-primary/50 focus:ring-2 focus:ring-primary/10 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-200"
+              className="w-full rounded-xl border border-line bg-white py-2.5 pl-10 pr-4 text-sm text-black outline-none transition-colors focus:border-primary/50 focus:ring-2 focus:ring-primary/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
             />
           </div>
           <div className="relative">
@@ -164,7 +164,7 @@ export default async function ActualitesPage({ searchParams }: ActualitesPagePro
               id="news-category"
               name="category"
               defaultValue={category}
-              className="w-full appearance-none rounded-xl border border-gray-200 bg-white py-2.5 pl-4 pr-9 text-[13px] font-semibold text-black outline-none transition-colors focus:border-primary/50 focus:ring-2 focus:ring-primary/10 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-200 sm:w-56"
+              className="w-full appearance-none rounded-xl border border-line bg-white py-2.5 pl-4 pr-9 text-[13px] font-semibold text-black outline-none transition-colors focus:border-primary/50 focus:ring-2 focus:ring-primary/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white sm:w-56"
             >
               {FILTER_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -172,7 +172,7 @@ export default async function ActualitesPage({ searchParams }: ActualitesPagePro
                 </option>
               ))}
             </select>
-            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-black/50 dark:text-white/50">
               <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
                 <path d="m6 9 6 6 6-6" />
               </svg>
@@ -184,9 +184,9 @@ export default async function ActualitesPage({ searchParams }: ActualitesPagePro
       {/* ===== Liste des articles ===== */}
       <section className="container mx-auto px-4 pb-12 sm:pb-16 max-w-5xl">
         {paged.length === 0 ? (
-          <div className="bg-white dark:bg-slate-900 border border-dashed border-border rounded-2xl p-10 sm:p-16 text-center">
-            <div className="mx-auto w-16 h-16 rounded-2xl bg-gray-50 dark:bg-slate-800 flex items-center justify-center mb-5">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 text-gray-400">
+          <div className="bg-white dark:bg-slate-900 border border-dashed border-line rounded-2xl p-10 sm:p-16 text-center">
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-brand-soft dark:bg-slate-800 flex items-center justify-center mb-5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 text-black/50 dark:text-white/50">
                 <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
                 <path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6Z" />
               </svg>
@@ -215,10 +215,10 @@ export default async function ActualitesPage({ searchParams }: ActualitesPagePro
             {featured && (
               <Link
                 href={`/actualites/${featured.slug}`}
-                className="group block mb-8 bg-white dark:bg-slate-900 border border-border rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-1 hover:border-primary/30 transition-all duration-200"
+                className="group block mb-8 bg-white dark:bg-slate-900 border border-line rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-1 hover:border-primary/30 transition-all duration-200"
               >
                 <div className="grid sm:grid-cols-2">
-                  <div className="relative h-48 sm:h-full overflow-hidden bg-gray-100 dark:bg-slate-800">
+                  <div className="relative h-48 sm:h-full overflow-hidden bg-brand-soft dark:bg-slate-800">
                     <CoverImage
                       src={featured.cover_image || IMAGES.blog}
                       alt={featured.title}
@@ -233,7 +233,7 @@ export default async function ActualitesPage({ searchParams }: ActualitesPagePro
                       <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10.5px] font-bold ${CATEGORY_COLORS[featured.category]}`}>
                         {CATEGORY_LABELS[featured.category]}
                       </span>
-                      <span className="text-[11px] text-gray-400">
+                      <span className="text-[11px] text-black/50 dark:text-white/50">
                         {formatRelativeTime(featured.published_at || featured.created_at)}
                       </span>
                     </div>
@@ -270,7 +270,7 @@ export default async function ActualitesPage({ searchParams }: ActualitesPagePro
                 {safePage > 1 && (
                   <Link
                     href={filterHref({ page: String(safePage - 1) })}
-                    className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                    className="rounded-xl border border-line bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                   >
                     ← Précédent
                   </Link>
@@ -284,7 +284,7 @@ export default async function ActualitesPage({ searchParams }: ActualitesPagePro
                   }, [])
                   .map((p, i) =>
                     p === -1 ? (
-                      <span key={`gap-${i}`} className="px-1 text-gray-400">…</span>
+                      <span key={`gap-${i}`} className="px-1 text-black/50 dark:text-white/50">…</span>
                     ) : (
                       <Link
                         key={p}
@@ -293,7 +293,7 @@ export default async function ActualitesPage({ searchParams }: ActualitesPagePro
                         className={`rounded-xl px-4 py-2 text-sm font-semibold transition-colors ${
                           p === safePage
                             ? 'bg-primary text-white shadow-md shadow-primary/20'
-                            : 'border border-gray-200 bg-white text-black hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white'
+                            : 'border border-line bg-white text-black hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white'
                         }`}
                       >
                         {p}
@@ -303,7 +303,7 @@ export default async function ActualitesPage({ searchParams }: ActualitesPagePro
                 {safePage < totalPages && (
                   <Link
                     href={filterHref({ page: String(safePage + 1) })}
-                    className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                    className="rounded-xl border border-line bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                   >
                     Suivant →
                   </Link>
@@ -325,9 +325,9 @@ function ArticleCard({ article }: { article: Article }) {
   return (
     <Link
       href={`/actualites/${article.slug}`}
-      className="group flex flex-col bg-white dark:bg-slate-900 border border-border rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-1 hover:border-primary/30 transition-all duration-200"
+      className="group flex flex-col bg-white dark:bg-slate-900 border border-line rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-1 hover:border-primary/30 transition-all duration-200"
     >
-      <div className="relative h-28 overflow-hidden bg-gray-100 dark:bg-slate-800 sm:h-36">
+      <div className="relative h-28 overflow-hidden bg-brand-soft dark:bg-slate-800 sm:h-36">
         <CoverImage
           src={article.cover_image || IMAGES.blog}
           alt={article.title}

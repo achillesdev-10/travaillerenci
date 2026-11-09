@@ -88,7 +88,7 @@ const JOURNEY = [
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-slate-950">
+    <main className="min-h-screen bg-brand-soft/50 dark:bg-slate-950">
       {/* ===== En-tête ===== */}
       <section className="relative overflow-hidden border-b border-border/40 bg-primary/5 dark:bg-primary/10">
         <div className="container mx-auto px-4 py-14 sm:py-20 relative z-10 max-w-4xl text-center">
@@ -206,7 +206,7 @@ export default function AboutPage() {
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/jobs"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-black font-bold text-sm hover:bg-gray-100 transition-colors shadow-lg"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-black font-bold text-sm hover:bg-brand-soft transition-colors shadow-lg"
             >
               Voir les offres
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">

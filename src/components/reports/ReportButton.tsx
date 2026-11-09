@@ -148,7 +148,7 @@ export default function ReportButton({
             if (e.target === e.currentTarget) close();
           }}
         >
-          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+          <div className="w-full max-w-md rounded-3xl border border-line bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
             {state === 'done' ? (
               <div className="py-6 text-center">
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand/15">
@@ -182,7 +182,7 @@ export default function ReportButton({
               </div>
             ) : (
               <>
-                <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-4 dark:border-slate-800">
+                <div className="flex items-start justify-between gap-3 border-b border-line pb-4 dark:border-slate-800">
                   <div>
                     <h3 id="report-title" className="text-lg font-bold text-black dark:text-white">
                       Signaler ce contenu
@@ -195,7 +195,7 @@ export default function ReportButton({
                     type="button"
                     onClick={close}
                     aria-label="Fermer"
-                    className="text-gray-400 hover:text-black dark:hover:text-white text-xl font-bold leading-none"
+                    className="text-black/50 hover:text-black dark:hover:text-white text-xl font-bold leading-none"
                   >
                     &times;
                   </button>
@@ -213,7 +213,7 @@ export default function ReportButton({
                           className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-3 transition-colors ${
                             reason === r.value
                               ? 'border-brand/50 bg-brand-soft dark:bg-brand/10'
-                              : 'border-slate-200 hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600'
+                              : 'border-line hover:border-primary/40 dark:border-slate-700 dark:hover:border-slate-600'
                           }`}
                         >
                           <input
@@ -251,7 +251,7 @@ export default function ReportButton({
                       rows={3}
                       maxLength={1000}
                       placeholder="Ex. : l'annonce demande 5 000 FCFA de frais de dossier par email…"
-                      className="mt-1.5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-black focus:outline-none focus:border-primary dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-neutral-400"
+                      className="mt-1.5 w-full rounded-2xl border border-line bg-white px-4 py-3 text-sm text-black focus:outline-none focus:border-primary dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-neutral-400"
                     />
                   </div>
 
@@ -268,7 +268,7 @@ export default function ReportButton({
                       value={reporterEmail}
                       onChange={(e) => setReporterEmail(e.target.value)}
                       placeholder="vous@exemple.com"
-                      className="mt-1.5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-black focus:outline-none focus:border-primary dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-neutral-400"
+                      className="mt-1.5 w-full rounded-2xl border border-line bg-white px-4 py-3 text-sm text-black focus:outline-none focus:border-primary dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-neutral-400"
                     />
                   </div>
 
@@ -278,11 +278,11 @@ export default function ReportButton({
                     </p>
                   )}
 
-                  <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
+                  <div className="flex items-center justify-end gap-3 border-t border-line pt-4 dark:border-slate-800">
                     <button
                       type="button"
                       onClick={close}
-                      className="rounded-2xl bg-slate-100 px-5 py-3 text-xs font-bold text-black hover:bg-slate-200 transition-colors dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
+                      className="rounded-2xl bg-brand-soft px-5 py-3 text-xs font-bold text-black hover:bg-brand/10 transition-colors dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
                     >
                       Annuler
                     </button>

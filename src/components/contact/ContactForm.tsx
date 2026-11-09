@@ -12,7 +12,7 @@ const SUBJECTS = [
 ];
 
 const inputClass =
-  'w-full rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/60 px-4 py-3 text-sm text-black dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all';
+  'w-full rounded-xl border border-line dark:border-slate-700 bg-brand-soft/50 dark:bg-slate-800/60 px-4 py-3 text-sm text-black dark:text-white placeholder:text-black/40 dark:placeholder:text-white/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all';
 const labelClass =
   'block text-xs font-bold uppercase tracking-widest text-black dark:text-white mb-1.5';
 
@@ -155,7 +155,7 @@ export default function ContactForm() {
           Envoyer le message
         </button>
 
-        <p className="text-center text-xs text-gray-400 dark:text-white flex items-center justify-center gap-1.5">
+        <p className="text-center text-xs text-black/50 dark:text-white flex items-center justify-center gap-1.5">
           <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="11" width="18" height="11" rx="2" />
             <path d="M7 11V7a5 5 0 0110 0v4" />

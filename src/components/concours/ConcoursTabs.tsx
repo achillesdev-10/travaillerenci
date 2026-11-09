@@ -102,7 +102,7 @@ export default function ConcoursTabs({
       <div
         role="tablist"
         aria-label="Sections concours"
-        className="flex gap-1 rounded-xl bg-gray-100 dark:bg-slate-800 p-1 mb-6"
+        className="flex gap-1 rounded-xl bg-brand-soft dark:bg-slate-800 p-1 mb-6"
       >
         {TABS.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -130,7 +130,7 @@ export default function ConcoursTabs({
                     'inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10px] font-bold',
                     isActive
                       ? 'bg-primary/10 text-primary dark:bg-brand/15 dark:text-brand-accent'
-                      : 'bg-gray-200/80 text-black dark:bg-slate-700 dark:text-white',
+                      : 'bg-brand/10 text-black dark:bg-slate-700 dark:text-white',
                   )}
                 >
                   {count > 99 ? '99+' : count}

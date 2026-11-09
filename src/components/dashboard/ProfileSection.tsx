@@ -179,21 +179,21 @@ export default function ProfileSection() {
 
   if (!loaded) {
     return (
-      <div className="rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-8 text-center text-sm text-gray-400">
+      <div className="rounded-3xl border border-line dark:border-slate-800 bg-white dark:bg-slate-950 p-8 text-center text-sm text-black/50">
         Chargement du profil…
       </div>
     );
   }
 
   const inputClass =
-    'w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary';
+    'w-full rounded-2xl border border-line dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary';
   const labelClass =
     'block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1';
 
   return (
     <form
       onSubmit={save}
-      className="rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 sm:p-8 space-y-5"
+      className="rounded-3xl border border-line dark:border-slate-800 bg-white dark:bg-slate-950 p-6 sm:p-8 space-y-5"
     >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
@@ -216,12 +216,12 @@ export default function ProfileSection() {
       </div>
 
       {/* Indicateur de complétion */}
-      <div className="rounded-2xl border border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/60 p-4">
+      <div className="rounded-2xl border border-line dark:border-slate-800 bg-brand-soft/50 dark:bg-slate-900/60 p-4">
         <div className="flex items-center justify-between gap-3 mb-2">
-          <span className="text-xs font-bold text-black dark:text-gray-200">
+          <span className="text-xs font-bold text-black dark:text-white">
             Profil complété à {completion.percent}%
           </span>
-          <span className="text-[11px] text-gray-400">
+          <span className="text-[11px] text-black/50">
             {completion.done}/{completion.total}
           </span>
         </div>
@@ -231,7 +231,7 @@ export default function ProfileSection() {
           aria-valuemin={0}
           aria-valuemax={100}
           aria-label="Complétion du profil"
-          className="h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-slate-800"
+          className="h-2 w-full overflow-hidden rounded-full bg-brand-soft dark:bg-slate-800"
         >
           <div
             className="h-full rounded-full bg-primary transition-all"
@@ -246,7 +246,7 @@ export default function ProfileSection() {
                 'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10.5px] font-semibold',
                 item.done
                   ? 'bg-brand/10 text-brand dark:text-brand-accent'
-                  : 'bg-gray-200/70 text-black dark:bg-slate-800 dark:text-white',
+                  : 'bg-brand-soft text-black dark:bg-slate-800 dark:text-white',
               )}
             >
               <span aria-hidden="true">{item.done ? '✓' : '○'}</span>
@@ -353,7 +353,7 @@ export default function ProfileSection() {
                 'rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all',
                 profile.sectors.includes(s.slug)
                   ? 'border-primary bg-primary/10 text-primary'
-                  : 'border-gray-200 bg-white text-black hover:border-primary/40 dark:border-slate-700 dark:bg-slate-900 dark:text-white',
+                  : 'border-line bg-white text-black hover:border-primary/40 dark:border-slate-700 dark:bg-slate-900 dark:text-white',
               )}
             >
               {s.name}
@@ -375,7 +375,7 @@ export default function ProfileSection() {
                 'rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all',
                 profile.contract_types.includes(t.value)
                   ? 'border-accent bg-accent/10 text-accent'
-                  : 'border-gray-200 bg-white text-black hover:border-accent/40 dark:border-slate-700 dark:bg-slate-900 dark:text-white',
+                  : 'border-line bg-white text-black hover:border-accent/40 dark:border-slate-700 dark:bg-slate-900 dark:text-white',
               )}
             >
               {t.label}
@@ -406,7 +406,7 @@ export default function ProfileSection() {
           <button
             type="button"
             onClick={addSkill}
-            className="shrink-0 rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 text-xs font-bold text-black dark:text-gray-200 hover:border-primary/40 hover:text-primary transition-all"
+            className="shrink-0 rounded-2xl border border-line dark:border-slate-700 bg-white dark:bg-slate-900 px-4 text-xs font-bold text-black dark:text-white hover:border-primary/40 hover:text-primary transition-all"
           >
             Ajouter
           </button>
@@ -431,7 +431,7 @@ export default function ProfileSection() {
             ))}
           </div>
         ) : null}
-        <p className="text-[11px] text-gray-400 dark:text-white mt-1.5 ml-1">
+        <p className="text-[11px] text-black/50 dark:text-white mt-1.5 ml-1">
           Appuyez sur Entrée ou virgule pour ajouter une compétence.
         </p>
       </div>
@@ -464,7 +464,7 @@ export default function ProfileSection() {
             onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
             className={inputClass}
           />
-          <p className="text-[11px] text-gray-400 dark:text-white mt-1.5 ml-1">
+          <p className="text-[11px] text-black/50 dark:text-white mt-1.5 ml-1">
             Format international. Nécessaire pour les alertes WhatsApp.
           </p>
         </div>
@@ -482,14 +482,14 @@ export default function ProfileSection() {
             onChange={(e) => setProfile({ ...profile, resume_url: e.target.value })}
             className={inputClass}
           />
-          <p className="text-[11px] text-gray-400 dark:text-white mt-1.5 ml-1">
+          <p className="text-[11px] text-black/50 dark:text-white mt-1.5 ml-1">
             Non exposé publiquement. Prêt pour la future CVthèque.
           </p>
         </div>
       </div>
 
       {/* Consentement de visibilité (§30 — CVthèque future) */}
-      <div className="rounded-2xl border border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/60 p-4">
+      <div className="rounded-2xl border border-line dark:border-slate-800 bg-brand-soft/50 dark:bg-slate-900/60 p-4">
         <span className={labelClass}>Visibilité de mon profil</span>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {(Object.keys(PROFILE_VISIBILITY_LABELS) as ProfileVisibility[]).map((value) => {
@@ -505,7 +505,7 @@ export default function ProfileSection() {
                   'flex items-start gap-2.5 rounded-xl border px-3.5 py-3 text-left transition-all',
                   active
                     ? 'border-primary bg-primary/10'
-                    : 'border-gray-200 bg-white hover:border-primary/40 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-primary/40',
+                    : 'border-line bg-white hover:border-primary/40 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-primary/40',
                 )}
               >
                 <span
@@ -514,7 +514,7 @@ export default function ProfileSection() {
                     'mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border text-[9px] font-bold',
                     active
                       ? 'border-primary bg-primary text-white'
-                      : 'border-gray-300 text-transparent dark:border-slate-600',
+                      : 'border-line text-transparent dark:border-slate-600',
                   )}
                 >
                   ✓
@@ -525,7 +525,7 @@ export default function ProfileSection() {
                       'block text-xs font-bold',
                       active
                         ? 'text-primary'
-                        : 'text-black dark:text-gray-200',
+                        : 'text-black dark:text-white',
                     )}
                   >
                     {PROFILE_VISIBILITY_LABELS[value]}

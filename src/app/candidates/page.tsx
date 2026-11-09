@@ -129,7 +129,7 @@ export default function CandidatesPage() {
                 </a>
                 <Link
                   href="/jobs"
-                  className="w-full sm:w-auto bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 hover:border-primary/50 text-black dark:text-white px-8 py-4 rounded-2xl font-bold transition-all text-center"
+                  className="w-full sm:w-auto bg-white dark:bg-slate-900 border border-line dark:border-slate-700 hover:border-primary/50 text-black dark:text-white px-8 py-4 rounded-2xl font-bold transition-all text-center"
                 >
                   Voir les offres d’emploi
                 </Link>
@@ -263,7 +263,7 @@ export default function CandidatesPage() {
       </section>
 
       {/* Inscription */}
-      <section id="inscription" className="bg-gray-50 dark:bg-slate-950 border-t border-border">
+      <section id="inscription" className="bg-brand-soft/50 dark:bg-slate-950 border-t border-border">
         <div className="container mx-auto px-4 py-16">
           <div className="grid lg:grid-cols-2 gap-12 items-center max-w-5xl mx-auto">
             <div>

@@ -43,15 +43,15 @@ export default function EntreprendreFilters({
   const hasFilters = Boolean(currentSector || currentBudget);
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-border rounded-2xl shadow-sm overflow-hidden">
+    <div className="bg-white dark:bg-slate-900 border border-line rounded-2xl shadow-sm overflow-hidden">
       {/* Toggle button */}
       <button
         type="button"
         onClick={() => setShowFilters((s) => !s)}
-        className="w-full flex items-center justify-between px-5 py-4 text-sm font-semibold text-black dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors"
+        className="w-full flex items-center justify-between px-5 py-4 text-sm font-semibold text-black dark:text-white hover:bg-brand-soft/50 dark:hover:bg-slate-800/50 transition-colors"
       >
         <span className="flex items-center gap-2">
-          <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          <svg className="w-4 h-4 text-black/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
             <line x1="4" x2="4" y1="21" y2="14" />
             <line x1="4" x2="4" y1="10" y2="3" />
             <line x1="12" x2="12" y1="21" y2="12" />
@@ -70,7 +70,7 @@ export default function EntreprendreFilters({
           )}
         </span>
         <svg
-          className={`w-4 h-4 text-gray-400 transition-transform ${showFilters ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 text-black/50 transition-transform ${showFilters ? 'rotate-180' : ''}`}
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -84,7 +84,7 @@ export default function EntreprendreFilters({
 
       {/* Filters content */}
       {showFilters && (
-        <div className="px-5 pb-5 border-t border-border/50 pt-4 space-y-4">
+        <div className="px-5 pb-5 border-t border-line/50 pt-4 space-y-4">
           {/* Secteur */}
           <div>
             <label className="block text-xs font-semibold text-black dark:text-white uppercase tracking-wider mb-2">
@@ -99,7 +99,7 @@ export default function EntreprendreFilters({
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                     currentSector === key
                       ? 'bg-primary text-white shadow-sm shadow-primary/20'
-                      : 'bg-gray-100 dark:bg-slate-800 text-black dark:text-white hover:bg-gray-200 dark:hover:bg-slate-700'
+                      : 'bg-brand-soft dark:bg-slate-800 text-black dark:text-white hover:bg-brand/10 dark:hover:bg-slate-700'
                   }`}
                 >
                   {label}
@@ -122,7 +122,7 @@ export default function EntreprendreFilters({
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                     currentBudget === key
                       ? 'bg-primary text-white shadow-sm shadow-primary/20'
-                      : 'bg-gray-100 dark:bg-slate-800 text-black dark:text-white hover:bg-gray-200 dark:hover:bg-slate-700'
+                      : 'bg-brand-soft dark:bg-slate-800 text-black dark:text-white hover:bg-brand/10 dark:hover:bg-slate-700'
                   }`}
                 >
                   {label}

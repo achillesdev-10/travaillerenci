@@ -69,8 +69,8 @@ export default function TwoFactorSetupPage() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-6">
-          <div className="flex items-center gap-3 text-emerald-400 font-medium">
+        <div className="rounded-2xl border border-brand/20 bg-brand/5 p-6">
+          <div className="flex items-center gap-3 text-brand font-medium">
             <svg
               className="w-5 h-5"
               fill="currentColor"
@@ -110,8 +110,8 @@ export default function TwoFactorSetupPage() {
           </h1>
         </div>
 
-        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-6 space-y-4">
-          <div className="flex items-center gap-3 text-emerald-400 font-medium">
+        <div className="rounded-2xl border border-brand/20 bg-brand/5 p-6 space-y-4">
+          <div className="flex items-center gap-3 text-brand font-medium">
             <svg
               className="w-5 h-5"
               fill="currentColor"
@@ -139,7 +139,7 @@ export default function TwoFactorSetupPage() {
               <code className="text-slate-300">.env.local</code> ou les
               variables d&apos;environnement Vercel :
             </p>
-            <code className="block text-xs text-emerald-400 bg-slate-900 rounded-lg p-3 break-all font-mono">
+            <code className="block text-xs text-brand bg-slate-900 rounded-lg p-3 break-all font-mono">
               ADMIN_TOTP_SECRET={secret}
             </code>
           </div>

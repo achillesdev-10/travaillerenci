@@ -148,7 +148,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
     const home = sessionUser.role === 'company' ? '/dashboard/company' : '/dashboard/candidate';
     return (
       <div
-        className="w-full max-w-md space-y-5 rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 shadow-2xl text-center"
+        className="w-full max-w-md space-y-5 rounded-3xl border border-line dark:border-slate-800 bg-white dark:bg-slate-900 p-8 shadow-2xl text-center"
         data-testid="register-already-authenticated"
       >
         <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary border border-primary/20">
@@ -172,7 +172,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
           <button
             type="button"
             onClick={switchAccount}
-            className="block w-full rounded-2xl border border-gray-200 dark:border-slate-700 py-3 text-xs font-bold text-black dark:text-white hover:border-primary/40 hover:text-primary transition-all"
+            className="block w-full rounded-2xl border border-line dark:border-slate-700 py-3 text-xs font-bold text-black dark:text-white hover:border-primary/40 hover:text-primary transition-all"
           >
             Se déconnecter pour un autre compte
           </button>
@@ -182,7 +182,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
   }
 
   return (
-    <div className="w-full max-w-md space-y-8 rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 shadow-2xl">
+    <div className="w-full max-w-md space-y-8 rounded-3xl border border-line dark:border-slate-800 bg-white dark:bg-slate-900 p-8 shadow-2xl">
       <div className="text-center space-y-2">
         <Link
           href="/"
@@ -224,7 +224,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
             className={`rounded-2xl border p-4 text-left transition-all ${
               role === 'candidate'
                 ? 'border-primary bg-primary/10 text-primary dark:text-white shadow-lg shadow-primary/10'
-                : 'border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 text-black dark:text-white hover:border-gray-300 dark:hover:border-slate-700'
+                : 'border-line dark:border-slate-800 bg-surface dark:bg-slate-950 text-black dark:text-white hover:border-line dark:hover:border-slate-700'
             }`}
           >
             <div className="font-bold text-sm">Candidat</div>
@@ -240,7 +240,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
             className={`rounded-2xl border p-4 text-left transition-all ${
               role === 'company'
                 ? 'border-primary bg-primary/10 text-primary dark:text-white shadow-lg shadow-primary/10'
-                : 'border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 text-black dark:text-white hover:border-gray-300 dark:hover:border-slate-700'
+                : 'border-line dark:border-slate-800 bg-surface dark:bg-slate-950 text-black dark:text-white hover:border-line dark:hover:border-slate-700'
             }`}
           >
             <div className="font-bold text-sm">Entreprise</div>
@@ -264,7 +264,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
               placeholder="Koffi Kouadio"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
+              className="w-full rounded-2xl border border-line dark:border-slate-800 bg-surface dark:bg-slate-950 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
             />
           </div>
         ) : (
@@ -279,7 +279,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
               placeholder="MTN Côte d’Ivoire"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
-              className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
+              className="w-full rounded-2xl border border-line dark:border-slate-800 bg-surface dark:bg-slate-950 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
             />
           </div>
         )}
@@ -295,7 +295,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
             placeholder="vous@exemple.ci"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
+            className="w-full rounded-2xl border border-line dark:border-slate-800 bg-surface dark:bg-slate-950 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
           />
         </div>
 
@@ -351,7 +351,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
 
         {/* Mini-profil optionnel — alimente les alertes (voir 3.3) */}
         {role === 'candidate' && (
-          <details className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50/60 dark:bg-slate-950/50 p-4 group">
+          <details className="rounded-2xl border border-line dark:border-slate-800 bg-surface/60 dark:bg-slate-950/50 p-4 group">
             <summary className="cursor-pointer list-none text-xs font-bold text-black dark:text-white flex items-center justify-between">
               <span className="inline-flex items-center gap-1.5">
                 <svg className="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -359,7 +359,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
                 </svg>
                 Profil d'alerte (optionnel)
               </span>
-              <svg className="w-4 h-4 text-gray-400 transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <svg className="w-4 h-4 text-black/50 transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <path d="m6 9 6 6 6-6" />
               </svg>
             </summary>
@@ -380,7 +380,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
                   id="register-city"
                   value={profileCity}
                   onChange={(e) => setProfileCity(e.target.value)}
-                  className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
+                  className="w-full rounded-2xl border border-line dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
                 >
                   <option value="">Toutes les villes</option>
                   {REGIONS_CI.map((r) => (
@@ -402,7 +402,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
                   id="register-diploma"
                   value={profileDiploma}
                   onChange={(e) => setProfileDiploma(e.target.value)}
-                  className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
+                  className="w-full rounded-2xl border border-line dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
                 >
                   <option value="">Sélectionner un diplôme</option>
                   {DIPLOMA_FILTERS.map((d) => (
@@ -435,7 +435,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
                         'rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all',
                         profileSectors.includes(s.slug)
                           ? 'border-primary bg-primary/10 text-primary'
-                          : 'border-gray-200 bg-white text-black hover:border-primary/40 dark:border-slate-700 dark:bg-slate-900 dark:text-white',
+                          : 'border-line bg-white text-black hover:border-primary/40 dark:border-slate-700 dark:bg-slate-900 dark:text-white',
                       )}
                     >
                       {s.name}
@@ -460,7 +460,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
         <>
           <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200 dark:border-slate-800" />
+              <div className="w-full border-t border-line dark:border-slate-800" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-white dark:bg-slate-900 px-2 text-black dark:text-white">
@@ -471,7 +471,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
 
           <a
             href={googleAuthHref()}
-            className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 py-3.5 px-4 text-xs font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm"
+            className="w-full rounded-2xl border border-line dark:border-slate-800 bg-surface dark:bg-slate-950 py-3.5 px-4 text-xs font-bold text-black dark:text-white hover:bg-brand-soft dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path

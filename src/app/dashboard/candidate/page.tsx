@@ -23,7 +23,7 @@ const QUICK_ACTIONS = [
       </svg>
     ),
     href: '/jobs',
-    color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+    color: 'bg-brand-soft text-primary dark:bg-brand/15 dark:text-brand-accent',
   },
   {
     title: 'Créer mon CV',
@@ -45,7 +45,7 @@ const QUICK_ACTIONS = [
       </svg>
     ),
     href: '/bourses',
-    color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+    color: 'bg-brand-soft text-primary dark:bg-brand/15 dark:text-brand-accent',
   },
   {
     title: 'Conseils carrière',
@@ -90,9 +90,9 @@ export default function CandidateDashboardPage() {
   const firstName = user ? (user.name.split(' ')[0] || user.email.split('@')[0]) : '';
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
+    <div className="min-h-screen bg-brand-soft dark:bg-slate-950">
       {/* ===== Bandeau supérieur — identité utilisateur + barre latérale d'action ===== */}
-      <div className="border-b border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+      <div className="border-b border-line dark:border-slate-800 bg-white dark:bg-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-5">
             <div className="flex items-center gap-4">
@@ -136,7 +136,7 @@ export default function CandidateDashboardPage() {
               </Link>
               <Link
                 href="/generateur-de-cv"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-xs font-bold text-black dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-line dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-xs font-bold text-black dark:text-white hover:bg-brand-soft dark:hover:bg-slate-700 transition-all"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -151,7 +151,7 @@ export default function CandidateDashboardPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Alerte : compte migré sans mot de passe → définir un mot de passe */}
         {user?.needs_password_reset ? (
-          <div className="rounded-3xl border border-orange-500/40 bg-orange-50 dark:bg-slate-900 dark:border-orange-500/30 p-6 lg:p-8 shadow-xl flex flex-col lg:flex-row gap-8">
+          <div className="rounded-3xl border border-brand/40 bg-brand-soft dark:bg-slate-900 dark:border-brand/30 p-6 lg:p-8 shadow-xl flex flex-col lg:flex-row gap-8">
             <div className="flex-1">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-500/10 px-3 py-1 text-[11px] font-bold text-orange-600 dark:text-orange-400 border border-orange-500/30 mb-4">
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,7 +188,7 @@ export default function CandidateDashboardPage() {
               <Link
                 key={action.title}
                 href={action.href}
-                className="group rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 hover:-translate-y-0.5 hover:shadow-xl hover:border-primary/20 transition-all duration-200"
+                className="group rounded-2xl border border-line dark:border-slate-800 bg-white dark:bg-slate-900 p-5 hover:-translate-y-0.5 hover:shadow-xl hover:border-primary/20 transition-all duration-200"
               >
                 <div className={`w-10 h-10 rounded-xl ${action.color} flex items-center justify-center mb-3`}>
                   {action.icon}
@@ -235,7 +235,7 @@ export default function CandidateDashboardPage() {
             </section>
 
             {/* Statut du compte */}
-            <div className="rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
+            <div className="rounded-3xl border border-line dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
               <h3 className="text-sm font-bold font-[var(--font-display)] text-black dark:text-white mb-3">
                 Mon compte
               </h3>
@@ -266,10 +266,10 @@ export default function CandidateDashboardPage() {
                   </span>
                 </li>
               </ul>
-              <div className="mt-4 pt-3 border-t border-gray-100 dark:border-slate-800">
+              <div className="mt-4 pt-3 border-t border-line dark:border-slate-800">
                 <Link
                   href="/"
-                  className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400 hover:text-primary transition-colors"
+                  className="flex items-center gap-1.5 text-[11px] font-semibold text-black/50 hover:text-primary transition-colors"
                 >
                   <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                     <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -281,7 +281,7 @@ export default function CandidateDashboardPage() {
             </div>
 
             {/* Prochaines étapes */}
-            <div className="rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
+            <div className="rounded-3xl border border-line dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
               <h3 className="text-sm font-bold font-[var(--font-display)] text-black dark:text-white mb-3">
                 Prochaines étapes
               </h3>

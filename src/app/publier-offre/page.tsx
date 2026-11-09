@@ -20,12 +20,12 @@ export default async function PublierOffrePage() {
   });
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-slate-950">
+    <main className="min-h-screen bg-white dark:bg-slate-950">
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-gray-100 dark:border-slate-800 bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      <section className="relative overflow-hidden border-b border-line bg-primary/5 dark:border-slate-800 dark:bg-primary/10">
         <div className="container mx-auto px-4 py-10 md:py-14 max-w-4xl">
           <div className="text-center max-w-2xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-bold mb-4 border border-blue-200/60 dark:border-blue-800/40">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-soft dark:bg-brand/15 text-primary dark:text-brand-accent text-xs font-bold mb-4 border border-brand/20 dark:border-brand/30">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
                 <rect x="2" y="7" width="20" height="14" rx="2" />
                 <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
@@ -65,7 +65,7 @@ export default async function PublierOffrePage() {
               desc: 'Atteignez les candidats ivoiriens qualifiés.',
             },
           ].map((item) => (
-            <div key={item.title} className="rounded-2xl border border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 text-center shadow-sm">
+            <div key={item.title} className="rounded-2xl border border-line dark:border-slate-800 bg-white dark:bg-slate-900 p-4 text-center shadow-sm">
               <span className="text-2xl mb-2 block">{item.icon}</span>
               <h3 className="text-sm font-bold text-black dark:text-white">{item.title}</h3>
               <p className="text-xs text-black dark:text-white mt-1">{item.desc}</p>
@@ -116,14 +116,14 @@ function contractBadge(type?: string | null) {
   if (!type) return null;
   const colors: Record<string, string> = {
     CDI: 'bg-brand-soft text-brand-strong dark:bg-brand/15 dark:text-brand-accent',
-    CDD: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-    Stage: 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400',
-    Alternance: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-    Freelance: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400',
-    Prestation: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+    CDD: 'bg-brand-soft text-brand-strong dark:bg-brand/15 dark:text-brand-accent',
+    Stage: 'bg-brand-soft text-brand-strong dark:bg-brand/15 dark:text-brand-accent',
+    Alternance: 'bg-brand-soft text-brand-strong dark:bg-brand/15 dark:text-brand-accent',
+    Freelance: 'bg-brand-soft text-brand-strong dark:bg-brand/15 dark:text-brand-accent',
+    Prestation: 'bg-brand-soft text-brand-strong dark:bg-brand/15 dark:text-brand-accent',
   };
   return (
-    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${colors[type] || 'bg-gray-100 text-black'}`}>
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${colors[type] || 'bg-brand-soft text-brand-strong'}`}>
       {type}
     </span>
   );
@@ -133,7 +133,7 @@ function AvailableOfferCard({ offer }: { offer: JobOfferSchema }) {
   return (
     <Link
       href={`/jobs/${offer.id}`}
-      className="group block rounded-2xl border border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200"
+      className="group block rounded-2xl border border-line dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200"
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <h3 className="text-[13px] font-bold text-black dark:text-white leading-snug line-clamp-2 group-hover:text-primary transition-colors">
@@ -144,7 +144,7 @@ function AvailableOfferCard({ offer }: { offer: JobOfferSchema }) {
       <p className="text-[11px] text-black dark:text-white mb-2 line-clamp-1">
         {offer.company || 'Entreprise'}
       </p>
-      <div className="flex items-center gap-3 text-[10px] text-gray-400 dark:text-white">
+      <div className="flex items-center gap-3 text-[10px] text-black/50 dark:text-white/50">
         {offer.location && (
           <span className="inline-flex items-center gap-1">
             <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">

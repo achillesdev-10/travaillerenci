@@ -19,7 +19,7 @@ type OfferStatus = 'pending' | 'published' | 'archived' | 'rejected';
 const STATUS_BADGES: Record<OfferStatus, { label: string; classes: string }> = {
   pending: {
     label: 'En attente',
-    classes: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+    classes: 'bg-brand-soft text-primary dark:bg-brand/15 dark:text-brand-accent border-brand/20',
   },
   published: {
     label: 'Publiée',

@@ -13,9 +13,9 @@ const PHASE_SECTION_ACCENTS = {
     bar: 'bg-brand',
   },
   indigo: {
-    dot: 'bg-indigo-500',
-    ring: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/30',
-    bar: 'bg-indigo-500',
+    dot: 'bg-brand',
+    ring: 'bg-brand/10 text-brand dark:text-brand-accent border-brand/30',
+    bar: 'bg-brand',
   },
   slate: {
     dot: 'bg-slate-400',

@@ -135,7 +135,7 @@ export default function SaveButton({
           <div
             role="status"
             aria-live="polite"
-            className="fixed inset-x-4 bottom-4 z-[70] mx-auto flex max-w-md items-start gap-3 rounded-2xl border border-amber-400/50 bg-white p-4 shadow-2xl dark:border-slate-700 dark:bg-slate-900"
+            className="fixed inset-x-4 bottom-4 z-[70] mx-auto flex max-w-md items-start gap-3 rounded-2xl border border-brand/40 bg-white p-4 shadow-2xl dark:border-slate-700 dark:bg-slate-900"
           >
             <span aria-hidden="true" className="text-lg leading-none">
               ❤️
@@ -155,7 +155,7 @@ export default function SaveButton({
                 <button
                   type="button"
                   onClick={() => router.push(`/login?next=${encodeURIComponent(nextPath)}`)}
-                  className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-bold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:text-gray-200"
+                  className="rounded-lg border border-line px-3 py-1.5 text-xs font-bold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:text-white"
                 >
                   J&apos;ai déjà un compte
                 </button>
@@ -163,7 +163,7 @@ export default function SaveButton({
                   type="button"
                   onClick={() => setInvite(false)}
                   aria-label="Fermer l'invitation"
-                  className="ml-auto rounded-lg px-2 py-1 text-xs text-gray-400 transition-colors hover:text-black dark:hover:text-gray-200"
+                  className="ml-auto rounded-lg px-2 py-1 text-xs text-black/50 transition-colors hover:text-black dark:hover:text-gray-200"
                 >
                   ✕
                 </button>
@@ -187,8 +187,8 @@ export default function SaveButton({
           className={cn(
             'inline-flex h-7 w-7 items-center justify-center rounded-full transition-all active:scale-90 disabled:opacity-50',
             saved
-              ? 'bg-amber-400/15 text-amber-500'
-              : 'bg-white text-gray-400 hover:text-amber-500 hover:bg-amber-50 dark:bg-slate-900 dark:hover:bg-slate-800',
+              ? 'bg-brand/15 text-brand'
+              : 'bg-white text-black/50 hover:text-brand hover:bg-brand-soft dark:bg-slate-900 dark:hover:bg-slate-800',
             className,
           )}
         >
@@ -219,8 +219,8 @@ export default function SaveButton({
         className={cn(
           'inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-xs sm:text-sm font-bold transition-all active:scale-[0.99] disabled:opacity-50',
           saved
-            ? 'border-amber-400/40 bg-amber-400/10 text-amber-600 dark:text-amber-400'
-            : 'border-gray-200 bg-white text-black hover:border-amber-400/40 hover:text-amber-600 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-200',
+            ? 'border-brand/40 bg-brand-soft text-primary dark:bg-brand/15 dark:text-brand-accent'
+            : 'border-line bg-white text-black hover:border-brand/40 hover:text-brand dark:border-slate-700 dark:bg-slate-900 dark:text-white',
           className,
         )}
       >

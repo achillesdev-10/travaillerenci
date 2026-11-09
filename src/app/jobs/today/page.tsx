@@ -31,7 +31,7 @@ const REASON_BADGES: Record<string, ReasonBadge> = {
   populaire: {
     key: 'populaire',
     label: 'Populaire',
-    className: 'bg-amber-500 text-white',
+    className: 'bg-primary text-white',
   },
   recente: {
     key: 'recente',
@@ -156,7 +156,7 @@ export default async function JobsTodayPage() {
   };
 
   return (
-    <main className="flex-1 min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors py-8 sm:py-12">
+    <main className="flex-1 min-h-screen bg-white dark:bg-slate-950 transition-colors py-8 sm:py-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -175,11 +175,11 @@ export default async function JobsTodayPage() {
           <span className="mx-2" aria-hidden="true">
             /
           </span>
-          <span className="font-medium text-black dark:text-gray-200">Offres du jour</span>
+          <span className="font-medium text-black dark:text-white">Offres du jour</span>
         </nav>
 
         {/* En-tête : partageable pour Facebook / LinkedIn (§34) */}
-        <div className="mb-8 rounded-2xl border border-gray-100 bg-primary/5 p-6 dark:border-slate-800 dark:bg-primary/10 sm:p-8">
+        <div className="mb-8 rounded-2xl border border-line bg-primary/5 p-6 dark:border-slate-800 dark:bg-primary/10 sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <h1 className="mb-2 font-[var(--font-display)] text-3xl font-extrabold text-black dark:text-white sm:text-4xl">
@@ -214,7 +214,7 @@ export default async function JobsTodayPage() {
             </h2>
             <Link
               href="/jobs"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
             >
               Toutes les offres
               <svg
@@ -300,38 +300,38 @@ export default async function JobsTodayPage() {
         )}
 
         {/* ===== Maillage interne (§33) ===== */}
-        <section className="rounded-2xl border border-gray-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+        <section className="rounded-2xl border border-line bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
           <h2 className="mb-4 font-[var(--font-display)] text-lg font-bold text-black dark:text-white">
             Explorer les opportunités
           </h2>
 
           <div className="space-y-5">
             <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-400">
+              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-black dark:text-white">
                 Par type
               </p>
               <div className="flex flex-wrap gap-2">
                 <Link
                   href="/jobs"
-                  className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                  className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                 >
                   Toutes les offres
                 </Link>
                 <Link
                   href="/stages"
-                  className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                  className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                 >
                   Stages
                 </Link>
                 <Link
                   href="/concours"
-                  className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                  className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                 >
                   Concours
                 </Link>
                 <Link
                   href="/bourses"
-                  className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                  className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                 >
                   Bourses d&apos;étude
                 </Link>
@@ -339,7 +339,7 @@ export default async function JobsTodayPage() {
             </div>
 
             <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-400">
+              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-black dark:text-white">
                 Par ville
               </p>
               <div className="flex flex-wrap gap-2">
@@ -347,7 +347,7 @@ export default async function JobsTodayPage() {
                   <Link
                     key={city.href}
                     href={city.href}
-                    className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                    className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                   >
                     Emplois {city.name}
                   </Link>
@@ -356,7 +356,7 @@ export default async function JobsTodayPage() {
             </div>
 
             <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-400">
+              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-black dark:text-white">
                 Par métier
               </p>
               <div className="flex flex-wrap gap-2">
@@ -364,7 +364,7 @@ export default async function JobsTodayPage() {
                   <Link
                     key={metier.href}
                     href={metier.href}
-                    className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                    className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                   >
                     {metier.name}
                   </Link>
@@ -372,7 +372,7 @@ export default async function JobsTodayPage() {
                 {metierLinks.size === 0 && cityLinks.size === 0 && (
                   <Link
                     href="/jobs"
-                    className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                    className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                   >
                     Rechercher par métier
                   </Link>

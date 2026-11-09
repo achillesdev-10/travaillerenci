@@ -179,17 +179,17 @@ export default function AdminSidebar({
       {/* Brand */}
       <div className="border-b border-white/[0.06] px-6 py-6">
         <Link href="/cz7tk" onClick={handleNavigate} className="flex items-center gap-3">
-          <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25">
+          <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-strong shadow-lg shadow-brand/25">
             <span className="font-[var(--font-display)] text-xl font-black text-white">T</span>
-            <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-slate-950 bg-emerald-400" />
+            <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-slate-950 bg-brand" />
           </div>
           <div>
             <div className="font-[var(--font-display)] text-lg font-extrabold tracking-tight">
               <span className="text-orange-400">Travailler</span>
               <span className="text-white">En</span>
-              <span className="text-emerald-400">Ci</span>
+              <span className="text-brand">Ci</span>
             </div>
-            <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-emerald-400/80">
+            <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-brand/80">
               Console Admin
             </div>
           </div>
@@ -201,8 +201,8 @@ export default function AdminSidebar({
         <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] px-4 py-3">
           <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Session</div>
           <div className="mt-1.5 truncate text-sm font-medium text-white">{email}</div>
-          <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-300">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+          <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-2.5 py-1 text-[11px] font-semibold text-brand">
+            <span className="h-1.5 w-1.5 rounded-full bg-brand" />
             Administrateur
           </div>
         </div>
@@ -227,12 +227,12 @@ export default function AdminSidebar({
               )}
             >
               {active && (
-                <span className="absolute left-0 top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-full bg-emerald-400" />
+                <span className="absolute left-0 top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-full bg-brand" />
               )}
               <span
                 className={cn(
                   'transition-colors',
-                  active ? 'text-emerald-400' : 'text-slate-500 group-hover:text-slate-300'
+                  active ? 'text-brand' : 'text-slate-500 group-hover:text-slate-300'
                 )}
               >
                 {item.icon}

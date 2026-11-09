@@ -25,11 +25,11 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 const CATEGORY_COLORS: Record<string, string> = {
   emploi: 'bg-primary/10 text-primary dark:text-brand-accent',
-  formation: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-  concours: 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
-  economie: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
-  carriere: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-  guide: 'bg-brand/10 text-brand dark:text-brand-accent',
+  formation: 'bg-primary/10 text-primary dark:text-brand-accent',
+  concours: 'bg-primary/10 text-primary dark:text-brand-accent',
+  economie: 'bg-primary/10 text-primary dark:text-brand-accent',
+  carriere: 'bg-primary/10 text-primary dark:text-brand-accent',
+  guide: 'bg-primary/10 text-primary dark:text-brand-accent',
 };
 
 interface PageProps {
@@ -133,7 +133,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
   const similar = related.filter((a) => a.id !== article.id).slice(0, 3);
 
   return (
-    <main className="flex-1 min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors">
+    <main className="flex-1 min-h-screen bg-white dark:bg-slate-950 transition-colors">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
@@ -144,7 +144,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
       />
 
       {/* ===== HERO ===== */}
-      <section className="bg-primary/5 dark:bg-primary/10 border-b border-gray-100 dark:border-slate-800">
+      <section className="bg-primary/5 dark:bg-primary/10 border-b border-line dark:border-slate-800">
         <div className="container mx-auto px-4 pt-4 sm:pt-8 pb-6 sm:pb-10 max-w-4xl">
           {/* Cover image */}
           {article.cover_image && (
@@ -174,12 +174,12 @@ export default async function ArticleDetailPage({ params }: PageProps) {
             <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs sm:text-sm font-bold ${CATEGORY_COLORS[article.category] || ''}`}>
               {CATEGORY_LABELS[article.category] || article.category}
             </span>
-            <span className="text-[11px] sm:text-xs text-gray-400 dark:text-white">
+            <span className="text-[11px] sm:text-xs text-black/50 dark:text-white/60">
               {article.published_at
                 ? `Publié ${formatRelativeTime(article.published_at)}`
                 : ''}
             </span>
-            <span className="text-[11px] sm:text-xs text-gray-400 dark:text-white">
+            <span className="text-[11px] sm:text-xs text-black/50 dark:text-white/60">
               par {article.author}
             </span>
           </div>
@@ -201,7 +201,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Article body */}
           <article className="lg:col-span-2 order-2 lg:order-1">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm shadow-black/5 p-5 sm:p-8">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-line dark:border-slate-800 shadow-sm shadow-black/5 p-5 sm:p-8">
               <div className="mb-4 flex justify-end">
                 <ShareButton
                   title={article.title}
@@ -225,7 +225,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
 
             {/* Source link */}
             {article.source_url && (
-              <div className="mt-6 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm p-5">
+              <div className="mt-6 bg-white dark:bg-slate-900 rounded-2xl border border-line dark:border-slate-800 shadow-sm p-5">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary dark:text-brand-accent flex items-center justify-center shrink-0">
                     <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -263,7 +263,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                     <li key={s.id}>
                       <Link
                         href={`/actualites/${s.slug}`}
-                        className="group block bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800 hover:border-primary/25 hover:shadow-md p-4 transition-all"
+                        className="group block bg-white dark:bg-slate-900 rounded-xl border border-line dark:border-slate-800 hover:border-primary/25 hover:shadow-md p-4 transition-all"
                       >
                         <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-bold ${CATEGORY_COLORS[s.category] || ''} mb-2`}>
                           {CATEGORY_LABELS[s.category] || s.category}
@@ -292,7 +292,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                 <li>
                   <Link
                     href="/actualites"
-                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                   >
                     Toutes les actualités
                   </Link>
@@ -300,7 +300,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                 <li>
                   <Link
                     href="/concours"
-                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                   >
                     Concours administratifs
                   </Link>
@@ -308,7 +308,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                 <li>
                   <Link
                     href="/jobs"
-                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                   >
                     Offres d&apos;emploi
                   </Link>
@@ -319,7 +319,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
 
           {/* Sidebar */}
           <aside className="lg:col-span-1 order-1 lg:order-2 space-y-5 lg:sticky lg:top-24 lg:self-start">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm p-5 text-sm">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-line dark:border-slate-800 shadow-sm p-5 text-sm">
               <h3 className="font-bold text-black dark:text-white mb-4">Informations</h3>
               <dl className="space-y-3.5">
                 <div className="flex items-start justify-between gap-4">

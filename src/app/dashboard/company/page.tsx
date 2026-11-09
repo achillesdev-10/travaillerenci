@@ -32,17 +32,17 @@ export default function CompanyDashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <Link
           href="/dashboard/company/jobs"
-          className="rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 shadow-xl hover:border-primary/30 hover:shadow-md transition-all"
+          className="rounded-3xl border border-line dark:border-slate-800 bg-white dark:bg-slate-950 p-6 shadow-xl hover:border-primary/30 hover:shadow-md transition-all"
         >
           <div className="text-xs uppercase tracking-wider font-semibold text-black dark:text-white">Mes offres</div>
           <div className="text-3xl font-black text-primary dark:text-brand-accent mt-2">→</div>
           <div className="text-xs text-primary dark:text-brand-accent mt-1 font-semibold">Gérer mes offres</div>
         </Link>
 
-        <div className="rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 shadow-xl">
+        <div className="rounded-3xl border border-line dark:border-slate-800 bg-white dark:bg-slate-950 p-6 shadow-xl">
           <div className="text-xs uppercase tracking-wider font-semibold text-black dark:text-white">Candidatures reçues</div>
           <div className="text-3xl font-black text-black dark:text-white mt-2">—</div>
-          <div className="text-xs text-gray-400 dark:text-white mt-1">Bientôt disponible</div>
+          <div className="text-xs text-black/50 dark:text-white mt-1">Bientôt disponible</div>
         </div>
 
         <Link
@@ -55,7 +55,7 @@ export default function CompanyDashboardPage() {
         </Link>
       </div>
 
-      <div className="rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 lg:p-8 shadow-xl">
+      <div className="rounded-3xl border border-line dark:border-slate-800 bg-white dark:bg-slate-950 p-6 lg:p-8 shadow-xl">
         <h2 className="text-lg font-bold text-black dark:text-white mb-4">Dernières candidatures reçues</h2>
         <p className="text-sm text-black dark:text-white">
           La gestion des candidatures sera bientôt disponible. Vous pourrez consulter, filtrer et contacter les candidats directement depuis cet espace.

@@ -80,7 +80,7 @@ const OPPORTUNITIES = [
 
 export default function CareersPage() {
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-slate-950">
+    <main className="min-h-screen bg-brand-soft/50 dark:bg-slate-950">
       {/* ===== En-tête ===== */}
       <section className="relative overflow-hidden border-b border-border/40 bg-primary/5 dark:bg-primary/10">
         <div className="container mx-auto px-4 py-14 sm:py-20 relative z-10 max-w-4xl text-center">
@@ -191,7 +191,7 @@ export default function CareersPage() {
           </p>
           <a
             href={`mailto:${SITE_CONFIG.supportEmail}?subject=${encodeURIComponent('Je souhaite travailler avec TravaillerenCi')}`}
-            className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-7 py-3.5 text-black font-bold text-sm hover:bg-gray-100 transition-colors shadow-lg"
+            className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-7 py-3.5 text-black font-bold text-sm hover:bg-brand-soft transition-colors shadow-lg"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />

@@ -158,7 +158,7 @@ export default function NotificationCenter() {
                 type="button"
                 onClick={() => void handleMarkAllAsRead()}
                 disabled={loading}
-                className="text-[11px] font-semibold text-emerald-400 transition hover:text-emerald-300 disabled:opacity-50"
+                className="text-[11px] font-semibold text-brand transition hover:text-brand disabled:opacity-50"
               >
                 Tout marquer comme lu
               </button>
@@ -206,7 +206,7 @@ export default function NotificationCenter() {
                                   if (!notif.read) void handleMarkAsRead(notif.id);
                                   setOpen(false);
                                 }}
-                                className="text-[11px] font-semibold text-emerald-400 transition hover:text-emerald-300"
+                                className="text-[11px] font-semibold text-brand transition hover:text-brand"
                               >
                                 Voir →
                               </Link>

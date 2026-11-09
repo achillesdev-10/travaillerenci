@@ -107,14 +107,14 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
   }
 
   return (
-    <div className="rounded-3xl bg-white dark:bg-slate-900 border border-border p-6 sm:p-8">
+    <div className="rounded-3xl bg-white dark:bg-slate-900 border border-line p-6 sm:p-8">
       <h2 className="text-lg font-bold text-black dark:text-white font-[var(--font-display)] mb-5 flex items-center gap-2">
-        <svg className="w-5 h-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        <svg className="w-5 h-5 text-black/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
           <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
         </svg>
         Commentaires
         {total > 0 && (
-          <span className="ml-1 text-sm font-semibold text-gray-400 dark:text-white">
+          <span className="ml-1 text-sm font-semibold text-black/50 dark:text-white">
             ({total})
           </span>
         )}
@@ -124,12 +124,12 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
       {loading ? (
         <div className="space-y-3">
           {[1, 2].map((i) => (
-            <div key={i} className="animate-pulse rounded-xl bg-gray-50 dark:bg-slate-800 p-4">
+            <div key={i} className="animate-pulse rounded-xl bg-brand-soft dark:bg-slate-800 p-4">
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-slate-700" />
-                <div className="h-3 w-24 rounded bg-gray-200 dark:bg-slate-700" />
+                <div className="w-8 h-8 rounded-full bg-brand-soft dark:bg-slate-700" />
+                <div className="h-3 w-24 rounded bg-brand-soft dark:bg-slate-700" />
               </div>
-              <div className="h-3 w-full rounded bg-gray-200 dark:bg-slate-700" />
+              <div className="h-3 w-full rounded bg-brand-soft dark:bg-slate-700" />
             </div>
           ))}
         </div>
@@ -142,7 +142,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
           {comments.map((comment) => (
             <div
               key={comment.id}
-              className="rounded-xl bg-gray-50 dark:bg-slate-800/50 border border-border/50 p-4"
+              className="rounded-xl bg-brand-soft dark:bg-slate-800/50 border border-line/50 p-4"
             >
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-8 h-8 rounded-full bg-brand flex items-center justify-center text-white text-xs font-bold shrink-0">
@@ -152,7 +152,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                   <div className="text-sm font-semibold text-black dark:text-white">
                     {comment.user_display_name || 'Utilisateur'}
                   </div>
-                  <div className="text-[11px] text-gray-400 dark:text-white">
+                  <div className="text-[11px] text-black/50 dark:text-white">
                     {formatDate(comment.created_at)}
                   </div>
                 </div>
@@ -160,7 +160,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                   <button
                     type="button"
                     onClick={() => handleReport(comment.id)}
-                    className="ml-auto text-[11px] text-gray-400 hover:text-red-500 transition-colors"
+                    className="ml-auto text-[11px] text-black/50 hover:text-red-500 transition-colors"
                     title="Signaler ce commentaire"
                   >
                     🚩 Signaler
@@ -177,10 +177,10 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
 
       {/* Formulaire d'ajout */}
       {authLoading ? (
-        <div className="h-24 rounded-xl bg-gray-50 dark:bg-slate-800 animate-pulse" />
+        <div className="h-24 rounded-xl bg-brand-soft dark:bg-slate-800 animate-pulse" />
       ) : isAuthenticated ? (
         <form onSubmit={handleSubmit} className="mt-4">
-          <label className="block text-sm font-semibold text-black dark:text-gray-200 mb-2">
+          <label className="block text-sm font-semibold text-black dark:text-white mb-2">
             Ajouter un commentaire
           </label>
           <textarea
@@ -188,7 +188,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
             onChange={(e) => setContent(e.target.value)}
             placeholder="Partagez votre avis ou votre expérience…"
             rows={3}
-            className="w-full rounded-xl border border-border bg-gray-50 dark:bg-slate-800 px-4 py-3 text-sm text-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none transition-all"
+            className="w-full rounded-xl border border-line bg-brand-soft dark:bg-slate-800 px-4 py-3 text-sm text-black dark:text-white placeholder-black/40 dark:placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none transition-all"
           />
           {error && (
             <p className="mt-1 text-xs text-red-500">{error}</p>
@@ -207,7 +207,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
           </div>
         </form>
       ) : (
-        <div className="mt-4 rounded-xl bg-gray-50 dark:bg-slate-800/50 border border-dashed border-border p-5 text-center">
+        <div className="mt-4 rounded-xl bg-brand-soft dark:bg-slate-800/50 border border-dashed border-line p-5 text-center">
           <p className="text-sm text-black dark:text-white">
             Connectez-vous pour laisser un commentaire.
           </p>
@@ -220,7 +220,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
             </Link>
             <Link
               href="/register"
-              className="px-4 py-2 rounded-xl border border-border text-sm font-semibold text-black dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+              className="px-4 py-2 rounded-xl border border-line text-sm font-semibold text-black dark:text-white hover:bg-brand-soft dark:hover:bg-slate-800 transition-colors"
             >
               S&apos;inscrire
             </Link>

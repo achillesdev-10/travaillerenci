@@ -146,10 +146,10 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
   }
 
   return (
-    <main className="flex-1 min-h-screen bg-gray-50 py-8 transition-colors dark:bg-slate-950 sm:py-12">
+    <main className="flex-1 min-h-screen bg-brand-soft py-8 transition-colors dark:bg-slate-950 sm:py-12">
       <div className="container mx-auto max-w-6xl px-4">
         {/* ===================== HÉRO ===================== */}
-        <section className="relative overflow-hidden mb-6 rounded-2xl bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 shadow-md">
+        <section className="relative overflow-hidden mb-6 rounded-2xl bg-white dark:bg-slate-900 border border-line dark:border-slate-800 shadow-md">
           <div className="relative p-5 sm:p-7">
             <nav
               aria-label="Fil d'Ariane"
@@ -215,7 +215,7 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
                 </Link>
                 <Link
                   href="/jobs"
-                  className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-black dark:text-gray-200 px-4 py-2 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-700 transition-all"
+                  className="inline-flex items-center gap-2 rounded-xl border border-line dark:border-slate-700 bg-white dark:bg-slate-800 text-black dark:text-white px-4 py-2 text-sm font-semibold hover:bg-brand-soft dark:hover:bg-slate-700 transition-all"
                 >
                   Voir les offres d'emploi
                 </Link>
@@ -230,12 +230,12 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
         </div>
 
         {/* ===================== FILTRES DYNAMIQUES (Selects) ===================== */}
-        <div className="mb-6 rounded-2xl border border-gray-100 bg-white p-4 shadow-md shadow-black/5 dark:border-slate-800 dark:bg-slate-900 sm:p-5">
+        <div className="mb-6 rounded-2xl border border-line bg-white p-4 shadow-md shadow-black/5 dark:border-slate-800 dark:bg-slate-900 sm:p-5">
           <div className="mb-3 flex flex-wrap items-center gap-2">
-            <svg className="h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <svg className="h-4 w-4 text-black/50 dark:text-white/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
             </svg>
-            <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-white">
+            <span className="text-[11px] font-bold uppercase tracking-widest text-black/50 dark:text-white/50 dark:text-white">
               Filtrer les concours
             </span>
           </div>
@@ -249,9 +249,9 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
         </div>
 
         {/* ===================== CALENDRIER DES CONCOURS ADMINISTRATIFS ===================== */}
-        <div className="mb-6 rounded-2xl border border-indigo-100 bg-white p-5 shadow-md shadow-black/5 dark:border-indigo-900/30 dark:bg-slate-900">
+        <div className="mb-6 rounded-2xl border border-brand/20 bg-white p-5 shadow-sm dark:border-brand/30 dark:bg-slate-900">
           <div className="flex items-center gap-2 mb-3">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-soft text-primary dark:bg-brand/15 dark:text-brand-accent">
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
               </svg>
@@ -264,8 +264,8 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
               { name: 'ENA', full: "École Nationale d'Administration", color: 'bg-brand-soft text-brand-strong border-brand/20', darkColor: 'dark:bg-brand/15 dark:text-brand-accent dark:border-brand/25', icon: '🏛️' },
-              { name: 'Fonction Publique', full: 'Concours de la Fonction Publique', color: 'bg-orange-50 text-orange-700 border-orange-200', darkColor: 'dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800/40', icon: '🏢' },
-              { name: 'CAFOP', full: "Centres d'Animation de Formation P\u00e9dagogique", color: 'bg-blue-50 text-blue-700 border-blue-200', darkColor: 'dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/40', icon: '🎓' },
+              { name: 'Fonction Publique', full: 'Concours de la Fonction Publique', color: 'bg-brand-soft text-brand-strong border-brand/20', darkColor: 'dark:bg-brand/15 dark:text-brand-accent dark:border-brand/25', icon: '🏢' },
+              { name: 'CAFOP', full: "Centres d'Animation de Formation P\u00e9dagogique", color: 'bg-brand-soft text-brand-strong border-brand/20', darkColor: 'dark:bg-brand/15 dark:text-brand-accent dark:border-brand/25', icon: '🎓' },
             ].map((item) => (
               <Link
                 key={item.name}
@@ -284,7 +284,7 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
               </Link>
             ))}
           </div>
-          <p className="mt-3 text-[11px] text-gray-400 dark:text-white text-center">
+          <p className="mt-3 text-[11px] text-black/50 dark:text-white/50 dark:text-white text-center">
             🔔 Activez une alerte pour recevoir les dates d'inscription par email
           </p>
         </div>
@@ -304,7 +304,7 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
             <>
               {/* Explorer par catégorie / par diplôme — pages SEO (maillage interne) */}
               <section aria-label="Explorer par catégorie ou par diplôme" className="mb-6">
-                <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-gray-400">
+                <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-black/50 dark:text-white/50">
                   Explorer par catégorie
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -312,14 +312,14 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
                     <Link
                       key={c.value}
                       href={`/concours/categorie/${c.value}`}
-                      className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:bg-primary/5 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                      className="inline-flex items-center gap-1 rounded-full border border-line bg-white px-3 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:bg-primary/5 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
                       <CategoryIcon category={c.value} className="h-3.5 w-3.5" />
                       {c.label}
                     </Link>
                   ))}
                 </div>
-                <p className="mb-2 mt-4 text-[11px] font-bold uppercase tracking-widest text-gray-400">
+                <p className="mb-2 mt-4 text-[11px] font-bold uppercase tracking-widest text-black/50 dark:text-white/50">
                   Par diplôme
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -327,7 +327,7 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
                     <Link
                       key={d.slug}
                       href={`/concours/diplome/${d.slug}`}
-                      className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:bg-primary/5 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                      className="inline-flex items-center rounded-full border border-line bg-white px-3 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:bg-primary/5 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
                       {d.label}
                     </Link>
@@ -370,7 +370,7 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
                       {safePage > 1 && (
                         <Link
                           href={filterHref({ page: String(safePage - 1) })}
-                          className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                          className="rounded-xl border border-line bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                         >
                           ← Précédent
                         </Link>
@@ -384,7 +384,7 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
                         }, [])
                         .map((p, i) =>
                           p === -1 ? (
-                            <span key={`gap-${i}`} className="px-1 text-gray-400">…</span>
+                            <span key={`gap-${i}`} className="px-1 text-black/50 dark:text-white/50">…</span>
                           ) : (
                             <Link
                               key={p}
@@ -394,7 +394,7 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
                                 'rounded-xl px-4 py-2 text-sm font-semibold transition-colors',
                                 p === safePage
                                   ? 'bg-primary text-white shadow-md shadow-primary/20'
-                                  : 'border border-gray-200 bg-white text-black hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white',
+                                  : 'border border-line bg-white text-black hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white',
                               )}
                             >
                               {p}
@@ -404,7 +404,7 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
                       {safePage < totalPages && (
                         <Link
                           href={filterHref({ page: String(safePage + 1) })}
-                          className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                          className="rounded-xl border border-line bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                         >
                           Suivant →
                         </Link>
@@ -452,7 +452,7 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
           {/* ===================== ONGLET 2 : COMMUNIQUÉS ===================== */}
           {activeTab === 'communiques' && (
             <section>
-              <div className="mb-6 rounded-2xl border border-gray-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+              <div className="mb-6 rounded-2xl border border-line bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
                 <h2 className="mb-3 font-[var(--font-display)] text-lg font-bold text-black dark:text-white">
                   Communiqués officiels &amp; Résultats
                 </h2>
@@ -469,7 +469,7 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/50 p-8 text-center dark:border-slate-700 dark:bg-slate-800/50">
+                  <div className="rounded-xl border border-dashed border-line bg-brand-soft/50 p-8 text-center dark:border-slate-700 dark:bg-slate-800/50">
                     <p className="text-sm text-black dark:text-white">
                       Aucun communiqué ou résultat disponible pour le moment.
                     </p>
@@ -481,7 +481,7 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
                   <div className="mt-6 text-center">
                     <Link
                       href={filterHref({ phase: 'past', page: undefined })}
-                      className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                      className="inline-flex items-center gap-2 rounded-xl border border-line bg-white px-5 py-3 text-sm font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
                       Voir tous les résultats
                       <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
@@ -494,7 +494,7 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
               </div>
 
               {/* Source officielle */}
-              <div className="rounded-2xl border border-gray-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+              <div className="rounded-2xl border border-line bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
                 <h2 className="mb-3 font-[var(--font-display)] text-lg font-bold text-black dark:text-white">
                   Des informations vérifiées, directement à la source
                 </h2>
@@ -510,7 +510,7 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
           {/* ===================== ONGLET 3 : ACTUALITÉS & GUIDES ===================== */}
           {activeTab === 'actualites' && (
             <section>
-              <div className="mb-6 rounded-2xl border border-gray-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+              <div className="mb-6 rounded-2xl border border-line bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
                 <h2 className="mb-3 font-[var(--font-display)] text-lg font-bold text-black dark:text-white">
                   Actualités &amp; Guides de préparation
                 </h2>
@@ -541,7 +541,7 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
                 <div className="mt-6 text-center">
                   <Link
                     href="/actualites"
-                    className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                    className="inline-flex items-center gap-2 rounded-xl border border-line bg-white px-5 py-3 text-sm font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                   >
                     Voir toutes les actualités
                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
@@ -565,7 +565,7 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
 
         {/* Bloc sources officielles (crédibilité + SEO) — seulement si pas dans onglet communiqués */}
         {activeTab !== 'communiques' && (
-          <section className="mt-12 rounded-2xl border border-gray-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+          <section className="mt-12 rounded-2xl border border-line bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
             <h2 className="mb-3 font-[var(--font-display)] text-lg font-bold text-black dark:text-white">
               Des informations vérifiées, directement à la source
             </h2>
@@ -589,9 +589,9 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
 
 function ConcoursEmptyState() {
   return (
-    <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center dark:border-slate-800 dark:bg-slate-900 sm:p-12">
-      <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-50 dark:bg-slate-800 sm:h-20 sm:w-20">
-        <svg className="h-8 w-8 text-gray-400 sm:h-10 sm:w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <div className="rounded-2xl border border-dashed border-line bg-white p-8 text-center dark:border-slate-800 dark:bg-slate-900 sm:p-12">
+      <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-soft dark:bg-slate-800 sm:h-20 sm:w-20">
+        <svg className="h-8 w-8 text-black/50 dark:text-white/50 sm:h-10 sm:w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
           <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z" />
         </svg>
       </div>
@@ -623,7 +623,7 @@ function GuideCard({
   category: string;
 }) {
   return (
-    <div className="flex flex-col bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-1 hover:border-primary/30 transition-all duration-200 cursor-pointer">
+    <div className="flex flex-col bg-white dark:bg-slate-900 border border-line dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-1 hover:border-primary/30 transition-all duration-200 cursor-pointer">
       <div className="h-28 bg-gradient-to-br from-primary/5 to-brand/5 dark:from-primary/10 dark:to-brand/10 flex items-center justify-center">
         <svg className="h-12 w-12 text-primary/30 dark:text-brand-accent/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
           <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
@@ -658,8 +658,8 @@ function ConcoursFiltersSkeleton() {
     <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 animate-pulse">
       {[1, 2, 3].map((i) => (
         <div key={i} className="flex-1 min-w-0">
-          <div className="mb-1 h-3 w-20 rounded bg-gray-100 dark:bg-slate-800" />
-          <div className="h-10 rounded-xl bg-gray-100 dark:bg-slate-800" />
+          <div className="mb-1 h-3 w-20 rounded bg-brand-soft dark:bg-slate-800" />
+          <div className="h-10 rounded-xl bg-brand-soft dark:bg-slate-800" />
         </div>
       ))}
     </div>

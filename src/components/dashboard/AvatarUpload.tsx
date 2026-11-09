@@ -249,7 +249,7 @@ export default function AvatarUpload({
 
       {/* Erreur */}
       {error && (
-        <p className="text-[11px] text-amber-600 dark:text-amber-400 text-center max-w-[200px]">
+        <p className="text-[11px] text-primary dark:text-brand-accent text-center max-w-[200px]">
           {error}
         </p>
       )}

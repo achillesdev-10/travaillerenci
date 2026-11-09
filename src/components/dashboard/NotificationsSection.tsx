@@ -11,22 +11,22 @@ const TYPE_CONFIG: Record<
 > = {
   alert_match: {
     icon: '🔔',
-    color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+    color: 'bg-brand-soft text-primary dark:bg-brand/15 dark:text-brand-accent',
     label: 'Alerte',
   },
   saved_update: {
     icon: '⭐',
-    color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+    color: 'bg-brand-soft text-primary dark:bg-brand/15 dark:text-brand-accent',
     label: 'Sauvegarde',
   },
   account_event: {
     icon: '👤',
-    color: 'bg-brand/10 text-brand dark:text-brand-accent',
+    color: 'bg-brand-soft text-primary dark:bg-brand/15 dark:text-brand-accent',
     label: 'Compte',
   },
   system: {
     icon: '📢',
-    color: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
+    color: 'bg-brand-soft text-primary dark:bg-brand/15 dark:text-brand-accent',
     label: 'Système',
   },
 };
@@ -131,7 +131,7 @@ export default function NotificationsSection() {
   }
 
   return (
-    <div className="rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 sm:p-8">
+    <div className="rounded-3xl border border-line dark:border-slate-800 bg-white dark:bg-slate-950 p-6 sm:p-8">
       {/* En-tête */}
       <div className="mb-5 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -158,10 +158,10 @@ export default function NotificationsSection() {
 
       {/* Contenu */}
       {!loaded ? (
-        <div className="py-10 text-center text-sm text-gray-400">Chargement…</div>
+        <div className="py-10 text-center text-sm text-black/50">Chargement…</div>
       ) : notifications.length === 0 ? (
         <div className="py-6 text-center">
-          <div className="mx-auto mb-4 w-14 h-14 rounded-2xl bg-gray-100 dark:bg-slate-800 text-gray-400 flex items-center justify-center">
+          <div className="mx-auto mb-4 w-14 h-14 rounded-2xl bg-brand-soft dark:bg-slate-800 text-black/50 flex items-center justify-center">
             <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
               <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
               <path d="M13.73 21a2 2 0 01-3.46 0" />
@@ -182,8 +182,8 @@ export default function NotificationsSection() {
                 className={cn(
                   'group relative flex items-start gap-3 rounded-2xl border p-4 transition-all',
                   notif.read
-                    ? 'border-gray-100 dark:border-slate-800/50 bg-white dark:bg-slate-950'
-                    : 'border-gray-200 dark:border-slate-800 bg-gray-50/60 dark:bg-slate-900/60',
+                    ? 'border-line dark:border-slate-800/50 bg-white dark:bg-slate-950'
+                    : 'border-line dark:border-slate-800 bg-brand-soft/40 dark:bg-slate-900/60',
                 )}
               >
                 {/* Indicateur non-lu */}
@@ -239,7 +239,7 @@ export default function NotificationsSection() {
                           type="button"
                           onClick={() => markAsRead(notif)}
                           aria-label="Marquer comme lu"
-                          className="inline-flex items-center justify-center h-7 w-7 rounded-lg text-gray-400 hover:text-brand hover:bg-brand/10 transition-all"
+                          className="inline-flex items-center justify-center h-7 w-7 rounded-lg text-black/50 hover:text-brand hover:bg-brand/10 transition-all"
                           title="Marquer comme lu"
                         >
                           <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -252,7 +252,7 @@ export default function NotificationsSection() {
                         type="button"
                         onClick={() => removeNotification(notif)}
                         aria-label="Supprimer la notification"
-                        className="inline-flex items-center justify-center h-7 w-7 rounded-lg text-gray-400 hover:text-rose-500 hover:bg-rose-500/10 transition-all"
+                        className="inline-flex items-center justify-center h-7 w-7 rounded-lg text-black/50 hover:text-rose-500 hover:bg-rose-500/10 transition-all"
                       >
                         <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                           <path d="M18 6L6 18" />
@@ -264,7 +264,7 @@ export default function NotificationsSection() {
 
                   {/* Timestamp + badge type */}
                   <div className="mt-1.5 flex items-center gap-2">
-                    <span className="text-[10px] text-gray-400 dark:text-white">
+                    <span className="text-[10px] text-black/50 dark:text-white">
                       {relativeTime(notif.created_at)}
                     </span>
                     <span

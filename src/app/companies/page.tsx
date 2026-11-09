@@ -187,7 +187,7 @@ function SiteCard({ site }: { site: OfficialSite }) {
         </div>
       </div>
       <span
-        className="w-8 h-8 rounded-full bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-black dark:text-white group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all"
+        className="w-8 h-8 rounded-full bg-brand-soft dark:bg-slate-800 flex items-center justify-center text-black dark:text-white group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all"
         aria-hidden="true"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

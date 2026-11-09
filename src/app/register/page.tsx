@@ -13,7 +13,7 @@ const REASONS: Array<{ icon: string; text: string }> = [
 
 export default function RegisterPage() {
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-slate-950 px-4 py-10 sm:py-14 text-black dark:text-slate-50 transition-colors">
+    <main className="min-h-screen bg-surface dark:bg-slate-950 px-4 py-10 sm:py-14 text-black dark:text-slate-50 transition-colors">
       <div className="mx-auto grid w-full max-w-5xl items-center gap-8 lg:grid-cols-2 lg:gap-14">
         {/* Colonne « valeur » — visible dès le mobile (compacte), étoffée en desktop */}
         <section aria-labelledby="register-value" className="space-y-4 sm:space-y-5">
@@ -33,7 +33,7 @@ export default function RegisterPage() {
           </p>
           <ul className="space-y-2.5">
             {REASONS.map((reason) => (
-              <li key={reason.text} className="flex items-start gap-3 text-sm sm:text-[15px] text-black dark:text-gray-200">
+              <li key={reason.text} className="flex items-start gap-3 text-sm sm:text-[15px] text-black dark:text-white">
                 <span
                   aria-hidden="true"
                   className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-base"

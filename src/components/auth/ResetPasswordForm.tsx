@@ -41,7 +41,7 @@ export default function ResetPasswordForm({ token }: { token: string }) {
 
   if (success) {
     return (
-      <div className="w-full max-w-md rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 shadow-2xl text-center space-y-5">
+      <div className="w-full max-w-md rounded-3xl border border-line dark:border-slate-800 bg-white dark:bg-slate-900 p-8 shadow-2xl text-center space-y-5">
         <div className="mx-auto w-14 h-14 rounded-full bg-brand/10 border border-brand/30 flex items-center justify-center">
           <svg className="w-7 h-7 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
@@ -62,7 +62,7 @@ export default function ResetPasswordForm({ token }: { token: string }) {
   }
 
   return (
-    <div className="w-full max-w-md rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 shadow-2xl space-y-6">
+    <div className="w-full max-w-md rounded-3xl border border-line dark:border-slate-800 bg-white dark:bg-slate-900 p-8 shadow-2xl space-y-6">
       <div className="text-center space-y-2">
         <Link href="/" className="inline-block text-2xl font-black text-primary font-[var(--font-display)]">
           Travailleren<span className="text-black dark:text-white">Ci</span>

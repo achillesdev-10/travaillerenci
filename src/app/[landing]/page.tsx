@@ -140,7 +140,7 @@ export default async function JobSeoLandingPage({ params }: PageProps) {
   };
 
   return (
-    <main className="flex-1 min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors py-8 sm:py-12">
+    <main className="flex-1 min-h-screen bg-brand-soft/50 dark:bg-slate-950 transition-colors py-8 sm:py-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -159,7 +159,7 @@ export default async function JobSeoLandingPage({ params }: PageProps) {
           <span className="mx-2" aria-hidden="true">
             /
           </span>
-          <span className="text-black dark:text-gray-200 font-medium">{title}</span>
+          <span className="text-black dark:text-white font-medium">{title}</span>
         </nav>
 
         {/* En-tête éditorial unique */}
@@ -184,7 +184,7 @@ export default async function JobSeoLandingPage({ params }: PageProps) {
           </h2>
           <Link
             href={jobsHref}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
           >
             Recherche avancée
             <svg
@@ -217,7 +217,7 @@ export default async function JobSeoLandingPage({ params }: PageProps) {
 
           <div className="space-y-5">
             <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-400">
+              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-black/50">
                 Par ville
               </p>
               <div className="flex flex-wrap gap-2">
@@ -229,7 +229,7 @@ export default async function JobSeoLandingPage({ params }: PageProps) {
                       citySlug: c.slug,
                       metierSlug: null,
                     })}
-                    className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                    className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                   >
                     {parsed.activity === 'stages' ? 'Stages' : 'Emplois'} {c.name}
                   </Link>
@@ -238,7 +238,7 @@ export default async function JobSeoLandingPage({ params }: PageProps) {
             </div>
 
             <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-400">
+              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-black/50">
                 Par métier
               </p>
               <div className="flex flex-wrap gap-2">
@@ -250,7 +250,7 @@ export default async function JobSeoLandingPage({ params }: PageProps) {
                       citySlug: null,
                       metierSlug: m.slug,
                     })}
-                    className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                    className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                   >
                     {m.label}
                   </Link>

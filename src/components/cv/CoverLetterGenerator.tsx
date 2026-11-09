@@ -12,8 +12,8 @@ interface CoverLetterForm {
 }
 
 const inputClass =
-  'w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-black dark:text-gray-100 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all';
-const labelClass = 'block text-sm font-semibold text-black dark:text-gray-200 mb-1.5';
+  'w-full px-3.5 py-2.5 rounded-xl border border-line dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-black dark:text-white focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all';
+const labelClass = 'block text-sm font-semibold text-black dark:text-white mb-1.5';
 
 interface CoverLetterGeneratorProps {
   initialName?: string;
@@ -105,9 +105,9 @@ export default function CoverLetterGenerator({
   return (
     <div className="space-y-6">
       {/* Formulaire */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-6 shadow-sm">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-line dark:border-slate-800 p-6 shadow-sm">
         <div className="flex items-center gap-3 mb-5">
-          <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-lg shadow-md shadow-blue-500/20">
+          <span className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center text-lg shadow-sm">
             ✉️
           </span>
           <div>
@@ -197,7 +197,7 @@ export default function CoverLetterGenerator({
           <button
             onClick={generate}
             disabled={loading || !form.companyName.trim() || !form.jobTitle.trim()}
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-bold shadow-lg shadow-blue-500/20 hover:shadow-xl hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed transition-all inline-flex items-center gap-2"
+            className="px-6 py-3 rounded-xl bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary-dark disabled:opacity-60 disabled:cursor-not-allowed transition-all inline-flex items-center gap-2"
           >
             {loading ? (
               <>
@@ -221,7 +221,7 @@ export default function CoverLetterGenerator({
 
       {/* Résultat */}
       {result && (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-6 shadow-sm">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-line dark:border-slate-800 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-bold text-black dark:text-white flex items-center gap-2">
               <span className="w-7 h-7 rounded-lg bg-brand-soft dark:bg-brand/15 text-brand-strong dark:text-brand-accent flex items-center justify-center text-sm">✓</span>
@@ -230,7 +230,7 @@ export default function CoverLetterGenerator({
             <div className="flex items-center gap-2">
               <button
                 onClick={copyToClipboard}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-black dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all inline-flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-line dark:border-slate-700 bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-brand-soft/50 dark:hover:bg-slate-700 transition-all inline-flex items-center gap-1.5"
               >
                 {copied ? (
                   <>
@@ -250,7 +250,7 @@ export default function CoverLetterGenerator({
               </button>
               <button
                 onClick={downloadTxt}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-black dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all inline-flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-line dark:border-slate-700 bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-brand-soft/50 dark:hover:bg-slate-700 transition-all inline-flex items-center gap-1.5"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -259,12 +259,12 @@ export default function CoverLetterGenerator({
               </button>
             </div>
           </div>
-          <div className="rounded-xl bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 p-5">
-            <pre className="whitespace-pre-wrap text-sm text-black dark:text-gray-200 leading-relaxed font-[var(--font-body)]">
+          <div className="rounded-xl bg-brand-soft/50 dark:bg-slate-800/50 border border-line dark:border-slate-700 p-5">
+            <pre className="whitespace-pre-wrap text-sm text-black dark:text-white leading-relaxed font-[var(--font-body)]">
               {result}
             </pre>
           </div>
-          <p className="mt-3 text-[11px] text-gray-400 dark:text-white">
+          <p className="mt-3 text-[11px] text-black/50 dark:text-white">
             ✨ Lettre générée par IA. Vérifiez et personnalisez les détails avant de l&apos;envoyer.
           </p>
         </div>

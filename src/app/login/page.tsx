@@ -149,8 +149,8 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-slate-950 flex flex-col items-center justify-center px-4 py-12 text-black dark:text-slate-50 transition-colors">
-      <div className="w-full max-w-md space-y-8 rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 shadow-2xl">
+    <main className="min-h-screen bg-surface dark:bg-slate-950 flex flex-col items-center justify-center px-4 py-12 text-black dark:text-slate-50 transition-colors">
+      <div className="w-full max-w-md space-y-8 rounded-3xl border border-line dark:border-slate-800 bg-white dark:bg-slate-900 p-8 shadow-2xl">
         <div className="text-center space-y-2">
           <Link href="/" className="inline-block text-2xl font-black text-primary font-[var(--font-display)]">
             Travailleren<span className="text-black dark:text-white">Ci</span>
@@ -188,7 +188,7 @@ export default function LoginPage() {
             </button>
           </div>
         ) : showForgot ? (
-          <form onSubmit={handleForgotPassword} className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 p-5 space-y-4">
+          <form onSubmit={handleForgotPassword} className="rounded-2xl border border-line dark:border-slate-800 bg-surface dark:bg-slate-950 p-5 space-y-4">
             <div>
               <h2 className="font-bold text-sm text-black dark:text-white mb-1">Mot de passe oublié ?</h2>
               <p className="text-xs text-black dark:text-white">
@@ -206,7 +206,7 @@ export default function LoginPage() {
                 placeholder="vous@exemple.ci"
                 value={resetEmail}
                 onChange={(e) => setResetEmail(e.target.value)}
-                className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
+                className="w-full rounded-2xl border border-line dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
               />
             </div>
             <div className="flex items-center gap-3">
@@ -247,7 +247,7 @@ export default function LoginPage() {
                   className={`rounded-2xl border p-3 text-center transition-all text-xs font-bold ${
                     roleOverride === "candidate"
                       ? "border-primary bg-primary/10 text-primary dark:text-white shadow-lg shadow-primary/10"
-                      : "border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 text-black dark:text-white hover:border-gray-300 dark:hover:border-slate-700"
+                      : "border-line dark:border-slate-800 bg-surface dark:bg-slate-950 text-black dark:text-white hover:border-line dark:hover:border-slate-700"
                   }`}
                 >
                   Candidat
@@ -259,7 +259,7 @@ export default function LoginPage() {
                   className={`rounded-2xl border p-3 text-center transition-all text-xs font-bold ${
                     roleOverride === "company"
                       ? "border-primary bg-primary/10 text-primary dark:text-white shadow-lg shadow-primary/10"
-                      : "border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 text-black dark:text-white hover:border-gray-300 dark:hover:border-slate-700"
+                      : "border-line dark:border-slate-800 bg-surface dark:bg-slate-950 text-black dark:text-white hover:border-line dark:hover:border-slate-700"
                   }`}
                 >
                   Entreprise
@@ -279,7 +279,7 @@ export default function LoginPage() {
                   placeholder="vous@exemple.ci"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
+                  className="w-full rounded-2xl border border-line dark:border-slate-800 bg-surface dark:bg-slate-950 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
                 />
               </div>
 
@@ -314,7 +314,7 @@ export default function LoginPage() {
               <>
                 <div className="relative my-4">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-200 dark:border-slate-800" />
+                    <div className="w-full border-t border-line dark:border-slate-800" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
                     <span className="bg-white dark:bg-slate-900 px-2 text-black dark:text-white">
@@ -325,7 +325,7 @@ export default function LoginPage() {
 
                 <a
                   href={googleAuthHref()}
-                  className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 py-3.5 px-4 text-xs font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm"
+                  className="w-full rounded-2xl border border-line dark:border-slate-800 bg-surface dark:bg-slate-950 py-3.5 px-4 text-xs font-bold text-black dark:text-white hover:bg-brand-soft dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24">
                     <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.9C6.2 7.1 8.9 5 12 5z" />

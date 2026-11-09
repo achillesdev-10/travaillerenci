@@ -11,7 +11,7 @@ export default function StatsCard({
 }) {
   const toneClass =
     tone === 'success'
-      ? 'from-emerald-500/15 to-emerald-500/5 text-emerald-700'
+      ? 'from-brand/15 to-brand/5 text-brand'
       : tone === 'warning'
       ? 'from-amber-500/15 to-amber-500/5 text-amber-700'
       : 'from-primary/15 to-accent/5 text-primary';

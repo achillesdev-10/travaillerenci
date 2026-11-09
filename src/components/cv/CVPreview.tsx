@@ -28,10 +28,10 @@ export default function CVPreview({ cvData }: CVPreviewProps) {
       `}</style>
 
       {/* ── En-tête propre sans fond coloré ── */}
-      <header className="px-[18mm] pt-[16mm] pb-[8mm] border-b-2 border-gray-200">
+      <header className="px-[18mm] pt-[16mm] pb-[8mm] border-b-2 border-line">
         <div className="flex items-start gap-6">
           {cvData.photoUrl ? (
-            <div className="shrink-0 w-[72px] h-[72px] rounded-full overflow-hidden border-2 border-gray-200 shadow-sm">
+            <div className="shrink-0 w-[72px] h-[72px] rounded-full overflow-hidden border-2 border-line shadow-sm">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={cvData.photoUrl}
@@ -41,7 +41,7 @@ export default function CVPreview({ cvData }: CVPreviewProps) {
               />
             </div>
           ) : (
-            <div className="shrink-0 w-[72px] h-[72px] rounded-full bg-gray-100 flex items-center justify-center text-xl font-bold text-gray-400 border-2 border-gray-200">
+            <div className="shrink-0 w-[72px] h-[72px] rounded-full bg-brand-soft flex items-center justify-center text-xl font-bold text-black/50 border-2 border-line">
               {(cvData.fullName || '?').charAt(0).toUpperCase()}
             </div>
           )}
@@ -90,7 +90,7 @@ export default function CVPreview({ cvData }: CVPreviewProps) {
                         {exp.company || 'Entreprise'}
                       </p>
                     </div>
-                    <span className="text-[9px] font-semibold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full whitespace-nowrap mt-0.5 shrink-0">
+                    <span className="text-[9px] font-semibold text-black/50 bg-brand-soft/50 px-2 py-0.5 rounded-full whitespace-nowrap mt-0.5 shrink-0">
                       {exp.period}
                     </span>
                   </div>
@@ -118,7 +118,7 @@ export default function CVPreview({ cvData }: CVPreviewProps) {
                     </h3>
                     <p className="text-[9.5px] text-black">{edu.school || 'École'}</p>
                   </div>
-                  <span className="text-[9px] font-semibold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full whitespace-nowrap mt-0.5 shrink-0">
+                  <span className="text-[9px] font-semibold text-black/50 bg-brand-soft/50 px-2 py-0.5 rounded-full whitespace-nowrap mt-0.5 shrink-0">
                     {edu.year}
                   </span>
                 </div>
@@ -136,11 +136,11 @@ export default function CVPreview({ cvData }: CVPreviewProps) {
                 <div key={skill}>
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-[10px] font-semibold text-black">{skill}</span>
-                    <span className="text-[9px] text-gray-400 font-medium">
+                    <span className="text-[9px] text-black/50 font-medium">
                       {skillLevels[idx % skillLevels.length]}%
                     </span>
                   </div>
-                  <div className="h-[5px] bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-[5px] bg-brand-soft rounded-full overflow-hidden">
                     <div
                       className="h-full bg-primary rounded-full"
                       style={{ width: `${skillLevels[idx % skillLevels.length]}%` }}
@@ -155,9 +155,9 @@ export default function CVPreview({ cvData }: CVPreviewProps) {
 
       {/* ── Footer ── */}
       <div className="px-[18mm] pb-[10mm] mt-auto">
-        <div className="border-t border-gray-100 pt-3 text-center">
+        <div className="border-t border-line pt-3 text-center">
           <p className="text-[8px] text-gray-300">
-            CV généré via <span className="font-semibold text-gray-400">{getSiteHostname()}</span>
+            CV généré via <span className="font-semibold text-black/50">{getSiteHostname()}</span>
           </p>
         </div>
       </div>

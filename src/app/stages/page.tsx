@@ -97,7 +97,7 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
   };
 
   return (
-    <main className="flex-1 min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors py-8 sm:py-12">
+    <main className="flex-1 min-h-screen bg-white dark:bg-slate-950 transition-colors py-8 sm:py-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
@@ -106,7 +106,7 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
         <nav aria-label="Fil d'Ariane" className="text-sm text-black dark:text-white mb-6">
           <Link href="/" className="hover:text-primary">Accueil</Link>
           <span className="mx-2" aria-hidden="true">/</span>
-          <span className="text-black dark:text-gray-200 font-medium">Offres de stage</span>
+          <span className="text-black dark:text-white font-medium">Offres de stage</span>
         </nav>
 
         <div className="mb-8">
@@ -124,19 +124,19 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
         <nav aria-label="Explorer par catégorie" className="mb-6 flex flex-wrap gap-2">
           <Link
             href="/jobs"
-            className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+            className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
           >
             Offres d'emploi
           </Link>
           <Link
             href="/concours"
-            className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+            className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
           >
             Concours administratifs
           </Link>
           <Link
             href="/bourses"
-            className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+            className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
           >
             Bourses d'études
           </Link>
@@ -165,9 +165,9 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
             ))}
           </div>
         ) : (
-          <div className="bg-white dark:bg-slate-900 border border-dashed border-border rounded-2xl p-8 sm:p-12 text-center">
-            <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gray-50 dark:bg-slate-800 flex items-center justify-center mb-5">
-              <svg className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white dark:bg-slate-900 border border-dashed border-line rounded-2xl p-8 sm:p-12 text-center">
+            <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-brand-soft dark:bg-slate-800 flex items-center justify-center mb-5">
+              <svg className="w-8 h-8 sm:w-10 sm:h-10 text-black dark:text-white dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
             </div>
@@ -186,7 +186,7 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
               </Link>
               <Link
                 href="/jobs"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 text-black dark:text-gray-200 font-semibold text-sm transition-all"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-line bg-white hover:bg-brand-soft dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 text-black dark:text-white font-semibold text-sm transition-all"
               >
                 Offres d'emploi
               </Link>
@@ -200,7 +200,7 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
             {safePage > 1 && (
               <Link
                 href={filterHref({ page: String(safePage - 1) })}
-                className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                className="rounded-xl border border-line bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
               >
                 ← Précédent
               </Link>
@@ -214,7 +214,7 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
               }, [])
               .map((p, i) =>
                 p === -1 ? (
-                  <span key={`gap-${i}`} className="px-1 text-gray-400">
+                  <span key={`gap-${i}`} className="px-1 text-black dark:text-white">
                     …
                   </span>
                 ) : (
@@ -226,7 +226,7 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
                       'rounded-xl px-4 py-2 text-sm font-semibold transition-colors',
                       p === safePage
                         ? 'bg-primary text-white shadow-md shadow-primary/20'
-                        : 'border border-gray-200 bg-white text-black hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white',
+                        : 'border border-line bg-white text-black hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white',
                     )}
                   >
                     {p}
@@ -236,7 +236,7 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
             {safePage < totalPages && (
               <Link
                 href={filterHref({ page: String(safePage + 1) })}
-                className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                className="rounded-xl border border-line bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
               >
                 Suivant →
               </Link>
@@ -259,7 +259,7 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
                     citySlug: cityItem.slug,
                     metierSlug: null,
                   })}
-                  className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                  className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                 >
                   {cityItem.name}
                 </Link>
@@ -279,7 +279,7 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
                     citySlug: null,
                     metierSlug: metierItem.slug,
                   })}
-                  className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                  className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                 >
                   {metierItem.label}
                 </Link>
@@ -289,7 +289,7 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
         </section>
 
         {/* Bloc éditorial — contexte stage */}
-        <section className="mt-12 rounded-2xl border border-gray-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+        <section className="mt-12 rounded-2xl border border-line bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
           <h2 className="mb-3 font-[var(--font-display)] text-lg font-bold text-black dark:text-white">
             Comment trouver un stage en Côte d'Ivoire ?
           </h2>

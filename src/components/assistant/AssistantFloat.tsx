@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
 import type { AssistantResult, AssistantResponse } from '@/services/assistant/types';
@@ -95,16 +96,16 @@ function ResultCard({ result }: { result: AssistantResult }) {
     <Link
       href={result.url}
       prefetch={false}
-      className="group block rounded-xl border border-gray-100 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 p-3 transition-all hover:border-primary/40 hover:shadow-md hover:-translate-y-px"
+      className="group block rounded-xl border border-line dark:border-slate-700/60 bg-white dark:bg-slate-800/80 p-3 transition-all hover:border-primary/40 hover:shadow-md hover:-translate-y-px"
     >
       <div className="flex items-start gap-2.5">
         <div
           className={cn(
             'flex items-center justify-center rounded-lg w-8 h-8 shrink-0 text-base',
             isExam
-              ? 'bg-indigo-500/10'
+              ? 'bg-brand/10'
               : isScholarship
-                ? 'bg-amber-500/10'
+                ? 'bg-brand/10'
                 : 'bg-primary/10',
           )}
           aria-hidden="true"
@@ -121,7 +122,7 @@ function ResultCard({ result }: { result: AssistantResult }) {
           <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-black dark:text-white">
             {result.location && (
               <span className="inline-flex items-center gap-0.5 min-w-0">
-                <svg className="w-3 h-3 shrink-0 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <svg className="w-3 h-3 shrink-0 text-black/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                   <circle cx="12" cy="10" r="3" />
                 </svg>
@@ -148,6 +149,9 @@ function ResultCard({ result }: { result: AssistantResult }) {
 // ---------------------------------------------------------------------------
 
 export default function AssistantFloat() {
+  const pathname = usePathname();
+  const isJobDetail =
+    pathname !== '/jobs/today' && /^\/jobs\/[^/]+$/.test(pathname);
   const [open, setOpen] = useState(false);
   const [visible, setVisible] = useState(false);
   const [footerVisible, setFooterVisible] = useState(false);
@@ -206,7 +210,7 @@ export default function AssistantFloat() {
         // Hauteur effective du panneau — miroir du style inline (clamp 65vh).
         const panelHeight = Math.min(Math.max(window.innerHeight * 0.65, 320), 540);
         const navHeight = mobileNav?.getBoundingClientRect().height ?? 0;
-        const baseBottom = navHeight > 0 ? navHeight + 16 : 20;
+        const baseBottom = (navHeight > 0 ? navHeight + 16 : 20) + (isJobDetail ? 72 : 0);
         const panelBottom = baseBottom + 56 + 8;
         const widgetTop = open
           ? window.innerHeight - panelBottom - panelHeight
@@ -227,7 +231,7 @@ export default function AssistantFloat() {
       window.removeEventListener('scroll', update);
       ro.disconnect();
     };
-  }, [open]);
+  }, [open, isJobDetail]);
 
   // Message d'accueil à la première ouverture.
   useEffect(() => {
@@ -375,7 +379,10 @@ export default function AssistantFloat() {
           // transition-[opacity,transform] uniquement : `visibility`
           // (classe invisible) bascule instantanément, sans animation —
           // corrige l'audit « animation non composée sur visibility ».
-          'group fixed bottom-[calc(5rem_+_env(safe-area-inset-bottom))] right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-white shadow-xl shadow-primary/30 transition-[opacity,transform] duration-300 hover:scale-105 hover:shadow-primary/50 active:scale-95 lg:bottom-5',
+          'group fixed right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-white shadow-xl shadow-primary/30 transition-[opacity,transform] duration-300 hover:scale-105 hover:shadow-primary/50 active:scale-95 lg:bottom-5',
+          isJobDetail
+            ? 'bottom-[calc(9.5rem_+_env(safe-area-inset-bottom))]'
+            : 'bottom-[calc(5rem_+_env(safe-area-inset-bottom))]',
           visible && !footerVisible && !headerOverlap
             ? 'translate-y-0 opacity-100'
             : 'invisible translate-y-16 opacity-0 pointer-events-none',
@@ -404,7 +411,12 @@ export default function AssistantFloat() {
       {/* ===================== FENÊTRE DE CHAT (compacte & responsive) ===================== */}
       {open && !footerVisible && !headerOverlap && (
         <div
-          className="fixed bottom-[calc(9rem_+_env(safe-area-inset-bottom))] z-50 flex flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl shadow-black/25 animate-pop lg:bottom-[5.25rem]"
+          className={cn(
+            'fixed z-50 flex flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-line dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl shadow-black/25 animate-pop lg:bottom-[5.25rem]',
+            isJobDetail
+              ? 'bottom-[calc(13.5rem_+_env(safe-area-inset-bottom))]'
+              : 'bottom-[calc(9rem_+_env(safe-area-inset-bottom))]',
+          )}
           style={{
             right: '1.25rem',
             width: 'min(calc(100vw - 2.5rem), 400px)',
@@ -414,7 +426,7 @@ export default function AssistantFloat() {
           aria-label="Assistant TravaillerenCi"
         >
           {/* En-tête */}
-          <div className="flex items-center gap-3 px-4 py-3.5 border-b border-gray-100 dark:border-slate-800 bg-gradient-to-r from-primary to-primary-dark text-white">
+          <div className="flex items-center gap-3 px-4 py-3.5 border-b border-line dark:border-slate-800 bg-gradient-to-r from-primary to-primary-dark text-white">
             <BotAvatar />
             <div className="min-w-0 flex-1">
               <div className="text-sm font-extrabold font-[var(--font-display)] leading-tight truncate">
@@ -452,12 +464,12 @@ export default function AssistantFloat() {
           </div>
 
           {/* Corps : messages */}
-          <div ref={scrollRef} className="flex-1 overflow-y-auto px-3.5 py-4 space-y-3.5 bg-gray-50/70 dark:bg-slate-950/50">
+          <div ref={scrollRef} className="flex-1 overflow-y-auto px-3.5 py-4 space-y-3.5 bg-brand-soft/60/70 dark:bg-slate-950/50">
             {showWelcome ? (
               <div className="space-y-3.5">
                 <div className="flex items-start gap-2.5 animate-fade-in-up">
                   <BotAvatar />
-                  <div className="rounded-2xl rounded-tl-sm bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 px-3.5 py-2.5 text-[13px] leading-relaxed text-black dark:text-gray-200 shadow-sm max-w-[85%]">
+                  <div className="rounded-2xl rounded-tl-sm bg-white dark:bg-slate-800 border border-line dark:border-slate-700 px-3.5 py-2.5 text-[13px] leading-relaxed text-black dark:text-white shadow-sm max-w-[85%]">
                     Bonjour 👋
                     <br />
                     Je peux vous aider à trouver un emploi, un stage, une bourse ou un concours sur TravaillerenCi. Que recherchez-vous ?
@@ -469,7 +481,7 @@ export default function AssistantFloat() {
                       key={s.prompt}
                       type="button"
                       onClick={() => sendMessage(s.prompt)}
-                      className="text-left rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-[12.5px] font-semibold text-black dark:text-gray-200 hover:border-primary/40 hover:bg-primary/5 dark:hover:bg-slate-700 transition-colors"
+                      className="text-left rounded-xl border border-line dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-[12.5px] font-semibold text-black dark:text-white hover:border-primary/40 hover:bg-primary/5 dark:hover:bg-slate-700 transition-colors"
                     >
                       {s.label}
                     </button>
@@ -497,7 +509,7 @@ export default function AssistantFloat() {
                         'rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed shadow-sm',
                         m.role === 'user'
                           ? 'rounded-br-sm bg-primary text-white whitespace-pre-line'
-                          : 'rounded-tl-sm bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 text-black dark:text-gray-200',
+                          : 'rounded-tl-sm bg-white dark:bg-slate-800 border border-line dark:border-slate-700 text-black dark:text-white',
                         m.error && 'border-rose-300 dark:border-rose-500/40 text-rose-600 dark:text-rose-400',
                       )}
                     >
@@ -507,7 +519,7 @@ export default function AssistantFloat() {
                         <span className="whitespace-pre-line">{m.text}</span>
                       )}
                       {m.aiUsed && (
-                        <div className="mt-1.5 text-[10px] text-gray-400 dark:text-white">
+                        <div className="mt-1.5 text-[10px] text-black/50 dark:text-white">
                           ✨ Réponse assistée par IA
                         </div>
                       )}
@@ -542,11 +554,11 @@ export default function AssistantFloat() {
             {loading && (
               <div className="flex items-start gap-2.5 animate-fade-in">
                 <BotAvatar size="sm" />
-                <div className="rounded-2xl rounded-tl-sm bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 px-4 py-3 shadow-sm">
+                <div className="rounded-2xl rounded-tl-sm bg-white dark:bg-slate-800 border border-line dark:border-slate-700 px-4 py-3 shadow-sm">
                   <div className="flex gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-gray-400 dark:bg-gray-500 animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="h-1.5 w-1.5 rounded-full bg-gray-400 dark:bg-gray-500 animate-bounce" style={{ animationDelay: '120ms' }} />
-                    <span className="h-1.5 w-1.5 rounded-full bg-gray-400 dark:bg-gray-500 animate-bounce" style={{ animationDelay: '240ms' }} />
+                    <span className="h-1.5 w-1.5 rounded-full bg-gray-400 dark:bg-brand-soft/600 animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="h-1.5 w-1.5 rounded-full bg-gray-400 dark:bg-brand-soft/600 animate-bounce" style={{ animationDelay: '120ms' }} />
+                    <span className="h-1.5 w-1.5 rounded-full bg-gray-400 dark:bg-brand-soft/600 animate-bounce" style={{ animationDelay: '240ms' }} />
                   </div>
                 </div>
               </div>
@@ -559,7 +571,7 @@ export default function AssistantFloat() {
               e.preventDefault();
               sendMessage();
             }}
-            className="flex items-center gap-2 border-t border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2.5"
+            className="flex items-center gap-2 border-t border-line dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2.5"
           >
             <input
               ref={inputRef}
@@ -570,7 +582,7 @@ export default function AssistantFloat() {
               maxLength={500}
               aria-label="Votre message"
               autoComplete="off"
-              className="flex-1 min-w-0 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-3.5 py-2.5 text-[13px] text-black dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+              className="flex-1 min-w-0 rounded-xl border border-line dark:border-slate-700 bg-brand-soft/60 dark:bg-slate-800 px-3.5 py-2.5 text-[13px] text-black dark:text-gray-100 placeholder-black/40 dark:placeholder-white/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
             />
             <button
               type="submit"

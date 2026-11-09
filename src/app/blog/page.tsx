@@ -75,9 +75,9 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
   });
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-slate-950">
+    <main className="min-h-screen bg-white dark:bg-slate-950">
       {/* ===== En-tête ===== */}
-      <section className="relative overflow-hidden border-b border-border/40 bg-primary/5 dark:bg-primary/10">
+      <section className="relative overflow-hidden border-b border-line/60 bg-primary/5 dark:bg-primary/10">
         <div className="container mx-auto px-4 py-12 sm:py-16 relative z-10 max-w-4xl text-center">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary dark:text-brand-accent px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-5">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
@@ -118,9 +118,9 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
           </div>
         )}
         {posts.length === 0 ? (
-          <div className="bg-white dark:bg-slate-900 border border-dashed border-border rounded-2xl p-10 sm:p-16 text-center">
-            <div className="mx-auto w-16 h-16 rounded-2xl bg-gray-50 dark:bg-slate-800 flex items-center justify-center mb-5">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 text-gray-400" aria-hidden="true">
+          <div className="bg-white dark:bg-slate-900 border border-dashed border-line rounded-2xl p-10 sm:p-16 text-center">
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-brand-soft dark:bg-slate-800 flex items-center justify-center mb-5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 text-black/50 dark:text-white/50" aria-hidden="true">
                 <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
                 <path d="M18 14h-8M15 18h-10M9 6h8v4H9z" />
               </svg>
@@ -181,10 +181,10 @@ function BlogCard({ post }: { post: BlogPost }) {
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group flex flex-col bg-white dark:bg-slate-900 border border-border rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-1 hover:border-primary/30 transition-all duration-200"
+      className="group flex flex-col bg-white dark:bg-slate-900 border border-line rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-1 hover:border-primary/30 transition-all duration-200"
     >
       {/* Couverture */}
-      <div className="relative h-28 overflow-hidden bg-gray-100 dark:bg-slate-800 sm:h-40">
+      <div className="relative h-28 overflow-hidden bg-brand-soft dark:bg-slate-800 sm:h-40">
         <CoverImage
           src={post.cover_image || IMAGES.blog}
           alt={post.title}

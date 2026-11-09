@@ -8,10 +8,10 @@ export interface TickerItem {
 }
 
 const TYPE_META: Record<TickerItem['type'], { label: string; className: string }> = {
-  offre: { label: 'Offre', className: 'bg-orange-500/20 text-orange-300' },
-  concours: { label: 'Concours', className: 'bg-brand/20 text-brand-accent' },
-  bourse: { label: 'Bourse', className: 'bg-sky-500/20 text-sky-300' },
-  blog: { label: 'Blog', className: 'bg-amber-500/20 text-amber-300' },
+  offre: { label: 'Offre', className: 'bg-white/10 text-white' },
+  concours: { label: 'Concours', className: 'bg-white/10 text-white' },
+  bourse: { label: 'Bourse', className: 'bg-white/10 text-white' },
+  blog: { label: 'Blog', className: 'bg-white/10 text-white' },
 };
 
 function TickerLink({ item }: { item: TickerItem }) {

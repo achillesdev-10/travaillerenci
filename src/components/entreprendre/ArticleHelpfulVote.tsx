@@ -34,8 +34,8 @@ export default function ArticleHelpfulVote({
   }, [articleId, voted, loading]);
 
   return (
-    <div className="mt-8 rounded-2xl bg-gray-50 dark:bg-slate-800/50 border border-border p-5 text-center">
-      <p className="text-sm font-semibold text-black dark:text-gray-200 mb-3">
+    <div className="mt-8 rounded-2xl bg-brand-soft dark:bg-slate-800/50 border border-line p-5 text-center">
+      <p className="text-sm font-semibold text-black dark:text-white mb-3">
         Cet article vous a-t-il été utile ?
       </p>
       <button
@@ -45,7 +45,7 @@ export default function ArticleHelpfulVote({
         className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
           voted
             ? 'bg-brand-soft text-brand-strong dark:bg-brand/20 dark:text-brand-accent cursor-default'
-            : 'bg-white dark:bg-slate-900 border border-border text-black dark:text-gray-200 hover:bg-brand-soft dark:hover:bg-brand/15 hover:border-brand/40 dark:hover:border-brand/60 active:scale-95'
+            : 'bg-white dark:bg-slate-900 border border-line text-black dark:text-white hover:bg-brand-soft dark:hover:bg-brand/15 hover:border-brand/40 dark:hover:border-brand/60 active:scale-95'
         }`}
       >
         {voted ? (
@@ -67,7 +67,7 @@ export default function ArticleHelpfulVote({
         )}
       </button>
       {count > 0 && (
-        <p className="mt-2 text-xs text-gray-400 dark:text-white">
+        <p className="mt-2 text-xs text-black/50 dark:text-white">
           {count} personne{count > 1 ? 's' : ''} ont trouvé cet article utile
         </p>
       )}

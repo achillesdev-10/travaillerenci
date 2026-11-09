@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import CoverImage from '@/components/content/CoverImage';
@@ -62,7 +61,7 @@ const QUICK_LINKS = [
     label: 'Offres d\u2019emploi',
     desc: 'CDI, CDD, prestation',
     href: '/jobs',
-    color: 'bg-orange-500',
+    color: 'bg-brand',
     image: IMAGES.jobs,
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 sm:h-7 sm:w-7 drop-shadow">
@@ -75,7 +74,7 @@ const QUICK_LINKS = [
     label: 'Stages',
     desc: 'Pour étudiants & jeunes diplômés',
     href: '/jobs?contract=Stage',
-    color: 'bg-sky-500',
+    color: 'bg-brand',
     image: IMAGES.internship,
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 sm:h-7 sm:w-7 drop-shadow">
@@ -102,7 +101,7 @@ const QUICK_LINKS = [
     label: 'Concours admin.',
     desc: 'ENA, INFAS, CAFOP\u2026',
     href: '/concours',
-    color: 'bg-indigo-600',
+    color: 'bg-brand',
     image: IMAGES.concours,
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 sm:h-7 sm:w-7 drop-shadow">
@@ -116,7 +115,7 @@ const QUICK_LINKS = [
     label: 'Générateur de CV',
     desc: 'Un CV pro avec l\u2019IA',
     href: '/generateur-de-cv',
-    color: 'bg-purple-600',
+    color: 'bg-brand',
     image: IMAGES.cv,
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 sm:h-7 sm:w-7 drop-shadow">
@@ -130,7 +129,7 @@ const QUICK_LINKS = [
     label: 'Conseils & Blog',
     desc: 'Astuces candidature',
     href: '/blog',
-    color: 'bg-rose-500',
+    color: 'bg-brand',
     image: IMAGES.blog,
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 sm:h-7 sm:w-7 drop-shadow">
@@ -289,7 +288,7 @@ export default async function HomePage() {
   };
 
   return (
-    <main id="main-content" className="flex-1 min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors">
+    <main id="main-content" className="flex-1 min-h-screen bg-white dark:bg-slate-950 transition-colors">
       {/* JSON-LD (SEO) : WebSite + SearchAction */}
       <script
         type="application/ld+json"
@@ -302,11 +301,10 @@ export default async function HomePage() {
       {/* ======================================================================== */}
       {/*   HERO — Mobile-first : texte lisible, peu de padding vertical            */}
       {/* ======================================================================== */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-brand-soft via-white to-orange-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 pt-8 pb-8 sm:pt-14 sm:pb-10 border-b border-border/40">
-        <div className="container mx-auto px-4 relative z-10 max-w-6xl">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            {/* Colonne texte */}
-            <div className="text-center lg:text-left animate-fade-in-up">
+      <section className="relative overflow-hidden bg-white dark:bg-slate-950 pt-10 pb-10 sm:pt-16 sm:pb-14 border-b border-line dark:border-slate-800">
+        <div className="container mx-auto px-4 relative z-10 max-w-5xl">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center animate-fade-in-up">
               <div className="inline-flex items-center gap-2 bg-primary/10 text-primary dark:text-brand-accent px-3.5 py-1.5 rounded-full text-[12px] sm:text-sm font-semibold mb-4 sm:mb-5">
                 <span className="relative flex h-2 w-2 shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
@@ -316,13 +314,13 @@ export default async function HomePage() {
               </div>
 
               <h1 className="text-[28px] leading-[1.15] sm:text-4xl lg:text-[44px] xl:text-5xl font-extrabold mb-3 sm:mb-5 font-[var(--font-display)] text-black dark:text-white">
-                Travailleren<span className="text-primary">Ci</span>
-                <span className="block text-black dark:text-gray-200 text-[22px] sm:text-3xl lg:text-[32px] mt-1 sm:mt-2">
+                TravaillerEn<span className="text-primary">Ci</span>
+                <span className="block text-black dark:text-white text-[22px] sm:text-3xl lg:text-[32px] mt-1 sm:mt-2">
                   Trouvez un job qui <span className="text-primary">vaut le coup</span>
                 </span>
               </h1>
 
-              <p className="text-[15px] sm:text-lg text-black dark:text-white max-w-xl mx-auto lg:mx-0 leading-relaxed">
+              <p className="text-[15px] sm:text-lg text-black dark:text-white max-w-2xl mx-auto leading-relaxed">
                 <strong className="text-black dark:text-white">
                   TravaillerEnCi vous aide à trouver des opportunités professionnelles en Côte
                   d&apos;Ivoire.
@@ -336,7 +334,7 @@ export default async function HomePage() {
                   recherche, alertes, CV, profil candidat. */}
               <ul
                 aria-label="Ce que vous pouvez faire sur TravaillerEnCi"
-                className="mt-4 flex flex-wrap items-center justify-center lg:justify-start gap-2"
+                className="mt-4 flex flex-wrap items-center justify-center gap-2"
               >
                 {[
                   { label: 'Offres', href: '/jobs' },
@@ -349,7 +347,7 @@ export default async function HomePage() {
                   <li key={feature.label}>
                     <Link
                       href={feature.href}
-                      className="inline-flex items-center rounded-full border border-gray-200 bg-white/80 px-3 py-1.5 text-[12px] sm:text-[13px] font-semibold text-black backdrop-blur transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900/80 dark:text-gray-200"
+                      className="inline-flex items-center rounded-full border border-line bg-white px-3 py-1.5 text-[12px] sm:text-[13px] font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
                       {feature.label}
                     </Link>
@@ -358,10 +356,10 @@ export default async function HomePage() {
               </ul>
 
               {/* CTA principal — de visiteur à compte (§18) */}
-              <div className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center lg:justify-start gap-3">
+              <div className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-3">
                 <Link
                   href="/register"
-                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white shadow-lg shadow-primary/25 transition-transform hover:-translate-y-0.5 hover:brightness-110"
+                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-primary-dark"
                 >
                   Créer mon profil
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -371,59 +369,16 @@ export default async function HomePage() {
                 </Link>
                 <Link
                   href="/jobs"
-                  className="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white/80 px-5 py-3 text-sm font-bold text-black backdrop-blur transition-colors hover:border-primary/50 hover:text-primary dark:border-slate-700 dark:bg-slate-900/80 dark:text-gray-100"
+                  className="inline-flex items-center gap-2 rounded-xl border border-line bg-white px-5 py-3 text-sm font-bold text-black transition-colors hover:border-primary/50 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                 >
                   Voir les offres
                 </Link>
                 <Link
                   href="/jobs/today"
-                  className="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white/80 px-5 py-3 text-sm font-bold text-black backdrop-blur transition-colors hover:border-primary/50 hover:text-primary dark:border-slate-700 dark:bg-slate-900/80 dark:text-gray-100"
+                  className="inline-flex items-center gap-2 rounded-xl border border-line bg-white px-5 py-3 text-sm font-bold text-black transition-colors hover:border-primary/50 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                 >
                   Offres du jour
                 </Link>
-              </div>
-            </div>
-
-            {/* Colonne illustration (desktop uniquement) — bannière locale + badges flottants */}
-            <div className="hidden lg:block relative">
-              <div className="relative h-[380px] lg:h-[420px] overflow-hidden rounded-3xl shadow-2xl shadow-primary/20 ring-1 ring-black/5 animate-float">
-                <Image
-                  src={LOCAL_IMAGES.heroBanner}
-                  alt="Jeune professionnel ivoirien en recherche d'emploi"
-                  fill
-                  priority
-                  sizes="(min-width: 1024px) 520px, 100vw"
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-tr from-brand-strong/70 via-brand-strong/25 to-transparent" aria-hidden="true" />
-              </div>
-
-              {/* Badge : offres vérifiées */}
-              <div className="absolute -left-5 top-8 flex items-center gap-2.5 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur px-4 py-3 shadow-lg border border-border animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-soft text-brand dark:bg-brand/20 dark:text-brand-accent">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" className="h-4.5 w-4.5" aria-hidden="true">
-                    <path d="M20 6 9 17l-5-5" />
-                  </svg>
-                </span>
-                <div>
-                  <div className="text-sm font-extrabold text-black dark:text-white leading-none">Offres vérifiées</div>
-                  <div className="text-[11px] text-black dark:text-white mt-0.5">Zéro spam, que du sérieux</div>
-                </div>
-              </div>
-
-              {/* Badge : concours & bourses */}
-              <div className="absolute -right-3 bottom-10 flex items-center gap-2.5 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur px-4 py-3 shadow-lg border border-border animate-fade-in-up" style={{ animationDelay: '350ms' }}>
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4.5 w-4.5" aria-hidden="true">
-                    <path d="M3 21h18" />
-                    <path d="M4 21V10l8-6 8 6v11" />
-                    <path d="M9 21v-6h6v6" />
-                  </svg>
-                </span>
-                <div>
-                  <div className="text-sm font-extrabold text-black dark:text-white leading-none">Concours & bourses</div>
-                  <div className="text-[11px] text-black dark:text-white mt-0.5">ENA, INFAS, universités…</div>
-                </div>
               </div>
             </div>
           </div>
@@ -431,7 +386,7 @@ export default async function HomePage() {
           {/* Barre de recherche pleine largeur — rendue dans le HTML initial
               (pas de Suspense : la barre est l'élément LCP et ne doit pas
               dépendre de l'hydratation pour s'afficher) */}
-          <div className="mt-8 sm:mt-10 max-w-4xl mx-auto">
+          <div className="mt-8 sm:mt-10 max-w-2xl mx-auto">
             <SearchBar targetPath="/jobs" />
 
             <div className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-3 sm:gap-5 text-[12px] sm:text-sm text-black dark:text-white">
@@ -469,13 +424,12 @@ export default async function HomePage() {
       {/* ======================================================================== */}
       {/*   CHIFFRES CLÉS — compteurs réels issus de la BDD                      */}
       {/* ======================================================================== */}
-      <section className="container mx-auto px-4 -mt-2 sm:mt-2 max-w-6xl">
+      <section className="container mx-auto px-4 py-8 sm:py-10 max-w-6xl">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <HomeStat
             value={totalKnown}
             suffix="+"
             label="Offres d'emploi"
-            color="bg-orange-500"
             href="/jobs"
             icon={
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
@@ -488,7 +442,6 @@ export default async function HomePage() {
             value={examRows.total}
             suffix=""
             label="Concours suivis"
-            color="bg-indigo-600"
             href="/concours"
             icon={
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
@@ -502,7 +455,6 @@ export default async function HomePage() {
             value={bourseRows.total}
             suffix=""
             label="Bourses d'études"
-            color="bg-brand"
             href="/bourses"
             icon={
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
@@ -516,7 +468,6 @@ export default async function HomePage() {
             value={blogRows.total}
             suffix=""
             label="Conseils & articles"
-            color="bg-rose-500"
             href="/blog"
             icon={
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
@@ -557,38 +508,20 @@ export default async function HomePage() {
             <Link
               key={link.label}
               href={link.href}
-              className="group relative overflow-hidden rounded-2xl bg-slate-900 p-4 sm:p-5 text-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl animate-fade-in-up"
+              className="group flex items-start gap-3 rounded-xl border border-line bg-white p-4 transition-colors hover:border-primary/40 hover:bg-brand-soft/50 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800 animate-fade-in-up"
               style={{ animationDelay: `${i * 60}ms` }}
             >
-              {/* Photo de fond + voile sombre (l'image ne charge pas ? la couleur de repli reste visible) */}
-              <div className={`absolute inset-0 ${link.color}`} aria-hidden="true" />
-              <Image
-                src={link.image}
-                alt=""
-                fill
-                sizes="(min-width: 1024px) 33vw, 50vw"
-                className="object-cover opacity-90 transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/30 to-slate-900/10" aria-hidden="true" />
-              <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-white/15 transition-transform duration-500 group-hover:scale-150" aria-hidden="true" />
-              <div className="relative flex flex-col gap-1.5">
-                <span className="text-2xl sm:text-3xl drop-shadow" aria-hidden="true">
-                  {link.icon}
-                </span>
-                <span className="font-[var(--font-display)] text-sm sm:text-base font-extrabold leading-tight">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary [&_svg]:h-5 [&_svg]:w-5">
+                <span aria-hidden="true">{link.icon}</span>
+              </span>
+              <span className="min-w-0">
+                <span className="block font-[var(--font-display)] text-sm font-bold leading-tight text-black dark:text-white group-hover:text-primary">
                   {link.label}
                 </span>
-                <span className="text-[11px] sm:text-xs text-white/85 leading-tight">
+                <span className="mt-0.5 block text-[11px] sm:text-xs leading-tight text-black dark:text-white">
                   {link.desc}
                 </span>
-                <span className="mt-1 inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold opacity-0 transition-opacity group-hover:opacity-100">
-                  Explorer
-                  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M5 12h14" />
-                    <path d="m12 5 7 7-7 7" />
-                  </svg>
-                </span>
-              </div>
+              </span>
             </Link>
           ))}
         </div>
@@ -604,30 +537,24 @@ export default async function HomePage() {
           actionHref="/jobs"
           actionLabel="Toutes les offres"
         />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {POPULAR_SECTORS.map((sector, i) => (
             <Link
               key={sector.q}
               href={`/jobs?q=${encodeURIComponent(sector.q)}`}
-              className="group relative overflow-hidden rounded-2xl aspect-[4/3] bg-slate-900 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl animate-fade-in-up"
+              className="group flex items-center justify-between gap-2 rounded-xl border border-line bg-white px-4 py-3.5 transition-colors hover:border-primary/40 hover:bg-brand-soft/50 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800 animate-fade-in-up"
               style={{ animationDelay: `${i * 60}ms` }}
             >
-              <Image
-                src={sector.image}
-                alt={sector.name}
-                fill
-                sizes="(min-width: 1024px) 25vw, 50vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/25 to-transparent" aria-hidden="true" />
-              <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-brand-accent bg-white/15 backdrop-blur px-2 py-0.5 rounded-full inline-block mb-1.5">
-                  Voir les offres
-                </span>
-                <div className="font-[var(--font-display)] text-sm sm:text-base font-extrabold text-white leading-tight drop-shadow">
+              <span className="flex min-w-0 items-center gap-2">
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true" />
+                <span className="truncate font-[var(--font-display)] text-sm font-bold text-black dark:text-white group-hover:text-primary">
                   {sector.name}
-                </div>
-              </div>
+                </span>
+              </span>
+              <svg className="h-4 w-4 shrink-0 text-primary transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
             </Link>
           ))}
         </div>
@@ -648,7 +575,7 @@ export default async function HomePage() {
             <Link
               key={city.name}
               href={`/jobs?city=${encodeURIComponent(city.name)}`}
-              className="group flex items-center gap-2.5 rounded-xl border border-gray-100 bg-white px-3.5 py-3 shadow-sm transition-all duration-200 hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md animate-fade-in-up dark:border-slate-800 dark:bg-slate-900"
+              className="group flex items-center gap-2.5 rounded-xl border border-line bg-white px-3.5 py-3 transition-colors hover:border-primary/40 hover:bg-brand-soft/50 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800 animate-fade-in-up"
               style={{ animationDelay: `${i * 40}ms` }}
             >
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary dark:text-brand-accent">
@@ -657,7 +584,7 @@ export default async function HomePage() {
                   <circle cx="12" cy="10" r="3" />
                 </svg>
               </span>
-              <span className="text-[13px] font-semibold text-black dark:text-gray-200 group-hover:text-primary transition-colors truncate">
+              <span className="text-[13px] font-semibold text-black dark:text-white group-hover:text-primary transition-colors truncate">
                 {city.name}
               </span>
             </Link>
@@ -682,8 +609,8 @@ export default async function HomePage() {
       {/* ======================================================================== */}
       {/*   OFFRE À LA UNE — grille 2 colonnes dès le mobile                        */}
       {/* ======================================================================== */}
-      <section className="container mx-auto px-4 pb-4 sm:pb-8 max-w-6xl mt-10 sm:mt-14 py-8 sm:py-10 rounded-3xl bg-orange-50/60 dark:bg-orange-950/20">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 sm:gap-4 mt-10 sm:mt-14 mb-4 sm:mb-6">
+      <section className="container mx-auto px-4 pb-10 sm:pb-14 max-w-6xl mt-12 sm:mt-16 pt-10 sm:pt-12 border-t border-line dark:border-slate-800">
+        <div className="flex items-end justify-between gap-3 mb-4 sm:mb-6">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-black dark:text-white font-[var(--font-display)]">
               Dernières offres
@@ -692,6 +619,16 @@ export default async function HomePage() {
               Les dernières opportunités publiées sur TravaillerenCi
             </p>
           </div>
+          <Link
+            href="/jobs"
+            className="shrink-0 inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-primary hover:gap-2 transition-all"
+          >
+            Tout voir
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
+          </Link>
         </div>
 
         {jobsList.length === 0 ? (
@@ -725,42 +662,30 @@ export default async function HomePage() {
       {/* ======================================================================== */}
       <section className="container mx-auto px-4 pb-16 sm:pb-24 max-w-6xl">
         <SectionHeading kicker="Simple & rapide" title="Comment ça marche ?" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
           {HOW_IT_WORKS.map((step, i) => (
             <div
               key={step.title}
-              className="group relative overflow-hidden rounded-3xl border border-border bg-white dark:bg-slate-900 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl animate-fade-in-up"
+              className="rounded-xl border border-line bg-white p-5 dark:border-slate-800 dark:bg-slate-900 animate-fade-in-up"
               style={{ animationDelay: `${i * 90}ms` }}
             >
-              <div className="relative h-36 sm:h-40 overflow-hidden">
-                <Image
-                  src={step.image}
-                  alt={step.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" aria-hidden="true" />
-                <span className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white text-primary font-black font-[var(--font-display)] shadow-lg">
-                  {i + 1}
-                </span>
-              </div>
-              <div className="p-4 sm:p-5">
-                <h3 className="font-[var(--font-display)] text-base sm:text-lg font-extrabold text-black dark:text-white mb-1.5">
-                  {step.title}
-                </h3>
-                <p className="text-sm text-black dark:text-white leading-relaxed">{step.desc}</p>
-                <Link
-                  href={step.href}
-                  className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:gap-2.5 transition-all"
-                >
-                  {step.cta}
-                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M5 12h14" />
-                    <path d="m12 5 7 7-7 7" />
-                  </svg>
-                </Link>
-              </div>
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-black text-white font-[var(--font-display)]">
+                {i + 1}
+              </span>
+              <h3 className="mt-4 font-[var(--font-display)] text-base sm:text-lg font-extrabold text-black dark:text-white mb-1.5">
+                {step.title}
+              </h3>
+              <p className="text-sm text-black dark:text-white leading-relaxed">{step.desc}</p>
+              <Link
+                href={step.href}
+                className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:gap-2.5 transition-all"
+              >
+                {step.cta}
+                <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M5 12h14" />
+                  <path d="m12 5 7 7-7 7" />
+                </svg>
+              </Link>
             </div>
           ))}
         </div>
@@ -770,17 +695,8 @@ export default async function HomePage() {
       {/*   SUIVEZ-NOUS — réseaux sociaux du moment                                */}
       {/* ======================================================================== */}
       <section className="container mx-auto px-4 pb-16 sm:pb-24 max-w-6xl">
-        <div className="relative overflow-hidden rounded-3xl bg-slate-900 dark:bg-slate-900 text-white shadow-xl">
-          <Image
-            src={IMAGES.community}
-            alt=""
-            fill
-            sizes="100vw"
-            className="object-cover opacity-30"
-            aria-hidden="true"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-900/70 to-slate-900/40" aria-hidden="true" />
-          <div className="relative flex flex-col lg:flex-row items-center gap-6 lg:gap-10 px-6 py-10 sm:p-12">
+        <div className="rounded-2xl bg-black text-white">
+          <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-10 px-6 py-10 sm:p-12">
             <div className="text-center lg:text-left flex-1">
               <p className="text-[11px] font-bold uppercase tracking-widest text-brand-accent mb-2">Suivez-nous</p>
               <h2 className="font-[var(--font-display)] text-2xl sm:text-3xl font-extrabold leading-tight">
@@ -799,7 +715,7 @@ export default async function HomePage() {
       {/*   POURQUOI CRÉER UN COMPTE — bénéfices (§19)                           */}
       {/* ======================================================================== */}
       <section className="container mx-auto px-4 pb-16 sm:pb-24 max-w-6xl" aria-labelledby="pourquoi-compte">
-        <div className="rounded-3xl border border-gray-200 bg-white p-6 sm:p-10 dark:border-slate-800 dark:bg-slate-900">
+        <div className="rounded-2xl border border-line bg-white p-6 sm:p-10 dark:border-slate-800 dark:bg-slate-900">
           <p className="text-[11px] font-bold uppercase tracking-widest text-primary dark:text-brand-accent mb-1">
             Votre espace personnel
           </p>
@@ -818,7 +734,7 @@ export default async function HomePage() {
             {ACCOUNT_BENEFITS.map((benefit) => (
               <li
                 key={benefit.title}
-                className="flex gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-slate-800 dark:bg-slate-950/60"
+                className="flex gap-3 rounded-xl border border-line bg-brand-soft/30 p-4 dark:border-slate-800 dark:bg-slate-950/60"
               >
                 <span
                   aria-hidden="true"
@@ -841,13 +757,13 @@ export default async function HomePage() {
           <div className="mt-6 flex flex-col sm:flex-row items-center gap-3">
             <Link
               href="/register"
-              className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-extrabold text-white shadow-lg shadow-primary/20 transition-transform hover:-translate-y-0.5 hover:brightness-110"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-extrabold text-white transition-colors hover:bg-primary-dark"
             >
               Créer mon compte gratuitement
             </Link>
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-6 py-3 text-sm font-bold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:text-gray-200"
+              className="inline-flex items-center gap-2 rounded-xl border border-line px-6 py-3 text-sm font-bold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:text-white"
             >
               J'ai déjà un compte
             </Link>
@@ -945,10 +861,10 @@ function HomeBlogCard({
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-primary/25 animate-fade-in-up"
+      className="group flex h-full flex-col overflow-hidden rounded-xl border border-line bg-white dark:border-slate-800 dark:bg-slate-900 transition-colors hover:border-primary/30 animate-fade-in-up"
       style={{ animationDelay: `${index * 70}ms` }}
     >
-      <div className="relative h-24 sm:h-32 overflow-hidden bg-gray-100 dark:bg-slate-800">
+      <div className="relative h-24 sm:h-32 overflow-hidden bg-brand-soft dark:bg-slate-800">
         <CoverImage
           src={post.cover_image || IMAGES.blog}
           alt={post.title}
@@ -956,11 +872,11 @@ function HomeBlogCard({
         />
       </div>
       <div className="flex flex-1 flex-col p-3 sm:p-4">
-        <h3 className="font-bold text-[12.5px] sm:text-sm leading-snug text-black line-clamp-2 transition-colors group-hover:text-primary">
+        <h3 className="font-bold text-[12.5px] sm:text-sm leading-snug text-black dark:text-white line-clamp-2 transition-colors group-hover:text-primary">
           {post.title}
         </h3>
         {post.excerpt && (
-          <p className="mt-1.5 flex-1 text-[11px] sm:text-xs text-black line-clamp-2 leading-relaxed">
+          <p className="mt-1.5 flex-1 text-[11px] sm:text-xs text-black dark:text-white line-clamp-2 leading-relaxed">
             {post.excerpt}
           </p>
         )}
@@ -980,20 +896,18 @@ function HomeStat({
   value,
   suffix,
   label,
-  color,
   icon,
   href,
 }: {
   value: number;
   suffix: string;
   label: string;
-  color: string;
   icon: ReactNode;
   href?: string;
 }) {
   const content = (
-    <div className="flex items-center gap-3 sm:gap-4 rounded-2xl border border-border bg-white dark:bg-slate-900 p-3.5 sm:p-5 shadow-sm hover:shadow-md transition-all duration-300 animate-fade-in-up">
-      <span className={`shrink-0 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl ${color} text-white shadow-md`}>
+    <div className="flex items-center gap-3 sm:gap-4 rounded-xl border border-line bg-white dark:border-slate-800 dark:bg-slate-900 p-3.5 sm:p-4 transition-colors hover:border-primary/30 animate-fade-in-up">
+      <span className="shrink-0 flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
         <span aria-hidden="true">{icon}</span>
       </span>
       <div className="min-w-0">
@@ -1012,7 +926,7 @@ function HomeStat({
     return (
       <Link
         href={href}
-        className="block hover:-translate-y-0.5 transition-transform duration-300"
+        className="block"
       >
         {content}
       </Link>
@@ -1024,7 +938,7 @@ function HomeStat({
 
 function Stat({ icon, label }: { icon: ReactNode; label: string }) {
   return (
-    <span className="inline-flex items-center gap-1.5 bg-white/70 dark:bg-slate-900/75 backdrop-blur px-2.5 sm:px-3 py-1.5 rounded-full border border-border shadow-sm text-black dark:text-white">
+    <span className="inline-flex items-center gap-1.5 bg-white dark:bg-slate-900 px-2.5 sm:px-3 py-1.5 rounded-full border border-line dark:border-slate-800 text-black dark:text-white">
       <span aria-hidden="true">{icon}</span>
       {label}
     </span>
@@ -1033,10 +947,10 @@ function Stat({ icon, label }: { icon: ReactNode; label: string }) {
 
 function EmptyState() {
   return (
-    <div className="bg-white dark:bg-slate-900 border border-dashed border-border rounded-2xl p-8 sm:p-12 text-center">
-      <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gray-50 dark:bg-slate-800 flex items-center justify-center mb-5">
+    <div className="bg-white dark:bg-slate-900 border border-dashed border-line dark:border-slate-700 rounded-xl p-8 sm:p-12 text-center">
+      <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-brand-soft dark:bg-slate-800 flex items-center justify-center mb-5">
         <svg
-          className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-white"
+          className="w-8 h-8 sm:w-10 sm:h-10 text-black dark:text-white"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -1057,7 +971,7 @@ function EmptyState() {
       </p>
       <Link
         href="/"
-        className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold text-sm shadow-md shadow-primary/20"
+        className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold text-sm"
       >
         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
           <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />

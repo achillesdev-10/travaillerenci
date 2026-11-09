@@ -24,7 +24,7 @@ const QUESTIONS: ForumQuestion[] = [
     replies: 12,
     views: 234,
     category: 'Concours',
-    categoryColor: 'bg-indigo-100 text-indigo-700',
+    categoryColor: 'bg-primary/10 text-primary',
     answer: 'Commencez par télécharger les annales des sessions précédentes sur le site officiel de l\'ENA. Concentrez-vous sur la culture générale, les questions de logique et l\'actualité ivoirienne.',
   },
   {
@@ -35,7 +35,7 @@ const QUESTIONS: ForumQuestion[] = [
     replies: 8,
     views: 187,
     category: 'Emploi',
-    categoryColor: 'bg-orange-100 text-orange-700',
+    categoryColor: 'bg-primary/10 text-primary',
     answer: 'Le secteur IT/Digital, la banque-finance, le BTP et l\'industrie pharmaceutique sont les plus dynamiques.',
   },
   {
@@ -46,7 +46,7 @@ const QUESTIONS: ForumQuestion[] = [
     replies: 15,
     views: 412,
     category: 'Stages',
-    categoryColor: 'bg-sky-100 text-sky-700',
+    categoryColor: 'bg-primary/10 text-primary',
     answer: 'Utilisez les plateformes comme TravaillerEnCi, Envie d\'Emploi et LinkedIn. Candidature spontanée auprès des grandes entreprises est aussi efficace.',
   },
   {
@@ -57,7 +57,7 @@ const QUESTIONS: ForumQuestion[] = [
     replies: 20,
     views: 563,
     category: 'CV',
-    categoryColor: 'bg-purple-100 text-purple-700',
+    categoryColor: 'bg-primary/10 text-primary',
     answer: 'Utilisez le générateur CV de TravaillerEnCi pour un format professionnel. Mettez en avant vos compétences techniques et adaptez le CV au poste.',
   },
   {
@@ -68,7 +68,7 @@ const QUESTIONS: ForumQuestion[] = [
     replies: 6,
     views: 298,
     category: 'Bourses',
-    categoryColor: 'bg-brand-soft text-brand-strong',
+    categoryColor: 'bg-primary/10 text-primary',
     answer: 'Consultez régulièrement la section Bourses de TravaillerEnCi. Les bourses Chevening, Erasmus Mundus, et celles du gouvernement chinois/sud-coréen sont parmi les plus accessibles.',
   },
   {
@@ -79,7 +79,7 @@ const QUESTIONS: ForumQuestion[] = [
     replies: 18,
     views: 891,
     category: 'Plateforme',
-    categoryColor: 'bg-rose-100 text-rose-700',
+    categoryColor: 'bg-primary/10 text-primary',
     answer: 'Oui, toutes les offres sont vérifiées par notre équipe avant publication. Nous contactons les entreprises pour confirmer la légitimité de chaque offre.',
   },
 ];
@@ -97,7 +97,7 @@ function QuestionRow({
     <button
       onClick={onToggle}
       aria-expanded={expanded}
-      className="w-full text-left px-3.5 py-2.5 hover:bg-gray-50/80 dark:hover:bg-slate-800/50 transition-colors"
+      className="w-full text-left px-3.5 py-2.5 hover:bg-brand-soft/50 dark:hover:bg-slate-800/50 transition-colors"
     >
       <div className="flex items-start gap-2.5">
         <div className="shrink-0 mt-0.5">
@@ -179,7 +179,7 @@ export default function ForumSection() {
 
       {/* Boîte défilante avec fades haut/bas */}
       <div
-        className="relative rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden group/faq"
+        className="relative rounded-2xl border border-line dark:border-slate-800 overflow-hidden group/faq"
         style={{ maxHeight: '280px' }}
       >
         {/* Top fade */}
@@ -190,7 +190,7 @@ export default function ForumSection() {
         <div className="overflow-hidden" style={{ maxHeight: '280px' }}>
           <style>{`[data-scroll-box]::-webkit-scrollbar { display: none; }`}</style>
           <div className="animate-marquee-vertical group-hover/faq:[animation-play-state:paused]">
-            <div data-scroll-box className="divide-y divide-gray-50 dark:divide-slate-800">
+            <div data-scroll-box className="divide-y divide-line dark:divide-slate-800">
               {QUESTIONS.map((q) => (
                 <QuestionRow
                   key={String(q.id)}
@@ -200,7 +200,7 @@ export default function ForumSection() {
                 />
               ))}
             </div>
-            <div data-scroll-box className="divide-y divide-gray-50 dark:divide-slate-800" aria-hidden="true" inert>
+            <div data-scroll-box className="divide-y divide-line dark:divide-slate-800" aria-hidden="true" inert>
               {QUESTIONS.map((q) => (
                 <QuestionRow
                   key={`copy-${q.id}`}

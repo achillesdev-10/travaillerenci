@@ -6,7 +6,7 @@ import Link from 'next/link';
 const CONTRACT_TYPES = ['CDI', 'CDD', 'Stage', 'Prestation', 'Alternance', 'Freelance'];
 
 const inputClass =
-  'w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-black dark:text-gray-100 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all';
+  'w-full px-3.5 py-2.5 rounded-xl border border-line dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-black dark:text-white focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all';
 const labelClass = 'block text-sm font-semibold text-black dark:text-gray-200 mb-1.5';
 
 interface PublishForm {
@@ -75,7 +75,7 @@ export default function PublishOfferForm() {
     <>
       {/* Success message */}
       {success ? (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-8 shadow-sm text-center">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-line dark:border-slate-800 p-8 shadow-sm text-center">
           <div className="mx-auto w-16 h-16 rounded-full bg-brand-soft dark:bg-brand/15 flex items-center justify-center mb-5">
             <svg className="h-8 w-8 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
               <path d="M20 6 9 17l-5-5" />
@@ -96,16 +96,16 @@ export default function PublishOfferForm() {
             </button>
             <Link
               href="/"
-              className="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm font-semibold text-black dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all"
+              className="px-5 py-2.5 rounded-xl border border-line dark:border-slate-700 text-sm font-semibold text-black dark:text-white hover:bg-brand-soft dark:hover:bg-slate-800 transition-all"
             >
               Retour à l&apos;accueil
             </Link>
           </div>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-6 shadow-sm">
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 rounded-2xl border border-line dark:border-slate-800 p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-6">
-            <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-lg shadow-md shadow-blue-500/20">
+            <span className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center text-lg shadow-sm">
               📋
             </span>
             <div>
@@ -194,13 +194,13 @@ export default function PublishOfferForm() {
                 onChange={(e) => updateField('description', e.target.value)}
                 required
               />
-              <p className="text-[11px] text-gray-400 dark:text-white mt-1">
+              <p className="text-[11px] text-black/50 dark:text-white/50 mt-1">
                 Minimum 20 caractères. Plus la description est détaillée, plus elle attirera de candidats qualifiés.
               </p>
             </div>
 
             {/* Apply */}
-            <div className="border-t border-gray-100 dark:border-slate-800 pt-5">
+            <div className="border-t border-line dark:border-slate-800 pt-5">
               <h3 className="text-sm font-bold text-black dark:text-white mb-3 flex items-center gap-2">
                 <span className="w-6 h-6 rounded-md bg-primary/10 text-primary flex items-center justify-center text-xs">✉️</span>
                 Comment postuler ?
@@ -227,15 +227,15 @@ export default function PublishOfferForm() {
                   />
                 </div>
               </div>
-              <p className="text-[11px] text-gray-400 dark:text-white mt-1">
+              <p className="text-[11px] text-black/50 dark:text-white/50 mt-1">
                 Au moins un moyen de postuler est requis (lien ou email).
               </p>
             </div>
 
             {/* Contact */}
-            <div className="border-t border-gray-100 dark:border-slate-800 pt-5">
+            <div className="border-t border-line dark:border-slate-800 pt-5">
               <h3 className="text-sm font-bold text-black dark:text-white mb-3 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs">👤</span>
+                <span className="w-6 h-6 rounded-md bg-brand-soft dark:bg-brand/15 text-primary dark:text-brand-accent flex items-center justify-center text-xs">👤</span>
                 Contact (optionnel)
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -282,7 +282,7 @@ export default function PublishOfferForm() {
             <button
               type="submit"
               disabled={loading || !form.title.trim() || !form.company.trim() || !form.description.trim() || !form.location.trim()}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-bold shadow-lg shadow-blue-500/20 hover:shadow-xl hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed transition-all inline-flex items-center gap-2"
+              className="px-6 py-3 rounded-xl bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary-dark disabled:opacity-60 disabled:cursor-not-allowed transition-all inline-flex items-center gap-2"
             >
               {loading ? (
                 <>

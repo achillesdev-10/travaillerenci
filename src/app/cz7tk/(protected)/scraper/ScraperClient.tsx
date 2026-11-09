@@ -39,7 +39,7 @@ function runStatusLabel(status: ScraperHealth["status"]) {
 function runStatusClasses(status: ScraperHealth["status"]) {
   switch (status) {
     case "success":
-      return "border-emerald-500/30 bg-emerald-500/10 text-emerald-400";
+      return "border-brand/30 bg-brand/10 text-brand";
     case "running":
       return "border-sky-500/30 bg-sky-500/10 text-sky-400";
     case "error":
@@ -181,7 +181,7 @@ export default function ScraperClient({
           <div
             className={`rounded-2xl border px-4 py-3 text-sm ${
               feedback.tone === "success"
-                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                ? "border-brand/30 bg-brand/10 text-brand"
                 : "border-rose-500/30 bg-rose-500/10 text-rose-300"
             }`}
           >

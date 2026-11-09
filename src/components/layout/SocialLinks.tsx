@@ -39,8 +39,8 @@ export default function SocialLinks({
   const svg = size === 'md' ? 'w-4 h-4' : 'w-3.5 h-3.5';
   const tone =
     variant === 'dark'
-      ? 'bg-gray-800 hover:bg-brand text-gray-400 hover:text-white'
-      : 'bg-gray-100 dark:bg-slate-800 text-black dark:text-white hover:bg-brand hover:text-white';
+      ? 'bg-slate-800 hover:bg-brand text-white hover:text-white'
+      : 'bg-brand-soft dark:bg-slate-800 text-black dark:text-white hover:bg-brand hover:text-white';
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>

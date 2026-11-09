@@ -75,7 +75,7 @@ export default function ConcoursFilters({
       <div className="relative flex-1 min-w-0">
         <label
           htmlFor="filter-diploma"
-          className="mb-1 block text-[10.5px] font-bold uppercase tracking-widest text-gray-400 dark:text-white"
+          className="mb-1 block text-[10.5px] font-bold uppercase tracking-widest text-black/50 dark:text-white/50"
         >
           Diplôme
         </label>
@@ -84,7 +84,7 @@ export default function ConcoursFilters({
             id="filter-diploma"
             value={initialDiploma}
             onChange={(e) => updateParam('diploma', e.target.value)}
-            className="w-full appearance-none rounded-xl border border-gray-200 bg-white py-2.5 pl-4 pr-9 text-[13px] font-semibold text-black outline-none transition-colors focus:border-primary/50 focus:ring-2 focus:ring-primary/10 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-200 dark:focus:border-primary/50"
+            className="w-full appearance-none rounded-xl border border-line bg-white py-2.5 pl-4 pr-9 text-[13px] font-semibold text-black outline-none transition-colors focus:border-primary/50 focus:ring-2 focus:ring-primary/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:focus:border-primary/50"
           >
             {DIPLOMA_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -92,7 +92,7 @@ export default function ConcoursFilters({
               </option>
             ))}
           </select>
-          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-black/50 dark:text-white/50">
             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
               <path d="m6 9 6 6 6-6" />
             </svg>
@@ -104,7 +104,7 @@ export default function ConcoursFilters({
       <div className="relative flex-1 min-w-0">
         <label
           htmlFor="filter-category"
-          className="mb-1 block text-[10.5px] font-bold uppercase tracking-widest text-gray-400 dark:text-white"
+          className="mb-1 block text-[10.5px] font-bold uppercase tracking-widest text-black/50 dark:text-white/50"
         >
           Catégorie
         </label>
@@ -113,7 +113,7 @@ export default function ConcoursFilters({
             id="filter-category"
             value={initialCategory}
             onChange={(e) => updateParam('category', e.target.value)}
-            className="w-full appearance-none rounded-xl border border-gray-200 bg-white py-2.5 pl-4 pr-9 text-[13px] font-semibold text-black outline-none transition-colors focus:border-primary/50 focus:ring-2 focus:ring-primary/10 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-200 dark:focus:border-primary/50"
+            className="w-full appearance-none rounded-xl border border-line bg-white py-2.5 pl-4 pr-9 text-[13px] font-semibold text-black outline-none transition-colors focus:border-primary/50 focus:ring-2 focus:ring-primary/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:focus:border-primary/50"
           >
             {CATEGORY_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -121,7 +121,7 @@ export default function ConcoursFilters({
               </option>
             ))}
           </select>
-          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-black/50 dark:text-white/50">
             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
               <path d="m6 9 6 6 6-6" />
             </svg>
@@ -133,7 +133,7 @@ export default function ConcoursFilters({
       <div className="relative flex-1 min-w-0">
         <label
           htmlFor="filter-status"
-          className="mb-1 block text-[10.5px] font-bold uppercase tracking-widest text-gray-400 dark:text-white"
+          className="mb-1 block text-[10.5px] font-bold uppercase tracking-widest text-black/50 dark:text-white/50"
         >
           Statut
         </label>
@@ -142,7 +142,7 @@ export default function ConcoursFilters({
             id="filter-status"
             value={initialPhase}
             onChange={(e) => updateParam('phase', e.target.value)}
-            className="w-full appearance-none rounded-xl border border-gray-200 bg-white py-2.5 pl-4 pr-9 text-[13px] font-semibold text-black outline-none transition-colors focus:border-primary/50 focus:ring-2 focus:ring-primary/10 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-200 dark:focus:border-primary/50"
+            className="w-full appearance-none rounded-xl border border-line bg-white py-2.5 pl-4 pr-9 text-[13px] font-semibold text-black outline-none transition-colors focus:border-primary/50 focus:ring-2 focus:ring-primary/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:focus:border-primary/50"
           >
             {STATUS_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -150,7 +150,7 @@ export default function ConcoursFilters({
               </option>
             ))}
           </select>
-          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-black/50 dark:text-white/50">
             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
               <path d="m6 9 6 6 6-6" />
             </svg>
