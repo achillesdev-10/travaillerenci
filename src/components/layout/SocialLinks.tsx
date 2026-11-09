@@ -40,7 +40,7 @@ export default function SocialLinks({
   const tone =
     variant === 'dark'
       ? 'bg-gray-800 hover:bg-brand text-gray-400 hover:text-white'
-      : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-brand hover:text-white';
+      : 'bg-gray-100 dark:bg-slate-800 text-black dark:text-white hover:bg-brand hover:text-white';
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>

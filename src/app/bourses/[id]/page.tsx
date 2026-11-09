@@ -176,7 +176,7 @@ export default async function BourseDetailPage({ params }: PageProps) {
           </div>
 
           <nav aria-label="Fil d'Ariane" className="mb-4 sm:mb-6">
-            <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] sm:text-sm text-gray-500 dark:text-gray-400">
+            <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] sm:text-sm text-black dark:text-white">
               <li>
                 <Link href="/" className="hover:text-primary hover:underline">
                   Accueil
@@ -189,7 +189,7 @@ export default async function BourseDetailPage({ params }: PageProps) {
                 </Link>
               </li>
               <li aria-hidden="true">/</li>
-              <li className="text-gray-700 dark:text-gray-200 font-medium truncate max-w-[60vw]">
+              <li className="text-black dark:text-gray-200 font-medium truncate max-w-[60vw]">
                 {bourse.title}
               </li>
             </ol>
@@ -204,7 +204,7 @@ export default async function BourseDetailPage({ params }: PageProps) {
                 className={`inline-flex items-center rounded-full px-3 py-1 text-xs sm:text-sm font-semibold ${
                   deadlinePassed
                     ? 'bg-rose-500/10 text-rose-500 border border-rose-500/30'
-                    : 'bg-primary/10 text-primary dark:text-emerald-400 border border-primary/20'
+                    : 'bg-primary/10 text-primary dark:text-brand-accent border border-primary/20'
                 }`}
               >
                 {deadlinePassed ? `Clôturée le ${formatDate(bourse.deadline!)}` : `Limite : ${formatDate(bourse.deadline!)}`}
@@ -212,20 +212,20 @@ export default async function BourseDetailPage({ params }: PageProps) {
             )}
           </div>
 
-          <h1 className="text-[26px] sm:text-3xl lg:text-4xl font-extrabold text-gray-900 dark:text-white leading-tight mb-3 font-[var(--font-display)]">
+          <h1 className="text-[26px] sm:text-3xl lg:text-4xl font-extrabold text-black dark:text-white leading-tight mb-3 font-[var(--font-display)]">
             {bourse.title}
           </h1>
 
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[14px] sm:text-base">
-            <div className="text-primary dark:text-emerald-400 font-bold">{bourse.company}</div>
-            <div className="inline-flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
-              <svg className="w-4 h-4 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <div className="text-primary dark:text-brand-accent font-bold">{bourse.company}</div>
+            <div className="inline-flex items-center gap-1.5 text-black dark:text-white">
+              <svg className="w-4 h-4 text-gray-400 dark:text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                 <circle cx="12" cy="10" r="3" />
               </svg>
               {bourse.location || 'International'}
             </div>
-            <span className="text-[11px] sm:text-xs text-gray-400 dark:text-gray-500">
+            <span className="text-[11px] sm:text-xs text-gray-400 dark:text-white">
               Publiée le {formatDate(bourse.created_at)}
             </span>
           </div>
@@ -236,10 +236,10 @@ export default async function BourseDetailPage({ params }: PageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           <article className="lg:col-span-2">
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm shadow-black/5 p-5 sm:p-8">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 font-[var(--font-display)]">
+              <h2 className="text-lg sm:text-xl font-bold text-black dark:text-white mb-4 font-[var(--font-display)]">
                 À propos de cette bourse
               </h2>
-              <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 leading-relaxed">
+              <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none text-black dark:text-white leading-relaxed">
                 <SimpleMarkdown text={bourse.description} />
               </div>
             </div>
@@ -256,7 +256,7 @@ export default async function BourseDetailPage({ params }: PageProps) {
             {/* Bourses similaires — maillage interne */}
             {related.length > 0 && (
               <div className="mt-8 sm:mt-10">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-5 font-[var(--font-display)]">
+                <h2 className="text-lg sm:text-xl font-bold text-black dark:text-white mb-4 sm:mb-5 font-[var(--font-display)]">
                   Autres bourses à découvrir
                 </h2>
                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 list-none m-0 p-0">
@@ -283,14 +283,14 @@ export default async function BourseDetailPage({ params }: PageProps) {
 
             {/* Maillage interne — catégories principales */}
             <nav aria-label="Liens complémentaires" className="mt-8 sm:mt-10">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 font-[var(--font-display)]">
+              <h2 className="text-lg sm:text-xl font-bold text-black dark:text-white mb-4 font-[var(--font-display)]">
                 Explorer davantage
               </h2>
               <ul className="flex flex-wrap gap-2.5 list-none m-0 p-0">
                 <li>
                   <Link
                     href="/jobs"
-                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                   >
                     Offres d'emploi
                   </Link>
@@ -298,7 +298,7 @@ export default async function BourseDetailPage({ params }: PageProps) {
                 <li>
                   <Link
                     href="/stages"
-                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                   >
                     Stages
                   </Link>
@@ -306,7 +306,7 @@ export default async function BourseDetailPage({ params }: PageProps) {
                 <li>
                   <Link
                     href="/concours"
-                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                   >
                     Concours administratifs
                   </Link>
@@ -325,8 +325,8 @@ export default async function BourseDetailPage({ params }: PageProps) {
                   </svg>
                 </div>
                 <div>
-                  <div className="font-bold text-gray-900 dark:text-white">Candidater</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Via l'organisme de la bourse</div>
+                  <div className="font-bold text-black dark:text-white">Candidater</div>
+                  <div className="text-xs text-black dark:text-white">Via l'organisme de la bourse</div>
                 </div>
               </div>
               <div className="space-y-2.5">
@@ -343,13 +343,13 @@ export default async function BourseDetailPage({ params }: PageProps) {
                 {hasEmail ? (
                   <a
                     href={`mailto:${bourse.apply_email}?subject=${encodeURIComponent(`Candidature bourse : ${bourse.title}`)}`}
-                    className="flex w-full items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-800 dark:text-gray-200 font-semibold text-sm transition-all"
+                    className="flex w-full items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 text-black dark:text-gray-200 font-semibold text-sm transition-all"
                   >
                     Postuler par email
                   </a>
                 ) : null}
                 {!hasLink && !hasEmail ? (
-                  <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                  <p className="text-xs text-black dark:text-white text-center">
                     Contactez l'organisme via la page d'origine ci-dessous.
                   </p>
                 ) : null}
@@ -372,7 +372,7 @@ export default async function BourseDetailPage({ params }: PageProps) {
             </div>
 
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm p-5 text-sm">
-              <h3 className="font-bold text-gray-900 dark:text-white mb-4">
+              <h3 className="font-bold text-black dark:text-white mb-4">
                 Informations utiles
               </h3>
               <dl className="space-y-3.5">
@@ -416,7 +416,7 @@ function MetaRow({
       href={href}
       target={external ? '_blank' : undefined}
       rel={external ? 'noopener noreferrer' : undefined}
-      className="font-medium text-primary dark:text-emerald-400 hover:underline inline-flex items-center gap-1"
+      className="font-medium text-primary dark:text-brand-accent hover:underline inline-flex items-center gap-1"
     >
       {value}
       {external && (
@@ -431,7 +431,7 @@ function MetaRow({
       className={`font-medium ${
         tone === 'danger'
           ? 'text-rose-500'
-          : 'text-gray-800 dark:text-gray-200'
+          : 'text-black dark:text-gray-200'
       }`}
     >
       {value}
@@ -439,7 +439,7 @@ function MetaRow({
   );
   return (
     <div className="flex items-start justify-between gap-4">
-      <dt className="text-gray-500 dark:text-gray-400 shrink-0">{label}</dt>
+      <dt className="text-black dark:text-white shrink-0">{label}</dt>
       <dd className="text-right break-words">{ValueComp}</dd>
     </div>
   );
@@ -462,20 +462,20 @@ function MiniBourseCard({ bourse }: { bourse: JobOfferSchema }) {
         </span>
         {deadline && (
           <span
-            className={`text-[11px] font-semibold ${deadlinePassed ? 'text-rose-500' : 'text-gray-500 dark:text-gray-400'}`}
+            className={`text-[11px] font-semibold ${deadlinePassed ? 'text-rose-500' : 'text-black dark:text-white'}`}
           >
             {deadlinePassed ? 'Clôturée le ' : 'Limite : '}
             {formatDate(bourse.deadline!)}
           </span>
         )}
       </div>
-      <h3 className="font-bold text-[14px] leading-snug text-gray-900 dark:text-white line-clamp-2 mb-1 group-hover:text-primary dark:group-hover:text-emerald-400 transition-colors">
+      <h3 className="font-bold text-[14px] leading-snug text-black dark:text-white line-clamp-2 mb-1 group-hover:text-primary dark:group-hover:text-brand-accent transition-colors">
         {bourse.title}
       </h3>
-      <div className="text-[13px] text-primary dark:text-emerald-400 font-semibold mb-0.5 truncate">
+      <div className="text-[13px] text-primary dark:text-brand-accent font-semibold mb-0.5 truncate">
         {bourse.company}
       </div>
-      <div className="text-[12px] text-gray-500 dark:text-gray-400 truncate">
+      <div className="text-[12px] text-black dark:text-white truncate">
         {bourse.location || 'International'}
       </div>
     </Link>

@@ -3,34 +3,30 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* Vert identitaire foncé (#009639 → #007a2e) : le blanc sur
-     #009639 ne passait que 3,9:1 (échec AA pour les petits textes — audit
-     contraste Lighthouse). #007a2e atteint ~5,4:1 (AA large + normal,
-     y compris sur fonds gris clairs comme bg-gray-50). */
-  --color-primary: #007a2e;
-  --color-primary-dark: #006a25;
-  --color-primary-light: #33ab60;
-  --color-secondary: #F77F00;
-  --color-secondary-dark: #d96f00;
-  --color-accent: #003087;
-  --color-accent-light: #1e4db3;
-  --color-ivory: #FFFAF0;
-  --color-terracotta: #E2725B;
-  --color-sand: #F5E6D3;
-  --color-forest: #2D5016;
+  /* Identité 2026 : orange / noir / blanc.
+     `primary` est conservé comme alias de `brand` pour que les anciens
+     composants (111 fichiers) basculent d'un seul coup sans laisser de vert.
+     Le vert `success` reste uniquement fonctionnel (messages de succès). */
+  --color-primary: #c2410c;
+  --color-primary-dark: #9a3412;
+  --color-primary-light: #f97316;
+  --color-secondary: #c2410c;
+  --color-secondary-dark: #9a3412;
+  --color-accent: #c2410c;
+  --color-accent-light: #9a3412;
   --color-brand: #c2410c;
   --color-brand-strong: #9a3412;
   --color-brand-soft: #fff4e9;
   --color-brand-accent: #f97316;
   --color-surface: #f8fafc;
-  --color-ink: #171717;
-  --color-ink-soft: #404040;
-  --color-muted: #737373;
+  --color-ink: #000000;
+  --color-ink-soft: #000000;
+  --color-muted: #000000;
   --color-line: #eaeaea;
   --color-success: #16a34a;
   --color-success-strong: #15803d;
   --color-danger: #dc2626;
-  --color-muted-foreground: #6b7280;
+  --color-muted-foreground: #000000;
   --color-border: #eaeaea;
   --color-background: #ffffff;
   --color-card: #ffffff;
@@ -80,13 +76,13 @@ body {
 }
 
 html.dark {
-  background-color: #030712;
-  color: #f3f4f6;
+  background-color: #0a0a0a;
+  color: #ffffff;
 }
 
 html.dark body {
-  background-color: #030712 !important;
-  color: #f3f4f6 !important;
+  background-color: #0a0a0a !important;
+  color: #ffffff !important;
 }
 
 @layer utilities {

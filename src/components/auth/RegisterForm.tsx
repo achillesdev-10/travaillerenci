@@ -154,10 +154,10 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
         <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary border border-primary/20">
           Session active
         </span>
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+        <h2 className="text-xl font-bold text-black dark:text-white">
           Vous êtes déjà connecté
         </h2>
-        <p className="text-sm text-gray-600 dark:text-slate-400">
+        <p className="text-sm text-black dark:text-white">
           {sessionUser.email} est connecté
           {sessionUser.role === 'company' ? ' en tant qu’entreprise' : ''} : l’inscription est
           inutile. Accédez à votre espace, ou déconnectez-vous pour créer un autre compte.
@@ -172,7 +172,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
           <button
             type="button"
             onClick={switchAccount}
-            className="block w-full rounded-2xl border border-gray-200 dark:border-slate-700 py-3 text-xs font-bold text-gray-700 dark:text-slate-300 hover:border-primary/40 hover:text-primary transition-all"
+            className="block w-full rounded-2xl border border-gray-200 dark:border-slate-700 py-3 text-xs font-bold text-black dark:text-white hover:border-primary/40 hover:text-primary transition-all"
           >
             Se déconnecter pour un autre compte
           </button>
@@ -188,10 +188,10 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
           href="/"
           className="inline-block text-2xl font-black text-primary font-[var(--font-display)]"
         >
-          Travailleren<span className="text-gray-900 dark:text-white">Ci</span>
+          Travailleren<span className="text-black dark:text-white">Ci</span>
         </Link>
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Créer un compte</h2>
-        <p className="text-xs text-gray-500 dark:text-slate-400">
+        <h2 className="text-xl font-bold text-black dark:text-white">Créer un compte</h2>
+        <p className="text-xs text-black dark:text-white">
           Rejoignez la première plateforme d’emploi en Côte d’Ivoire
         </p>
       </div>
@@ -208,7 +208,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
       <div className="space-y-3">
         <span
           id="register-role-label"
-          className="block text-xs font-bold text-gray-700 dark:text-slate-400 uppercase tracking-widest"
+          className="block text-xs font-bold text-black dark:text-white uppercase tracking-widest"
         >
           Je souhaite :
         </span>
@@ -224,11 +224,11 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
             className={`rounded-2xl border p-4 text-left transition-all ${
               role === 'candidate'
                 ? 'border-primary bg-primary/10 text-primary dark:text-white shadow-lg shadow-primary/10'
-                : 'border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 text-gray-700 dark:text-slate-400 hover:border-gray-300 dark:hover:border-slate-700'
+                : 'border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 text-black dark:text-white hover:border-gray-300 dark:hover:border-slate-700'
             }`}
           >
             <div className="font-bold text-sm">Candidat</div>
-            <div className="text-[11px] text-gray-500 dark:text-slate-400 mt-0.5">
+            <div className="text-[11px] text-black dark:text-white mt-0.5">
               Je cherche un emploi ou un stage
             </div>
           </button>
@@ -240,11 +240,11 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
             className={`rounded-2xl border p-4 text-left transition-all ${
               role === 'company'
                 ? 'border-primary bg-primary/10 text-primary dark:text-white shadow-lg shadow-primary/10'
-                : 'border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 text-gray-700 dark:text-slate-400 hover:border-gray-300 dark:hover:border-slate-700'
+                : 'border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 text-black dark:text-white hover:border-gray-300 dark:hover:border-slate-700'
             }`}
           >
             <div className="font-bold text-sm">Entreprise</div>
-            <div className="text-[11px] text-gray-500 dark:text-slate-400 mt-0.5">
+            <div className="text-[11px] text-black dark:text-white mt-0.5">
               Je recrute des talents
             </div>
           </button>
@@ -254,7 +254,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
       <form onSubmit={handleRegister} className="space-y-4 pt-2">
         {role === 'candidate' ? (
           <div>
-            <label htmlFor="register-name" className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+            <label htmlFor="register-name" className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1">
               Nom complet
             </label>
             <input
@@ -264,12 +264,12 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
               placeholder="Koffi Kouadio"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary"
+              className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
             />
           </div>
         ) : (
           <div>
-            <label htmlFor="register-company" className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+            <label htmlFor="register-company" className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1">
               Nom de l’entreprise
             </label>
             <input
@@ -279,13 +279,13 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
               placeholder="MTN Côte d’Ivoire"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
-              className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary"
+              className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
             />
           </div>
         )}
 
         <div>
-          <label htmlFor="register-email" className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+          <label htmlFor="register-email" className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1">
             Email professionnel ou personnel
           </label>
           <input
@@ -295,7 +295,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
             placeholder="vous@exemple.ci"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary"
+            className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
           />
         </div>
 
@@ -316,7 +316,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
                       level <= passwordStrength(password)
                         ? passwordStrength(password) <= 2
                           ? 'bg-amber-500'
-                          : 'bg-emerald-500'
+                          : 'bg-brand'
                         : 'bg-gray-200 dark:bg-slate-800'
                     }`}
                   />
@@ -326,7 +326,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
                 className={`mt-1 text-[10px] font-semibold ${
                   passwordStrength(password) <= 2
                     ? 'text-amber-600 dark:text-amber-400'
-                    : 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-brand dark:text-brand-accent'
                 }`}
               >
                 {passwordStrength(password) <= 2
@@ -352,7 +352,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
         {/* Mini-profil optionnel — alimente les alertes (voir 3.3) */}
         {role === 'candidate' && (
           <details className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50/60 dark:bg-slate-950/50 p-4 group">
-            <summary className="cursor-pointer list-none text-xs font-bold text-gray-700 dark:text-slate-300 flex items-center justify-between">
+            <summary className="cursor-pointer list-none text-xs font-bold text-black dark:text-white flex items-center justify-between">
               <span className="inline-flex items-center gap-1.5">
                 <svg className="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
@@ -363,7 +363,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
                 <path d="m6 9 6 6 6-6" />
               </svg>
             </summary>
-            <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-2 mb-3">
+            <p className="text-[11px] text-black dark:text-white mt-2 mb-3">
               Renseignez vos critères pour recevoir des alertes personnalisées
               (emplois, stages, bourses, concours). Complétable à tout moment
               depuis votre espace.
@@ -372,7 +372,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
               <div>
                 <label
                   htmlFor="register-city"
-                  className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1"
+                  className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1"
                 >
                   Ville
                 </label>
@@ -380,7 +380,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
                   id="register-city"
                   value={profileCity}
                   onChange={(e) => setProfileCity(e.target.value)}
-                  className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary"
+                  className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
                 >
                   <option value="">Toutes les villes</option>
                   {REGIONS_CI.map((r) => (
@@ -394,7 +394,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
               <div>
                 <label
                   htmlFor="register-diploma"
-                  className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1"
+                  className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1"
                 >
                   Diplôme le plus élevé
                 </label>
@@ -402,7 +402,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
                   id="register-diploma"
                   value={profileDiploma}
                   onChange={(e) => setProfileDiploma(e.target.value)}
-                  className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary"
+                  className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
                 >
                   <option value="">Sélectionner un diplôme</option>
                   {DIPLOMA_FILTERS.map((d) => (
@@ -416,7 +416,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
               <div>
                 <span
                   id="register-sectors-label"
-                  className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1"
+                  className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1"
                 >
                   Secteurs d&apos;intérêt
                 </span>
@@ -435,7 +435,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
                         'rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all',
                         profileSectors.includes(s.slug)
                           ? 'border-primary bg-primary/10 text-primary'
-                          : 'border-gray-200 bg-white text-gray-600 hover:border-primary/40 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300',
+                          : 'border-gray-200 bg-white text-black hover:border-primary/40 dark:border-slate-700 dark:bg-slate-900 dark:text-white',
                       )}
                     >
                       {s.name}
@@ -463,7 +463,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
               <div className="w-full border-t border-gray-200 dark:border-slate-800" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white dark:bg-slate-900 px-2 text-gray-500 dark:text-slate-400">
+              <span className="bg-white dark:bg-slate-900 px-2 text-black dark:text-white">
                 Ou continuer avec
               </span>
             </div>
@@ -471,7 +471,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
 
           <a
             href={googleAuthHref()}
-            className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 py-3.5 px-4 text-xs font-bold text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm"
+            className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 py-3.5 px-4 text-xs font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path
@@ -496,7 +496,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
         </>
       )}
 
-      <div className="text-center text-xs text-gray-500 dark:text-slate-400">
+      <div className="text-center text-xs text-black dark:text-white">
         Vous avez déjà un compte ?{' '}
         <Link href="/login" className="text-primary font-bold hover:underline">
           Se connecter

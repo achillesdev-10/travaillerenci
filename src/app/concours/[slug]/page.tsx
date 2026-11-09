@@ -194,7 +194,7 @@ export default async function ConcoursDetailPage({ params }: PageProps) {
       <ExamViewsTracker examId={exam.id} />
 
       {/* ============================ EN-TÊTE ============================ */}
-      <section className="border-b border-gray-100 bg-emerald-500/5 dark:border-slate-800 dark:bg-emerald-500/10">
+      <section className="border-b border-gray-100 bg-brand/10 dark:border-slate-800 dark:bg-brand/10">
         <div className="container mx-auto max-w-4xl px-4 pb-6 pt-4 sm:pt-8">
           {/* Bannière photo par défaut selon la catégorie de concours */}
           <div className="relative h-40 sm:h-56 overflow-hidden rounded-2xl sm:rounded-3xl shadow-lg mb-5 sm:mb-6">
@@ -207,7 +207,7 @@ export default async function ConcoursDetailPage({ params }: PageProps) {
           </div>
 
           <nav aria-label="Fil d'Ariane" className="mb-4 sm:mb-6">
-            <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-gray-500 dark:text-gray-400 sm:text-sm">
+            <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-black dark:text-white sm:text-sm">
               <li>
                 <Link href="/" className="hover:text-primary hover:underline">
                   Accueil
@@ -229,7 +229,7 @@ export default async function ConcoursDetailPage({ params }: PageProps) {
                 </Link>
               </li>
               <li aria-hidden="true">/</li>
-              <li className="max-w-[40vw] truncate font-medium text-gray-700 dark:text-gray-200">
+              <li className="max-w-[40vw] truncate font-medium text-black dark:text-gray-200">
                 {exam.title}
               </li>
             </ol>
@@ -244,24 +244,24 @@ export default async function ConcoursDetailPage({ params }: PageProps) {
             >
               {EXAM_PHASE_LABEL[phase]}
             </span>
-            <span className="inline-flex items-center rounded-full border border-gray-200 bg-white/70 px-3 py-1 text-xs font-semibold text-gray-600 dark:border-slate-700 dark:bg-slate-800/70 dark:text-gray-300 sm:text-sm">
+            <span className="inline-flex items-center rounded-full border border-gray-200 bg-white/70 px-3 py-1 text-xs font-semibold text-black dark:border-slate-700 dark:bg-slate-800/70 dark:text-white sm:text-sm">
               {EXAM_CATEGORY_LABEL[exam.category] || exam.category}
             </span>
             {exam.positions_count != null && (
-              <span className="inline-flex items-center rounded-full border border-gray-200 bg-white/70 px-3 py-1 text-xs font-semibold text-gray-600 dark:border-slate-700 dark:bg-slate-800/70 dark:text-gray-300 sm:text-sm">
+              <span className="inline-flex items-center rounded-full border border-gray-200 bg-white/70 px-3 py-1 text-xs font-semibold text-black dark:border-slate-700 dark:bg-slate-800/70 dark:text-white sm:text-sm">
                 {exam.positions_count} poste{exam.positions_count > 1 ? 's' : ''}
               </span>
             )}
           </div>
 
-          <h1 className="mb-3 font-[var(--font-display)] text-[26px] font-extrabold leading-tight text-gray-900 dark:text-white sm:text-3xl lg:text-4xl">
+          <h1 className="mb-3 font-[var(--font-display)] text-[26px] font-extrabold leading-tight text-black dark:text-white sm:text-3xl lg:text-4xl">
             {exam.title}
           </h1>
 
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[14px] sm:text-base">
             <div className="font-bold text-primary">{exam.organizer}</div>
             {exam.location && (
-              <div className="inline-flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
+              <div className="inline-flex items-center gap-1.5 text-black dark:text-white">
                 <svg className="h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                   <circle cx="12" cy="10" r="3" />
@@ -269,14 +269,14 @@ export default async function ConcoursDetailPage({ params }: PageProps) {
                 {exam.location}
               </div>
             )}
-            <div className="inline-flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
+            <div className="inline-flex items-center gap-1.5 text-black dark:text-white">
               <svg className="h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
                 <circle cx="12" cy="12" r="3" />
               </svg>
               <span>{exam.views_count} vues</span>
             </div>
-            <span className="text-[11px] text-gray-400 dark:text-gray-500 sm:text-xs">
+            <span className="text-[11px] text-gray-400 dark:text-white sm:text-xs">
               Publié le {formatDate(exam.published_at || exam.created_at)}
             </span>
           </div>
@@ -290,7 +290,7 @@ export default async function ConcoursDetailPage({ params }: PageProps) {
           <aside className="order-1 space-y-5 lg:order-2 lg:sticky lg:top-24 lg:self-start">
             {/* Conditions d'éligibilité */}
             <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm shadow-black/5 dark:border-slate-800 dark:bg-slate-900">
-              <h3 className="mb-4 flex items-center gap-2 font-bold text-gray-900 dark:text-white">
+              <h3 className="mb-4 flex items-center gap-2 font-bold text-black dark:text-white">
                 <svg className="h-5 w-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
                 </svg>
@@ -306,7 +306,7 @@ export default async function ConcoursDetailPage({ params }: PageProps) {
                 {exam.nationality && <EligRow label="Nationalité" value={exam.nationality} />}
                 {exam.diplomas.length > 0 && (
                   <div className="flex items-start justify-between gap-4">
-                    <dt className="shrink-0 text-gray-500 dark:text-gray-400">Diplômes</dt>
+                    <dt className="shrink-0 text-black dark:text-white">Diplômes</dt>
                     <dd className="flex flex-wrap justify-end gap-1.5">
                       {exam.diplomas.map((d) => (
                         <span
@@ -349,7 +349,7 @@ export default async function ConcoursDetailPage({ params }: PageProps) {
                 href={`https://wa.me/?text=${encodeURIComponent(`📣 Je souhaite m'abonner aux alertes concours (${EXAM_CATEGORY_LABEL[exam.category] || exam.category}) sur TravaillerEnCi : ${shareText}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-3 text-sm font-semibold text-emerald-600 transition-colors hover:bg-emerald-500/20 dark:text-emerald-400"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-brand/30 bg-brand/10 px-5 py-3 text-sm font-semibold text-brand transition-colors hover:bg-brand/20 dark:text-brand-accent"
               >
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M12 2a10 10 0 0 0-8.66 15l-1.3 4.7 4.8-1.26A10 10 0 1 0 12 2Zm5.7 14.1c-.24.68-1.4 1.3-1.93 1.34-.5.05-.99.23-3.34-.7-2.83-1.1-4.62-3.97-4.76-4.15-.14-.19-1.14-1.52-1.14-2.9s.72-2.05.98-2.33c.25-.28.55-.35.74-.35h.53c.17 0 .4-.06.62.48.24.57.8 1.97.87 2.11.07.14.12.3.02.49-.1.19-.15.31-.29.48-.15.16-.31.36-.44.48-.15.15-.31.31-.13.61.17.3.78 1.29 1.68 2.09 1.15 1.03 2.12 1.35 2.42 1.5.3.15.48.13.66-.08.17-.22.76-.89.96-1.2.2-.3.4-.25.68-.15.27.1 1.73.82 2.03.97.3.15.5.22.57.34.07.13.07.72-.16 1.4Z" />
@@ -400,7 +400,7 @@ export default async function ConcoursDetailPage({ params }: PageProps) {
                   href={exam.source_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-1 flex items-center justify-between gap-2 rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3 text-xs text-gray-600 transition-colors hover:border-primary/30 hover:text-primary dark:border-slate-700 dark:bg-slate-800/50 dark:text-gray-300"
+                  className="mt-1 flex items-center justify-between gap-2 rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3 text-xs text-black transition-colors hover:border-primary/30 hover:text-primary dark:border-slate-700 dark:bg-slate-800/50 dark:text-white"
                 >
                   <span className="inline-flex items-center gap-1.5">
                     <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -418,10 +418,10 @@ export default async function ConcoursDetailPage({ params }: PageProps) {
           <article className="order-2 lg:order-1 lg:col-span-2">
             {/* Description */}
             <div className="mb-6 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm shadow-black/5 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
-              <h2 className="mb-4 font-[var(--font-display)] text-lg font-bold text-gray-900 dark:text-white sm:text-xl">
+              <h2 className="mb-4 font-[var(--font-display)] text-lg font-bold text-black dark:text-white sm:text-xl">
                 Détails du concours
               </h2>
-              <div className="prose prose-sm max-w-none leading-relaxed text-gray-700 dark:prose-invert dark:text-gray-300 sm:prose-base">
+              <div className="prose prose-sm max-w-none leading-relaxed text-black dark:prose-invert dark:text-white sm:prose-base">
                 <SimpleMarkdown text={exam.description_md || exam.seo_description || 'Communiqué en cours de rédaction.'} />
               </div>
             </div>
@@ -438,7 +438,7 @@ export default async function ConcoursDetailPage({ params }: PageProps) {
             {/* Timeline dates clés */}
             {(regStart || regEnd || examDate || resultsDate) && (
               <div className="mb-6 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm shadow-black/5 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
-                <h2 className="mb-5 font-[var(--font-display)] text-lg font-bold text-gray-900 dark:text-white sm:text-xl">
+                <h2 className="mb-5 font-[var(--font-display)] text-lg font-bold text-black dark:text-white sm:text-xl">
                   Dates clés
                 </h2>
                 <ol className="relative space-y-6 border-l-2 border-gray-100 pl-6 dark:border-slate-800">
@@ -481,10 +481,10 @@ export default async function ConcoursDetailPage({ params }: PageProps) {
             {exam.documents.length > 0 && (
               <div className="mb-6 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm shadow-black/5 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
                 <div className="mb-4 flex items-center gap-2">
-                  <h2 className="font-[var(--font-display)] text-lg font-bold text-gray-900 dark:text-white">
+                  <h2 className="font-[var(--font-display)] text-lg font-bold text-black dark:text-white">
                     Documents & annales
                   </h2>
-                  <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                  <span className="rounded-full bg-brand/10 px-2.5 py-0.5 text-[11px] font-bold text-brand dark:text-brand-accent">
                     Accès gratuit
                   </span>
                 </div>
@@ -504,7 +504,7 @@ export default async function ConcoursDetailPage({ params }: PageProps) {
                           </svg>
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate text-sm font-semibold text-gray-800 dark:text-gray-200">
+                          <span className="block truncate text-sm font-semibold text-black dark:text-gray-200">
                             {doc.name}
                           </span>
                           <span className="text-[11px] text-gray-400">Télécharger gratuitement</span>
@@ -584,7 +584,7 @@ async function LinkedJobsSection({ exam }: { exam: Exam }) {
   return (
     <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm shadow-black/5 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
       <div className="mb-4 flex items-center gap-2">
-        <h2 className="font-[var(--font-display)] text-lg font-bold text-gray-900 dark:text-white">
+        <h2 className="font-[var(--font-display)] text-lg font-bold text-black dark:text-white">
           Offres d'emploi liées
         </h2>
         <span className="rounded-full bg-sky-500/10 px-2.5 py-0.5 text-[11px] font-bold text-sky-600 dark:text-sky-400">
@@ -601,10 +601,10 @@ async function LinkedJobsSection({ exam }: { exam: Exam }) {
             <div className="mb-1 text-[11px] font-bold uppercase tracking-wide text-gray-400">
               {job.company}
             </div>
-            <div className="mb-1 line-clamp-2 text-sm font-semibold text-gray-800 transition-colors group-hover:text-primary dark:text-gray-200">
+            <div className="mb-1 line-clamp-2 text-sm font-semibold text-black transition-colors group-hover:text-primary dark:text-gray-200">
               {job.title}
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">
+            <div className="text-xs text-black dark:text-white">
               {job.location} · {job.contract_type}
             </div>
           </Link>
@@ -621,7 +621,7 @@ async function SimilarExamsSection({ exam }: { exam: Exam }) {
   return (
     <section>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="font-[var(--font-display)] text-lg font-bold text-gray-900 dark:text-white sm:text-xl">
+        <h2 className="font-[var(--font-display)] text-lg font-bold text-black dark:text-white sm:text-xl">
           Concours similaires
         </h2>
         <Link
@@ -653,13 +653,13 @@ async function SimilarExamsSection({ exam }: { exam: Exam }) {
                 {EXAM_PHASE_LABEL[examPhase(s)]}
               </span>
             </div>
-            <div className="line-clamp-2 text-sm font-bold text-gray-900 transition-colors group-hover:text-primary dark:text-white">
+            <div className="line-clamp-2 text-sm font-bold text-black transition-colors group-hover:text-primary dark:text-white">
               {s.title}
             </div>
             {s.diplomas.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-1">
                 {s.diplomas.slice(0, 3).map((d) => (
-                  <span key={d} className="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-bold text-gray-500 dark:bg-slate-800 dark:text-gray-400">
+                  <span key={d} className="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-bold text-black dark:bg-slate-800 dark:text-white">
                     {d}
                   </span>
                 ))}
@@ -707,28 +707,28 @@ function TimelineItem({
         className={cn(
           'absolute -left-[31px] top-0.5 flex h-4 w-4 items-center justify-center rounded-full border-2 bg-white dark:bg-slate-900',
           isOpen
-            ? 'border-emerald-500'
+            ? 'border-brand'
             : done
               ? 'border-gray-300 dark:border-slate-700'
               : 'border-amber-400',
         )}
       >
-        {isOpen && <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />}
+        {isOpen && <span className="h-1.5 w-1.5 rounded-full bg-brand" />}
       </span>
       <div className={cn('text-sm', highlight && 'font-semibold')}>
-        <div className="text-gray-500 dark:text-gray-400">{label}</div>
+        <div className="text-black dark:text-white">{label}</div>
         <div
           className={cn(
             'font-bold',
             isOpen
-              ? 'text-emerald-600 dark:text-emerald-400'
+              ? 'text-brand dark:text-brand-accent'
               : done
                 ? 'text-gray-400 line-through decoration-gray-300 dark:decoration-slate-700'
-                : 'text-gray-800 dark:text-gray-200',
+                : 'text-black dark:text-gray-200',
           )}
         >
           {date}
-          {isOpen && <span className="ml-2 text-[11px] font-bold text-emerald-500">● en cours</span>}
+          {isOpen && <span className="ml-2 text-[11px] font-bold text-brand">● en cours</span>}
         </div>
       </div>
     </li>
@@ -738,8 +738,8 @@ function TimelineItem({
 function EligRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-start justify-between gap-4">
-      <dt className="shrink-0 text-gray-500 dark:text-gray-400">{label}</dt>
-      <dd className="break-words text-right font-medium text-gray-800 dark:text-gray-200">{value}</dd>
+      <dt className="shrink-0 text-black dark:text-white">{label}</dt>
+      <dd className="break-words text-right font-medium text-black dark:text-gray-200">{value}</dd>
     </div>
   );
 }

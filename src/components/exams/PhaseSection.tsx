@@ -8,9 +8,9 @@ export const SECTION_LIMIT = 12;
 
 const PHASE_SECTION_ACCENTS = {
   emerald: {
-    dot: 'bg-emerald-500',
-    ring: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
-    bar: 'bg-emerald-500',
+    dot: 'bg-brand',
+    ring: 'bg-brand/10 text-brand dark:text-brand-accent border-brand/30',
+    bar: 'bg-brand',
   },
   indigo: {
     dot: 'bg-indigo-500',
@@ -19,7 +19,7 @@ const PHASE_SECTION_ACCENTS = {
   },
   slate: {
     dot: 'bg-slate-400',
-    ring: 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/30',
+    ring: 'bg-slate-500/10 text-black dark:text-white border-slate-500/30',
     bar: 'bg-slate-400',
   },
 } as const;
@@ -76,10 +76,10 @@ export default function PhaseSection({
         <div className="flex items-center gap-2.5">
           <span className={`h-2.5 w-2.5 rounded-full ${a.dot}`} aria-hidden="true" />
           <div>
-            <h2 className="font-[var(--font-display)] text-lg font-bold text-gray-900 dark:text-white sm:text-xl">
+            <h2 className="font-[var(--font-display)] text-lg font-bold text-black dark:text-white sm:text-xl">
               {title}
             </h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400 sm:text-sm">{subtitle}</p>
+            <p className="text-xs text-black dark:text-white sm:text-sm">{subtitle}</p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">

@@ -23,7 +23,7 @@ const LEGAL_LINKS = [
 
 export default function Footer() {
   return (
-    <footer className="mt-auto border-t border-line bg-white text-ink-soft dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+    <footer className="mt-auto border-t border-line bg-white text-ink-soft dark:border-slate-800 dark:bg-slate-950 dark:text-white">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
         <div className="grid gap-9 lg:grid-cols-[1.35fr_1fr_1.25fr]">
           <div className="min-w-0">
@@ -35,19 +35,19 @@ export default function Footer() {
                 <span className="block text-lg font-black leading-none tracking-tight text-ink dark:text-white">
                   TravaillerEn<span className="text-brand dark:text-brand-accent">Ci</span>
                 </span>
-                <span className="mt-1 block text-[9px] font-semibold uppercase tracking-[0.16em] text-muted dark:text-slate-400">
+                <span className="mt-1 block text-[9px] font-semibold uppercase tracking-[0.16em] text-muted dark:text-white">
                   L’emploi en Côte d’Ivoire
                 </span>
               </span>
             </Link>
-            <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted dark:text-slate-400">
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted dark:text-white">
               Emplois, stages, bourses et concours pour construire votre parcours professionnel en Côte d’Ivoire.
             </p>
             <SocialLinks size="sm" className="mt-5 gap-2" />
           </div>
 
           <nav aria-label="Liens du pied de page" className="min-w-0">
-            <h2 className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted dark:text-slate-400">
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted dark:text-white">
               Explorer
             </h2>
             <ul className="mt-4 grid grid-cols-2 gap-x-5 gap-y-2.5 text-sm">
@@ -55,7 +55,7 @@ export default function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="inline-flex min-h-8 items-center text-ink-soft transition-colors hover:text-brand dark:text-slate-300 dark:hover:text-brand-accent"
+                    className="inline-flex min-h-8 items-center text-ink-soft transition-colors hover:text-brand dark:text-white dark:hover:text-brand-accent"
                   >
                     {link.label}
                   </Link>
@@ -65,10 +65,10 @@ export default function Footer() {
           </nav>
 
           <div className="min-w-0">
-            <h2 className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted dark:text-slate-400">
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted dark:text-white">
               Newsletter
             </h2>
-            <p className="mt-4 text-sm leading-relaxed text-muted dark:text-slate-400">
+            <p className="mt-4 text-sm leading-relaxed text-muted dark:text-white">
               Inscrivez-vous pour recevoir les prochaines opportunités.
             </p>
             <NewsletterForm className="mt-4 max-w-md" />
@@ -77,7 +77,7 @@ export default function Footer() {
 
         <div className="mt-9 border-t border-line pt-5 dark:border-slate-800">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted dark:text-slate-400">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted dark:text-white">
               <p>© {new Date().getFullYear()} TravaillerenCi — Tous droits réservés.</p>
               <span className="hidden h-3 w-px bg-line dark:bg-slate-700 sm:block" aria-hidden="true" />
               <div className="flex items-center gap-2">
@@ -94,7 +94,7 @@ export default function Footer() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="inline-flex min-h-8 items-center text-[11px] text-muted transition-colors hover:text-brand dark:text-slate-400 dark:hover:text-brand-accent"
+                  className="inline-flex min-h-8 items-center text-[11px] text-muted transition-colors hover:text-brand dark:text-white dark:hover:text-brand-accent"
                 >
                   {link.label}
                 </Link>

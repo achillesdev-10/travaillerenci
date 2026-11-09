@@ -74,14 +74,14 @@ export default function EmailVerificationBanner({
         <h2 className="text-base font-bold font-[var(--font-display)] mb-1">
           Confirmez votre adresse email
         </h2>
-        <p className="text-sm text-gray-600 dark:text-slate-400 leading-relaxed">
+        <p className="text-sm text-black dark:text-white leading-relaxed">
           Cliquez sur le lien reçu par email pour activer toutes les fonctionnalités
           (alertes, sauvegarde d'offres…). Le lien est valable 24 heures.
         </p>
         {feedback ? (
           <p
             className={`mt-2 text-xs font-semibold ${
-              status === 'error' ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
+              status === 'error' ? 'text-rose-600 dark:text-rose-400' : 'text-brand dark:text-brand-accent'
             }`}
           >
             {feedback}

@@ -176,7 +176,7 @@ export default async function BlogArticlePage({
       <div className="container mx-auto px-4 -mt-10 sm:-mt-14 relative z-10 max-w-3xl">
         <article className="bg-white dark:bg-slate-900 border border-border rounded-3xl shadow-xl shadow-black/5 overflow-hidden">
           <div className="p-6 sm:p-10">
-            <div className="flex flex-wrap items-center gap-2 text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium mb-4">
+            <div className="flex flex-wrap items-center gap-2 text-[11px] sm:text-xs text-black dark:text-white font-medium mb-4">
               <Link
                 href="/blog"
                 className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary px-3 py-1.5 font-bold hover:bg-primary/15 transition-colors"
@@ -191,14 +191,14 @@ export default async function BlogArticlePage({
                 <Link
                   key={t}
                   href={`/blog?tag=${encodeURIComponent(t)}`}
-                  className="rounded-full border border-border bg-gray-50 dark:bg-slate-800 px-3 py-1.5 font-semibold text-gray-600 dark:text-gray-300 hover:border-primary/40 hover:text-primary transition-colors"
+                  className="rounded-full border border-border bg-gray-50 dark:bg-slate-800 px-3 py-1.5 font-semibold text-black dark:text-white hover:border-primary/40 hover:text-primary transition-colors"
                 >
                   #{t}
                 </Link>
               ))}
             </div>
 
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white font-[var(--font-display)] leading-tight">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-black dark:text-white font-[var(--font-display)] leading-tight">
               {post.title}
             </h1>
 
@@ -207,8 +207,8 @@ export default async function BlogArticlePage({
                 {post.author.charAt(0).toUpperCase()}
               </div>
               <div>
-                <div className="text-sm font-semibold text-gray-900 dark:text-white">{post.author}</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">
+                <div className="text-sm font-semibold text-black dark:text-white">{post.author}</div>
+                <div className="text-xs text-black dark:text-white">
                   Publié le {formatDate(post.published_at)}
                 </div>
               </div>
@@ -244,7 +244,7 @@ export default async function BlogArticlePage({
             </div>
 
             {/* Corps de l'article */}
-            <div className="mt-6 text-[15px] sm:text-base leading-relaxed text-gray-700 dark:text-gray-300">
+            <div className="mt-6 text-[15px] sm:text-base leading-relaxed text-black dark:text-white">
               <SimpleMarkdown text={post.content} />
             </div>
           </div>
@@ -253,10 +253,10 @@ export default async function BlogArticlePage({
         {/* ===== Offres liées au sujet de l'article (§16) ===== */}
         {relatedOffers.length > 0 && (
           <div className="mt-8 rounded-3xl border border-border bg-white dark:bg-slate-900 p-6 sm:p-7">
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white font-[var(--font-display)]">
+            <h2 className="text-lg sm:text-xl font-bold text-black dark:text-white font-[var(--font-display)]">
               Offres qui pourraient vous intéresser
             </h2>
-            <p className="mt-1.5 text-sm text-gray-600 dark:text-gray-400">
+            <p className="mt-1.5 text-sm text-black dark:text-white">
               Les dernières offres publiées{metier ? ` dans le domaine ${metier.label.toLowerCase()}` : ''} sur
               TravaillerenCi.
             </p>
@@ -299,7 +299,7 @@ export default async function BlogArticlePage({
           <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
             <Link
               href={offersLink.href}
-              className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-gray-900 font-bold text-sm hover:bg-gray-100 transition-colors shadow-lg"
+              className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-black font-bold text-sm hover:bg-gray-100 transition-colors shadow-lg"
             >
               {offersLinkLabel}
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
@@ -324,7 +324,7 @@ export default async function BlogArticlePage({
         {/* ===== Articles liés ===== */}
         {relatedPosts.length > 0 && (
           <div className="mt-12 pb-10">
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white font-[var(--font-display)] mb-5">
+            <h2 className="text-lg sm:text-xl font-bold text-black dark:text-white font-[var(--font-display)] mb-5">
               À lire aussi
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -334,14 +334,14 @@ export default async function BlogArticlePage({
                   href={`/blog/${p.slug}`}
                   className="group bg-white dark:bg-slate-900 border border-border rounded-2xl p-5 hover:border-primary/30 hover:shadow-md transition-all"
                 >
-                  <div className="text-[11px] text-gray-500 dark:text-gray-400 font-medium mb-1.5">
+                  <div className="text-[11px] text-black dark:text-white font-medium mb-1.5">
                     {formatDate(p.published_at)}
                   </div>
-                  <h3 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-primary transition-colors line-clamp-2">
+                  <h3 className="text-sm font-bold text-black dark:text-white group-hover:text-primary transition-colors line-clamp-2">
                     {p.title}
                   </h3>
                   {p.excerpt && (
-                    <p className="mt-1.5 text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
+                    <p className="mt-1.5 text-xs text-black dark:text-white line-clamp-2">
                       {p.excerpt}
                     </p>
                   )}

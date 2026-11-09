@@ -121,7 +121,7 @@ export default function MobileBottomNav() {
                   'flex h-full min-w-0 flex-col items-center justify-center gap-1 px-1 text-[10px] font-semibold transition-colors',
                   isActive
                     ? 'text-brand dark:text-brand-accent'
-                    : 'text-muted hover:text-brand dark:text-slate-400 dark:hover:text-brand-accent',
+                    : 'text-muted hover:text-brand dark:text-white dark:hover:text-brand-accent',
                 )}
               >
                 <span

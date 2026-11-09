@@ -49,16 +49,16 @@ export default function ContactPage() {
       {/* ===== En-tête ===== */}
       <section className="relative overflow-hidden border-b border-border/40 bg-primary/5 dark:bg-primary/10">
         <div className="container mx-auto px-4 py-12 sm:py-16 relative z-10 max-w-4xl text-center">
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary dark:text-emerald-400 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-5">
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary dark:text-brand-accent px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-5">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z" />
             </svg>
             Nous contacter
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-[var(--font-display)] text-gray-900 dark:text-white">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-[var(--font-display)] text-black dark:text-white">
             Parlons-en&nbsp;!
           </h1>
-          <p className="mt-4 text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-4 text-base sm:text-lg text-black dark:text-white max-w-2xl mx-auto leading-relaxed">
             Une question sur une offre, une suggestion pour améliorer la plateforme, un
             partenariat&nbsp;? Écrivez-nous, on vous répond rapidement.
           </p>
@@ -79,18 +79,18 @@ export default function ContactPage() {
                   <span aria-hidden="true">{item.icon}</span>
                 </div>
                 <div className="min-w-0">
-                  <div className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                  <div className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-white">
                     {item.title}
                   </div>
                   {item.href ? (
                     <a
                       href={item.href}
-                      className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white hover:text-primary transition-colors break-all"
+                      className="text-sm sm:text-base font-semibold text-black dark:text-white hover:text-primary transition-colors break-all"
                     >
                       {item.value}
                     </a>
                   ) : (
-                    <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
+                    <div className="text-sm sm:text-base font-semibold text-black dark:text-white">
                       {item.value}
                     </div>
                   )}
@@ -100,7 +100,7 @@ export default function ContactPage() {
 
             {/* Réseaux sociaux */}
             <div className="rounded-2xl border border-border bg-white dark:bg-slate-900 p-5 shadow-sm">
-              <div className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3">
+              <div className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-white mb-3">
                 Suivez-nous
               </div>
               <div className="flex items-center gap-3">

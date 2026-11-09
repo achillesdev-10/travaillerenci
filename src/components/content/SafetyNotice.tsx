@@ -54,13 +54,13 @@ export default function SafetyNotice({
 
   return (
     <aside
-      className={`rounded-2xl border border-emerald-500/25 bg-emerald-50/70 dark:bg-emerald-500/5 p-4 sm:p-5 ${className}`}
+      className={`rounded-2xl border border-brand/25 bg-brand-soft/70 dark:bg-brand/10 p-4 sm:p-5 ${className}`}
       role="note"
     >
       <div className="flex items-start gap-3">
         <div className="mt-0.5 shrink-0">
           <svg
-            className="h-5 w-5 text-emerald-600 dark:text-emerald-400"
+            className="h-5 w-5 text-brand dark:text-brand-accent"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -74,10 +74,10 @@ export default function SafetyNotice({
           </svg>
         </div>
         <div className="min-w-0 text-sm leading-relaxed">
-          <p className="font-bold text-emerald-800 dark:text-emerald-300">
+          <p className="font-bold text-brand-strong dark:text-brand-accent">
             {c.title}
           </p>
-          <p className="mt-0.5 text-emerald-900/80 dark:text-emerald-200/80">
+          <p className="mt-0.5 text-black/80 dark:text-slate-200">
             {c.text}
           </p>
           <div className="mt-2">
@@ -90,7 +90,7 @@ export default function SafetyNotice({
           </div>
         </div>
       </div>
-      <p className="mt-2 text-[11px] text-emerald-700/60 dark:text-emerald-300/50">
+      <p className="mt-2 text-[11px] text-brand-strong/60 dark:text-brand-accent/50">
         Un doute sur une annonce ? Signalez-la, notre équipe la vérifie
         rapidement.
       </p>

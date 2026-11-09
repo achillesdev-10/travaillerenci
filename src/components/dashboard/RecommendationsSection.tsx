@@ -64,10 +64,10 @@ export default function RecommendationsSection() {
     >
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold font-[var(--font-display)] text-gray-900 dark:text-white">
+          <h2 className="text-lg font-bold font-[var(--font-display)] text-black dark:text-white">
             🎯 Offres recommandées pour vous
           </h2>
-          <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 max-w-xl">
+          <p className="text-xs text-black dark:text-white mt-1 max-w-xl">
             {!loaded
               ? 'Analyse de votre profil…'
               : personalized
@@ -102,7 +102,7 @@ export default function RecommendationsSection() {
         </p>
       ) : jobs.length === 0 ? (
         <div className="py-6 text-center">
-          <p className="mx-auto mb-5 max-w-md text-sm text-gray-500 dark:text-slate-400">
+          <p className="mx-auto mb-5 max-w-md text-sm text-black dark:text-white">
             Ajoutez votre ville et vos secteurs d&apos;intérêt dans votre profil pour recevoir
             des recommandations pertinentes.
           </p>

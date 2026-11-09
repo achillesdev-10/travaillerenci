@@ -31,17 +31,19 @@ export default function SectionHeader({
             {kicker}
           </p>
         ) : null}
-        <Heading className="font-display text-xl font-bold tracking-tight text-ink sm:text-2xl">
+        <Heading className="font-display text-xl font-bold tracking-tight text-black dark:text-white sm:text-2xl">
           {title}
         </Heading>
         {description ? (
-          <p className="mt-2 text-sm leading-relaxed text-muted sm:text-base">{description}</p>
+          <p className="mt-2 text-sm leading-relaxed text-black dark:text-white sm:text-base">
+            {description}
+          </p>
         ) : null}
       </div>
       {actionHref && actionLabel ? (
         <Link
           href={actionHref}
-          className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-brand transition-colors hover:text-brand-strong"
+          className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-brand transition-colors hover:text-brand-strong dark:text-brand-accent dark:hover:text-white"
         >
           {actionLabel}
           <svg

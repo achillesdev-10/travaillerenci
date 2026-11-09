@@ -112,13 +112,13 @@ function ResultCard({ result }: { result: AssistantResult }) {
           {isExam ? '🎓' : isScholarship ? '📚' : '💼'}
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-[13px] font-bold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-primary dark:group-hover:text-emerald-400 transition-colors">
+          <div className="text-[13px] font-bold text-black dark:text-white leading-snug line-clamp-2 group-hover:text-primary dark:group-hover:text-brand-accent transition-colors">
             {result.title}
           </div>
-          <div className="text-[12px] font-semibold text-primary dark:text-emerald-400 truncate mt-0.5">
+          <div className="text-[12px] font-semibold text-primary dark:text-brand-accent truncate mt-0.5">
             {result.subtitle}
           </div>
-          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-black dark:text-white">
             {result.location && (
               <span className="inline-flex items-center gap-0.5 min-w-0">
                 <svg className="w-3 h-3 shrink-0 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -130,7 +130,7 @@ function ResultCard({ result }: { result: AssistantResult }) {
             )}
             {result.meta && <span className="truncate">{result.meta}</span>}
           </div>
-          <div className="mt-1.5 inline-flex items-center gap-1 text-[11.5px] font-bold text-primary dark:text-emerald-400">
+          <div className="mt-1.5 inline-flex items-center gap-1 text-[11.5px] font-bold text-primary dark:text-brand-accent">
             Voir l'offre
             <svg className="w-3 h-3 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14" />
@@ -394,8 +394,8 @@ export default function AssistantFloat() {
             </svg>
             {/* Indicateur « en ligne » discret */}
             <span className="absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5" aria-hidden="true">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-50" />
-              <span className="relative inline-flex h-3.5 w-3.5 rounded-full border-2 border-white dark:border-slate-900 bg-emerald-500" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-accent opacity-50" />
+              <span className="relative inline-flex h-3.5 w-3.5 rounded-full border-2 border-white dark:border-slate-900 bg-brand" />
             </span>
           </>
         )}
@@ -457,7 +457,7 @@ export default function AssistantFloat() {
               <div className="space-y-3.5">
                 <div className="flex items-start gap-2.5 animate-fade-in-up">
                   <BotAvatar />
-                  <div className="rounded-2xl rounded-tl-sm bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 px-3.5 py-2.5 text-[13px] leading-relaxed text-gray-700 dark:text-gray-200 shadow-sm max-w-[85%]">
+                  <div className="rounded-2xl rounded-tl-sm bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 px-3.5 py-2.5 text-[13px] leading-relaxed text-black dark:text-gray-200 shadow-sm max-w-[85%]">
                     Bonjour 👋
                     <br />
                     Je peux vous aider à trouver un emploi, un stage, une bourse ou un concours sur TravaillerenCi. Que recherchez-vous ?
@@ -469,7 +469,7 @@ export default function AssistantFloat() {
                       key={s.prompt}
                       type="button"
                       onClick={() => sendMessage(s.prompt)}
-                      className="text-left rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-[12.5px] font-semibold text-gray-700 dark:text-gray-200 hover:border-primary/40 hover:bg-primary/5 dark:hover:bg-slate-700 transition-colors"
+                      className="text-left rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-[12.5px] font-semibold text-black dark:text-gray-200 hover:border-primary/40 hover:bg-primary/5 dark:hover:bg-slate-700 transition-colors"
                     >
                       {s.label}
                     </button>
@@ -497,7 +497,7 @@ export default function AssistantFloat() {
                         'rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed shadow-sm',
                         m.role === 'user'
                           ? 'rounded-br-sm bg-primary text-white whitespace-pre-line'
-                          : 'rounded-tl-sm bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 text-gray-700 dark:text-gray-200',
+                          : 'rounded-tl-sm bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 text-black dark:text-gray-200',
                         m.error && 'border-rose-300 dark:border-rose-500/40 text-rose-600 dark:text-rose-400',
                       )}
                     >
@@ -507,7 +507,7 @@ export default function AssistantFloat() {
                         <span className="whitespace-pre-line">{m.text}</span>
                       )}
                       {m.aiUsed && (
-                        <div className="mt-1.5 text-[10px] text-gray-400 dark:text-gray-500">
+                        <div className="mt-1.5 text-[10px] text-gray-400 dark:text-white">
                           ✨ Réponse assistée par IA
                         </div>
                       )}
@@ -525,7 +525,7 @@ export default function AssistantFloat() {
                       <Link
                         href={m.seeMoreUrl}
                         prefetch={false}
-                        className="inline-flex items-center gap-1.5 rounded-xl border border-primary/30 bg-primary/5 px-3.5 py-2 text-[12.5px] font-bold text-primary dark:text-emerald-400 hover:bg-primary/10 transition-colors"
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-primary/30 bg-primary/5 px-3.5 py-2 text-[12.5px] font-bold text-primary dark:text-brand-accent hover:bg-primary/10 transition-colors"
                       >
                         Voir plus de résultats
                         <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
@@ -570,7 +570,7 @@ export default function AssistantFloat() {
               maxLength={500}
               aria-label="Votre message"
               autoComplete="off"
-              className="flex-1 min-w-0 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-3.5 py-2.5 text-[13px] text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+              className="flex-1 min-w-0 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-3.5 py-2.5 text-[13px] text-black dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
             />
             <button
               type="submit"

@@ -50,7 +50,7 @@ export default function NewsletterForm({ className = '' }: { className?: string 
     <form onSubmit={handleSubmit} className={cn('w-full max-w-md', className)} noValidate>
       <label
         htmlFor="newsletter-email"
-        className="mb-2 block text-[11px] font-bold uppercase tracking-widest text-muted dark:text-slate-400"
+        className="mb-2 block text-[11px] font-bold uppercase tracking-widest text-muted dark:text-white"
       >
         Votre email
       </label>
@@ -65,7 +65,7 @@ export default function NewsletterForm({ className = '' }: { className?: string 
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           aria-label="Votre adresse email"
-          className="min-w-0 flex-1 rounded-xl border border-line bg-surface px-4 py-2.5 text-sm text-ink placeholder:text-muted focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-500"
+          className="min-w-0 flex-1 rounded-xl border border-line bg-surface px-4 py-2.5 text-sm text-ink placeholder:text-neutral-500 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder:text-neutral-400"
         />
         <button
           type="submit"
@@ -76,7 +76,7 @@ export default function NewsletterForm({ className = '' }: { className?: string 
         </button>
       </div>
 
-      <label className="mt-2.5 flex cursor-pointer items-start gap-2 text-[11px] leading-relaxed text-muted dark:text-slate-400">
+      <label className="mt-2.5 flex cursor-pointer items-start gap-2 text-[11px] leading-relaxed text-muted dark:text-white">
         <input
           type="checkbox"
           required
@@ -96,7 +96,7 @@ export default function NewsletterForm({ className = '' }: { className?: string 
           aria-live="polite"
           className={cn(
             'mt-2 text-[11px] font-semibold',
-            status === 'success' ? 'text-success-strong dark:text-emerald-400' : 'text-danger dark:text-rose-400',
+            status === 'success' ? 'text-success-strong dark:text-brand-accent' : 'text-danger dark:text-rose-400',
           )}
         >
           {message}

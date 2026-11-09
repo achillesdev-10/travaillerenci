@@ -73,7 +73,7 @@ export default function JobCard({ job, priority = false }: JobCardProps) {
           </div>
 
           {/* Title */}
-          <h3 className="font-bold text-[15px] sm:text-base leading-snug text-gray-900 mb-1 line-clamp-2 group-hover:text-primary transition-colors">
+          <h3 className="font-bold text-[15px] sm:text-base leading-snug text-black mb-1 line-clamp-2 group-hover:text-primary transition-colors">
             {job.title}
           </h3>
 
@@ -83,7 +83,7 @@ export default function JobCard({ job, priority = false }: JobCardProps) {
           </p>
 
           {/* Location + meta */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-4 text-xs sm:text-sm text-gray-500 mt-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-4 text-xs sm:text-sm text-black mt-auto">
             <span className="inline-flex items-center gap-1.5">
               <svg className="w-3.5 h-3.5 flex-shrink-0 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />

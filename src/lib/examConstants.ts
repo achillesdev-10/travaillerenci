@@ -141,7 +141,7 @@ export const EXAM_PHASE_LABEL: Record<ExamPhase, string> = {
 /** Classes Tailwind des badges de phase (cartes / fiche). */
 export const EXAM_PHASE_BADGE: Record<ExamPhase, string> = {
   upcoming: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/30',
-  open: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
+  open: 'bg-brand/10 text-brand dark:text-brand-accent border-brand/30',
   ongoing: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30',
   closed: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30',
   results: 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/30',

@@ -118,8 +118,8 @@ export default function ConcoursTabs({
               className={cn(
                 'flex-1 flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-[13px] font-semibold transition-all',
                 isActive
-                  ? 'bg-white dark:bg-slate-900 text-primary shadow-sm dark:text-emerald-400'
-                  : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300',
+                  ? 'bg-white dark:bg-slate-900 text-primary shadow-sm dark:text-brand-accent'
+                  : 'text-black hover:text-black dark:hover:text-gray-300',
               )}
             >
               {tab.icon}
@@ -129,8 +129,8 @@ export default function ConcoursTabs({
                   className={cn(
                     'inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10px] font-bold',
                     isActive
-                      ? 'bg-primary/10 text-primary dark:bg-emerald-400/15 dark:text-emerald-400'
-                      : 'bg-gray-200/80 text-gray-500 dark:bg-slate-700 dark:text-gray-400',
+                      ? 'bg-primary/10 text-primary dark:bg-brand/15 dark:text-brand-accent'
+                      : 'bg-gray-200/80 text-black dark:bg-slate-700 dark:text-white',
                   )}
                 >
                   {count > 99 ? '99+' : count}

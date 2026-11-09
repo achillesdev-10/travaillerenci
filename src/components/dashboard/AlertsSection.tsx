@@ -159,10 +159,10 @@ export default function AlertsSection() {
   return (
     <div className="rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 sm:p-8 space-y-6">
       <div>
-        <h2 className="text-lg font-bold font-[var(--font-display)] text-gray-900 dark:text-white">
+        <h2 className="text-lg font-bold font-[var(--font-display)] text-black dark:text-white">
           Mes alertes
         </h2>
-        <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+        <p className="text-xs text-black dark:text-white mt-1">
           Recevez par email ou WhatsApp les nouveaux contenus qui correspondent à vos
           critères — un lien de désinscription figure dans chaque notification.
         </p>
@@ -195,21 +195,21 @@ export default function AlertsSection() {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-bold text-[14px] text-gray-900 dark:text-white truncate">
+                    <span className="font-bold text-[14px] text-black dark:text-white truncate">
                       {alert.label}
                     </span>
                     <span
                       className={cn(
                         'rounded-full px-2 py-0.5 text-[10px] font-bold',
                         alert.active
-                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                          : 'bg-gray-100 text-gray-500 dark:bg-slate-800 dark:text-slate-400',
+                          ? 'bg-brand/10 text-brand dark:text-brand-accent'
+                          : 'bg-gray-100 text-black dark:bg-slate-800 dark:text-white',
                       )}
                     >
                       {alert.active ? 'Active' : 'Désactivée'}
                     </span>
                   </div>
-                  <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-gray-500 dark:text-slate-400">
+                  <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-black dark:text-white">
                     <span>
                       {alert.content_types.length === 0
                         ? 'Tous les contenus'
@@ -251,7 +251,7 @@ export default function AlertsSection() {
                     className={cn(
                       'inline-flex items-center justify-center h-8 w-8 rounded-lg transition-all',
                       alert.active
-                        ? 'text-emerald-600 hover:bg-emerald-500/10 dark:text-emerald-400'
+                        ? 'text-brand hover:bg-brand/10 dark:text-brand-accent'
                         : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800',
                     )}
                   >
@@ -284,7 +284,7 @@ export default function AlertsSection() {
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-gray-500 dark:text-slate-400 py-2">
+        <p className="text-sm text-black dark:text-white py-2">
           Aucune alerte pour le moment. Créez-en une ci-dessous.
         </p>
       )}
@@ -295,14 +295,14 @@ export default function AlertsSection() {
         onSubmit={create}
         className="space-y-4 rounded-2xl border border-dashed border-gray-300 dark:border-slate-700 bg-gray-50/60 dark:bg-slate-900/50 p-4 sm:p-5"
       >
-        <h3 className="text-sm font-bold text-gray-900 dark:text-white">
+        <h3 className="text-sm font-bold text-black dark:text-white">
           {editingId ? 'Modifier l’alerte' : 'Créer une alerte'}
         </h3>
 
         <div>
           <label
             htmlFor="alert-label"
-            className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1"
+            className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1"
           >
             Nom de l&apos;alerte
           </label>
@@ -312,14 +312,14 @@ export default function AlertsSection() {
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             placeholder="Ex. Offres IT à Abidjan"
-            className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary"
+            className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
           />
         </div>
 
         <div>
           <span
             id="alert-content-types"
-            className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1"
+            className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1"
           >
             Types de contenu
           </span>
@@ -333,7 +333,7 @@ export default function AlertsSection() {
                   'rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all',
                   contentTypes.includes(o.value)
                     ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-gray-200 bg-white text-gray-600 hover:border-primary/40 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300',
+                    : 'border-gray-200 bg-white text-black hover:border-primary/40 dark:border-slate-700 dark:bg-slate-900 dark:text-white',
                 )}
               >
                 {o.label}
@@ -346,7 +346,7 @@ export default function AlertsSection() {
           <div>
             <label
               htmlFor="alert-city"
-              className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1"
+              className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1"
             >
               Ville
             </label>
@@ -354,7 +354,7 @@ export default function AlertsSection() {
               id="alert-city"
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary"
+              className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
             >
               <option value="">Toutes</option>
               {REGIONS_CI.map((r) => (
@@ -367,7 +367,7 @@ export default function AlertsSection() {
           <div>
             <label
               htmlFor="alert-diploma"
-              className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1"
+              className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1"
             >
               Diplôme
             </label>
@@ -375,7 +375,7 @@ export default function AlertsSection() {
               id="alert-diploma"
               value={diploma}
               onChange={(e) => setDiploma(e.target.value)}
-              className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary"
+              className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
             >
               <option value="">Tous</option>
               {DIPLOMA_FILTERS.map((d) => (
@@ -388,7 +388,7 @@ export default function AlertsSection() {
           <div>
             <label
               htmlFor="alert-sector"
-              className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1"
+              className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1"
             >
               Secteur
             </label>
@@ -396,7 +396,7 @@ export default function AlertsSection() {
               id="alert-sector"
               value={sector}
               onChange={(e) => setSector(e.target.value)}
-              className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary"
+              className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
             >
               <option value="">Tous</option>
               {SECTORS.map((s) => (
@@ -409,7 +409,7 @@ export default function AlertsSection() {
           <div>
             <label
               htmlFor="alert-contract"
-              className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1"
+              className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1"
             >
               Contrat
             </label>
@@ -417,7 +417,7 @@ export default function AlertsSection() {
               id="alert-contract"
               value={contract}
               onChange={(e) => setContract(e.target.value)}
-              className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary"
+              className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
             >
               <option value="">Tous</option>
               {CONTRACT_OPTIONS.map((c) => (
@@ -432,7 +432,7 @@ export default function AlertsSection() {
         <div>
           <label
             htmlFor="alert-keywords"
-            className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1"
+            className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1"
           >
             Mots-clés
           </label>
@@ -443,7 +443,7 @@ export default function AlertsSection() {
             onChange={(e) => setKeywords(e.target.value)}
             placeholder="Ex. développeur, data, cybersécurité"
             aria-describedby="alert-keywords-hint"
-            className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary"
+            className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
           />
           <p id="alert-keywords-hint" className="text-[10px] text-gray-400 mt-1 ml-1">
             Séparés par des virgules — l&apos;offre doit en contenir au moins un.
@@ -454,7 +454,7 @@ export default function AlertsSection() {
           <div>
             <span
               id="alert-channels"
-              className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1"
+              className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1"
             >
               Canal
             </span>
@@ -468,7 +468,7 @@ export default function AlertsSection() {
                     'rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all',
                     channels === c
                       ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-gray-200 bg-white text-gray-600 hover:border-primary/40 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300',
+                      : 'border-gray-200 bg-white text-black hover:border-primary/40 dark:border-slate-700 dark:bg-slate-900 dark:text-white',
                   )}
                 >
                   {c === 'email' ? 'Email' : c === 'whatsapp' ? 'WhatsApp' : 'Email + WhatsApp'}
@@ -484,7 +484,7 @@ export default function AlertsSection() {
           <div>
             <span
               id="alert-frequency"
-              className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1"
+              className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1"
             >
               Fréquence
             </span>
@@ -498,7 +498,7 @@ export default function AlertsSection() {
                     'rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all',
                     frequency === f
                       ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-gray-200 bg-white text-gray-600 hover:border-primary/40 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300',
+                      : 'border-gray-200 bg-white text-black hover:border-primary/40 dark:border-slate-700 dark:bg-slate-900 dark:text-white',
                   )}
                 >
                   {FREQUENCY_LABEL[f]}
@@ -513,7 +513,7 @@ export default function AlertsSection() {
             <button
               type="button"
               onClick={resetForm}
-              className="rounded-xl border border-gray-200 px-4 py-3 text-xs font-bold text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-900 dark:border-slate-700 dark:text-gray-300"
+              className="rounded-xl border border-gray-200 px-4 py-3 text-xs font-bold text-black transition-colors hover:border-gray-300 hover:text-black dark:border-slate-700 dark:text-white"
             >
               Annuler
             </button>

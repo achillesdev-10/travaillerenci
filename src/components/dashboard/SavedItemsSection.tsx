@@ -26,7 +26,7 @@ const TYPE_ACCENT: Record<SavedItem['item_type'], string> = {
   job: 'text-primary bg-primary/10',
   internship: 'text-blue-600 bg-blue-500/10 dark:text-blue-400',
   scholarship: 'text-amber-600 bg-amber-500/10 dark:text-amber-400',
-  exam: 'text-emerald-600 bg-emerald-500/10 dark:text-emerald-400',
+  exam: 'text-brand bg-brand/10 dark:text-brand-accent',
 };
 
 /** Section « Mes sauvegardes » du dashboard candidat (groupée par type). */
@@ -72,10 +72,10 @@ export default function SavedItemsSection() {
     <div className="rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 sm:p-8">
       <div className="mb-5 flex items-center justify-between gap-4">
         <div>
-          <h2 className="text-lg font-bold font-[var(--font-display)] text-gray-900 dark:text-white">
+          <h2 className="text-lg font-bold font-[var(--font-display)] text-black dark:text-white">
             Mes offres sauvegardées
           </h2>
-          <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+          <p className="text-xs text-black dark:text-white mt-1">
             Les opportunités que vous avez mises de côté, groupées par type.
           </p>
         </div>
@@ -95,7 +95,7 @@ export default function SavedItemsSection() {
               <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
             </svg>
           </div>
-          <p className="text-sm text-gray-500 dark:text-slate-400 max-w-md mx-auto mb-5">
+          <p className="text-sm text-black dark:text-white max-w-md mx-auto mb-5">
             Cliquez sur l'étoile d'une offre d'emploi, d'un stage, d'une bourse ou d'un
             concours pour la retrouver ici — sans compte, elle vous redirigera vers la
             connexion.
@@ -114,7 +114,7 @@ export default function SavedItemsSection() {
         if (group.length === 0) return null;
         return (
           <div key={type}>
-            <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white">
+            <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-black dark:text-white">
               <span className={`inline-flex items-center rounded-lg px-2.5 py-1 text-[11px] font-bold ${TYPE_ACCENT[type]}`}>
                 {TYPE_LABEL[type]}
               </span>
@@ -127,10 +127,10 @@ export default function SavedItemsSection() {
                   className="group flex items-center gap-3 rounded-2xl border border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-950 p-3.5 sm:p-4 transition-all hover:border-primary/25 hover:shadow-md"
                 >
                   <Link href={item.url} className="flex-1 min-w-0">
-                    <div className="font-bold text-[14px] text-gray-900 dark:text-white truncate group-hover:text-primary transition-colors">
+                    <div className="font-bold text-[14px] text-black dark:text-white truncate group-hover:text-primary transition-colors">
                       {item.title}
                     </div>
-                    <div className="text-[12px] text-gray-500 dark:text-slate-400 truncate mt-0.5">
+                    <div className="text-[12px] text-black dark:text-white truncate mt-0.5">
                       {item.subtitle}
                     </div>
                     <div className="text-[11px] text-gray-400 mt-1">

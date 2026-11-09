@@ -79,17 +79,17 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
       {/* ===== En-tête ===== */}
       <section className="relative overflow-hidden border-b border-border/40 bg-primary/5 dark:bg-primary/10">
         <div className="container mx-auto px-4 py-12 sm:py-16 relative z-10 max-w-4xl text-center">
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary dark:text-emerald-400 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-5">
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary dark:text-brand-accent px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-5">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
               <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
               <path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6Z" />
             </svg>
             Le blog TravaillerenCi
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-[var(--font-display)] text-gray-900 dark:text-white">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-[var(--font-display)] text-black dark:text-white">
             Conseils & actualités
           </h1>
-          <p className="mt-4 text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-4 text-base sm:text-lg text-black dark:text-white max-w-2xl mx-auto leading-relaxed">
             Des astuces pour vos candidatures, les tendances du marché du travail ivoirien et
             les nouveautés de la plateforme.
           </p>
@@ -100,10 +100,10 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
       <section className="container mx-auto px-4 py-10 sm:py-14 max-w-5xl">
         {tag && (
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-primary/25 bg-primary/5 px-4 py-3">
-            <p className="text-sm text-gray-700 dark:text-gray-200">
+            <p className="text-sm text-black dark:text-gray-200">
               Étiquette&nbsp;: <strong className="font-bold text-primary">#{tag}</strong>
               {total > 0 && (
-                <span className="text-gray-500 dark:text-gray-400">
+                <span className="text-black dark:text-white">
                   {' '}
                   — {total} article{total > 1 ? 's' : ''}
                 </span>
@@ -127,10 +127,10 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
             </div>
             {tag ? (
               <>
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white font-[var(--font-display)]">
+                <h2 className="text-lg sm:text-xl font-bold text-black dark:text-white font-[var(--font-display)]">
                   Aucun article avec l&apos;étiquette «&nbsp;{tag}&nbsp;»
                 </h2>
-                <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-2 max-w-md mx-auto">
+                <p className="text-sm sm:text-base text-black dark:text-white mt-2 max-w-md mx-auto">
                   Essayez une autre étiquette ou parcourez l&apos;ensemble des articles du blog.
                 </p>
                 <Link
@@ -142,10 +142,10 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
               </>
             ) : (
               <>
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white font-[var(--font-display)]">
+                <h2 className="text-lg sm:text-xl font-bold text-black dark:text-white font-[var(--font-display)]">
                   Aucun article publié pour le moment
                 </h2>
-                <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-2 max-w-md mx-auto">
+                <p className="text-sm sm:text-base text-black dark:text-white mt-2 max-w-md mx-auto">
                   Revenez bientôt : nos premiers articles sur l&apos;emploi en Côte d&apos;Ivoire
                   arrivent très vite !
                 </p>
@@ -160,8 +160,8 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
           </div>
         ) : (
           <>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-              <strong className="text-gray-800 dark:text-gray-200">{total}</strong>{' '}
+            <p className="text-sm text-black dark:text-white mb-6">
+              <strong className="text-black dark:text-gray-200">{total}</strong>{' '}
               article{total > 1 ? 's' : ''} publié{total > 1 ? 's' : ''}
             </p>
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
@@ -199,7 +199,7 @@ function BlogCard({ post }: { post: BlogPost }) {
 
       {/* Corps */}
       <div className="flex flex-col flex-1 p-3.5 sm:p-5">
-        <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 font-medium mb-2">
+        <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-black dark:text-white font-medium mb-2">
           <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="4" width="18" height="18" rx="2" />
             <path d="M16 2v4M8 2v4M3 10h18" />
@@ -209,11 +209,11 @@ function BlogCard({ post }: { post: BlogPost }) {
           <span aria-hidden="true">•</span>
           <span className="truncate">{post.author}</span>
         </div>
-        <h2 className="text-[13px] sm:text-lg font-bold text-gray-900 dark:text-white font-[var(--font-display)] leading-snug group-hover:text-primary transition-colors line-clamp-2">
+        <h2 className="text-[13px] sm:text-lg font-bold text-black dark:text-white font-[var(--font-display)] leading-snug group-hover:text-primary transition-colors line-clamp-2">
           {post.title}
         </h2>
         {post.excerpt && (
-          <p className="mt-1.5 sm:mt-2 text-[11.5px] sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-3 flex-1">
+          <p className="mt-1.5 sm:mt-2 text-[11.5px] sm:text-sm text-black dark:text-white leading-relaxed line-clamp-3 flex-1">
             {post.excerpt}
           </p>
         )}

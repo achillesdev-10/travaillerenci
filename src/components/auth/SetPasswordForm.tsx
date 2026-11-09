@@ -52,7 +52,7 @@ export default function SetPasswordForm({ onSuccess }: SetPasswordFormProps) {
 
   if (success) {
     return (
-      <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5 text-sm text-emerald-700 dark:text-emerald-300 flex items-start gap-3">
+      <div className="rounded-2xl border border-brand/30 bg-brand/10 p-5 text-sm text-brand-strong dark:text-brand-accent flex items-start gap-3">
         <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
         </svg>

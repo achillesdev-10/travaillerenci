@@ -259,17 +259,17 @@ export default function CVGeneratorPage() {
           <div className="grid lg:grid-cols-[1fr_420px] lg:items-center gap-8">
             <div>
               <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs font-bold mb-4 border border-emerald-200/60 dark:border-emerald-800/40">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-soft dark:bg-brand/15 text-brand-strong dark:text-brand-accent text-xs font-bold mb-4 border border-brand/25 dark:border-brand/25">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
                   <path d="M9 3h6M10 3v4a2 2 0 0 1-2 2H4M14 3v4a2 2 0 0 0 2 2h4M5 3h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2ZM19 11h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2ZM12 13a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM8 19c0-1.5 1.8-3 4-3s4 1.5 4 3" />
                 </svg>
                 Propulsé par l'IA — Optimisé pour la Côte d'Ivoire
               </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-gray-900 dark:text-white font-[var(--font-display)]">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-black dark:text-white font-[var(--font-display)]">
                 Générateur de CV IA —{' '}
                 <span className="text-primary">travaillerenci</span>
               </h1>
-              <p className="mt-3 text-gray-600 dark:text-gray-300 text-base md:text-lg leading-relaxed">
+              <p className="mt-3 text-black dark:text-white text-base md:text-lg leading-relaxed">
                 Créez un CV professionnel en quelques minutes. Optimisez votre contenu avec l'IA
                 pour maximiser vos chances auprès des recruteurs ivoiriens.
               </p>
@@ -281,29 +281,29 @@ export default function CVGeneratorPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                     </svg>
-                    <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Sauvegarde…</span>
+                    <span className="text-xs font-semibold text-black dark:text-white">Sauvegarde…</span>
                   </>
                 ) : saveState === 'saved' ? (
                   <>
-                    <svg className="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3.5 h-3.5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Sauvegardé automatiquement</span>
+                    <span className="text-xs font-semibold text-brand dark:text-brand-accent">Sauvegardé automatiquement</span>
                   </>
                 ) : (
                   <>
-                    <svg className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3.5 h-3.5 text-gray-400 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a2 2 0 012-2h8l6 6v10a2 2 0 01-2 2H6a2 2 0 01-2-2V5z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 3v6h6M9 13h6M9 17h4" />
                     </svg>
-                    <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Sauvegarde automatique</span>
+                    <span className="text-xs font-semibold text-black dark:text-white">Sauvegarde automatique</span>
                   </>
                 )}
               </div>
               <div className="flex flex-wrap gap-3 mt-6">
                 <button
                   onClick={resetCV}
-                className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all shadow-sm inline-flex items-center gap-2"
+                className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold text-black dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all shadow-sm inline-flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -313,7 +313,7 @@ export default function CVGeneratorPage() {
               <button
                 onClick={exportPDF}
                 disabled={isExporting || !hydrated}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-emerald-500 text-white text-sm font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed transition-all inline-flex items-center gap-2"
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-brand text-white text-sm font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed transition-all inline-flex items-center gap-2"
               >
                 {isExporting ? (
                   <>
@@ -343,7 +343,7 @@ export default function CVGeneratorPage() {
                 sizes="(min-width: 1024px) 420px, 100vw"
                 className="object-cover object-center"
               />
-              <div className="absolute inset-0 bg-gradient-to-tr from-emerald-950/60 via-transparent to-transparent" aria-hidden="true" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-brand-strong/60 via-transparent to-transparent" aria-hidden="true" />
             </div>
           </div>
         </div>
@@ -356,8 +356,8 @@ export default function CVGeneratorPage() {
             onClick={() => setMode('cv')}
             className={`flex-1 sm:flex-none px-5 py-2.5 rounded-lg text-sm font-bold transition-all inline-flex items-center justify-center gap-2 ${
               mode === 'cv'
-                ? 'bg-white dark:bg-slate-900 text-gray-900 dark:text-white shadow'
-                : 'text-gray-600 dark:text-gray-400'
+                ? 'bg-white dark:bg-slate-900 text-black dark:text-white shadow'
+                : 'text-black dark:text-white'
             }`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -370,8 +370,8 @@ export default function CVGeneratorPage() {
             onClick={() => setMode('letter')}
             className={`flex-1 sm:flex-none px-5 py-2.5 rounded-lg text-sm font-bold transition-all inline-flex items-center justify-center gap-2 ${
               mode === 'letter'
-                ? 'bg-white dark:bg-slate-900 text-gray-900 dark:text-white shadow'
-                : 'text-gray-600 dark:text-gray-400'
+                ? 'bg-white dark:bg-slate-900 text-black dark:text-white shadow'
+                : 'text-black dark:text-white'
             }`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -398,8 +398,8 @@ export default function CVGeneratorPage() {
               onClick={() => setActiveTab('edit')}
               className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-bold transition-all inline-flex items-center justify-center gap-2 ${
                 activeTab === 'edit'
-                  ? 'bg-white dark:bg-slate-900 text-gray-900 dark:text-white shadow'
-                  : 'text-gray-600 dark:text-gray-400'
+                  ? 'bg-white dark:bg-slate-900 text-black dark:text-white shadow'
+                  : 'text-black dark:text-white'
               }`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -411,8 +411,8 @@ export default function CVGeneratorPage() {
               onClick={() => setActiveTab('preview')}
               className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-bold transition-all inline-flex items-center justify-center gap-2 ${
                 activeTab === 'preview'
-                  ? 'bg-white dark:bg-slate-900 text-gray-900 dark:text-white shadow'
-                  : 'text-gray-600 dark:text-gray-400'
+                  ? 'bg-white dark:bg-slate-900 text-black dark:text-white shadow'
+                  : 'text-black dark:text-white'
               }`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -433,9 +433,9 @@ export default function CVGeneratorPage() {
               <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50/60 p-4 dark:border-blue-900/30 dark:bg-blue-950/20">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-base">✉️</span>
-                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">Lettre de motivation</h3>
+                  <h3 className="text-sm font-bold text-black dark:text-white">Lettre de motivation</h3>
                 </div>
-                <p className="text-[12px] text-gray-600 dark:text-gray-300 mb-3">
+                <p className="text-[12px] text-black dark:text-white mb-3">
                   Vos infos du CV sont automatiquement utilisées pour pré-remplir la lettre. Ajoutez le nom de l'entreprise et le poste visé pour générer une lettre personnalisée.
                 </p>
                 <button
@@ -454,7 +454,7 @@ export default function CVGeneratorPage() {
           <div className={`lg:col-span-7 ${activeTab === 'edit' ? 'hidden lg:block' : ''}`}>
             <div className="lg:sticky lg:top-24">
               <div className="bg-gray-100 dark:bg-slate-800/50 rounded-2xl p-3 md:p-6 border border-gray-200 dark:border-slate-800 shadow-inner">
-                <div className="text-center text-xs text-gray-500 dark:text-gray-400 mb-3 font-semibold">
+                <div className="text-center text-xs text-black dark:text-white mb-3 font-semibold">
                   Format A4 — Aperçu en temps réel
                 </div>
                 <div

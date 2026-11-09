@@ -36,7 +36,7 @@ export default function PasswordInput({
       <label
         htmlFor={inputId}
         className={cn(
-          'block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1',
+          'block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1',
           labelClassName,
         )}
       >
@@ -52,7 +52,7 @@ export default function PasswordInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className={cn(
-            'w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary pr-11',
+            'w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary pr-11',
             inputClassName,
           )}
         />
@@ -62,7 +62,7 @@ export default function PasswordInput({
           aria-label={visible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
           aria-pressed={visible}
           className={cn(
-            'absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors',
+            'absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg text-gray-400 hover:text-black dark:hover:text-gray-200 transition-colors',
             buttonClassName,
           )}
         >

@@ -17,49 +17,49 @@ export default function MentionsLegalesPage() {
           Retour à l&apos;accueil
         </Link>
 
-        <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white font-[var(--font-display)] mb-6">
+        <h1 className="text-3xl sm:text-4xl font-black text-black dark:text-white font-[var(--font-display)] mb-6">
           Mentions légales
         </h1>
 
         <div className="prose prose-gray dark:prose-invert max-w-none space-y-8">
           <section>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Éditeur du site</h2>
-            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+            <h2 className="text-xl font-bold text-black dark:text-white">Éditeur du site</h2>
+            <p className="text-black dark:text-white leading-relaxed">
               <strong>TravaillerenCi</strong><br />
               Site d&apos;information sur l&apos;emploi, les stages, les bourses et les concours administratifs en Côte d&apos;Ivoire.
             </p>
-            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+            <p className="text-black dark:text-white leading-relaxed">
               Email de contact : <a href="mailto:achillesdev10@gmail.com" className="text-primary hover:underline">achillesdev10@gmail.com</a>
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Hébergeur</h2>
-            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+            <h2 className="text-xl font-bold text-black dark:text-white">Hébergeur</h2>
+            <p className="text-black dark:text-white leading-relaxed">
               Le site est hébergé par Vercel Inc., 349 S Biscayne Blvd, Suite 900, Miami, FL 33131, États-Unis.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Propriété intellectuelle</h2>
-            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+            <h2 className="text-xl font-bold text-black dark:text-white">Propriété intellectuelle</h2>
+            <p className="text-black dark:text-white leading-relaxed">
               L&apos;ensemble du contenu de ce site (textes, images, graphismes, logos, icônes, sons, logiciels) est la propriété exclusive de TravaillerenCi ou de ses partenaires et est protégé par les lois internationales relatives à la propriété intellectuelle.
             </p>
-            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+            <p className="text-black dark:text-white leading-relaxed">
               Toute reproduction, représentation, modification, publication, transmission ou dénaturation du site ou de son contenu, par quelque procédé que ce soit, est interdite sans autorisation préalable.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Données personnelles</h2>
-            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+            <h2 className="text-xl font-bold text-black dark:text-white">Données personnelles</h2>
+            <p className="text-black dark:text-white leading-relaxed">
               Conformément à la loi ivoirienne n°2013-450 relative à la protection des données à caractère personnel, vous disposez de droits sur vos données. Pour plus d&apos;informations, consultez notre <Link href="/confidentialite" className="text-primary hover:underline">Politique de confidentialité</Link>.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Cookies</h2>
-            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+            <h2 className="text-xl font-bold text-black dark:text-white">Cookies</h2>
+            <p className="text-black dark:text-white leading-relaxed">
               Notre site utilise des cookies pour améliorer l&apos;expérience utilisateur. Consultez notre <Link href="/cookies" className="text-primary hover:underline">Politique de cookies</Link> pour en savoir plus.
             </p>
           </section>

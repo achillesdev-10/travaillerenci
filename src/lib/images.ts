@@ -72,9 +72,9 @@ export const LOCAL_IMAGES = {
 // blocs photo quand l'image ne s'est pas encore chargée (ou a échoué).
 // -----------------------------------------------------------------------------
 export const IMAGE_FALLBACKS: Record<string, string> = {
-  hero: 'from-emerald-700 via-emerald-600 to-teal-600',
+  hero: 'from-brand-strong via-brand to-brand-strong',
   jobs: 'from-orange-500 via-orange-600 to-amber-600',
-  scholarship: 'from-emerald-600 via-emerald-700 to-teal-700',
+  scholarship: 'from-brand via-brand to-brand-strong',
   concours: 'from-indigo-600 via-indigo-700 to-blue-700',
   cv: 'from-purple-600 via-purple-700 to-fuchsia-700',
   blog: 'from-rose-500 via-rose-600 to-pink-600',

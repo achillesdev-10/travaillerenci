@@ -56,7 +56,7 @@ const QUICK_ACTIONS = [
       </svg>
     ),
     href: '/blog',
-    color: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+    color: 'bg-brand/10 text-brand dark:text-brand-accent',
   },
 ];
 
@@ -105,16 +105,16 @@ export default function CandidateDashboardPage() {
                   size={48}
                 />
               ) : (
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-primary/20 shrink-0" />
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-brand-accent flex items-center justify-center text-white font-black text-lg shadow-lg shadow-primary/20 shrink-0" />
               )}
               <div>
-                <h1 className="text-lg font-bold font-[var(--font-display)] text-gray-900 dark:text-white">
+                <h1 className="text-lg font-bold font-[var(--font-display)] text-black dark:text-white">
                   {hydrated && user ? `Bonjour, ${firstName} !` : 'Chargement…'}
                 </h1>
-                <p className="text-xs text-gray-500 dark:text-slate-400">
+                <p className="text-xs text-black dark:text-white">
                   {user ? (
                     <span className="inline-flex items-center gap-1.5">
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
                       Espace candidat sécurisé
                     </span>
                   ) : (
@@ -136,7 +136,7 @@ export default function CandidateDashboardPage() {
               </Link>
               <Link
                 href="/generateur-de-cv"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-xs font-bold text-black dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -162,7 +162,7 @@ export default function CandidateDashboardPage() {
               <h2 className="text-xl font-bold font-[var(--font-display)] mb-2">
                 Sécurisez votre compte
               </h2>
-              <p className="text-sm text-gray-600 dark:text-slate-400 leading-relaxed">
+              <p className="text-sm text-black dark:text-white leading-relaxed">
                 Votre compte a été migré depuis l'ancien système (ou créé via Google)
                 et ne possède pas encore de mot de passe. Définissez-en un pour vous
                 connecter par email et protéger vos données.
@@ -180,7 +180,7 @@ export default function CandidateDashboardPage() {
 
         {/* ===== Actions rapides ===== */}
         <section>
-          <h2 className="text-sm font-bold font-[var(--font-display)] text-gray-900 dark:text-white mb-3 uppercase tracking-wider">
+          <h2 className="text-sm font-bold font-[var(--font-display)] text-black dark:text-white mb-3 uppercase tracking-wider">
             Accès rapide
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -193,10 +193,10 @@ export default function CandidateDashboardPage() {
                 <div className={`w-10 h-10 rounded-xl ${action.color} flex items-center justify-center mb-3`}>
                   {action.icon}
                 </div>
-                <h3 className="font-bold text-sm text-gray-900 dark:text-white mb-0.5">
+                <h3 className="font-bold text-sm text-black dark:text-white mb-0.5">
                   {action.title}
                 </h3>
-                <p className="text-[11px] text-gray-500 dark:text-slate-400 leading-relaxed">
+                <p className="text-[11px] text-black dark:text-white leading-relaxed">
                   {action.description}
                 </p>
               </Link>
@@ -236,18 +236,18 @@ export default function CandidateDashboardPage() {
 
             {/* Statut du compte */}
             <div className="rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
-              <h3 className="text-sm font-bold font-[var(--font-display)] text-gray-900 dark:text-white mb-3">
+              <h3 className="text-sm font-bold font-[var(--font-display)] text-black dark:text-white mb-3">
                 Mon compte
               </h3>
               <ul className="space-y-2.5 text-xs">
                 <li className="flex items-center justify-between">
-                  <span className="text-gray-500 dark:text-slate-400">Email</span>
-                  <span className="font-semibold text-gray-900 dark:text-white truncate max-w-[180px]">
+                  <span className="text-black dark:text-white">Email</span>
+                  <span className="font-semibold text-black dark:text-white truncate max-w-[180px]">
                     {user?.email || '—'}
                   </span>
                 </li>
                 <li className="flex items-center justify-between">
-                  <span className="text-gray-500 dark:text-slate-400">Rôle</span>
+                  <span className="text-black dark:text-white">Rôle</span>
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-[11px] font-bold">
                     <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -257,8 +257,8 @@ export default function CandidateDashboardPage() {
                   </span>
                 </li>
                 <li className="flex items-center justify-between">
-                  <span className="text-gray-500 dark:text-slate-400">Sécurité</span>
-                  <span className="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold">
+                  <span className="text-black dark:text-white">Sécurité</span>
+                  <span className="inline-flex items-center gap-1.5 text-brand dark:text-brand-accent font-bold">
                     <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                     </svg>
@@ -282,7 +282,7 @@ export default function CandidateDashboardPage() {
 
             {/* Prochaines étapes */}
             <div className="rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
-              <h3 className="text-sm font-bold font-[var(--font-display)] text-gray-900 dark:text-white mb-3">
+              <h3 className="text-sm font-bold font-[var(--font-display)] text-black dark:text-white mb-3">
                 Prochaines étapes
               </h3>
               <ol className="space-y-3">
@@ -298,7 +298,7 @@ export default function CandidateDashboardPage() {
                     </span>
                     <Link
                       href={step.href}
-                      className="flex-1 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-primary transition-colors"
+                      className="flex-1 text-xs font-semibold text-black dark:text-white hover:text-primary transition-colors"
                     >
                       {step.label}
                     </Link>

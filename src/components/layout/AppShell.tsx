@@ -25,8 +25,8 @@ export default function AppShell({
   return (
     <>
       <Header />
-      <main className="flex-1">{children}</main>
-      <div className="bg-white pb-[calc(5rem_+_env(safe-area-inset-bottom))] dark:bg-slate-950 lg:pb-0">
+      <div className="flex flex-1 flex-col bg-white pb-[calc(4.5rem_+_env(safe-area-inset-bottom))] dark:bg-slate-950 lg:pb-0">
+        <main className="flex-1">{children}</main>
         <Footer />
       </div>
       <MobileBottomNav />

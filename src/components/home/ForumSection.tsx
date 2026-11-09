@@ -68,7 +68,7 @@ const QUESTIONS: ForumQuestion[] = [
     replies: 6,
     views: 298,
     category: 'Bourses',
-    categoryColor: 'bg-emerald-100 text-emerald-700',
+    categoryColor: 'bg-brand-soft text-brand-strong',
     answer: 'Consultez régulièrement la section Bourses de TravaillerEnCi. Les bourses Chevening, Erasmus Mundus, et celles du gouvernement chinois/sud-coréen sont parmi les plus accessibles.',
   },
   {
@@ -107,14 +107,14 @@ function QuestionRow({
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="text-[12px] font-bold text-gray-900 dark:text-white leading-snug line-clamp-1">
+            <h3 className="text-[12px] font-bold text-black dark:text-white leading-snug line-clamp-1">
               {q.question}
             </h3>
             <span className={`shrink-0 inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-bold ${q.categoryColor}`}>
               {q.category}
             </span>
           </div>
-          <div className="flex items-center gap-2 mt-1 text-[10px] text-gray-500 dark:text-gray-400">
+          <div className="flex items-center gap-2 mt-1 text-[10px] text-black dark:text-white">
             <span>{q.author}</span>
             <span>{q.date}</span>
             <span className="inline-flex items-center gap-0.5">
@@ -155,13 +155,13 @@ export default function ForumSection() {
     <section className="container mx-auto px-4 mt-10 sm:mt-14 max-w-4xl">
       <div className="flex items-end justify-between gap-3 mb-3">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-widest text-primary dark:text-emerald-400 mb-1">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-primary dark:text-brand-accent mb-1">
             Questions & Réponses
           </p>
-          <h2 className="text-base sm:text-xl font-bold text-gray-900 dark:text-white font-[var(--font-display)] leading-tight">
+          <h2 className="text-base sm:text-xl font-bold text-black dark:text-white font-[var(--font-display)] leading-tight">
             La communauté en parle
           </h2>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-xs text-black dark:text-white mt-1">
             Tout le monde peut consulter. <Link href="/register" className="text-primary font-semibold hover:underline">Inscrivez-vous</Link> pour participer.
           </p>
         </div>

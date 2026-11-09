@@ -8,7 +8,7 @@ interface ScrollingOffersProps {
 function contractBadge(type?: string | null) {
   if (!type) return null;
   const colors: Record<string, string> = {
-    CDI: 'bg-emerald-100 text-emerald-700',
+    CDI: 'bg-brand-soft text-brand-strong',
     CDD: 'bg-orange-100 text-orange-700',
     Stage: 'bg-sky-100 text-sky-700',
     Alternance: 'bg-purple-100 text-purple-700',
@@ -16,7 +16,7 @@ function contractBadge(type?: string | null) {
     'Temps partiel': 'bg-amber-100 text-amber-700',
   };
   return (
-    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${colors[type] || 'bg-gray-100 text-gray-700'}`}>
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${colors[type] || 'bg-gray-100 text-black'}`}>
       {type}
     </span>
   );
@@ -35,10 +35,10 @@ function OfferCard({ offer }: { offer: JobOfferSchema }) {
         </h3>
         {contractBadge(offer.contract_type)}
       </div>
-      <p className="text-[11px] text-gray-700 dark:text-gray-400 mb-2 line-clamp-1">
+      <p className="text-[11px] text-black dark:text-white mb-2 line-clamp-1">
         {offer.company || 'Entreprise'}
       </p>
-      <div className="flex items-center gap-2 text-[10px] text-gray-600 dark:text-gray-500">
+      <div className="flex items-center gap-2 text-[10px] text-black dark:text-white">
         {offer.location && (
           <span className="inline-flex items-center gap-1">
             <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">

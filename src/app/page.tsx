@@ -88,7 +88,7 @@ const QUICK_LINKS = [
     label: 'Bourses d\u2019études',
     desc: 'Étudier en CI & à l\u2019étranger',
     href: '/bourses',
-    color: 'bg-emerald-600',
+    color: 'bg-brand',
     image: IMAGES.scholarship,
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 sm:h-7 sm:w-7 drop-shadow">
@@ -302,12 +302,12 @@ export default async function HomePage() {
       {/* ======================================================================== */}
       {/*   HERO — Mobile-first : texte lisible, peu de padding vertical            */}
       {/* ======================================================================== */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-orange-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 pt-8 pb-8 sm:pt-14 sm:pb-10 border-b border-border/40">
+      <section className="relative overflow-hidden bg-gradient-to-br from-brand-soft via-white to-orange-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 pt-8 pb-8 sm:pt-14 sm:pb-10 border-b border-border/40">
         <div className="container mx-auto px-4 relative z-10 max-w-6xl">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Colonne texte */}
             <div className="text-center lg:text-left animate-fade-in-up">
-              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary dark:text-emerald-400 px-3.5 py-1.5 rounded-full text-[12px] sm:text-sm font-semibold mb-4 sm:mb-5">
+              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary dark:text-brand-accent px-3.5 py-1.5 rounded-full text-[12px] sm:text-sm font-semibold mb-4 sm:mb-5">
                 <span className="relative flex h-2 w-2 shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
@@ -315,19 +315,19 @@ export default async function HomePage() {
                 Plateforme 100% ivoirienne
               </div>
 
-              <h1 className="text-[28px] leading-[1.15] sm:text-4xl lg:text-[44px] xl:text-5xl font-extrabold mb-3 sm:mb-5 font-[var(--font-display)] text-gray-900 dark:text-white">
+              <h1 className="text-[28px] leading-[1.15] sm:text-4xl lg:text-[44px] xl:text-5xl font-extrabold mb-3 sm:mb-5 font-[var(--font-display)] text-black dark:text-white">
                 Travailleren<span className="text-primary">Ci</span>
-                <span className="block text-gray-800 dark:text-gray-200 text-[22px] sm:text-3xl lg:text-[32px] mt-1 sm:mt-2">
+                <span className="block text-black dark:text-gray-200 text-[22px] sm:text-3xl lg:text-[32px] mt-1 sm:mt-2">
                   Trouvez un job qui <span className="text-primary">vaut le coup</span>
                 </span>
               </h1>
 
-              <p className="text-[15px] sm:text-lg text-gray-600 dark:text-gray-300 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                <strong className="text-gray-900 dark:text-white">
+              <p className="text-[15px] sm:text-lg text-black dark:text-white max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                <strong className="text-black dark:text-white">
                   TravaillerEnCi vous aide à trouver des opportunités professionnelles en Côte
                   d&apos;Ivoire.
                 </strong>{' '}
-                Des <strong className="text-gray-900 dark:text-white">offres vérifiées</strong>, des
+                Des <strong className="text-black dark:text-white">offres vérifiées</strong>, des
                 entreprises de confiance, et zéro spam. Postulez simplement — on s&apos;occupe du
                 reste.
               </p>
@@ -349,7 +349,7 @@ export default async function HomePage() {
                   <li key={feature.label}>
                     <Link
                       href={feature.href}
-                      className="inline-flex items-center rounded-full border border-gray-200 bg-white/80 px-3 py-1.5 text-[12px] sm:text-[13px] font-semibold text-gray-700 backdrop-blur transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900/80 dark:text-gray-200"
+                      className="inline-flex items-center rounded-full border border-gray-200 bg-white/80 px-3 py-1.5 text-[12px] sm:text-[13px] font-semibold text-black backdrop-blur transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900/80 dark:text-gray-200"
                     >
                       {feature.label}
                     </Link>
@@ -371,13 +371,13 @@ export default async function HomePage() {
                 </Link>
                 <Link
                   href="/jobs"
-                  className="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white/80 px-5 py-3 text-sm font-bold text-gray-800 backdrop-blur transition-colors hover:border-primary/50 hover:text-primary dark:border-slate-700 dark:bg-slate-900/80 dark:text-gray-100"
+                  className="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white/80 px-5 py-3 text-sm font-bold text-black backdrop-blur transition-colors hover:border-primary/50 hover:text-primary dark:border-slate-700 dark:bg-slate-900/80 dark:text-gray-100"
                 >
                   Voir les offres
                 </Link>
                 <Link
                   href="/jobs/today"
-                  className="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white/80 px-5 py-3 text-sm font-bold text-gray-800 backdrop-blur transition-colors hover:border-primary/50 hover:text-primary dark:border-slate-700 dark:bg-slate-900/80 dark:text-gray-100"
+                  className="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white/80 px-5 py-3 text-sm font-bold text-black backdrop-blur transition-colors hover:border-primary/50 hover:text-primary dark:border-slate-700 dark:bg-slate-900/80 dark:text-gray-100"
                 >
                   Offres du jour
                 </Link>
@@ -395,19 +395,19 @@ export default async function HomePage() {
                   sizes="(min-width: 1024px) 520px, 100vw"
                   className="object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-tr from-emerald-950/70 via-emerald-900/25 to-transparent" aria-hidden="true" />
+                <div className="absolute inset-0 bg-gradient-to-tr from-brand-strong/70 via-brand-strong/25 to-transparent" aria-hidden="true" />
               </div>
 
               {/* Badge : offres vérifiées */}
               <div className="absolute -left-5 top-8 flex items-center gap-2.5 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur px-4 py-3 shadow-lg border border-border animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-soft text-brand dark:bg-brand/20 dark:text-brand-accent">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" className="h-4.5 w-4.5" aria-hidden="true">
                     <path d="M20 6 9 17l-5-5" />
                   </svg>
                 </span>
                 <div>
-                  <div className="text-sm font-extrabold text-gray-900 dark:text-white leading-none">Offres vérifiées</div>
-                  <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Zéro spam, que du sérieux</div>
+                  <div className="text-sm font-extrabold text-black dark:text-white leading-none">Offres vérifiées</div>
+                  <div className="text-[11px] text-black dark:text-white mt-0.5">Zéro spam, que du sérieux</div>
                 </div>
               </div>
 
@@ -421,8 +421,8 @@ export default async function HomePage() {
                   </svg>
                 </span>
                 <div>
-                  <div className="text-sm font-extrabold text-gray-900 dark:text-white leading-none">Concours & bourses</div>
-                  <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">ENA, INFAS, universités…</div>
+                  <div className="text-sm font-extrabold text-black dark:text-white leading-none">Concours & bourses</div>
+                  <div className="text-[11px] text-black dark:text-white mt-0.5">ENA, INFAS, universités…</div>
                 </div>
               </div>
             </div>
@@ -434,10 +434,10 @@ export default async function HomePage() {
           <div className="mt-8 sm:mt-10 max-w-4xl mx-auto">
             <SearchBar targetPath="/jobs" />
 
-            <div className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-3 sm:gap-5 text-[12px] sm:text-sm text-gray-500 dark:text-gray-400">
+            <div className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-3 sm:gap-5 text-[12px] sm:text-sm text-black dark:text-white">
               <Stat
                 icon={
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-emerald-500">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-brand">
                     <path d="M20 6 9 17l-5-5" />
                   </svg>
                 }
@@ -502,7 +502,7 @@ export default async function HomePage() {
             value={bourseRows.total}
             suffix=""
             label="Bourses d'études"
-            color="bg-emerald-600"
+            color="bg-brand"
             href="/bourses"
             icon={
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
@@ -621,7 +621,7 @@ export default async function HomePage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/25 to-transparent" aria-hidden="true" />
               <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-300 bg-white/15 backdrop-blur px-2 py-0.5 rounded-full inline-block mb-1.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-brand-accent bg-white/15 backdrop-blur px-2 py-0.5 rounded-full inline-block mb-1.5">
                   Voir les offres
                 </span>
                 <div className="font-[var(--font-display)] text-sm sm:text-base font-extrabold text-white leading-tight drop-shadow">
@@ -651,13 +651,13 @@ export default async function HomePage() {
               className="group flex items-center gap-2.5 rounded-xl border border-gray-100 bg-white px-3.5 py-3 shadow-sm transition-all duration-200 hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md animate-fade-in-up dark:border-slate-800 dark:bg-slate-900"
               style={{ animationDelay: `${i * 40}ms` }}
             >
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary dark:text-emerald-400">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary dark:text-brand-accent">
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                   <circle cx="12" cy="10" r="3" />
                 </svg>
               </span>
-              <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-200 group-hover:text-primary transition-colors truncate">
+              <span className="text-[13px] font-semibold text-black dark:text-gray-200 group-hover:text-primary transition-colors truncate">
                 {city.name}
               </span>
             </Link>
@@ -685,10 +685,10 @@ export default async function HomePage() {
       <section className="container mx-auto px-4 pb-4 sm:pb-8 max-w-6xl mt-10 sm:mt-14 py-8 sm:py-10 rounded-3xl bg-orange-50/60 dark:bg-orange-950/20">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 sm:gap-4 mt-10 sm:mt-14 mb-4 sm:mb-6">
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white font-[var(--font-display)]">
+            <h2 className="text-xl sm:text-2xl font-bold text-black dark:text-white font-[var(--font-display)]">
               Dernières offres
             </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-sm text-black dark:text-white mt-1">
               Les dernières opportunités publiées sur TravaillerenCi
             </p>
           </div>
@@ -746,10 +746,10 @@ export default async function HomePage() {
                 </span>
               </div>
               <div className="p-4 sm:p-5">
-                <h3 className="font-[var(--font-display)] text-base sm:text-lg font-extrabold text-gray-900 dark:text-white mb-1.5">
+                <h3 className="font-[var(--font-display)] text-base sm:text-lg font-extrabold text-black dark:text-white mb-1.5">
                   {step.title}
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{step.desc}</p>
+                <p className="text-sm text-black dark:text-white leading-relaxed">{step.desc}</p>
                 <Link
                   href={step.href}
                   className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:gap-2.5 transition-all"
@@ -782,7 +782,7 @@ export default async function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-900/70 to-slate-900/40" aria-hidden="true" />
           <div className="relative flex flex-col lg:flex-row items-center gap-6 lg:gap-10 px-6 py-10 sm:p-12">
             <div className="text-center lg:text-left flex-1">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-400 mb-2">Suivez-nous</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-brand-accent mb-2">Suivez-nous</p>
               <h2 className="font-[var(--font-display)] text-2xl sm:text-3xl font-extrabold leading-tight">
                 Rejoignez la communauté
               </h2>
@@ -800,16 +800,16 @@ export default async function HomePage() {
       {/* ======================================================================== */}
       <section className="container mx-auto px-4 pb-16 sm:pb-24 max-w-6xl" aria-labelledby="pourquoi-compte">
         <div className="rounded-3xl border border-gray-200 bg-white p-6 sm:p-10 dark:border-slate-800 dark:bg-slate-900">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-primary dark:text-emerald-400 mb-1">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-primary dark:text-brand-accent mb-1">
             Votre espace personnel
           </p>
           <h2
             id="pourquoi-compte"
-            className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white font-[var(--font-display)] leading-tight mb-2"
+            className="text-lg sm:text-2xl font-bold text-black dark:text-white font-[var(--font-display)] leading-tight mb-2"
           >
             Pourquoi créer un compte ?
           </h2>
-          <p className="max-w-2xl text-sm text-gray-600 dark:text-gray-300 mb-6">
+          <p className="max-w-2xl text-sm text-black dark:text-white mb-6">
             Gratuitement, votre compte transforme la recherche en routine efficace : vous ne
             repartez jamais les mains vides.
           </p>
@@ -827,10 +827,10 @@ export default async function HomePage() {
                   {benefit.icon}
                 </span>
                 <span>
-                  <span className="block text-sm font-bold text-gray-900 dark:text-white">
+                  <span className="block text-sm font-bold text-black dark:text-white">
                     {benefit.title}
                   </span>
-                  <span className="mt-0.5 block text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                  <span className="mt-0.5 block text-xs leading-relaxed text-black dark:text-white">
                     {benefit.description}
                   </span>
                 </span>
@@ -847,7 +847,7 @@ export default async function HomePage() {
             </Link>
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-6 py-3 text-sm font-bold text-gray-700 transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:text-gray-200"
+              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-6 py-3 text-sm font-bold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:text-gray-200"
             >
               J'ai déjà un compte
             </Link>
@@ -912,10 +912,10 @@ function SectionHeading({
   return (
     <div className="flex items-end justify-between gap-3 mb-4 sm:mb-5">
       <div>
-        <p className="text-[11px] font-bold uppercase tracking-widest text-primary dark:text-emerald-400 mb-1">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-primary dark:text-brand-accent mb-1">
           {kicker}
         </p>
-        <h2 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white font-[var(--font-display)] leading-tight">
+        <h2 className="text-lg sm:text-2xl font-bold text-black dark:text-white font-[var(--font-display)] leading-tight">
           {title}
         </h2>
       </div>
@@ -956,11 +956,11 @@ function HomeBlogCard({
         />
       </div>
       <div className="flex flex-1 flex-col p-3 sm:p-4">
-        <h3 className="font-bold text-[12.5px] sm:text-sm leading-snug text-gray-900 line-clamp-2 transition-colors group-hover:text-primary">
+        <h3 className="font-bold text-[12.5px] sm:text-sm leading-snug text-black line-clamp-2 transition-colors group-hover:text-primary">
           {post.title}
         </h3>
         {post.excerpt && (
-          <p className="mt-1.5 flex-1 text-[11px] sm:text-xs text-gray-500 line-clamp-2 leading-relaxed">
+          <p className="mt-1.5 flex-1 text-[11px] sm:text-xs text-black line-clamp-2 leading-relaxed">
             {post.excerpt}
           </p>
         )}
@@ -997,11 +997,11 @@ function HomeStat({
         <span aria-hidden="true">{icon}</span>
       </span>
       <div className="min-w-0">
-        <div className="text-lg sm:text-2xl font-black text-gray-900 dark:text-white font-[var(--font-display)] leading-none tabular-nums">
+        <div className="text-lg sm:text-2xl font-black text-black dark:text-white font-[var(--font-display)] leading-none tabular-nums">
           {value.toLocaleString('fr-FR')}
           {suffix}
         </div>
-        <div className="mt-1 text-[11px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 truncate">
+        <div className="mt-1 text-[11px] sm:text-xs font-medium text-black dark:text-white truncate">
           {label}
         </div>
       </div>
@@ -1024,7 +1024,7 @@ function HomeStat({
 
 function Stat({ icon, label }: { icon: ReactNode; label: string }) {
   return (
-    <span className="inline-flex items-center gap-1.5 bg-white/70 dark:bg-slate-900/75 backdrop-blur px-2.5 sm:px-3 py-1.5 rounded-full border border-border shadow-sm text-gray-700 dark:text-gray-300">
+    <span className="inline-flex items-center gap-1.5 bg-white/70 dark:bg-slate-900/75 backdrop-blur px-2.5 sm:px-3 py-1.5 rounded-full border border-border shadow-sm text-black dark:text-white">
       <span aria-hidden="true">{icon}</span>
       {label}
     </span>
@@ -1036,7 +1036,7 @@ function EmptyState() {
     <div className="bg-white dark:bg-slate-900 border border-dashed border-border rounded-2xl p-8 sm:p-12 text-center">
       <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gray-50 dark:bg-slate-800 flex items-center justify-center mb-5">
         <svg
-          className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-gray-500"
+          className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-white"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -1049,10 +1049,10 @@ function EmptyState() {
           <path d="m21 21-4.3-4.3" />
         </svg>
       </div>
-      <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2 font-[var(--font-display)]">
+      <h3 className="text-lg sm:text-xl font-bold text-black dark:text-white mb-2 font-[var(--font-display)]">
         Aucune offre publiée pour le moment
       </h3>
-      <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
+      <p className="text-sm sm:text-base text-black dark:text-white mb-6 max-w-md mx-auto">
         Essayez avec un autre mot-clé, une ville voisine, ou supprimez certains filtres.
       </p>
       <Link

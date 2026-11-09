@@ -264,7 +264,7 @@ export default async function JobDetailPage({ params }: PageProps) {
           </div>
 
           <nav aria-label="Fil d'Ariane" className="mb-4 sm:mb-6">
-            <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] sm:text-sm text-gray-500 dark:text-gray-400">
+            <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] sm:text-sm text-black dark:text-white">
               <li>
                 <Link href="/" className="hover:text-primary hover:underline">
                   Accueil
@@ -280,7 +280,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                 </Link>
               </li>
               <li aria-hidden="true">/</li>
-              <li className="text-gray-700 dark:text-gray-200 font-medium truncate max-w-[60vw]">
+              <li className="text-black dark:text-gray-200 font-medium truncate max-w-[60vw]">
                 {job.title}
               </li>
             </ol>
@@ -290,7 +290,7 @@ export default async function JobDetailPage({ params }: PageProps) {
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-3">
                 {job.is_verified ? (
-                  <span className="inline-flex items-center gap-1.5 bg-primary/10 text-primary dark:text-emerald-400 px-3 py-1 rounded-full text-xs sm:text-sm font-bold">
+                  <span className="inline-flex items-center gap-1.5 bg-primary/10 text-primary dark:text-brand-accent px-3 py-1 rounded-full text-xs sm:text-sm font-bold">
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
                       <path d="M9 12l2 2 4-4" />
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
@@ -298,24 +298,24 @@ export default async function JobDetailPage({ params }: PageProps) {
                     Offre vérifiée TravaillerEnCi
                   </span>
                 ) : (
-                  <span className="inline-flex items-center bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-gray-400 px-3 py-1 rounded-full text-xs sm:text-sm font-semibold">
+                  <span className="inline-flex items-center bg-gray-100 dark:bg-slate-800 text-black dark:text-white px-3 py-1 rounded-full text-xs sm:text-sm font-semibold">
                     Non vérifiée
                   </span>
                 )}
                 <span className="inline-flex items-center bg-accent/10 text-accent dark:text-blue-400 px-3 py-1 rounded-full text-xs sm:text-sm font-bold">
                   {job.contract_type}
                 </span>
-                <span className="text-[11px] sm:text-xs text-gray-400 dark:text-gray-500 ml-auto sm:ml-0">
+                <span className="text-[11px] sm:text-xs text-gray-400 dark:text-white ml-auto sm:ml-0">
                   Publiée le {formatDate(job.created_at)}
                 </span>
               </div>
 
-              <h1 className="text-[26px] sm:text-3xl lg:text-4xl font-extrabold text-gray-900 dark:text-white leading-tight mb-2 font-[var(--font-display)]">
+              <h1 className="text-[26px] sm:text-3xl lg:text-4xl font-extrabold text-black dark:text-white leading-tight mb-2 font-[var(--font-display)]">
                 {job.title}
               </h1>
 
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-4 sm:mb-5 text-[14px] sm:text-base">
-                <div className="text-primary dark:text-emerald-400 font-bold">
+                <div className="text-primary dark:text-brand-accent font-bold">
                   {/* Maillage offre → entreprise (§33) : toutes les offres de la société. */}
                   <Link
                     href={`/jobs?q=${encodeURIComponent(job.company)}`}
@@ -325,8 +325,8 @@ export default async function JobDetailPage({ params }: PageProps) {
                     {job.company}
                   </Link>
                 </div>
-                <div className="inline-flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
-                  <svg className="w-4 h-4 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <div className="inline-flex items-center gap-1.5 text-black dark:text-white">
+                  <svg className="w-4 h-4 text-gray-400 dark:text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                     <circle cx="12" cy="10" r="3" />
                   </svg>
@@ -350,7 +350,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                   rel="noopener noreferrer"
                   data-share="offre"
                   data-share-network="whatsapp"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-emerald-600/20 transition-all"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-strong text-white font-bold text-xs sm:text-sm shadow-md shadow-brand/20 transition-all"
                 >
                   <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                     <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
@@ -364,7 +364,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                   aria-label="Partager sur Facebook"
                   data-share="offre"
                   data-share-network="facebook"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 hover:border-primary/40 hover:text-primary transition-colors dark:border-slate-700 dark:bg-slate-900 dark:text-gray-400"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-black hover:border-primary/40 hover:text-primary transition-colors dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                 >
                   <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                     <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
@@ -377,7 +377,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                   aria-label="Partager sur LinkedIn"
                   data-share="offre"
                   data-share-network="linkedin"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 hover:border-primary/40 hover:text-primary transition-colors dark:border-slate-700 dark:bg-slate-900 dark:text-gray-400"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-black hover:border-primary/40 hover:text-primary transition-colors dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                 >
                   <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                     <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124zM7.119 20.452H3.555V9h3.564v11.452zM22 0H2C.895 0 0 .895 0 2v20c0 1.105.895 2 2 2h20c1.105 0 2-.895 2-2V2c0-1.105-.895-2-2-2z" />
@@ -404,10 +404,10 @@ export default async function JobDetailPage({ params }: PageProps) {
           {/* Colonne gauche — description */}
           <article className="lg:col-span-2 order-2 lg:order-1">
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm shadow-black/5 p-5 sm:p-8">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 font-[var(--font-display)]">
+              <h2 className="text-lg sm:text-xl font-bold text-black dark:text-white mb-4 font-[var(--font-display)]">
                 À propos de ce poste
               </h2>
-              <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 leading-relaxed">
+              <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none text-black dark:text-white leading-relaxed">
                 <SimpleMarkdown text={job.description} />
               </div>
             </div>
@@ -424,7 +424,7 @@ export default async function JobDetailPage({ params }: PageProps) {
             {/* Offres similaires */}
             {similar.length > 0 && (
               <div className="mt-8 sm:mt-10">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-5 font-[var(--font-display)]">
+                <h2 className="text-lg sm:text-xl font-bold text-black dark:text-white mb-4 sm:mb-5 font-[var(--font-display)]">
                   Offres similaires qui pourraient vous intéresser
                 </h2>
                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 list-none m-0 p-0">
@@ -440,7 +440,7 @@ export default async function JobDetailPage({ params }: PageProps) {
             {/* Articles liés au secteur de l'offre (§16) */}
             {relatedArticles.length > 0 && (
               <div className="mt-8 sm:mt-10">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-5 font-[var(--font-display)]">
+                <h2 className="text-lg sm:text-xl font-bold text-black dark:text-white mb-4 sm:mb-5 font-[var(--font-display)]">
                   À lire avant de postuler
                 </h2>
                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 list-none m-0 p-0">
@@ -451,15 +451,15 @@ export default async function JobDetailPage({ params }: PageProps) {
                         className="group flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-4 transition-all hover:border-primary/30 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
                       >
                         {article.published_at && (
-                          <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                          <span className="text-[11px] font-medium text-black dark:text-white">
                             {formatDate(article.published_at)}
                           </span>
                         )}
-                        <h3 className="mt-1.5 text-sm font-bold text-gray-900 dark:text-white transition-colors group-hover:text-primary line-clamp-2">
+                        <h3 className="mt-1.5 text-sm font-bold text-black dark:text-white transition-colors group-hover:text-primary line-clamp-2">
                           {article.title}
                         </h3>
                         {article.excerpt && (
-                          <p className="mt-1.5 text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
+                          <p className="mt-1.5 text-xs text-black dark:text-white line-clamp-2">
                             {article.excerpt}
                           </p>
                         )}
@@ -472,7 +472,7 @@ export default async function JobDetailPage({ params }: PageProps) {
 
             {/* Maillage interne — catégories principales + localisation */}
             <nav aria-label="Liens complémentaires" className="mt-8 sm:mt-10">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 font-[var(--font-display)]">
+              <h2 className="text-lg sm:text-xl font-bold text-black dark:text-white mb-4 font-[var(--font-display)]">
                 Explorer davantage
               </h2>
               <ul className="flex flex-wrap gap-2.5 list-none m-0 p-0">
@@ -490,7 +490,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                   <li>
                     <Link
                       href={landingLinks.metier.href}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
                       {landingLinks.metier.label}
                     </Link>
@@ -500,7 +500,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                   <li>
                     <Link
                       href={landingLinks.city?.href ?? `/jobs?city=${encodeURIComponent(jobCity)}`}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
                       Offres à {jobCity}
                     </Link>
@@ -510,7 +510,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                   <li>
                     <Link
                       href="/stages"
-                      className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
                       Tous les stages
                     </Link>
@@ -519,7 +519,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                   <li>
                     <Link
                       href="/jobs"
-                      className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
                       Toutes les offres d'emploi
                     </Link>
@@ -528,7 +528,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                 <li>
                   <Link
                     href="/concours"
-                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                   >
                     Concours administratifs
                   </Link>
@@ -536,7 +536,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                 <li>
                   <Link
                     href="/bourses"
-                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                   >
                     Bourses d'études
                   </Link>
@@ -555,7 +555,7 @@ export default async function JobDetailPage({ params }: PageProps) {
             </div>
 
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm p-5 text-sm">
-              <h3 className="font-bold text-gray-900 dark:text-white mb-4">Informations utiles</h3>
+              <h3 className="font-bold text-black dark:text-white mb-4">Informations utiles</h3>
               <dl className="space-y-3.5">
                 <MetaRow label="Entreprise" value={job.company} />
                 <MetaRow label="Ville" value={job.location} />
@@ -655,7 +655,7 @@ function ApplyBox({
   if (variant === 'horizontal') {
     return (
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded-2xl border border-gray-100 dark:border-slate-800 p-3 sm:p-4 shadow-sm">
-        <div className="text-[13px] sm:text-sm text-gray-500 dark:text-gray-400 flex-1">
+        <div className="text-[13px] sm:text-sm text-black dark:text-white flex-1">
           Prêt à postuler ? Choisissez votre méthode :
         </div>
         <ApplyActions job={job} />
@@ -666,7 +666,7 @@ function ApplyBox({
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm shadow-black/5 p-5">
       <div className="flex items-center gap-2 mb-4">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary dark:text-emerald-400 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary dark:text-brand-accent flex items-center justify-center">
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
             <path d="M20 7h-3a2 2 0 0 1-2-2V2" />
             <path d="M9 18a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h5l5 5v9a2 2 0 0 1-2 2h-1" />
@@ -674,8 +674,8 @@ function ApplyBox({
           </svg>
         </div>
         <div>
-          <div className="font-bold text-gray-900 dark:text-white">Postuler maintenant</div>
-          <div className="text-xs text-gray-500 dark:text-gray-400">1 à 2 minutes</div>
+          <div className="font-bold text-black dark:text-white">Postuler maintenant</div>
+          <div className="text-xs text-black dark:text-white">1 à 2 minutes</div>
         </div>
       </div>
       <ApplyActions job={job} />
@@ -729,7 +729,7 @@ function ApplyActions({ job }: { job: JobOfferSchema }) {
         <a
           data-apply={job.id}
           href={`mailto:${job.apply_email}?subject=${encodeURIComponent(`Candidature : ${job.title} (TravaillerEnCi)`)}`}
-          className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-800 dark:text-gray-200 font-semibold text-[13px] sm:text-sm transition-all w-full min-w-0 truncate"
+          className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 text-black dark:text-gray-200 font-semibold text-[13px] sm:text-sm transition-all w-full min-w-0 truncate"
         >
           <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="5" width="18" height="14" rx="2" />
@@ -760,7 +760,7 @@ function MetaRow({
       href={href}
       target={external ? '_blank' : undefined}
       rel={external ? 'noopener noreferrer' : undefined}
-      className="font-medium text-primary dark:text-emerald-400 hover:underline inline-flex items-center gap-1"
+      className="font-medium text-primary dark:text-brand-accent hover:underline inline-flex items-center gap-1"
     >
       {value}
       {external && (
@@ -772,14 +772,14 @@ function MetaRow({
     </a>
   ) : (
     <span
-      className={`font-medium ${tone === 'danger' ? 'text-rose-500' : 'text-gray-800 dark:text-gray-200'}`}
+      className={`font-medium ${tone === 'danger' ? 'text-rose-500' : 'text-black dark:text-gray-200'}`}
     >
       {value}
     </span>
   );
   return (
     <div className="flex items-start justify-between gap-4">
-      <dt className="text-gray-500 dark:text-gray-400 shrink-0">{label}</dt>
+      <dt className="text-black dark:text-white shrink-0">{label}</dt>
       <dd className="text-right break-words">{ValueComp}</dd>
     </div>
   );
@@ -794,8 +794,8 @@ function MiniJobCard({ job }: { job: JobOfferSchema }) {
       <div className="flex flex-wrap items-center gap-1.5 mb-2">
         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-bold ${
           job.is_verified
-            ? 'bg-primary/10 text-primary dark:text-emerald-400'
-            : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-gray-400'
+            ? 'bg-primary/10 text-primary dark:text-brand-accent'
+            : 'bg-gray-100 dark:bg-slate-800 text-black dark:text-white'
         }`}>
           {job.is_verified ? '✓ Vérifié' : job.contract_type}
         </span>
@@ -805,13 +805,13 @@ function MiniJobCard({ job }: { job: JobOfferSchema }) {
           </span>
         ) : null}
       </div>
-      <h3 className="font-bold text-[14px] leading-snug text-gray-900 dark:text-white line-clamp-2 mb-1 group-hover:text-primary dark:group-hover:text-emerald-400 transition-colors">
+      <h3 className="font-bold text-[14px] leading-snug text-black dark:text-white line-clamp-2 mb-1 group-hover:text-primary dark:group-hover:text-brand-accent transition-colors">
         {job.title}
       </h3>
-      <div className="text-[13px] text-primary dark:text-emerald-400 font-semibold mb-0.5 truncate">
+      <div className="text-[13px] text-primary dark:text-brand-accent font-semibold mb-0.5 truncate">
         {job.company}
       </div>
-      <div className="text-[12px] text-gray-500 dark:text-gray-400 truncate">{job.location}</div>
+      <div className="text-[12px] text-black dark:text-white truncate">{job.location}</div>
     </Link>
   );
 }

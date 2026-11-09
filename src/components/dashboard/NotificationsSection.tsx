@@ -21,7 +21,7 @@ const TYPE_CONFIG: Record<
   },
   account_event: {
     icon: '👤',
-    color: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+    color: 'bg-brand/10 text-brand dark:text-brand-accent',
     label: 'Compte',
   },
   system: {
@@ -135,7 +135,7 @@ export default function NotificationsSection() {
       {/* En-tête */}
       <div className="mb-5 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg font-bold font-[var(--font-display)] text-gray-900 dark:text-white">
+          <h2 className="text-lg font-bold font-[var(--font-display)] text-black dark:text-white">
             Notifications
           </h2>
           {unreadCount > 0 && (
@@ -167,7 +167,7 @@ export default function NotificationsSection() {
               <path d="M13.73 21a2 2 0 01-3.46 0" />
             </svg>
           </div>
-          <p className="text-sm text-gray-500 dark:text-slate-400 max-w-xs mx-auto">
+          <p className="text-sm text-black dark:text-white max-w-xs mx-auto">
             Aucune notification pour le moment. Créez des alertes pour être notifié
             de nouvelles opportunités.
           </p>
@@ -209,8 +209,8 @@ export default function NotificationsSection() {
                         className={cn(
                           'text-[13px] leading-snug',
                           notif.read
-                            ? 'text-gray-700 dark:text-gray-300'
-                            : 'font-bold text-gray-900 dark:text-white',
+                            ? 'text-black dark:text-white'
+                            : 'font-bold text-black dark:text-white',
                         )}
                       >
                         {notif.link ? (
@@ -226,7 +226,7 @@ export default function NotificationsSection() {
                         )}
                       </p>
                       {notif.body && (
-                        <p className="text-[12px] text-gray-500 dark:text-slate-400 mt-0.5 line-clamp-2">
+                        <p className="text-[12px] text-black dark:text-white mt-0.5 line-clamp-2">
                           {notif.body}
                         </p>
                       )}
@@ -239,7 +239,7 @@ export default function NotificationsSection() {
                           type="button"
                           onClick={() => markAsRead(notif)}
                           aria-label="Marquer comme lu"
-                          className="inline-flex items-center justify-center h-7 w-7 rounded-lg text-gray-400 hover:text-emerald-500 hover:bg-emerald-500/10 transition-all"
+                          className="inline-flex items-center justify-center h-7 w-7 rounded-lg text-gray-400 hover:text-brand hover:bg-brand/10 transition-all"
                           title="Marquer comme lu"
                         >
                           <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -264,7 +264,7 @@ export default function NotificationsSection() {
 
                   {/* Timestamp + badge type */}
                   <div className="mt-1.5 flex items-center gap-2">
-                    <span className="text-[10px] text-gray-400 dark:text-slate-500">
+                    <span className="text-[10px] text-gray-400 dark:text-white">
                       {relativeTime(notif.created_at)}
                     </span>
                     <span

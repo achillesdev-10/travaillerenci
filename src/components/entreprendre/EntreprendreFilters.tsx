@@ -48,7 +48,7 @@ export default function EntreprendreFilters({
       <button
         type="button"
         onClick={() => setShowFilters((s) => !s)}
-        className="w-full flex items-center justify-between px-5 py-4 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors"
+        className="w-full flex items-center justify-between px-5 py-4 text-sm font-semibold text-black dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors"
       >
         <span className="flex items-center gap-2">
           <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -87,7 +87,7 @@ export default function EntreprendreFilters({
         <div className="px-5 pb-5 border-t border-border/50 pt-4 space-y-4">
           {/* Secteur */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-semibold text-black dark:text-white uppercase tracking-wider mb-2">
               Secteur d&apos;activité
             </label>
             <div className="flex flex-wrap gap-2">
@@ -99,7 +99,7 @@ export default function EntreprendreFilters({
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                     currentSector === key
                       ? 'bg-primary text-white shadow-sm shadow-primary/20'
-                      : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700'
+                      : 'bg-gray-100 dark:bg-slate-800 text-black dark:text-white hover:bg-gray-200 dark:hover:bg-slate-700'
                   }`}
                 >
                   {label}
@@ -110,7 +110,7 @@ export default function EntreprendreFilters({
 
           {/* Budget */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-semibold text-black dark:text-white uppercase tracking-wider mb-2">
               Budget de démarrage
             </label>
             <div className="flex flex-wrap gap-2">
@@ -122,7 +122,7 @@ export default function EntreprendreFilters({
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                     currentBudget === key
                       ? 'bg-primary text-white shadow-sm shadow-primary/20'
-                      : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700'
+                      : 'bg-gray-100 dark:bg-slate-800 text-black dark:text-white hover:bg-gray-200 dark:hover:bg-slate-700'
                   }`}
                 >
                   {label}

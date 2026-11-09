@@ -38,7 +38,7 @@ export default function ExamCard({ exam, priority = false }: { exam: Exam; prior
           >
             {EXAM_PHASE_LABEL[phase]}
           </span>
-          <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-0.5 text-[10.5px] font-semibold text-gray-600 dark:border-slate-700 dark:bg-slate-800 dark:text-gray-300">
+          <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-0.5 text-[10.5px] font-semibold text-black dark:border-slate-700 dark:bg-slate-800 dark:text-white">
             {EXAM_CATEGORY_LABEL[exam.category] || exam.category}
           </span>
           <span className="ml-auto text-[11px] text-gray-400">
@@ -47,7 +47,7 @@ export default function ExamCard({ exam, priority = false }: { exam: Exam; prior
           <SaveButton itemType="exam" itemId={exam.id} variant="icon" />
         </div>
 
-        <h3 className="mb-1 font-bold text-[15px] leading-snug text-gray-900 line-clamp-2 transition-colors group-hover:text-primary dark:text-white">
+        <h3 className="mb-1 font-bold text-[15px] leading-snug text-black line-clamp-2 transition-colors group-hover:text-primary dark:text-white">
           {exam.title}
         </h3>
 
@@ -57,7 +57,7 @@ export default function ExamCard({ exam, priority = false }: { exam: Exam; prior
           {exam.diplomas.slice(0, 4).map((d) => (
             <span
               key={d}
-              className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10.5px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+              className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10.5px] font-bold text-black dark:bg-slate-800 dark:text-white"
             >
               {d}
             </span>
@@ -69,7 +69,7 @@ export default function ExamCard({ exam, priority = false }: { exam: Exam; prior
           )}
         </div>
 
-        <p className="mb-4 flex-1 text-[12.5px] leading-relaxed text-gray-500 line-clamp-3 dark:text-gray-400">
+        <p className="mb-4 flex-1 text-[12.5px] leading-relaxed text-black line-clamp-3 dark:text-white">
           {(exam.seo_description || exam.description_md || '')
             .replace(/\*\*/g, '')
             .replace(/#/g, '')
@@ -80,7 +80,7 @@ export default function ExamCard({ exam, priority = false }: { exam: Exam; prior
           {deadline ? (
             <span
               className={`text-[12px] font-semibold ${
-                deadlinePassed ? 'text-rose-500' : 'text-gray-500 dark:text-gray-400'
+                deadlinePassed ? 'text-rose-500' : 'text-black dark:text-white'
               }`}
             >
               {deadlinePassed

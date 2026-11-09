@@ -108,13 +108,13 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
 
   return (
     <div className="rounded-3xl bg-white dark:bg-slate-900 border border-border p-6 sm:p-8">
-      <h2 className="text-lg font-bold text-gray-900 dark:text-white font-[var(--font-display)] mb-5 flex items-center gap-2">
+      <h2 className="text-lg font-bold text-black dark:text-white font-[var(--font-display)] mb-5 flex items-center gap-2">
         <svg className="w-5 h-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
           <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
         </svg>
         Commentaires
         {total > 0 && (
-          <span className="ml-1 text-sm font-semibold text-gray-400 dark:text-gray-500">
+          <span className="ml-1 text-sm font-semibold text-gray-400 dark:text-white">
             ({total})
           </span>
         )}
@@ -134,7 +134,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
           ))}
         </div>
       ) : comments.length === 0 ? (
-        <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-6">
+        <p className="text-sm text-black dark:text-white text-center py-6">
           Aucun commentaire pour le moment. Soyez le premier à réagir !
         </p>
       ) : (
@@ -145,14 +145,14 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
               className="rounded-xl bg-gray-50 dark:bg-slate-800/50 border border-border/50 p-4"
             >
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                <div className="w-8 h-8 rounded-full bg-brand flex items-center justify-center text-white text-xs font-bold shrink-0">
                   {(comment.user_display_name || 'U').charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                  <div className="text-sm font-semibold text-black dark:text-white">
                     {comment.user_display_name || 'Utilisateur'}
                   </div>
-                  <div className="text-[11px] text-gray-400 dark:text-gray-500">
+                  <div className="text-[11px] text-gray-400 dark:text-white">
                     {formatDate(comment.created_at)}
                   </div>
                 </div>
@@ -167,7 +167,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                   </button>
                 )}
               </div>
-              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+              <p className="text-sm text-black dark:text-white leading-relaxed whitespace-pre-wrap">
                 {comment.content}
               </p>
             </div>
@@ -180,7 +180,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
         <div className="h-24 rounded-xl bg-gray-50 dark:bg-slate-800 animate-pulse" />
       ) : isAuthenticated ? (
         <form onSubmit={handleSubmit} className="mt-4">
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+          <label className="block text-sm font-semibold text-black dark:text-gray-200 mb-2">
             Ajouter un commentaire
           </label>
           <textarea
@@ -188,13 +188,13 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
             onChange={(e) => setContent(e.target.value)}
             placeholder="Partagez votre avis ou votre expérience…"
             rows={3}
-            className="w-full rounded-xl border border-border bg-gray-50 dark:bg-slate-800 px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none transition-all"
+            className="w-full rounded-xl border border-border bg-gray-50 dark:bg-slate-800 px-4 py-3 text-sm text-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none transition-all"
           />
           {error && (
             <p className="mt-1 text-xs text-red-500">{error}</p>
           )}
           {success && (
-            <p className="mt-1 text-xs text-emerald-600">{success}</p>
+            <p className="mt-1 text-xs text-brand">{success}</p>
           )}
           <div className="mt-3 flex justify-end">
             <button
@@ -208,7 +208,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
         </form>
       ) : (
         <div className="mt-4 rounded-xl bg-gray-50 dark:bg-slate-800/50 border border-dashed border-border p-5 text-center">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-black dark:text-white">
             Connectez-vous pour laisser un commentaire.
           </p>
           <div className="mt-3 flex items-center justify-center gap-3">
@@ -220,7 +220,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
             </Link>
             <Link
               href="/register"
-              className="px-4 py-2 rounded-xl border border-border text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+              className="px-4 py-2 rounded-xl border border-border text-sm font-semibold text-black dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
             >
               S&apos;inscrire
             </Link>

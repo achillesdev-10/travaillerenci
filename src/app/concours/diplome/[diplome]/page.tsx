@@ -95,7 +95,7 @@ export default async function ConcoursDiplomaPage({ params }: PageProps) {
   return (
     <main className="flex-1 min-h-screen bg-gray-50 py-8 transition-colors dark:bg-slate-950 sm:py-12">
       <div className="container mx-auto max-w-6xl px-4">
-        <nav aria-label="Fil d'Ariane" className="mb-6 text-sm text-gray-500 dark:text-gray-400">
+        <nav aria-label="Fil d'Ariane" className="mb-6 text-sm text-black dark:text-white">
           <Link href="/" className="hover:text-primary">
             Accueil
           </Link>
@@ -108,11 +108,11 @@ export default async function ConcoursDiplomaPage({ params }: PageProps) {
           <span className="mx-2" aria-hidden="true">
             /
           </span>
-          <span className="font-medium text-gray-900 dark:text-gray-200">{seo.title}</span>
+          <span className="font-medium text-black dark:text-gray-200">{seo.title}</span>
         </nav>
 
         {/* En-tête éditorial unique */}
-        <div className="mb-8 rounded-2xl border border-gray-100 bg-emerald-500/5 p-6 dark:border-slate-800 dark:bg-emerald-500/10 sm:p-8">
+        <div className="mb-8 rounded-2xl border border-gray-100 bg-brand/10 p-6 dark:border-slate-800 dark:bg-brand/10 sm:p-8">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1 text-xs font-bold text-primary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
               <path d="M22 10 12 5 2 10l10 5 10-5Z" />
@@ -120,11 +120,11 @@ export default async function ConcoursDiplomaPage({ params }: PageProps) {
             </svg>
             Diplôme : {seo.label}
           </div>
-          <h1 className="mb-3 font-[var(--font-display)] text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
+          <h1 className="mb-3 font-[var(--font-display)] text-3xl font-extrabold text-black dark:text-white sm:text-4xl">
             {seo.title}
           </h1>
           {seo.intro.map((p, i) => (
-            <p key={i} className="mb-3 max-w-3xl text-base leading-relaxed text-gray-600 dark:text-gray-300">
+            <p key={i} className="mb-3 max-w-3xl text-base leading-relaxed text-black dark:text-white">
               {p}
             </p>
           ))}
@@ -132,13 +132,13 @@ export default async function ConcoursDiplomaPage({ params }: PageProps) {
 
         {/* Compteur */}
         <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="font-[var(--font-display)] text-xl font-bold text-gray-900 dark:text-white">
+          <h2 className="font-[var(--font-display)] text-xl font-bold text-black dark:text-white">
             {total} concours acceptant le {seo.label}
             {total > 1 ? 's' : ''} recensé{total > 1 ? 's' : ''}
           </h2>
           <Link
             href="/concours"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-600 transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
           >
             Tous les concours
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -181,10 +181,10 @@ export default async function ConcoursDiplomaPage({ params }: PageProps) {
           </>
         ) : (
           <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center dark:border-slate-800 dark:bg-slate-900 sm:p-12">
-            <h3 className="mb-2 font-[var(--font-display)] text-lg font-bold text-gray-900 dark:text-white sm:text-xl">
+            <h3 className="mb-2 font-[var(--font-display)] text-lg font-bold text-black dark:text-white sm:text-xl">
               Aucun concours publié pour ce diplôme pour le moment
             </h3>
-            <p className="mx-auto mb-6 max-w-md text-sm text-gray-500 dark:text-gray-400 sm:text-base">
+            <p className="mx-auto mb-6 max-w-md text-sm text-black dark:text-white sm:text-base">
               Les nouveaux avis apparaissent ici dès leur validation. Explorez les autres
               niveaux de diplôme ci-dessous.
             </p>
@@ -193,7 +193,7 @@ export default async function ConcoursDiplomaPage({ params }: PageProps) {
 
         {/* Maillage interne : autres diplômes */}
         <section className="mt-12 rounded-2xl border border-gray-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
-          <h2 className="mb-4 font-[var(--font-display)] text-lg font-bold text-gray-900 dark:text-white">
+          <h2 className="mb-4 font-[var(--font-display)] text-lg font-bold text-black dark:text-white">
             Filtrer par un autre diplôme
           </h2>
           <div className="flex flex-wrap gap-2">
@@ -201,7 +201,7 @@ export default async function ConcoursDiplomaPage({ params }: PageProps) {
               <Link
                 key={d.slug}
                 href={`/concours/diplome/${d.slug}`}
-                className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
               >
                 {d.label}
               </Link>
@@ -216,7 +216,7 @@ export default async function ConcoursDiplomaPage({ params }: PageProps) {
                 <Link
                   key={c.value}
                   href={`/concours/categorie/${c.value}`}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-gray-600 transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                 >
                   <CategoryIcon category={c.value} className="h-3.5 w-3.5" />
                   {c.label}

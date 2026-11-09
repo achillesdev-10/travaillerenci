@@ -86,7 +86,7 @@ export default function Header() {
               <span className="block truncate text-[17px] font-black leading-none tracking-tight text-ink dark:text-white sm:text-lg">
                 TravaillerEn<span className="text-brand dark:text-brand-accent">Ci</span>
               </span>
-              <span className="mt-1 hidden text-[9px] font-semibold uppercase tracking-[0.16em] text-muted dark:text-slate-400 sm:block">
+              <span className="mt-1 hidden text-[9px] font-semibold uppercase tracking-[0.16em] text-muted dark:text-white sm:block">
                 L’emploi en Côte d’Ivoire
               </span>
             </span>
@@ -101,7 +101,7 @@ export default function Header() {
                   'rounded-lg px-2.5 py-2 text-[13px] font-semibold transition-colors',
                   isActive(link.href)
                     ? 'bg-brand-soft text-brand-strong dark:bg-slate-800 dark:text-brand-accent'
-                    : 'text-ink-soft hover:bg-surface hover:text-brand dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-brand-accent',
+                    : 'text-ink-soft hover:bg-surface hover:text-brand dark:text-white dark:hover:bg-slate-800 dark:hover:text-brand-accent',
                 )}
               >
                 {link.label}
@@ -114,7 +114,7 @@ export default function Header() {
               href="/jobs#search-keyword"
               aria-label="Rechercher"
               title="Rechercher une offre"
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-line bg-white text-ink-soft transition-colors hover:border-brand/40 hover:text-brand dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:text-brand-accent"
+              className="flex h-10 w-10 items-center justify-center rounded-lg border border-line bg-white text-ink-soft transition-colors hover:border-brand/40 hover:text-brand dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:hover:text-brand-accent"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <circle cx="11" cy="11" r="8" />
@@ -126,7 +126,7 @@ export default function Header() {
               type="button"
               onClick={toggleDarkMode}
               aria-label="Basculer le mode sombre"
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-line bg-white text-ink-soft transition-colors hover:border-brand/40 hover:text-brand dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:text-brand-accent"
+              className="flex h-10 w-10 items-center justify-center rounded-lg border border-line bg-white text-ink-soft transition-colors hover:border-brand/40 hover:text-brand dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:hover:text-brand-accent"
             >
               {isDarkMode ? (
                 <svg className="h-4 w-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -168,7 +168,7 @@ export default function Header() {
                   onClick={handleLogout}
                   aria-label="Déconnexion"
                   title="Déconnexion"
-                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-line bg-white text-ink-soft transition-colors hover:border-danger/30 hover:text-danger dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:text-red-400"
+                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-line bg-white text-ink-soft transition-colors hover:border-danger/30 hover:text-danger dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:hover:text-red-400"
                 >
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -181,7 +181,7 @@ export default function Header() {
               <>
                 <Link
                   href="/login"
-                  className="rounded-lg px-3 py-2 text-[13px] font-semibold text-ink-soft transition-colors hover:bg-surface hover:text-brand dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-brand-accent"
+                  className="rounded-lg px-3 py-2 text-[13px] font-semibold text-ink-soft transition-colors hover:bg-surface hover:text-brand dark:text-white dark:hover:bg-slate-900 dark:hover:text-brand-accent"
                 >
                   Connexion
                 </Link>
@@ -250,7 +250,7 @@ export default function Header() {
                     'flex min-h-11 items-center rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-colors',
                     isActive(link.href)
                       ? 'bg-brand-soft text-brand-strong dark:bg-slate-800 dark:text-brand-accent'
-                      : 'text-ink-soft hover:bg-surface hover:text-brand dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-brand-accent',
+                      : 'text-ink-soft hover:bg-surface hover:text-brand dark:text-white dark:hover:bg-slate-900 dark:hover:text-brand-accent',
                   )}
                 >
                   {link.label}
@@ -284,7 +284,7 @@ export default function Header() {
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="flex min-h-11 w-full items-center rounded-xl px-3 py-2.5 text-[13px] font-semibold text-ink-soft transition-colors hover:bg-red-50 hover:text-danger dark:text-slate-300 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+                    className="flex min-h-11 w-full items-center rounded-xl px-3 py-2.5 text-[13px] font-semibold text-ink-soft transition-colors hover:bg-red-50 hover:text-danger dark:text-white dark:hover:bg-red-950/30 dark:hover:text-red-400"
                   >
                     Déconnexion
                   </button>
@@ -294,7 +294,7 @@ export default function Header() {
                   <Link
                     href="/login"
                     onClick={() => setOpen(false)}
-                    className="flex min-h-11 items-center rounded-xl px-3 py-2.5 text-[13px] font-semibold text-ink-soft transition-colors hover:bg-surface hover:text-brand dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-brand-accent"
+                    className="flex min-h-11 items-center rounded-xl px-3 py-2.5 text-[13px] font-semibold text-ink-soft transition-colors hover:bg-surface hover:text-brand dark:text-white dark:hover:bg-slate-900 dark:hover:text-brand-accent"
                   >
                     Connexion
                   </Link>
@@ -313,7 +313,7 @@ export default function Header() {
               <button
                 type="button"
                 onClick={toggleDarkMode}
-                className="flex min-h-10 items-center gap-2 rounded-lg px-2 text-[13px] font-semibold text-ink-soft transition-colors hover:text-brand dark:text-slate-300 dark:hover:text-brand-accent"
+                className="flex min-h-10 items-center gap-2 rounded-lg px-2 text-[13px] font-semibold text-ink-soft transition-colors hover:text-brand dark:text-white dark:hover:text-brand-accent"
               >
                 {isDarkMode ? (
                   <svg className="h-4 w-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

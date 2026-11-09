@@ -104,7 +104,7 @@ function getDomain(url: string | null): string {
 
 const COLORS = [
   'bg-orange-500',
-  'bg-emerald-600',
+  'bg-brand',
   'bg-sky-600',
   'bg-purple-600',
   'bg-rose-500',

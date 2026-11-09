@@ -45,7 +45,7 @@ export default function CopyLinkButton({
       type="button"
       onClick={handleCopy}
       aria-live="polite"
-      className={`inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-gray-700 transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-200 ${className}`}
+      className={`inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-200 ${className}`}
     >
       <svg
         className="h-4 w-4 shrink-0"

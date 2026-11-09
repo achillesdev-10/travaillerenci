@@ -46,13 +46,13 @@ export default function CompactJobCard({ job }: { job: JobOfferSchema }) {
                 Vérifié
               </span>
             )}
-            <span className="ml-auto text-[10px] font-medium text-gray-500">
+            <span className="ml-auto text-[10px] font-medium text-black">
               {formatRelativeTime(job.created_at)}
             </span>
             <SaveButton itemType={savedType(job)} itemId={job.id} variant="icon" />
           </div>
 
-          <h3 className="font-bold text-[13px] sm:text-sm leading-snug text-gray-900 line-clamp-2 transition-colors group-hover:text-primary">
+          <h3 className="font-bold text-[13px] sm:text-sm leading-snug text-black line-clamp-2 transition-colors group-hover:text-primary">
             {job.title}
           </h3>
 
@@ -61,7 +61,7 @@ export default function CompactJobCard({ job }: { job: JobOfferSchema }) {
           </p>
 
           <div className="mt-auto flex items-center justify-between gap-2 pt-2.5">
-            <span className="inline-flex min-w-0 items-center gap-1 text-[11px] text-gray-500">
+            <span className="inline-flex min-w-0 items-center gap-1 text-[11px] text-black">
               <svg className="h-3 w-3 shrink-0 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                 <circle cx="12" cy="10" r="3" />

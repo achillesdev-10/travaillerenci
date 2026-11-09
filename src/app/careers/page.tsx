@@ -84,7 +84,7 @@ export default function CareersPage() {
       {/* ===== En-tête ===== */}
       <section className="relative overflow-hidden border-b border-border/40 bg-primary/5 dark:bg-primary/10">
         <div className="container mx-auto px-4 py-14 sm:py-20 relative z-10 max-w-4xl text-center">
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary dark:text-emerald-400 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-5">
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary dark:text-brand-accent px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-5">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
               <path d="M18 21a3 3 0 0 0 3-3v-3a3 3 0 0 0-3-3h-1v3a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3V8" />
               <path d="M6 3 3 6l3 3" />
@@ -92,10 +92,10 @@ export default function CareersPage() {
             </svg>
             Rejoignez l'équipe
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-[var(--font-display)] text-gray-900 dark:text-white">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-[var(--font-display)] text-black dark:text-white">
             Carrières chez <span className="text-primary">TravaillerenCi</span>
           </h1>
-          <p className="mt-4 text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-4 text-base sm:text-lg text-black dark:text-white max-w-2xl mx-auto leading-relaxed">
             Vous souhaitez <strong>travailler avec nous</strong>, contribuer au projet ou obtenir
             plus d’informations&nbsp;? Nous serions ravis d’échanger avec vous.
           </p>
@@ -105,7 +105,7 @@ export default function CareersPage() {
               <path d="M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2Z" />
             </svg>
             <div className="text-left">
-              <div className="text-[11px] uppercase tracking-widest text-gray-500 dark:text-gray-400 font-semibold">
+              <div className="text-[11px] uppercase tracking-widest text-black dark:text-white font-semibold">
                 Écrivez-nous à
               </div>
               <a
@@ -121,7 +121,7 @@ export default function CareersPage() {
 
       {/* ===== Pourquoi nous rejoindre ===== */}
       <section className="container mx-auto px-4 py-12 sm:py-16 max-w-5xl">
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white font-[var(--font-display)] text-center mb-8">
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-black dark:text-white font-[var(--font-display)] text-center mb-8">
           Pourquoi nous rejoindre&nbsp;?
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
@@ -133,8 +133,8 @@ export default function CareersPage() {
               <div className="text-primary mb-3" aria-hidden="true">
                 {r.icon}
               </div>
-              <h3 className="font-bold text-gray-900 dark:text-white">{r.title}</h3>
-              <p className="mt-1.5 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{r.text}</p>
+              <h3 className="font-bold text-black dark:text-white">{r.title}</h3>
+              <p className="mt-1.5 text-sm text-black dark:text-white leading-relaxed">{r.text}</p>
             </div>
           ))}
         </div>
@@ -142,10 +142,10 @@ export default function CareersPage() {
 
       {/* ===== Opportunités ===== */}
       <section className="container mx-auto px-4 pb-12 sm:pb-16 max-w-5xl">
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white font-[var(--font-display)] text-center mb-3">
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-black dark:text-white font-[var(--font-display)] text-center mb-3">
           Où pouvons-nous collaborer&nbsp;?
         </h2>
-        <p className="text-center text-sm text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-8">
+        <p className="text-center text-sm text-black dark:text-white max-w-2xl mx-auto mb-8">
           Profils en recherche active ou simples coups de main ponctuels, toutes les bonnes
           volontés sont les bienvenues. Envoyez-nous simplement un email.
         </p>
@@ -156,12 +156,12 @@ export default function CareersPage() {
               className="flex flex-col bg-white dark:bg-slate-900 border border-border rounded-2xl p-6 hover:border-primary/30 hover:shadow-md transition-all"
             >
               <div className="flex items-start justify-between gap-3">
-                <h3 className="font-bold text-gray-900 dark:text-white leading-snug">{o.role}</h3>
+                <h3 className="font-bold text-black dark:text-white leading-snug">{o.role}</h3>
                 <span className="shrink-0 inline-flex items-center rounded-full bg-primary/10 text-primary text-[11px] font-bold px-2.5 py-1">
                   {o.type}
                 </span>
               </div>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 leading-relaxed flex-1">
+              <p className="mt-2 text-sm text-black dark:text-white leading-relaxed flex-1">
                 {o.description}
               </p>
               <a
@@ -191,7 +191,7 @@ export default function CareersPage() {
           </p>
           <a
             href={`mailto:${SITE_CONFIG.supportEmail}?subject=${encodeURIComponent('Je souhaite travailler avec TravaillerenCi')}`}
-            className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-7 py-3.5 text-gray-900 font-bold text-sm hover:bg-gray-100 transition-colors shadow-lg"
+            className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-7 py-3.5 text-black font-bold text-sm hover:bg-gray-100 transition-colors shadow-lg"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />

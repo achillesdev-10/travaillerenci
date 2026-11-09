@@ -9,16 +9,16 @@ export default function CguPage() {
           <p className="text-sm text-muted-foreground mt-2">Dernière mise à jour : 31 juillet 2026</p>
         </div>
 
-        <div className="space-y-6 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+        <div className="space-y-6 text-sm leading-relaxed text-black dark:text-white">
           <section className="space-y-3">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">1. Objet</h2>
+            <h2 className="text-xl font-bold text-black dark:text-white">1. Objet</h2>
             <p>
               Les présentes Conditions Générales d'Utilisation (CGU) régissent l'accès et l'utilisation de la plateforme <strong>TravaillerEnCi</strong>, dédiée à la recherche d'emploi, de stages et au recrutement en Côte d'Ivoire. Toute utilisation de la plateforme implique l'acceptation sans réserve des présentes CGU par l'utilisateur (Candidat ou Entreprise).
             </p>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">2. Règles d'utilisation et interdictions</h2>
+            <h2 className="text-xl font-bold text-black dark:text-white">2. Règles d'utilisation et interdictions</h2>
             <p>
               L'utilisateur s'engage à utiliser TravaillerEnCi de manière loyale et légale. Il est strictement interdit :
             </p>
@@ -31,14 +31,14 @@ export default function CguPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">3. Rôle et Responsabilité de TravaillerEnCi</h2>
+            <h2 className="text-xl font-bold text-black dark:text-white">3. Rôle et Responsabilité de TravaillerEnCi</h2>
             <p>
               TravaillerEnCi agit en tant qu'intermédiaire et agrégateur d'opportunités professionnelles. La plateforme ne garantit pas l'exactitude des offres d'emploi tierces ni l'aboutissement des processus de recrutement. La responsabilité du contenu des offres publiées incombe exclusivement aux recruteurs d'origine.
             </p>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">4. Droit applicable</h2>
+            <h2 className="text-xl font-bold text-black dark:text-white">4. Droit applicable</h2>
             <p>
               Les présentes CGU sont régies par le droit en vigueur en Côte d'Ivoire. Tout litige relatif à leur interprétation ou à leur exécution relève de la compétence des tribunaux d'Abidjan.
             </p>

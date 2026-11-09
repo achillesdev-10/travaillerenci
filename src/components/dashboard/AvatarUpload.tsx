@@ -157,7 +157,7 @@ export default function AvatarUpload({
           />
         ) : (
           <div
-            className="w-full h-full rounded-full bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center text-white font-black shadow-lg shadow-primary/20"
+            className="w-full h-full rounded-full bg-gradient-to-br from-primary to-brand-accent flex items-center justify-center text-white font-black shadow-lg shadow-primary/20"
             style={{ fontSize: size * 0.38 }}
           >
             {initial}
@@ -234,7 +234,7 @@ export default function AvatarUpload({
         </button>
         {avatarUrl && (
           <>
-            <span className="text-gray-300 dark:text-slate-600">·</span>
+            <span className="text-gray-300 dark:text-white">·</span>
             <button
               type="button"
               onClick={handleDelete}

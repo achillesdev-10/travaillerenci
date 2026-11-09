@@ -6,8 +6,8 @@ import Link from 'next/link';
 const CONTRACT_TYPES = ['CDI', 'CDD', 'Stage', 'Prestation', 'Alternance', 'Freelance'];
 
 const inputClass =
-  'w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all';
-const labelClass = 'block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1.5';
+  'w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-black dark:text-gray-100 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all';
+const labelClass = 'block text-sm font-semibold text-black dark:text-gray-200 mb-1.5';
 
 interface PublishForm {
   title: string;
@@ -76,15 +76,15 @@ export default function PublishOfferForm() {
       {/* Success message */}
       {success ? (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-8 shadow-sm text-center">
-          <div className="mx-auto w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mb-5">
-            <svg className="h-8 w-8 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+          <div className="mx-auto w-16 h-16 rounded-full bg-brand-soft dark:bg-brand/15 flex items-center justify-center mb-5">
+            <svg className="h-8 w-8 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
               <path d="M20 6 9 17l-5-5" />
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+          <h2 className="text-xl font-bold text-black dark:text-white mb-2">
             Offre soumise avec succès !
           </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-6 max-w-md mx-auto">
+          <p className="text-sm text-black dark:text-white mb-6 max-w-md mx-auto">
             Votre offre est en attente de validation par notre équipe. Vous recevrez une notification une fois qu&apos;elle sera publiée.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -96,7 +96,7 @@ export default function PublishOfferForm() {
             </button>
             <Link
               href="/"
-              className="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all"
+              className="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm font-semibold text-black dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all"
             >
               Retour à l&apos;accueil
             </Link>
@@ -109,10 +109,10 @@ export default function PublishOfferForm() {
               📋
             </span>
             <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+              <h2 className="text-lg font-bold text-black dark:text-white">
                 Informations sur l&apos;offre
               </h2>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-black dark:text-white">
                 Les champs marqués * sont obligatoires
               </p>
             </div>
@@ -194,14 +194,14 @@ export default function PublishOfferForm() {
                 onChange={(e) => updateField('description', e.target.value)}
                 required
               />
-              <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
+              <p className="text-[11px] text-gray-400 dark:text-white mt-1">
                 Minimum 20 caractères. Plus la description est détaillée, plus elle attirera de candidats qualifiés.
               </p>
             </div>
 
             {/* Apply */}
             <div className="border-t border-gray-100 dark:border-slate-800 pt-5">
-              <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+              <h3 className="text-sm font-bold text-black dark:text-white mb-3 flex items-center gap-2">
                 <span className="w-6 h-6 rounded-md bg-primary/10 text-primary flex items-center justify-center text-xs">✉️</span>
                 Comment postuler ?
               </h3>
@@ -227,14 +227,14 @@ export default function PublishOfferForm() {
                   />
                 </div>
               </div>
-              <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
+              <p className="text-[11px] text-gray-400 dark:text-white mt-1">
                 Au moins un moyen de postuler est requis (lien ou email).
               </p>
             </div>
 
             {/* Contact */}
             <div className="border-t border-gray-100 dark:border-slate-800 pt-5">
-              <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+              <h3 className="text-sm font-bold text-black dark:text-white mb-3 flex items-center gap-2">
                 <span className="w-6 h-6 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs">👤</span>
                 Contact (optionnel)
               </h3>
@@ -276,7 +276,7 @@ export default function PublishOfferForm() {
 
           {/* Submit */}
           <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-black dark:text-white">
               📢 Votre offre sera examinée par notre équipe avant publication.
             </p>
             <button

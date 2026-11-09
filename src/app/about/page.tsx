@@ -92,7 +92,7 @@ export default function AboutPage() {
       {/* ===== En-tête ===== */}
       <section className="relative overflow-hidden border-b border-border/40 bg-primary/5 dark:bg-primary/10">
         <div className="container mx-auto px-4 py-14 sm:py-20 relative z-10 max-w-4xl text-center">
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary dark:text-emerald-400 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-5">
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary dark:text-brand-accent px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-5">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
               <circle cx="12" cy="12" r="10" />
               <circle cx="12" cy="12" r="4" />
@@ -100,10 +100,10 @@ export default function AboutPage() {
             </svg>
             À propos de TravaillerenCi
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-[var(--font-display)] text-gray-900 dark:text-white">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-[var(--font-display)] text-black dark:text-white">
             Qui sommes-nous&nbsp;?
           </h1>
-          <p className="mt-4 text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-4 text-base sm:text-lg text-black dark:text-white max-w-2xl mx-auto leading-relaxed">
             TravaillerenCi est une plateforme <strong>100% ivoirienne</strong> qui connecte les
             talents aux opportunités : emplois, stages, bourses d’études et concours
             administratifs, réunis au même endroit.
@@ -114,25 +114,25 @@ export default function AboutPage() {
       {/* ===== Article / histoire ===== */}
       <section className="container mx-auto px-4 py-12 sm:py-16 max-w-4xl">
         <div>
-          <article className="space-y-6 text-[15px] sm:text-base leading-relaxed text-gray-700 dark:text-gray-300">
+          <article className="space-y-6 text-[15px] sm:text-base leading-relaxed text-black dark:text-white">
             <p>
-              <strong className="text-gray-900 dark:text-white">TravaillerenCi</strong> est né
+              <strong className="text-black dark:text-white">TravaillerenCi</strong> est né
               d’une idée simple : <em>«&nbsp;Chaque Ivoirien mérite de trouver sa voie
               professionnelle sans se heurter à la désinformation ou aux annonces fantômes.&nbsp;»</em>{' '}
               Le projet a été imaginé, conçu et développé par un développeur ivoirien passionné,
-              connu sous le pseudo <strong className="text-gray-900 dark:text-white">AchillesDev10</strong>.
+              connu sous le pseudo <strong className="text-black dark:text-white">AchillesDev10</strong>.
             </p>
             <p>
               Partant du constat que les candidats perdent un temps précieux à éplucher des
               dizaines de sites pour trouver une simple offre correspondant à leur profil,
               AchillesDev10 a décidé de créer une plateforme centralisée, moderne et fiable :
-              un véritable <strong className="text-gray-900 dark:text-white">pont numérique</strong>{' '}
+              un véritable <strong className="text-black dark:text-white">pont numérique</strong>{' '}
               entre les recruteurs et les talents de Côte d’Ivoire.
             </p>
             <p>
               Aujourd’hui, TravaillerenCi agrège automatiquement les offres publiées par les
               entreprises, les institutions et les organismes de formation, puis soumet chaque
-              contenu à une <strong className="text-gray-900 dark:text-white">vérification humaine</strong>{' '}
+              contenu à une <strong className="text-black dark:text-white">vérification humaine</strong>{' '}
               avant publication. Les utilisateurs peuvent ainsi rechercher un emploi, un stage,
               une bourse ou un concours en toute confiance.
             </p>
@@ -162,10 +162,10 @@ export default function AboutPage() {
                   <div className="text-xs font-bold uppercase tracking-widest text-primary mb-1">
                     {String(i + 1).padStart(2, '0')} — {step.period}
                   </div>
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white font-[var(--font-display)]">
+                  <h3 className="text-lg sm:text-xl font-bold text-black dark:text-white font-[var(--font-display)]">
                     {step.title}
                   </h3>
-                  <p className="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">
+                  <p className="mt-2 text-sm sm:text-base text-black dark:text-white leading-relaxed">
                     {step.text}
                   </p>
                 </div>
@@ -176,7 +176,7 @@ export default function AboutPage() {
 
         {/* ===== Valeurs ===== */}
         <div className="mt-14">
-          <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white font-[var(--font-display)] mb-6">
+          <h2 className="text-2xl font-extrabold text-black dark:text-white font-[var(--font-display)] mb-6">
             Nos engagements
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
@@ -188,8 +188,8 @@ export default function AboutPage() {
                 <div className="text-primary mb-3" aria-hidden="true">
                   {v.icon}
                 </div>
-                <h3 className="font-bold text-gray-900 dark:text-white">{v.title}</h3>
-                <p className="mt-1.5 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{v.text}</p>
+                <h3 className="font-bold text-black dark:text-white">{v.title}</h3>
+                <p className="mt-1.5 text-sm text-black dark:text-white leading-relaxed">{v.text}</p>
               </div>
             ))}
           </div>
@@ -206,7 +206,7 @@ export default function AboutPage() {
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/jobs"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-gray-900 font-bold text-sm hover:bg-gray-100 transition-colors shadow-lg"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-black font-bold text-sm hover:bg-gray-100 transition-colors shadow-lg"
             >
               Voir les offres
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
@@ -230,7 +230,7 @@ export default function AboutPage() {
 
         {/* ===== Contact ===== */}
         <div className="mt-10 text-center">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-black dark:text-white">
             Une question, une suggestion&nbsp;? Écrivez-nous à{' '}
             <a href={`mailto:${SITE_CONFIG.supportEmail}`} className="text-primary font-semibold hover:underline">
               {SITE_CONFIG.supportEmail}

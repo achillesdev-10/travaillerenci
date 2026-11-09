@@ -68,12 +68,12 @@ export default function InstallPrompt({ compact = false }: { compact?: boolean }
           onClick={() => setShowIOSHint((s) => !s)}
           aria-label="Installer l'application"
           title="Installer l'application"
-          className="p-2 rounded-xl border border-border bg-gray-50 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+          className="p-2 rounded-xl border border-border bg-gray-50 dark:bg-slate-800 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
         >
           📱
         </button>
         {showIOSHint && (
-          <div className="absolute right-0 top-full mt-2 w-64 p-4 rounded-xl border border-border bg-white dark:bg-slate-900 shadow-xl z-50 text-sm text-gray-700 dark:text-gray-200">
+          <div className="absolute right-0 top-full mt-2 w-64 p-4 rounded-xl border border-border bg-white dark:bg-slate-900 shadow-xl z-50 text-sm text-black dark:text-gray-200">
             <p className="font-semibold mb-1">Installer l'application</p>
             <p>
               Sur iOS : touchez le bouton <strong>Partager</strong>{' '}

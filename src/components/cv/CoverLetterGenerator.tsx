@@ -12,8 +12,8 @@ interface CoverLetterForm {
 }
 
 const inputClass =
-  'w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all';
-const labelClass = 'block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1.5';
+  'w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-black dark:text-gray-100 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all';
+const labelClass = 'block text-sm font-semibold text-black dark:text-gray-200 mb-1.5';
 
 interface CoverLetterGeneratorProps {
   initialName?: string;
@@ -111,10 +111,10 @@ export default function CoverLetterGenerator({
             ✉️
           </span>
           <div>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+            <h2 className="text-lg font-bold text-black dark:text-white">
               Lettre de motivation IA
             </h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-black dark:text-white">
               L&apos;IA rédige une lettre personnalisée pour votre candidature
             </p>
           </div>
@@ -223,18 +223,18 @@ export default function CoverLetterGenerator({
       {result && (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <span className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-sm">✓</span>
+            <h3 className="text-base font-bold text-black dark:text-white flex items-center gap-2">
+              <span className="w-7 h-7 rounded-lg bg-brand-soft dark:bg-brand/15 text-brand-strong dark:text-brand-accent flex items-center justify-center text-sm">✓</span>
               Votre lettre de motivation
             </h3>
             <div className="flex items-center gap-2">
               <button
                 onClick={copyToClipboard}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all inline-flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-black dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all inline-flex items-center gap-1.5"
               >
                 {copied ? (
                   <>
-                    <svg className="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3.5 h-3.5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                     </svg>
                     Copié !
@@ -250,7 +250,7 @@ export default function CoverLetterGenerator({
               </button>
               <button
                 onClick={downloadTxt}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all inline-flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-black dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all inline-flex items-center gap-1.5"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -260,11 +260,11 @@ export default function CoverLetterGenerator({
             </div>
           </div>
           <div className="rounded-xl bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 p-5">
-            <pre className="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-200 leading-relaxed font-[var(--font-body)]">
+            <pre className="whitespace-pre-wrap text-sm text-black dark:text-gray-200 leading-relaxed font-[var(--font-body)]">
               {result}
             </pre>
           </div>
-          <p className="mt-3 text-[11px] text-gray-400 dark:text-gray-500">
+          <p className="mt-3 text-[11px] text-gray-400 dark:text-white">
             ✨ Lettre générée par IA. Vérifiez et personnalisez les détails avant de l&apos;envoyer.
           </p>
         </div>

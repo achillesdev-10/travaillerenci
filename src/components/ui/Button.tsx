@@ -25,9 +25,12 @@ type LinkProps = BaseProps &
 
 const VARIANTS: Record<ButtonVariant, string> = {
   primary: 'bg-brand text-white shadow-card hover:bg-brand-strong',
-  secondary: 'bg-brand-soft text-brand-strong hover:bg-[#ffe8d3]',
-  outline: 'border border-line bg-white text-ink hover:border-brand/40 hover:text-brand',
-  ghost: 'text-ink-soft hover:bg-surface hover:text-ink',
+  secondary:
+    'bg-brand-soft text-brand-strong hover:bg-[#ffe8d3] dark:bg-brand/15 dark:text-brand-accent dark:hover:bg-brand/25',
+  outline:
+    'border border-line bg-white text-black hover:border-brand/40 hover:text-brand dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:hover:border-brand-accent/50 dark:hover:text-brand-accent',
+  ghost:
+    'text-black hover:bg-surface hover:text-brand dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-brand-accent',
   danger: 'bg-danger text-white shadow-card hover:bg-red-700',
 };
 

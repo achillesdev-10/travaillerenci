@@ -166,7 +166,7 @@ export default function SearchBar({
             autoComplete="off"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            className="w-full pl-2 pr-3 sm:pl-3 sm:pr-4 py-3 sm:py-3.5 rounded-xl bg-gray-50/80 border border-transparent focus:bg-white focus:border-primary/40 focus:ring-2 focus:ring-primary/15 outline-none text-sm sm:text-base placeholder:text-gray-600 transition-colors"
+            className="w-full pl-2 pr-3 sm:pl-3 sm:pr-4 py-3 sm:py-3.5 rounded-xl bg-gray-50/80 border border-transparent focus:bg-white focus:border-primary/40 focus:ring-2 focus:ring-primary/15 outline-none text-sm sm:text-base placeholder:text-neutral-500 transition-colors"
           />
         </div>
 
@@ -181,7 +181,7 @@ export default function SearchBar({
                 setLocation(e.target.value);
                 pushFilters(keyword, e.target.value, contract);
               }}
-              className="w-full appearance-none pl-10 sm:pl-11 pr-8 py-3 sm:py-3.5 rounded-xl bg-gray-50/80 border border-transparent focus:bg-white focus:border-primary/40 focus:ring-2 focus:ring-primary/15 outline-none text-[13px] sm:text-sm text-gray-700"
+              className="w-full appearance-none pl-10 sm:pl-11 pr-8 py-3 sm:py-3.5 rounded-xl bg-gray-50/80 border border-transparent focus:bg-white focus:border-primary/40 focus:ring-2 focus:ring-primary/15 outline-none text-[13px] sm:text-sm text-black"
             >
               {CITY_OPTIONS.map((opt) => (
                 <option key={opt.value || 'all'} value={opt.value}>{opt.label}</option>
@@ -210,7 +210,7 @@ export default function SearchBar({
                 setContract(e.target.value);
                 pushFilters(keyword, location, e.target.value);
               }}
-              className="w-full appearance-none pl-10 sm:pl-11 pr-8 py-3 sm:py-3.5 rounded-xl bg-gray-50/80 border border-transparent focus:bg-white focus:border-primary/40 focus:ring-2 focus:ring-primary/15 outline-none text-[13px] sm:text-sm text-gray-700"
+              className="w-full appearance-none pl-10 sm:pl-11 pr-8 py-3 sm:py-3.5 rounded-xl bg-gray-50/80 border border-transparent focus:bg-white focus:border-primary/40 focus:ring-2 focus:ring-primary/15 outline-none text-[13px] sm:text-sm text-black"
             >
               {CONTRACT_OPTIONS.map((opt) => (
                 <option key={opt.value || 'all'} value={opt.value}>{opt.label}</option>

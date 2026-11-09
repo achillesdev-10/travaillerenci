@@ -98,29 +98,29 @@ export default function NewJobPage() {
   if (success) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
-        <div className="rounded-3xl border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-900/20 p-8 shadow-xl">
-          <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-4">
+        <div className="rounded-3xl border border-brand/30 bg-brand-soft dark:bg-brand/15 p-8 shadow-xl">
+          <div className="w-16 h-16 rounded-full bg-brand-soft dark:bg-brand/20 text-brand dark:text-brand-accent flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Offre créée avec succès !</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <h2 className="text-xl font-bold text-black dark:text-white mb-2">Offre créée avec succès !</h2>
+          <p className="text-sm text-black dark:text-white">
             Votre offre est en attente de modération par notre équipe. Elle sera publiée après validation.
           </p>
-          <p className="text-xs text-gray-500 dark:text-gray-500 mt-3">Redirection automatique…</p>
+          <p className="text-xs text-black dark:text-white mt-3">Redirection automatique…</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 space-y-6 text-gray-900 dark:text-slate-50">
+    <div className="max-w-3xl mx-auto px-4 py-8 space-y-6 text-black dark:text-slate-50">
       {/* Header */}
       <div>
         <Link
           href="/dashboard/company/jobs"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-primary mb-3"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-black dark:text-white hover:text-primary mb-3"
         >
           <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -130,7 +130,7 @@ export default function NewJobPage() {
         <h1 className="text-2xl lg:text-3xl font-extrabold font-[var(--font-display)]">
           Publier une offre d&apos;emploi
         </h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+        <p className="text-sm text-black dark:text-white mt-1">
           Remplissez les informations ci-dessous. Votre offre sera examinée par notre équipe avant publication.
         </p>
       </div>
@@ -149,7 +149,7 @@ export default function NewJobPage() {
 
           {/* Titre */}
           <div>
-            <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+            <label className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1">
               Titre du poste *
             </label>
             <input
@@ -164,10 +164,10 @@ export default function NewJobPage() {
 
           {/* Description */}
           <div>
-            <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+            <label className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1">
               Description du poste *
             </label>
-            <p className="text-[11px] text-gray-400 dark:text-gray-500 ml-1 mb-2">
+            <p className="text-[11px] text-gray-400 dark:text-white ml-1 mb-2">
               Vous pouvez utiliser le Markdown pour la mise en forme (**gras*, *italique*, listes, etc.)
             </p>
             <textarea
@@ -183,7 +183,7 @@ export default function NewJobPage() {
           {/* Ville + Type de contrat */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+              <label className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1">
                 Ville *
               </label>
               <select
@@ -200,7 +200,7 @@ export default function NewJobPage() {
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+              <label className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1">
                 Type de contrat *
               </label>
               <select
@@ -219,7 +219,7 @@ export default function NewJobPage() {
 
           {/* Date limite */}
           <div>
-            <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+            <label className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1">
               Date limite de candidature (optionnel)
             </label>
             <input
@@ -234,13 +234,13 @@ export default function NewJobPage() {
         {/* Moyen de postuler */}
         <div className="rounded-3xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 lg:p-8 shadow-xl space-y-5">
           <h2 className="font-bold text-lg">Comment postuler ?</h2>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-black dark:text-white">
             Renseignez au moins un moyen de candidature.
           </p>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+              <label className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1">
                 Lien de candidature (optionnel)
               </label>
               <input
@@ -252,10 +252,10 @@ export default function NewJobPage() {
               />
             </div>
 
-            <div className="text-center text-xs text-gray-400 dark:text-gray-500 font-semibold">OU</div>
+            <div className="text-center text-xs text-gray-400 dark:text-white font-semibold">OU</div>
 
             <div>
-              <label className="block text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
+              <label className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1">
                 Email de candidature (optionnel)
               </label>
               <input
@@ -273,7 +273,7 @@ export default function NewJobPage() {
         <div className="flex flex-col sm:flex-row items-center justify-end gap-3">
           <Link
             href="/dashboard/company/jobs"
-            className="w-full sm:w-auto text-center px-6 py-3 rounded-2xl border border-gray-200 dark:border-slate-800 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all"
+            className="w-full sm:w-auto text-center px-6 py-3 rounded-2xl border border-gray-200 dark:border-slate-800 text-sm font-semibold text-black dark:text-white hover:bg-gray-50 dark:hover:bg-slate-800 transition-all"
           >
             Annuler
           </Link>

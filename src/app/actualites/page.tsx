@@ -45,12 +45,12 @@ const CATEGORY_LABELS: Record<ArticleCategory, string> = {
 };
 
 const CATEGORY_COLORS: Record<ArticleCategory, string> = {
-  emploi: 'bg-primary/10 text-primary dark:text-emerald-400',
+  emploi: 'bg-primary/10 text-primary dark:text-brand-accent',
   formation: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
   concours: 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
   economie: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
   carriere: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-  guide: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+  guide: 'bg-brand/10 text-brand dark:text-brand-accent',
 };
 
 const FILTER_OPTIONS: { value: string; label: string }[] = [
@@ -117,17 +117,17 @@ export default async function ActualitesPage({ searchParams }: ActualitesPagePro
       {/* ===== En-tête ===== */}
       <section className="relative overflow-hidden border-b border-border/40 bg-primary/5 dark:bg-primary/10">
         <div className="container mx-auto px-4 py-12 sm:py-16 relative z-10 max-w-4xl text-center">
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary dark:text-emerald-400 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-5">
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary dark:text-brand-accent px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-5">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
               <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
               <path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6Z" />
             </svg>
             Actualités &amp; Guides
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-[var(--font-display)] text-gray-900 dark:text-white">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-[var(--font-display)] text-black dark:text-white">
             Le marché du travail ivoirien
           </h1>
-          <p className="mt-4 text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-4 text-base sm:text-lg text-black dark:text-white max-w-2xl mx-auto leading-relaxed">
             Actualités, guides de préparation et conseils pour réussir votre
             carrière en Côte d&apos;Ivoire.
           </p>
@@ -164,7 +164,7 @@ export default async function ActualitesPage({ searchParams }: ActualitesPagePro
               id="news-category"
               name="category"
               defaultValue={category}
-              className="w-full appearance-none rounded-xl border border-gray-200 bg-white py-2.5 pl-4 pr-9 text-[13px] font-semibold text-gray-700 outline-none transition-colors focus:border-primary/50 focus:ring-2 focus:ring-primary/10 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-200 sm:w-56"
+              className="w-full appearance-none rounded-xl border border-gray-200 bg-white py-2.5 pl-4 pr-9 text-[13px] font-semibold text-black outline-none transition-colors focus:border-primary/50 focus:ring-2 focus:ring-primary/10 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-200 sm:w-56"
             >
               {FILTER_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -191,10 +191,10 @@ export default async function ActualitesPage({ searchParams }: ActualitesPagePro
                 <path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6Z" />
               </svg>
             </div>
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white font-[var(--font-display)]">
+            <h2 className="text-lg sm:text-xl font-bold text-black dark:text-white font-[var(--font-display)]">
               Aucune actualité pour le moment
             </h2>
-            <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-2 max-w-md mx-auto">
+            <p className="text-sm sm:text-base text-black dark:text-white mt-2 max-w-md mx-auto">
               Revenez bientôt : nos articles sur l&apos;emploi arrivent très vite !
             </p>
             <Link
@@ -206,8 +206,8 @@ export default async function ActualitesPage({ searchParams }: ActualitesPagePro
           </div>
         ) : (
           <>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-              <strong className="text-gray-800 dark:text-gray-200">{total}</strong>{' '}
+            <p className="text-sm text-black dark:text-white mb-6">
+              <strong className="text-black dark:text-gray-200">{total}</strong>{' '}
               article{total > 1 ? 's' : ''} publié{total > 1 ? 's' : ''}
             </p>
 
@@ -237,11 +237,11 @@ export default async function ActualitesPage({ searchParams }: ActualitesPagePro
                         {formatRelativeTime(featured.published_at || featured.created_at)}
                       </span>
                     </div>
-                    <h2 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white font-[var(--font-display)] leading-snug group-hover:text-primary transition-colors mb-2">
+                    <h2 className="text-lg sm:text-2xl font-bold text-black dark:text-white font-[var(--font-display)] leading-snug group-hover:text-primary transition-colors mb-2">
                       {featured.title}
                     </h2>
                     {featured.excerpt && (
-                      <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-3">
+                      <p className="text-sm text-black dark:text-white leading-relaxed line-clamp-3">
                         {featured.excerpt}
                       </p>
                     )}
@@ -270,7 +270,7 @@ export default async function ActualitesPage({ searchParams }: ActualitesPagePro
                 {safePage > 1 && (
                   <Link
                     href={filterHref({ page: String(safePage - 1) })}
-                    className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-600 transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                    className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                   >
                     ← Précédent
                   </Link>
@@ -293,7 +293,7 @@ export default async function ActualitesPage({ searchParams }: ActualitesPagePro
                         className={`rounded-xl px-4 py-2 text-sm font-semibold transition-colors ${
                           p === safePage
                             ? 'bg-primary text-white shadow-md shadow-primary/20'
-                            : 'border border-gray-200 bg-white text-gray-600 hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300'
+                            : 'border border-gray-200 bg-white text-black hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white'
                         }`}
                       >
                         {p}
@@ -303,7 +303,7 @@ export default async function ActualitesPage({ searchParams }: ActualitesPagePro
                 {safePage < totalPages && (
                   <Link
                     href={filterHref({ page: String(safePage + 1) })}
-                    className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-600 transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300"
+                    className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                   >
                     Suivant →
                   </Link>
@@ -338,7 +338,7 @@ function ArticleCard({ article }: { article: Article }) {
         </span>
       </div>
       <div className="flex flex-col flex-1 p-3.5 sm:p-5">
-        <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 font-medium mb-2">
+        <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-black dark:text-white font-medium mb-2">
           <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="4" width="18" height="18" rx="2" />
             <path d="M16 2v4M8 2v4M3 10h18" />
@@ -354,11 +354,11 @@ function ArticleCard({ article }: { article: Article }) {
           <span aria-hidden="true">•</span>
           <span className="truncate">{article.author}</span>
         </div>
-        <h2 className="text-[13px] sm:text-base font-bold text-gray-900 dark:text-white font-[var(--font-display)] leading-snug group-hover:text-primary transition-colors line-clamp-2">
+        <h2 className="text-[13px] sm:text-base font-bold text-black dark:text-white font-[var(--font-display)] leading-snug group-hover:text-primary transition-colors line-clamp-2">
           {article.title}
         </h2>
         {article.excerpt && (
-          <p className="mt-1.5 text-[11.5px] sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-3 flex-1">
+          <p className="mt-1.5 text-[11.5px] sm:text-sm text-black dark:text-white leading-relaxed line-clamp-3 flex-1">
             {truncate(article.excerpt, 150)}
           </p>
         )}
