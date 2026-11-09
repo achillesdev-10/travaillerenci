@@ -51,6 +51,17 @@ test.describe("Recherche sur la page d'accueil", () => {
     await expect(page).toHaveURL(/q=d%C3%A9veloppeur/);
   });
 
+  test('la recherche ouvre directement la zone de resultats', async ({ page }) => {
+    await gotoPage(page, '/');
+
+    const keyword = page.locator('#search-keyword');
+    await keyword.fill('développeur');
+    await keyword.press('Enter');
+
+    await expect(page).toHaveURL(/#resultats/, { timeout: 20_000 });
+    await expect(page.locator('#resultats')).toBeInViewport({ timeout: 10_000 });
+  });
+
   test("le champ ville met a jour l'URL avec le parametre city", async ({ page }) => {
     await gotoPage(page, '/');
 

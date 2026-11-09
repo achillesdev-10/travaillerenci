@@ -8,7 +8,6 @@ import NewsTicker, { type TickerItem } from '@/components/home/NewsTicker';
 import HomeCarousel from '@/components/home/HomeCarousel';
 import PollWidget from '@/components/home/PollWidgetLazy';
 import OffersGrid from '@/components/home/OffersGrid';
-import ScrollingOffers from '@/components/home/ScrollingOffers';
 import ForumSection from '@/components/home/ForumSection';
 import SocialLinks from '@/components/layout/SocialLinks';
 import { buildCarouselSlides } from '@/lib/homeCarousel';
@@ -596,15 +595,6 @@ export default async function HomePage() {
       {/*   FORUM / Q&A — Questions de la communauté                              */}
       {/* ======================================================================== */}
       <ForumSection />
-
-      {/* ======================================================================== */}
-      {/*   DÉFILANT D'OFFRES — carrousel horizontal qui défile lentement          */}
-      {/* ======================================================================== */}
-      <section className="container mx-auto px-4 mt-10 sm:mt-14 max-w-6xl">
-        {/* 8 offres max (doublées pour la boucle CSS) : suffisant pour le
-            défilé et divise par ~3 le nombre de cartes dans le DOM. */}
-        <ScrollingOffers offers={jobsList.slice(0, 8)} />
-      </section>
 
       {/* ======================================================================== */}
       {/*   OFFRE À LA UNE — grille 2 colonnes dès le mobile                        */}

@@ -41,7 +41,7 @@ function runTest(viewport: { width: number; height: number }, label: string) {
       // Vérifier que les données d'exemple sont chargées (input du formulaire).
       // Le formulaire est chargé dynamiquement (ssr: false) : le délai de
       // compilation/chargement en dev peut dépasser 10 s.
-      await expect(page.locator('input[value*="KOUASSI"]')).toBeVisible({ timeout: 30_000 });
+      await expect(page.locator('input[value*="KONÉ"]')).toBeVisible({ timeout: 30_000 });
 
       // Configurer le téléchargement
       const downloadPromise = page.waitForEvent('download', { timeout: 30_000 });

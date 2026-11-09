@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import type { CVData, Experience, Education } from '@/types/cv';
 import { createEmptyExperience, createEmptyEducation } from '@/types/cv';
-
-const MAX_PHOTO_SIZE = 5 * 1024 * 1024; // 5 Mo
+import CVIllustration from './CVIllustration';
 
 interface CVFormProps {
   cvData: CVData;
@@ -14,13 +13,6 @@ interface CVFormProps {
 export default function CVForm({ cvData, onChange }: CVFormProps) {
   const [skillInput, setSkillInput] = useState('');
   const [optimizingField, setOptimizingField] = useState<string | null>(null);
-  const [photoUploading, setPhotoUploading] = useState(false);
-  const [photoMessage, setPhotoMessage] = useState<{
-    type: 'error' | 'info';
-    text: string;
-  } | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const photoInputRef = useRef<HTMLInputElement>(null);
 
   const updateField = <K extends keyof CVData>(field: K, value: CVData[K]) => {
     onChange({ ...cvData, [field]: value });
@@ -66,74 +58,6 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
 
   const removeSkill = (skill: string) => {
     updateField('skills', cvData.skills.filter((s) => s !== skill));
-  };
-
-  const handlePhotoFile = async (file: File | undefined | null) => {
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      setPhotoMessage({
-        type: 'error',
-        text: 'Format non supporté. Choisissez une image (JPG, PNG, WebP).',
-      });
-      return;
-    }
-    if (file.size > MAX_PHOTO_SIZE) {
-      setPhotoMessage({ type: 'error', text: 'Image trop lourde (5 Mo maximum).' });
-      return;
-    }
-    setPhotoMessage(null);
-    setPhotoUploading(true);
-
-    // Aperçu immédiat via un blob local, puis upload Supabase en arrière-plan.
-    const localUrl = URL.createObjectURL(file);
-    updateField('photoUrl', localUrl);
-
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const res = await fetch('/api/cv/photo', { method: 'POST', body: formData });
-      const data = await res.json();
-      if (res.ok && data.url) {
-        updateField('photoUrl', data.url);
-      } else if (res.status === 401 || data.code === 'auth_required') {
-        // Non connecté : l'aperçu local (blob:) est conservé pour le PDF.
-        setPhotoMessage({
-          type: 'info',
-          text: 'Connectez-vous pour enregistrer la photo en ligne — aperçu local conservé.',
-        });
-      } else if (data.code === 'not_configured') {
-        setPhotoMessage({
-          type: 'info',
-          text: 'Aperçu local uniquement — stockage Supabase non configuré.',
-        });
-      } else {
-        setPhotoMessage({
-          type: 'error',
-          text: data.error || "Échec de l'upload de la photo.",
-        });
-      }
-    } catch {
-      setPhotoMessage({
-        type: 'error',
-        text: "Erreur lors de l'upload de la photo.",
-      });
-    } finally {
-      setPhotoUploading(false);
-    }
-  };
-
-  const removePhoto = () => {
-    const current = cvData.photoUrl;
-    if (current?.startsWith('blob:')) URL.revokeObjectURL(current);
-    updateField('photoUrl', '');
-    setPhotoMessage(null);
-    if (photoInputRef.current) photoInputRef.current.value = '';
-  };
-
-  const handlePhotoDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    handlePhotoFile(e.dataTransfer.files?.[0]);
   };
 
   const handleSkillKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -187,126 +111,20 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
           Informations personnelles
         </h2>
 
-        {/* --- Photo de profil --- */}
-        <div className="mb-6 flex flex-col sm:flex-row items-center gap-5">
-          <div className="relative shrink-0">
-            <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-primary/15 bg-brand-soft dark:bg-slate-800 shadow-inner flex items-center justify-center">
-              {cvData.photoUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={cvData.photoUrl}
-                  alt="Photo de profil"
-                  crossOrigin={
-                    cvData.photoUrl.startsWith('http')
-                      ? 'anonymous'
-                      : undefined
-                  }
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <svg
-                  className="w-12 h-12 text-gray-300 dark:text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  />
-                </svg>
-              )}
-            </div>
-            {cvData.photoUrl && !photoUploading && (
-              <button
-                onClick={removePhoto}
-                title="Retirer la photo"
-                className="absolute -top-1.5 -right-1.5 w-7 h-7 rounded-full bg-red-500 hover:bg-red-600 text-white text-sm font-bold shadow-md flex items-center justify-center transition-all hover:scale-110"
-              >
-                ✕
-              </button>
-            )}
-          </div>
+        <p className="mb-5 text-sm text-black dark:text-white">
+          Les champs sont préremplis avec un exemple : remplacez-les par vos
+          informations réelles. Tout est sauvegardé automatiquement.
+        </p>
 
-          <div className="flex-1 min-w-0 w-full">
-            <label htmlFor="cv-photo" className={labelClass}>Photo de profil</label>
-            <input
-              ref={photoInputRef}
-              id="cv-photo"
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              className="hidden"
-              onChange={(e) => {
-                handlePhotoFile(e.target.files?.[0]);
-                e.target.value = '';
-              }}
-            />
-            <div
-              role="button"
-              tabIndex={0}
-              aria-label="Télécharger une photo de profil"
-              onClick={() => photoInputRef.current?.click()}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  photoInputRef.current?.click();
-                }
-              }}
-              onDragOver={(e) => {
-                e.preventDefault();
-                setIsDragging(true);
-              }}
-              onDragLeave={() => setIsDragging(false)}
-              onDrop={handlePhotoDrop}
-              className={`flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl border-2 border-dashed border-line dark:border-slate-600 bg-brand-soft/50 dark:bg-slate-800/50 text-sm font-semibold text-black dark:text-white cursor-pointer transition-all hover:border-primary hover:bg-primary/5 ${
-                isDragging
-                  ? 'border-primary bg-primary/10 scale-[1.01] ring-2 ring-primary/20'
-                  : ''
-              }`}
-            >
-              {photoUploading ? (
-                <>
-                  <svg
-                    className="w-4 h-4 animate-spin text-primary"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                    ></path>
-                  </svg>
-                  Upload en cours...
-                </>
-              ) : (
-                <>📷 Télécharger une photo ou glisser-déposer</>
-              )}
-            </div>
-            {photoMessage && (
-              <p
-                className={`mt-2 text-xs font-semibold ${
-                  photoMessage.type === 'error'
-                    ? 'text-red-500'
-                    : 'text-amber-500'
-                }`}
-              >
-                {photoMessage.text}
-              </p>
-            )}
-            <p className="text-xs text-black dark:text-white mt-2">
-              Conseil : photo récente, fond neutre et visage bien visible.
-              JPG, PNG ou WebP — 5 Mo max.
+        <div className="mb-6 flex items-center gap-4 rounded-xl border border-brand/20 bg-brand-soft/70 p-4 dark:border-brand/30 dark:bg-brand/10">
+          <CVIllustration className="h-16 w-16 shrink-0 rounded-xl" />
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-black dark:text-white">
+              Illustration professionnelle intégrée
+            </p>
+            <p className="mt-0.5 text-xs text-black dark:text-white">
+              Votre CV utilise une illustration neutre à la place d&apos;une
+              photo d&apos;identité. Aucun fichier à téléverser.
             </p>
           </div>
         </div>
@@ -317,7 +135,7 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
             <input
               id="cv-fullname"
               type="text"
-              placeholder="Ex: KOUASSI Jean-Paul"
+              placeholder="Ex: KONÉ Awa"
               className={inputClass}
               value={cvData.fullName}
               onChange={(e) => updateField('fullName', e.target.value)}
@@ -328,7 +146,7 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
             <input
               id="cv-jobtitle"
               type="text"
-              placeholder="Ex: Développeur Full-Stack"
+              placeholder="Ex: Assistante de Direction"
               className={inputClass}
               value={cvData.jobTitle}
               onChange={(e) => updateField('jobTitle', e.target.value)}
@@ -375,6 +193,10 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
           <span className="w-8 h-8 rounded-lg bg-brand-soft dark:bg-brand/15 text-brand-strong dark:text-brand-accent flex items-center justify-center text-base">📝</span>
           Accroche professionnelle
         </h2>
+        <p className="mb-4 text-xs text-black dark:text-white">
+          Résumez en 2 à 4 lignes votre métier, votre expérience et ce que vous
+          recherchez.
+        </p>
         <div className="relative">
           <textarea
             id="cv-summary"
@@ -415,6 +237,10 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
             <span className="text-base leading-none">+</span> Ajouter
           </button>
         </div>
+        <p className="mb-4 text-xs text-black dark:text-white">
+          Commencez par l&apos;expérience la plus récente. Décrivez 2 à 3
+          missions avec un résultat concret quand c&apos;est possible.
+        </p>
         <div className="space-y-5">
           {cvData.experiences.length === 0 && (
             <p className="text-sm text-black dark:text-white text-center py-6 border-2 border-dashed border-line dark:border-slate-700 rounded-xl">
@@ -512,6 +338,10 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
             <span className="text-base leading-none">+</span> Ajouter
           </button>
         </div>
+        <p className="mb-4 text-xs text-black dark:text-white">
+          Indiquez le diplôme le plus récent en premier, puis les formations
+          précédentes.
+        </p>
         <div className="space-y-4">
           {cvData.educations.length === 0 && (
             <p className="text-sm text-black dark:text-white text-center py-6 border-2 border-dashed border-line dark:border-slate-700 rounded-xl">
@@ -576,6 +406,10 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
           <span className="w-8 h-8 rounded-lg bg-brand-soft dark:bg-brand/15 text-primary dark:text-brand-accent flex items-center justify-center text-base">⚡</span>
           Compétences
         </h2>
+        <p className="mb-4 text-xs text-black dark:text-white">
+          Ajoutez 6 à 10 compétences : outils, savoir-faire métier et qualités
+          utiles pour le poste.
+        </p>
         <div className="flex flex-wrap gap-2 mb-3">
           {cvData.skills.map((skill) => (
             <span
@@ -597,7 +431,7 @@ export default function CVForm({ cvData, onChange }: CVFormProps) {
           id="cv-skill-input"
           type="text"
           aria-label="Ajouter une compétence"
-          placeholder="Tapez une compétence puis appuyez sur Entrée (ex: React, Java, Gestion de projet...)"
+          placeholder="Tapez une compétence puis appuyez sur Entrée (ex: Microsoft Office, Gestion de projet...)"
           className={inputClass}
           value={skillInput}
           onChange={(e) => setSkillInput(e.target.value)}

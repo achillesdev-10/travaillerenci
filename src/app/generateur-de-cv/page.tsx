@@ -4,7 +4,12 @@ import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 import { LOCAL_IMAGES } from '@/lib/images';
 import type { CVData } from '@/types/cv';
-import { createEmptyCV, createEmptyExperience, createEmptyEducation } from '@/types/cv';
+import {
+  createEmptyCV,
+  createEmptyExperience,
+  createEmptyEducation,
+  createSampleCV,
+} from '@/types/cv';
 import dynamic from 'next/dynamic';
 import { useLocalStorage } from '@/hooks';
 
@@ -15,62 +20,8 @@ const CoverLetterDynamic = dynamic(() => import('@/components/cv/CoverLetterGene
 /** Largeur naturelle du CV A4 en px (@96dpi : 210mm ≈ 794px). */
 const PREVIEW_WIDTH_PX = 794;
 
-const sampleCV: CVData = {
-  fullName: 'KOUASSI Jean-Paul',
-  jobTitle: 'Développeur Full-Stack Senior',
-  email: 'jeanpaul.kouassi@email.ci',
-  phone: '+225 07 12 34 56 78',
-  city: 'Abidjan, Cocody',
-  summary:
-    "Développeur Full-Stack passionné avec 6+ années d'expérience dans la conception et le déploiement d'applications web modernes en Côte d'Ivoire. Spécialisé dans les écosystèmes React / Node.js et Java / Spring Boot, j'accompagne les entreprises locales dans leur transformation numérique avec des solutions robustes, scalables et adaptées au marché africain.",
-  experiences: [
-    {
-      id: '1',
-      position: 'Développeur Full-Stack Senior',
-      company: 'Orange Digital Center Côte d\'Ivoire',
-      period: 'Mars 2023 - Aujourd\'hui',
-      description:
-        "Piloter le développement d'une plateforme de services bancaires mobiles utilisée par +200 000 utilisateurs. Concevoir l'architecture microservices (Spring Boot + Node.js) et superviser une équipe de 5 développeurs juniors. Optimiser les performances APIs qui a réduit la latence moyenne de 40%.",
-    },
-    {
-      id: '2',
-      position: 'Développeur Frontend React',
-      company: 'MTN Côte d\'Ivoire',
-      period: 'Juin 2020 - Février 2023',
-      description:
-        "Concevoir et déployer les tableaux de bord d'analyse de données pour le département Marketing. Implémenter +30 interfaces réactives avec Next.js et Tailwind CSS. Automatiser les tests E2E avec Cypress, améliorant la qualité de livraison de 60%.",
-    },
-  ],
-  educations: [
-    {
-      id: '1',
-      degree: 'Master en Génie Logiciel',
-      school: 'Institut National Polytechnique Félix Houphouët-Boigny (INP-HB)',
-      year: '2018 - 2020',
-    },
-    {
-      id: '2',
-      degree: 'Licence en Informatique',
-      school: 'Université Félix Houphouët-Boigny',
-      year: '2015 - 2018',
-    },
-  ],
-  skills: [
-    'TypeScript',
-    'React / Next.js',
-    'Node.js / Express',
-    'Java / Spring Boot',
-    'PostgreSQL',
-    'MongoDB',
-    'Docker',
-    'AWS',
-    'Gestion de projet',
-    'Travail d\'équipe',
-  ],
-};
-
 export default function CVGeneratorPage() {
-  const [cvData, setCVData] = useLocalStorage<CVData>('travaillerenci_cv_data', createEmptyCV());
+  const [cvData, setCVData] = useLocalStorage<CVData>('travaillerenci_cv_data', createSampleCV());
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
   const [mode, setMode] = useState<'cv' | 'letter'>('cv');
   const [isExporting, setIsExporting] = useState(false);
@@ -94,34 +45,19 @@ export default function CVGeneratorPage() {
 
   useEffect(() => {
     setCVData((prev) => {
-      // Les blob: URLs (aperçu local quand Supabase n'est pas configuré) ne
-      // survivent pas à un rechargement : on les retire pour éviter une image
-      // cassée. Les URL Supabase publiques, elles, restent valides.
-      const cleaned = prev.photoUrl?.startsWith('blob:')
-        ? { ...prev, photoUrl: '' }
-        : prev;
-
       const isEmpty =
-        !cleaned.fullName &&
-        !cleaned.jobTitle &&
-        !cleaned.email &&
-        !cleaned.phone &&
-        !cleaned.city &&
-        !cleaned.summary &&
-        cleaned.experiences.length === 0 &&
-        cleaned.educations.length === 0 &&
-        cleaned.skills.length === 0 &&
-        !cleaned.photoUrl;
+        !prev.fullName &&
+        !prev.jobTitle &&
+        !prev.email &&
+        !prev.phone &&
+        !prev.city &&
+        !prev.summary &&
+        prev.experiences.length === 0 &&
+        prev.educations.length === 0 &&
+        prev.skills.length === 0;
 
-      // Première visite (rien en mémoire locale) : charger un CV d'exemple.
-      if (isEmpty) {
-        return {
-          ...sampleCV,
-          experiences: sampleCV.experiences.map((e) => ({ ...e, id: crypto.randomUUID() })),
-          educations: sampleCV.educations.map((e) => ({ ...e, id: crypto.randomUUID() })),
-        };
-      }
-      return cleaned;
+      if (isEmpty) return createSampleCV();
+      return prev;
     });
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setHydrated(true);
@@ -169,17 +105,6 @@ export default function CVGeneratorPage() {
   const exportPDF = async () => {
     setIsExporting(true);
     try {
-      // Précharger la photo de profil
-      if (cvData.photoUrl) {
-        await new Promise<void>((resolve) => {
-          const img = new window.Image();
-          img.onload = () => resolve();
-          img.onerror = () => resolve();
-          img.crossOrigin = 'anonymous';
-          img.src = cvData.photoUrl!;
-        });
-      }
-
       // Sur mobile, l'onglet Éditer est actif par défaut et le CV preview
       // est masqué via `hidden`. Pour garantir la capture, on bascule
       // temporairement sur l'onglet Aperçu, on attend le rendu, puis on
@@ -242,6 +167,16 @@ export default function CVGeneratorPage() {
     }
   };
 
+  const loadExample = () => {
+    if (
+      window.confirm(
+        "Charger le CV d'exemple ? Vos modifications actuelles seront remplacées.",
+      )
+    ) {
+      setCVData(createSampleCV());
+    }
+  };
+
   const resetCV = () => {
     if (window.confirm('Réinitialiser tout le CV ? Les données actuelles seront perdues.')) {
       setCVData({
@@ -301,6 +236,15 @@ export default function CVGeneratorPage() {
                 )}
               </div>
               <div className="flex flex-wrap gap-3 mt-6">
+                <button
+                  onClick={loadExample}
+                  className="px-4 py-2.5 rounded-xl border border-brand/30 bg-brand-soft text-sm font-semibold text-brand-strong hover:bg-brand/15 transition-all shadow-sm inline-flex items-center gap-2 dark:border-brand/30 dark:bg-brand/10 dark:text-brand-accent"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3zM19 15l.9 2.1 2.1.9-2.1.9L19 21l-.9-2.1-2.1-.9 2.1-.9L19 15z" />
+                  </svg>
+                  Charger l&apos;exemple
+                </button>
                 <button
                   onClick={resetCV}
                 className="px-4 py-2.5 rounded-xl border border-line dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold text-black dark:text-white hover:bg-brand-soft/50 dark:hover:bg-slate-700 transition-all shadow-sm inline-flex items-center gap-2"
@@ -528,7 +472,7 @@ export default function CVGeneratorPage() {
             left: 0; top: 0;
             width: 210mm;
             min-height: 297mm;
-            padding: 18mm 16mm;
+            padding: 0;
             box-shadow: none !important;
             margin: 0 !important;
           }

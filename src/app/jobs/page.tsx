@@ -198,8 +198,8 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
           />
         </div>
 
-        {/* Résultats */}
-        <div className="mb-6 flex items-center justify-between">
+        {/* Résultats — ancre ciblée après une recherche depuis la home */}
+        <div id="resultats" className="scroll-mt-28 mb-6 flex items-center justify-between">
           <h2 className="text-xl font-bold text-black dark:text-white font-[var(--font-display)]">
             {total} {total > 1 ? 'offres trouvées' : 'offre trouvée'}
             {keyword || city || contract ? ' (filtrées)' : ''}

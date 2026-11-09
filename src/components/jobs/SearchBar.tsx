@@ -31,6 +31,15 @@ const CONTRACT_OPTIONS = [
   ...JOB_TYPES.map((t) => ({ value: t.value, label: t.label })),
 ];
 
+/** Ancre de la liste de résultats sur /jobs et /stages. */
+const RESULTS_ANCHOR = '#resultats';
+
+function resultsDestination(url: string, targetPath: string, hasFilters: boolean) {
+  if (!hasFilters) return url;
+  if (targetPath !== '/jobs' && targetPath !== '/stages') return url;
+  return `${url}${RESULTS_ANCHOR}`;
+}
+
 /**
  * Émet l'événement analytics `search` (§22) — libellé structuré
  * `motclé|ville|contrat`, jamais de donnée personnelle.
@@ -106,8 +115,11 @@ export default function SearchBar({
         if (c) params.set('city', c); else params.delete('city');
         if (ct) params.set('contract', ct); else params.delete('contract');
         params.delete('page');
-        const next = `${tp || pn}${params.toString() ? `?${params.toString()}` : ''}`;
-        startTransition(() => router.push(next, { scroll: cp ? false : true }));
+        const target = tp || pn;
+        const next = `${target}${params.toString() ? `?${params.toString()}` : ''}`;
+        const hasFilters = params.toString().length > 0;
+        const destination = cp ? next : resultsDestination(next, target, hasFilters);
+        startTransition(() => router.push(destination, { scroll: cp ? false : true }));
         if (os) os({ q, city: c, contract: ct });
         trackSearchOnce(lastTrackedRef, q, c, ct);
       }, 350),
@@ -124,8 +136,11 @@ export default function SearchBar({
     if (location) params.set('city', location); else params.delete('city');
     if (contract) params.set('contract', contract); else params.delete('contract');
     params.delete('page');
-    const next = `${targetPath || pathname}${params.toString() ? `?${params.toString()}` : ''}`;
-    startTransition(() => router.push(next, { scroll: !compact }));
+    const target = targetPath || pathname;
+    const next = `${target}${params.toString() ? `?${params.toString()}` : ''}`;
+    const hasFilters = params.toString().length > 0;
+    const destination = compact ? next : resultsDestination(next, target, hasFilters);
+    startTransition(() => router.push(destination, { scroll: !compact }));
     if (onSearch) onSearch({ q: keyword, city: location, contract });
     trackSearchOnce(lastTrackedRef, keyword, location, contract);
   };

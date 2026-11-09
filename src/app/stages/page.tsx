@@ -151,7 +151,7 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
           />
         </div>
 
-        <div className="mb-6 flex items-center justify-between">
+        <div id="resultats" className="scroll-mt-28 mb-6 flex items-center justify-between">
           <h2 className="text-xl font-bold text-black dark:text-white font-[var(--font-display)]">
             {total} stage{total > 1 ? 's' : ''} disponible{total > 1 ? 's' : ''}
             {keyword || city ? ' (filtrés)' : ''}
