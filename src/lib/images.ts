@@ -117,7 +117,7 @@ const svgAdmin = svgDataUri(
     <rect x="588" y="60" width="6" height="70" fill="#ffffff" opacity="0.3"/>
     <rect x="594" y="60" width="40" height="28" rx="2" fill="#f77f00" opacity="0.6"/>
     <rect x="594" y="88" width="40" height="28" rx="2" fill="#ffffff" opacity="0.3"/>
-    <rect x="594" y="116" width="40" height="28" rx="2" fill="#009639" opacity="0.5"/>
+    <rect x="594" y="116" width="40" height="28" rx="2" fill="#c2410c" opacity="0.5"/>
     <!-- Texte -->
     <text x="600" y="570" font-family="Poppins, Arial, sans-serif" font-size="32" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="0.7">Administration Publique</text>
   </svg>`,
@@ -128,8 +128,8 @@ const svgSante = svgDataUri(
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
     <defs>
       <linearGradient id="bg-sante" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#065f46"/>
-        <stop offset="100%" stop-color="#064e3b"/>
+        <stop offset="0%" stop-color="#9a3412"/>
+        <stop offset="100%" stop-color="#7c2d12"/>
       </linearGradient>
     </defs>
     <rect width="1200" height="630" fill="url(#bg-sante)"/>
@@ -141,8 +141,8 @@ const svgSante = svgDataUri(
     <!-- Cœur stylisé -->
     <path d="M600 430 C600 430, 530 390, 530 340 C530 310, 560 290, 590 310 L600 320 L610 310 C640 290, 670 310, 670 340 C670 390, 600 430, 600 430Z" fill="#ef4444" opacity="0.4"/>
     <!-- Éléments décoratifs -->
-    <circle cx="300" cy="300" r="15" fill="#34d399" opacity="0.3"/>
-    <circle cx="900" cy="350" r="20" fill="#34d399" opacity="0.25"/>
+    <circle cx="300" cy="300" r="15" fill="#fb923c" opacity="0.3"/>
+    <circle cx="900" cy="350" r="20" fill="#fb923c" opacity="0.25"/>
     <circle cx="780" cy="180" r="10" fill="#fbbf24" opacity="0.3"/>
     <!-- Texte -->
     <text x="600" y="570" font-family="Poppins, Arial, sans-serif" font-size="32" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="0.7">Santé Publique</text>
@@ -154,8 +154,8 @@ const svgEnseignement = svgDataUri(
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
     <defs>
       <linearGradient id="bg-ens" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#0e7490"/>
-        <stop offset="100%" stop-color="#155e75"/>
+        <stop offset="0%" stop-color="#9a3412"/>
+        <stop offset="100%" stop-color="#7c2d12"/>
       </linearGradient>
     </defs>
     <rect width="1200" height="630" fill="url(#bg-ens)"/>
@@ -177,8 +177,8 @@ const svgEnseignement = svgDataUri(
     <line x1="600" y1="160" x2="600" y2="175" stroke="#fbbf24" stroke-width="2" opacity="0.5"/>
     <circle cx="600" cy="180" r="6" fill="#fbbf24" opacity="0.5"/>
     <!-- Décorations -->
-    <circle cx="300" cy="480" r="12" fill="#34d399" opacity="0.25"/>
-    <circle cx="900" cy="200" r="16" fill="#34d399" opacity="0.2"/>
+    <circle cx="300" cy="480" r="12" fill="#fb923c" opacity="0.25"/>
+    <circle cx="900" cy="200" r="16" fill="#fb923c" opacity="0.2"/>
     <!-- Texte -->
     <text x="600" y="570" font-family="Poppins, Arial, sans-serif" font-size="32" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="0.7">Enseignement</text>
   </svg>`,
@@ -199,7 +199,7 @@ const svgSecurite = svgDataUri(
     <!-- Bouclier -->
     <path d="M600 120 L780 190 L780 340 Q780 440 600 500 Q420 440 420 340 L420 190 Z" fill="#ffffff" opacity="0.15" stroke="#ffffff" stroke-width="3" stroke-opacity="0.2"/>
     <!-- Vérification -->
-    <path d="M520 310 L575 365 L690 250" fill="none" stroke="#34d399" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+    <path d="M520 310 L575 365 L690 250" fill="none" stroke="#fb923c" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
     <!-- Éléments décoratifs -->
     <circle cx="300" cy="250" r="12" fill="#fbbf24" opacity="0.25"/>
     <circle cx="920" cy="380" r="18" fill="#fbbf24" opacity="0.2"/>
@@ -260,8 +260,8 @@ const svgAutre = svgDataUri(
     <rect x="465" y="275" width="200" height="10" rx="5" fill="#ffffff" opacity="0.15"/>
     <rect x="465" y="300" width="190" height="10" rx="5" fill="#ffffff" opacity="0.2"/>
     <rect x="465" y="325" width="170" height="10" rx="5" fill="#ffffff" opacity="0.15"/>
-    <!-- Tampon vert -->
-    <circle cx="650" cy="430" r="30" fill="#34d399" opacity="0.4"/>
+    <!-- Tampon orange -->
+    <circle cx="650" cy="430" r="30" fill="#fb923c" opacity="0.4"/>
     <path d="M635 430 L645 440 L665 420" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
     <!-- Crayon -->
     <g transform="translate(740 180) rotate(25)">

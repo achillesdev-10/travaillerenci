@@ -581,7 +581,7 @@ export default async function JobDetailPage({ params }: PageProps) {
       {/* ============= STICKY CTA MOBILE BAS DE PAGE ============= */}
       <div
         className="lg:hidden sticky bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t border-line dark:border-slate-800 px-3 py-3 safe-bottom"
-        style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom))' }}
+        style={{ bottom: 'calc(4rem + 1px + env(safe-area-inset-bottom))' }}
       >
         <ApplyBox job={job} variant="compact" />
       </div>

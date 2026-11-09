@@ -4,8 +4,8 @@
 
   <defs>
     <linearGradient id="gradGreen" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#009639"/>
-      <stop offset="100%" stop-color="#007a2e"/>
+      <stop offset="0%" stop-color="#c2410c"/>
+      <stop offset="100%" stop-color="#9a3412"/>
     </linearGradient>
     <linearGradient id="gradBlue" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#003087"/>
@@ -13,10 +13,10 @@
     </linearGradient>
     <linearGradient id="gradCard" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="100%" stop-color="#f2f7f3"/>
+      <stop offset="100%" stop-color="#fff4e9"/>
     </linearGradient>
     <linearGradient id="gradBlob" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#009639" stop-opacity="0.14"/>
+      <stop offset="0%" stop-color="#c2410c" stop-opacity="0.14"/>
       <stop offset="100%" stop-color="#003087" stop-opacity="0.10"/>
     </linearGradient>
     <filter id="softShadow" x="-40%" y="-40%" width="180%" height="180%">
@@ -29,14 +29,14 @@
 
   <!-- Blob d'arrière-plan -->
   <ellipse cx="282" cy="252" rx="238" ry="206" fill="url(#gradBlob)"/>
-  <ellipse cx="120" cy="80" rx="90" ry="60" fill="#009639" opacity="0.05"/>
+  <ellipse cx="120" cy="80" rx="90" ry="60" fill="#c2410c" opacity="0.05"/>
   <ellipse cx="470" cy="420" rx="110" ry="70" fill="#003087" opacity="0.05"/>
 
   <!-- Points décoratifs -->
   <g opacity="0.5">
-    <circle cx="78" cy="150" r="5" fill="#009639"/>
+    <circle cx="78" cy="150" r="5" fill="#c2410c"/>
     <circle cx="492" cy="120" r="4" fill="#003087"/>
-    <circle cx="452" cy="84" r="6" fill="#009639" opacity="0.35"/>
+    <circle cx="452" cy="84" r="6" fill="#c2410c" opacity="0.35"/>
     <circle cx="98" cy="360" r="4" fill="#003087" opacity="0.35"/>
   </g>
 
@@ -44,15 +44,15 @@
   <g filter="url(#softShadow)">
     <rect x="120" y="150" width="320" height="200" rx="22" fill="url(#gradCard)" stroke="#e2ece4"/>
     <!-- Barre de l'offre -->
-    <rect x="150" y="180" width="70" height="10" rx="5" fill="#009639" opacity="0.85"/>
+    <rect x="150" y="180" width="70" height="10" rx="5" fill="#c2410c" opacity="0.85"/>
     <rect x="150" y="202" width="180" height="14" rx="7" fill="#1c2b3a" opacity="0.85"/>
     <rect x="150" y="224" width="120" height="10" rx="5" fill="#94a3b8"/>
     <!-- Lignes de description -->
     <rect x="150" y="252" width="250" height="8" rx="4" fill="#cbd5e1"/>
     <rect x="150" y="268" width="210" height="8" rx="4" fill="#cbd5e1"/>
     <!-- Badges -->
-    <rect x="150" y="292" width="64" height="24" rx="12" fill="#009639" opacity="0.12"/>
-    <text x="182" y="308" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#009639">CDI</text>
+    <rect x="150" y="292" width="64" height="24" rx="12" fill="#c2410c" opacity="0.12"/>
+    <text x="182" y="308" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#c2410c">CDI</text>
     <rect x="226" y="292" width="84" height="24" rx="12" fill="#003087" opacity="0.10"/>
     <text x="268" y="308" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#003087">Abidjan</text>
     <!-- Bouton Postuler -->
@@ -86,11 +86,11 @@
   <!-- ===== Pin de localisation + sparkles ===== -->
   <g filter="url(#tinyShadow)">
     <circle cx="330" cy="96" r="30" fill="#ffffff" stroke="#e2ece4"/>
-    <path d="M330 76c-8.5 0-15 6.4-15 14.6 0 10 15 22 15 22s15-12 15-22c0-8.2-6.5-14.6-15-14.6z" fill="#009639"/>
+    <path d="M330 76c-8.5 0-15 6.4-15 14.6 0 10 15 22 15 22s15-12 15-22c0-8.2-6.5-14.6-15-14.6z" fill="#c2410c"/>
     <circle cx="330" cy="91" r="5.5" fill="#ffffff"/>
   </g>
   <path d="M452 210 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3 z" fill="#f59e0b" opacity="0.9"/>
-  <path d="M96 236 l2.5 6.5 6.5 2.5 -6.5 2.5 -2.5 6.5 -2.5 -6.5 -6.5 -2.5 6.5 -2.5 z" fill="#009639" opacity="0.55"/>
+  <path d="M96 236 l2.5 6.5 6.5 2.5 -6.5 2.5 -2.5 6.5 -2.5 -6.5 -6.5 -2.5 6.5 -2.5 z" fill="#c2410c" opacity="0.55"/>
 
   <!-- ===== Étoile + note positive ===== -->
   <g filter="url(#tinyShadow)">

@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
   .icon{width:56px;height:56px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:26px;background:#e6f7ee;}
   h1{margin:0 0 8px;font-size:18px;color:#111827;}
   p{margin:0 0 20px;font-size:14px;color:#4b5563;line-height:1.6;}
-  a{display:inline-block;background:#009639;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 24px;border-radius:12px;}
+  a{display:inline-block;background:#c2410c;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 24px;border-radius:12px;}
 </style>
 </head>
 <body>

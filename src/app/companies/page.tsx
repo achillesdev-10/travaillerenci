@@ -46,7 +46,7 @@ const OFFICIAL_SITES: OfficialSite[] = [
     domain: 'travaillerenci.com',
     url: 'https://travaillerenci.com',
     category: 'Emploi & Carrière',
-    color: '#059669',
+    color: '#C2410C',
   },
   {
     name: 'Envie d\'Emploi CI',
