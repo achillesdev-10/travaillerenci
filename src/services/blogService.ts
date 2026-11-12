@@ -298,11 +298,11 @@ function rowToPost(row: any): BlogPost {
 }
 
 const BLOG_FULL_COLUMNS =
-  'id,title,slug,excerpt,content,cover_image,author,tags,status,published_at,view_count,created_at,updated_at';
+  'id,title,slug,excerpt,content,cover_image,author,tags,status,published_at,created_at,updated_at';
 
-/** Toutes les colonnes sauf `content` (listes publiques). */
+/** Colonnes légères des listes publiques (sans `content` ni `view_count`). */
 const BLOG_CARD_COLUMNS =
-  'id,title,slug,excerpt,cover_image,author,tags,status,published_at,view_count,created_at,updated_at';
+  'id,title,slug,excerpt,cover_image,author,tags,status,published_at,created_at,updated_at';
 
 function normalizePostFromSupabase(row: any): BlogPost {
   return {
@@ -373,10 +373,11 @@ export class BlogService {
     if (!db) return { rows: [], total: 0 };
 
     const { whereSql, params } = buildFiltersSql(filters);
+    const requestedOrder = filters.order_by || 'created_at';
     const orderBy = (['created_at', 'published_at', 'title'] as const).includes(
-      (filters.order_by || 'created_at') as 'created_at' | 'published_at' | 'title'
+      requestedOrder as 'created_at' | 'published_at' | 'title'
     )
-      ? filters.order_by!
+      ? requestedOrder
       : 'created_at';
     const dir = filters.order_dir === 'asc' ? 'ASC' : 'DESC';
     const limit = Math.min(Math.max(filters.limit || 50, 1), 200);
@@ -578,10 +579,11 @@ export class BlogService {
       // est vérifiée ensuite en JS (voir plus bas).
       query = query.ilike('tags', `%${String(filters.tag).trim()}%`);
     }
+    const requestedOrder = filters.order_by || 'created_at';
     const orderBy = (['created_at', 'published_at', 'title'] as const).includes(
-      (filters.order_by || 'created_at') as 'created_at' | 'published_at' | 'title'
+      requestedOrder as 'created_at' | 'published_at' | 'title'
     )
-      ? filters.order_by!
+      ? requestedOrder
       : 'created_at';
     query = query.order(orderBy, { ascending: filters.order_dir === 'asc' });
     // Filtre tag : on borne volontairement à 200 lignes (début à 0 pour que

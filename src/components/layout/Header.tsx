@@ -15,12 +15,12 @@ const NAV_LINKS = [
   { label: 'Concours', href: '/concours' },
   { label: 'Bourses', href: '/bourses' },
   { label: 'Conseils', href: '/blog' },
+  { label: 'Mon CV', href: '/generateur-de-cv' },
 ];
 
 const MOBILE_LINKS = [
   { label: 'Accueil', href: '/' },
   ...NAV_LINKS,
-  { label: 'Mon CV Pro', href: '/generateur-de-cv' },
 ];
 
 export default function Header() {

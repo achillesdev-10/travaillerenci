@@ -246,10 +246,11 @@ export class EntreprendreArticleService {
     }
 
     const whereSql = clauses.length > 0 ? `WHERE ${clauses.join(' AND ')}` : '';
+    const requestedOrder = filters.order_by || 'published_at';
     const orderSafe = ['published_at', 'created_at', 'title', 'view_count', 'helpful_count'].includes(
-      filters.order_by || 'published_at',
+      requestedOrder,
     )
-      ? filters.order_by!
+      ? requestedOrder
       : 'published_at';
     const dirSafe = filters.order_dir === 'asc' ? 'ASC' : 'DESC';
     const limit = Math.min(Math.max(filters.limit || 20, 1), 100);
@@ -509,10 +510,11 @@ export class EntreprendreArticleService {
       query = query.eq('featured', filters.featured);
     }
 
+    const requestedOrder = filters.order_by || 'published_at';
     const orderBy = (['published_at', 'created_at', 'title', 'view_count', 'helpful_count'] as const).includes(
-      (filters.order_by || 'published_at') as 'published_at',
+      requestedOrder as 'published_at' | 'created_at' | 'title' | 'view_count' | 'helpful_count',
     )
-      ? filters.order_by!
+      ? requestedOrder
       : 'published_at';
     query = query.order(orderBy, { ascending: filters.order_dir === 'asc' });
 

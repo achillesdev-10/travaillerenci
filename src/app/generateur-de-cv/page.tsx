@@ -9,6 +9,7 @@ import {
   createEmptyExperience,
   createEmptyEducation,
   createSampleCV,
+  normalizeCVData,
 } from '@/types/cv';
 import dynamic from 'next/dynamic';
 import { useLocalStorage } from '@/hooks';
@@ -45,19 +46,22 @@ export default function CVGeneratorPage() {
 
   useEffect(() => {
     setCVData((prev) => {
+      const normalized = normalizeCVData(prev);
       const isEmpty =
-        !prev.fullName &&
-        !prev.jobTitle &&
-        !prev.email &&
-        !prev.phone &&
-        !prev.city &&
-        !prev.summary &&
-        prev.experiences.length === 0 &&
-        prev.educations.length === 0 &&
-        prev.skills.length === 0;
+        !normalized.fullName &&
+        !normalized.jobTitle &&
+        !normalized.email &&
+        !normalized.phone &&
+        !normalized.city &&
+        !normalized.summary &&
+        normalized.experiences.length === 0 &&
+        normalized.educations.length === 0 &&
+        normalized.skills.length === 0 &&
+        normalized.languages.length === 0 &&
+        normalized.interests.length === 0;
 
       if (isEmpty) return createSampleCV();
-      return prev;
+      return normalized;
     });
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setHydrated(true);
@@ -149,8 +153,21 @@ export default function CVGeneratorPage() {
         const imgData = canvas.toDataURL('image/jpeg', 0.98);
         const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
         const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeight);
+        heightLeft -= pdfHeight;
+
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeight);
+          heightLeft -= pdfHeight;
+        }
+
         pdf.save(`CV_${cvData.fullName.replace(/\s+/g, '_') || 'travaillerenci'}.pdf`);
       } finally {
         // Restaurer le transform scale d'origine

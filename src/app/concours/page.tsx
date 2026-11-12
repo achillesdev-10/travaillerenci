@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { getCachedExamOrganizers, getCachedExams } from '@/lib/cachedContent';
@@ -17,6 +18,7 @@ import {
 } from '@/lib/examConstants';
 import { DIPLOMA_SEO } from '@/lib/examSeo';
 import { getSiteUrl } from '@/lib/site';
+import { IMAGES } from '@/lib/images';
 import type { ExamPhase } from '@/types/exam';
 import { cn } from '@/lib/utils';
 
@@ -150,6 +152,22 @@ export default async function ConcoursPage({ searchParams }: ConcoursPageProps) 
       <div className="container mx-auto max-w-6xl px-4">
         {/* ===================== HÉRO ===================== */}
         <section className="relative overflow-hidden mb-6 rounded-2xl bg-white dark:bg-slate-900 border border-line dark:border-slate-800 shadow-md">
+          <div className="relative h-36 w-full sm:h-44">
+            <Image
+              src={IMAGES.concours}
+              alt="Concours administratifs en Côte d'Ivoire"
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 1152px"
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/45 to-slate-950/10" />
+            <div className="absolute inset-0 flex items-end p-5 sm:p-7">
+              <p className="max-w-lg text-sm font-semibold text-white sm:text-base">
+                Préparez votre avenir dans la fonction publique ivoirienne.
+              </p>
+            </div>
+          </div>
           <div className="relative p-5 sm:p-7">
             <nav
               aria-label="Fil d'Ariane"

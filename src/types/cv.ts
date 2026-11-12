@@ -20,9 +20,29 @@ export interface CVData {
   phone: string;
   city: string;
   summary: string;
+  photo: string | null;
   experiences: Experience[];
   educations: Education[];
   skills: string[];
+  languages: string[];
+  interests: string[];
+}
+
+export function normalizeCVData(data: Partial<CVData> | null | undefined): CVData {
+  return {
+    fullName: data?.fullName ?? '',
+    jobTitle: data?.jobTitle ?? '',
+    email: data?.email ?? '',
+    phone: data?.phone ?? '',
+    city: data?.city ?? '',
+    summary: data?.summary ?? '',
+    photo: typeof data?.photo === 'string' && data.photo ? data.photo : null,
+    experiences: Array.isArray(data?.experiences) ? data.experiences : [],
+    educations: Array.isArray(data?.educations) ? data.educations : [],
+    skills: Array.isArray(data?.skills) ? data.skills : [],
+    languages: Array.isArray(data?.languages) ? data.languages : [],
+    interests: Array.isArray(data?.interests) ? data.interests : [],
+  };
 }
 
 export const createEmptyCV = (): CVData => ({
@@ -32,9 +52,12 @@ export const createEmptyCV = (): CVData => ({
   phone: '',
   city: '',
   summary: '',
+  photo: null,
   experiences: [],
   educations: [],
   skills: [],
+  languages: [],
+  interests: [],
 });
 
 export const createSampleCV = (): CVData => ({
@@ -45,6 +68,7 @@ export const createSampleCV = (): CVData => ({
   city: 'Abidjan, Cocody',
   summary:
     "Assistante de direction organisée et proactive, avec 5 ans d'expérience dans la gestion administrative, l'accueil et la coordination d'agenda. Reconnue pour ma rigueur, ma discrétion et ma capacité à gérer plusieurs priorités dans un environnement exigeant. Je recherche un poste où mettre à profit mon sens du service et mon aisance relationnelle.",
+  photo: null,
   experiences: [
     {
       id: 'sample-exp-1',
@@ -87,6 +111,8 @@ export const createSampleCV = (): CVData => ({
     'Facturation',
     "Gestion d'agenda",
   ],
+  languages: ['Français (courant)', 'Anglais (professionnel)'],
+  interests: ['Lecture', 'Bénévolat', "Organisation d'événements"],
 });
 
 export const createEmptyExperience = (): Experience => ({

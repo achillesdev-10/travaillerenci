@@ -22,6 +22,8 @@ export default defineConfig([
     "node_modules/**",
     "next-env.d.ts",
     "public/**",
+    "cache-simulation.js",
+    "check-next-version.js",
     // Le scraper est un projet Python séparé : ses bundles JS (playwright,
     // .venv…) ne doivent jamais être lintés.
     "scraper/**",

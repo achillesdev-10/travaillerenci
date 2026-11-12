@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import CoverImage from '@/components/content/CoverImage';
 import SearchBar from '@/components/jobs/SearchBar';
@@ -13,6 +14,15 @@ import SocialLinks from '@/components/layout/SocialLinks';
 import { buildCarouselSlides } from '@/lib/homeCarousel';
 import { IMAGES, LOCAL_IMAGES } from '@/lib/images';
 import { getSiteUrl } from '@/lib/site';
+
+export const metadata: Metadata = {
+  title: "Offres d'emploi, stages, bourses et concours en Côte d'Ivoire",
+  description:
+    "Trouvez les dernières offres d'emploi, stages, bourses et concours en Côte d'Ivoire. Créez aussi votre CV professionnel gratuitement avec TravaillerenCi.",
+  alternates: {
+    canonical: getSiteUrl(),
+  },
+};
 
 export const revalidate = 60;
 

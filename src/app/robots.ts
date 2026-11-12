@@ -43,7 +43,7 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
         // `/*?` : toute URL avec query string (filtres, pagination, recherche).
         // `Disallow: /api/` et `/dashboard` : déjà en place, conservés.
-        disallow: ['/api/', '/dashboard', '/*?'],
+        disallow: ['/api/', '/dashboard', '/cz7tk', '/*?'],
       },
     ],
     sitemap: `${getSiteUrl()}/sitemap.xml`,

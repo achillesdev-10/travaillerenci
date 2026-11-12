@@ -3,6 +3,7 @@ import { getSiteUrl } from '@/lib/site';
 import { ExamService } from '@/services/examService';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import { BlogService } from '@/services/blogService';
+import { ArticleService } from '@/services/articleService';
 import { EntreprendreArticleService } from '@/services/entreprendreService';
 import { DIPLOMA_SEO } from '@/lib/examSeo';
 import { EXAM_CATEGORIES } from '@/lib/examConstants';
@@ -22,6 +23,7 @@ const STATIC_ROUTES = [
   '/concours',
   '/bourses',
   '/blog',
+  '/actualites',
   '/entreprendre',
   '/candidates',
   '/companies',
@@ -64,7 +66,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   // Concours publiés — prioritaires (module Concours Administratifs).
-  const [examRes, jobRes, bourseRes, blogRes, entreprendreRes] = await Promise.allSettled([
+  const [examRes, jobRes, bourseRes, blogRes, actualitesRes, entreprendreRes] = await Promise.allSettled([
     ExamService.list({
       status: 'published',
       limit: 500,
@@ -82,6 +84,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       fields: 'card',
     }),
     BlogService.list({ status: 'published', limit: 500, fields: 'card' }),
+    ArticleService.list({
+      status: 'published',
+      limit: 500,
+      order_by: 'published_at',
+      order_dir: 'desc',
+      fields: 'card',
+    }),
     EntreprendreArticleService.list({
       status: 'published',
       limit: 500,
@@ -132,6 +141,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }))
       : [];
 
+  const actualitesEntries: MetadataRoute.Sitemap =
+    actualitesRes.status === 'fulfilled'
+      ? actualitesRes.value.rows.map((article) => ({
+          url: `${BASE_URL}/actualites/${article.slug}`,
+          lastModified: new Date(article.updated_at || article.created_at),
+          changeFrequency: 'weekly',
+          priority: 0.6,
+        }))
+      : [];
+
   const entreprendreEntries: MetadataRoute.Sitemap =
     entreprendreRes.status === 'fulfilled'
       ? entreprendreRes.value.rows.map((article) => ({
@@ -162,6 +181,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...jobEntries,
     ...bourseEntries,
     ...blogEntries,
+    ...actualitesEntries,
     ...entreprendreEntries,
     ...seoLandingEntries,
   ];

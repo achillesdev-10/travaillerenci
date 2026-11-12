@@ -63,7 +63,7 @@ function VisitsChart({ data }: { data: AdminAnalyticsData }) {
   }
 
   return (
-    <div className="flex h-48 items-end gap-1 sm:gap-2.5">
+    <div className="flex h-32 items-end gap-1 sm:h-48 sm:gap-2.5">
       {data.visitsByDay.map((point, index) => (
         <div
           key={point.date}
@@ -80,7 +80,7 @@ function VisitsChart({ data }: { data: AdminAnalyticsData }) {
           </div>
           <span
             className={`text-[10px] font-medium text-slate-500 ${
-              index % 2 === 1 ? "hidden sm:block" : ""
+              index % 3 !== 0 ? "hidden sm:block" : ""
             }`}
           >
             {point.label}
@@ -144,7 +144,7 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
     {
       label: "Visiteurs uniques",
       value: data.uniqueVisitors,
-      hint: "IP distinctes enregistrées",
+      hint: "IP distinctes sur la période",
       accent: "from-fuchsia-500 to-purple-600",
       icon: (
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -163,16 +163,16 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
   return (
     <div className="space-y-6">
       {/* ===== En-tête ===== */}
-      <section className="rounded-3xl border border-white/[0.06] bg-gradient-to-br from-slate-900 to-slate-950 p-5 shadow-xl shadow-black/20 sm:p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <section className="rounded-3xl border border-white/[0.06] bg-gradient-to-br from-slate-900 to-slate-950 p-4 shadow-xl shadow-black/20 sm:p-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand">
               Mesure d'audience
             </p>
-            <h1 className="mt-1 font-[var(--font-display)] text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+            <h1 className="mt-1 font-[var(--font-display)] text-xl font-extrabold tracking-tight text-white sm:text-3xl">
               Analytics du site
             </h1>
-            <p className="mt-2 max-w-2xl text-sm text-slate-400">
+            <p className="mt-2 max-w-2xl text-xs text-slate-400 sm:text-sm">
               Visites, pages populaires et appareils des candidats qui
               consultent TravaillerenCi.
             </p>
@@ -192,24 +192,24 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
       </section>
 
       {/* ===== Stats ===== */}
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         {statCards.map((card) => (
           <article
             key={card.label}
-            className="hover-lift rounded-3xl border border-white/[0.06] bg-slate-900/60 p-5 shadow-lg shadow-black/20 backdrop-blur"
+            className="hover-lift rounded-3xl border border-white/[0.06] bg-slate-900/60 p-4 shadow-lg shadow-black/20 backdrop-blur sm:p-5"
           >
-            <div className="flex items-start justify-between gap-3">
-              <p className="text-sm text-slate-400">{card.label}</p>
+            <div className="flex items-start justify-between gap-2">
+              <p className="text-xs text-slate-400 sm:text-sm">{card.label}</p>
               <span
-                className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-lg ${card.accent}`}
+                className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-lg sm:h-10 sm:w-10 sm:rounded-2xl ${card.accent}`}
               >
                 {card.icon}
               </span>
             </div>
-            <p className="mt-4 font-[var(--font-display)] text-4xl font-black tracking-tight text-white">
+            <p className="mt-3 font-[var(--font-display)] text-2xl font-black tracking-tight text-white sm:mt-4 sm:text-4xl">
               {card.value}
             </p>
-            <p className="mt-2 text-xs text-slate-500">{card.hint}</p>
+            <p className="mt-2 hidden text-xs text-slate-500 sm:block">{card.hint}</p>
           </article>
         ))}
       </section>
@@ -285,7 +285,7 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
             <select
               value={deviceFilter}
               onChange={(e) => setDeviceFilter(e.target.value)}
-              className="rounded-2xl border border-white/10 bg-slate-950 px-3 py-2 text-xs font-medium text-slate-200 outline-none transition focus:border-brand/50"
+              className="w-full rounded-2xl border border-white/10 bg-slate-950 px-3 py-2 text-xs font-medium text-slate-200 outline-none transition focus:border-brand/50 sm:w-auto"
             >
               <option value="all" className="bg-slate-950">Tous les appareils</option>
               <option value="Desktop" className="bg-slate-950">Desktop</option>

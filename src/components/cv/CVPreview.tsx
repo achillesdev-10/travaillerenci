@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import type { CVData } from '@/types/cv';
 import { getSiteHostname } from '@/lib/site';
 import CVIllustration from './CVIllustration';
@@ -28,23 +29,34 @@ export default function CVPreview({ cvData }: CVPreviewProps) {
         }
       `}</style>
 
-      <header className="relative overflow-hidden bg-[#111827] px-[16mm] pb-[10mm] pt-[14mm] text-white">
-        <div className="absolute -right-10 -top-12 h-44 w-44 rounded-full bg-[#f97316]/20" aria-hidden="true" />
-        <div className="absolute -bottom-16 right-20 h-36 w-36 rounded-full bg-[#f97316]/10" aria-hidden="true" />
+      <header className="relative overflow-hidden border-b-2 border-[#f97316] bg-[#fff7ed] px-[16mm] pb-[10mm] pt-[14mm]">
+        <div className="absolute -right-10 -top-12 h-44 w-44 rounded-full bg-[#f97316]/10" aria-hidden="true" />
+        <div className="absolute -bottom-16 right-20 h-36 w-36 rounded-full bg-[#f97316]/5" aria-hidden="true" />
         <div className="relative flex items-center gap-6">
-          <CVIllustration className="h-28 w-28 shrink-0 rounded-2xl ring-2 ring-white/20" />
+          {cvData.photo ? (
+            <Image
+              src={cvData.photo}
+              alt={`Photo de ${cvData.fullName || 'candidat'}`}
+              width={112}
+              height={112}
+              unoptimized
+              className="h-28 w-28 shrink-0 rounded-2xl object-cover ring-2 ring-[#fdba74]"
+            />
+          ) : (
+            <CVIllustration className="h-28 w-28 shrink-0 rounded-2xl ring-2 ring-[#fdba74]" />
+          )}
           <div className="min-w-0 flex-1">
-            <p className="text-[8.5px] font-bold uppercase tracking-[0.32em] text-[#fb923c]">
+            <p className="text-[8.5px] font-bold uppercase tracking-[0.32em] text-[#c2410c]">
               Curriculum Vitae
             </p>
-            <h1 className="mt-1 break-words text-[26px] font-black leading-none tracking-tight">
+            <h1 className="mt-1 break-words text-[26px] font-black leading-none tracking-tight text-[#111827]">
               {cvData.fullName || 'Votre Nom Complet'}
             </h1>
-            <p className="mt-2 text-[13px] font-semibold uppercase tracking-[0.12em] text-[#fdba74]">
+            <p className="mt-2 text-[13px] font-semibold uppercase tracking-[0.12em] text-[#9a3412]">
               {cvData.jobTitle || 'Titre du poste recherché'}
             </p>
             {hasContact && (
-              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[9.5px] text-white/80">
+              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[9.5px] text-[#4b5563]">
                 {cvData.email && <span>{cvData.email}</span>}
                 {cvData.phone && <span>{cvData.phone}</span>}
                 {cvData.city && <span>{cvData.city}</span>}
@@ -66,6 +78,36 @@ export default function CVPreview({ cvData }: CVPreviewProps) {
                     className="rounded-md border border-[#fed7aa] bg-[#fff7ed] px-2 py-1 text-[9px] font-semibold leading-none text-[#9a3412]"
                   >
                     {skill}
+                  </span>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {cvData.languages.length > 0 && (
+            <section className="mt-7">
+              <SectionTitle label="Langues" />
+              <ul className="mt-3 space-y-1.5 text-[9.5px] text-[#374151]">
+                {cvData.languages.map((language) => (
+                  <li key={language} className="flex items-start gap-2">
+                    <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[#f97316]" aria-hidden="true" />
+                    <span>{language}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {cvData.interests.length > 0 && (
+            <section className="mt-7">
+              <SectionTitle label="Centres d'intérêt" />
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {cvData.interests.map((interest) => (
+                  <span
+                    key={interest}
+                    className="rounded-md border border-[#e5e7eb] bg-[#f9fafb] px-2 py-1 text-[9px] font-semibold leading-none text-[#374151]"
+                  >
+                    {interest}
                   </span>
                 ))}
               </div>

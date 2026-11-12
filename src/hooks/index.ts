@@ -21,7 +21,11 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
       setStored((prev) => {
         const next = value instanceof Function ? value(prev) : value;
         if (typeof window !== 'undefined') {
-          window.localStorage.setItem(key, JSON.stringify(next));
+          try {
+            window.localStorage.setItem(key, JSON.stringify(next));
+          } catch {
+            /* noop */
+          }
         }
         return next;
       });

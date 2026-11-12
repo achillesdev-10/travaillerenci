@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hors ligne — TravaillerenCi</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --brand: #f97316;
+        --brand-dark: #c2410c;
+        --ink: #0f172a;
+        --muted: #64748b;
+        --surface: #ffffff;
+        --line: #e2e8f0;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        background: linear-gradient(160deg, #fff7ed, #ffffff 45%, #f8fafc);
+        color: var(--ink);
+      }
+      main {
+        width: 100%;
+        max-width: 520px;
+        padding: 32px;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: var(--surface);
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+        text-align: center;
+      }
+      .logo {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        background: var(--brand);
+        color: #fff;
+        font-size: 24px;
+        font-weight: 900;
+      }
+      h1 {
+        margin: 20px 0 8px;
+        font-size: 1.6rem;
+        line-height: 1.2;
+      }
+      p {
+        margin: 0 auto;
+        max-width: 38ch;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 24px;
+      }
+      a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0 18px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        color: var(--ink);
+        font-weight: 700;
+        text-decoration: none;
+      }
+      a.primary {
+        border-color: var(--brand);
+        background: var(--brand);
+        color: #fff;
+      }
+      a.primary:hover {
+        background: var(--brand-dark);
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: #020617;
+          color: #f8fafc;
+        }
+        main {
+          background: #0f172a;
+          border-color: #1e293b;
+        }
+        p {
+          color: #94a3b8;
+        }
+        a {
+          border-color: #334155;
+          color: #f8fafc;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <span class="logo" aria-hidden="true">T</span>
+      <h1>Vous êtes hors ligne</h1>
+      <p>
+        Impossible de charger cette page pour le moment. Vérifiez votre connexion
+        internet, puis réessayez. Les offres déjà consultées restent accessibles.
+      </p>
+      <div class="actions">
+        <a class="primary" href="/">Retour à l’accueil</a>
+        <a href="/jobs">Voir les offres</a>
+      </div>
+    </main>
+  </body>
+</html>

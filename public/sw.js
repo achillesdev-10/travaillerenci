@@ -13,12 +13,26 @@
  *  déploiement (ex. 1 → 2).
  */
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE_NAME = `travaillerenci-${CACHE_VERSION}`;
-// Icônes uniquement : précacher la page d'accueil échouerait tout l'install si
-// le réseau est instable pendant le déploiement (une requête en échec = install
-// rejeté). La page d'accueil sera mise en cache au premier chargement en ligne.
-const PRECACHE_URLS = ['/icon-192.png', '/icon-maskable-512.png'];
+// Icônes + page hors-ligne : précacher la page d'accueil échouerait tout
+// l'install si le réseau est instable pendant le déploiement (une requête en
+// échec = install rejeté). La page d'accueil sera mise en cache au premier
+// chargement en ligne.
+const PRECACHE_URLS = [
+  '/icon-192.png',
+  '/icon-maskable-512.png',
+  '/offline.html',
+];
+
+// Espaces privés : jamais mis en cache, même pour les navigations.
+const PRIVATE_PREFIXES = [
+  '/cz7tk',
+  '/dashboard',
+  '/login',
+  '/register',
+  '/reset-password',
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -46,8 +60,15 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return; // hors-site : laisser le navigateur
   if (url.pathname.startsWith('/api/')) return; // données : jamais mises en cache
+  if (
+    PRIVATE_PREFIXES.some(
+      (prefix) => url.pathname === prefix || url.pathname.startsWith(`${prefix}/`),
+    )
+  ) {
+    return; // espaces privés : réseau direct, jamais de cache
+  }
 
-  // Navigations : réseau d'abord, sinon cache (hors-ligne), sinon page d'accueil.
+  // Navigations : réseau d'abord, sinon cache (hors-ligne), sinon page dédiée.
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
@@ -60,9 +81,13 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() =>
-          caches.match(request).then((cached) => cached || caches.match('/')),
-        ),
+        .catch(async () => {
+          const cached = await caches.match(request);
+          if (cached) return cached;
+          const offline = await caches.match('/offline.html');
+          if (offline) return offline;
+          return (await caches.match('/')) || Response.error();
+        }),
     );
     return;
   }
