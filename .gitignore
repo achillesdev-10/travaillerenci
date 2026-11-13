@@ -38,6 +38,10 @@ __pycache__/
 # Vercel
 .vercel
 
+# Secrets temporaires fournis à l'agent (ne jamais commiter)
+.vercel-token
+vercel-secrets.txt
+
 # IDE
 .idea/
 .vscode/
