@@ -13,6 +13,7 @@ const NAV_LINKS = [
   { label: 'Offres d’emploi', href: '/jobs' },
   { label: 'Stages', href: '/stages' },
   { label: 'Concours', href: '/concours' },
+  { label: 'Actualités', href: '/actualites' },
   { label: 'Bourses', href: '/bourses' },
   { label: 'Conseils', href: '/blog' },
   { label: 'Mon CV', href: '/generateur-de-cv' },
