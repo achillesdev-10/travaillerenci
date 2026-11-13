@@ -130,3 +130,24 @@ jobs:
 
       - name: Unit tests (phase concours)
         run: npm run test:exam-phase
+
+  # ==========================================================================
+  # Garde-fou dépendances : bloque la CI dès qu'une vulnérabilité high ou
+  # critical apparaît (les moderate restantes sont tolérées — voir la note
+  # sur minimatch dans le rapport d'audit). `npm audit` lit uniquement
+  # package-lock.json : pas de node_modules à installer ici.
+  # ==========================================================================
+  audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Audit des dépendances (échec si high ou critical)
+        run: npm audit --audit-level=high
