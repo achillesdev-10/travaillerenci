@@ -288,11 +288,12 @@ export async function collectNews(options: {
       if (sourceTexts.every((source) => source.text.trim().length < 80)) continue;
 
       aiCalls += 1;
-      const draft = await generateNewsDraft(cluster, sourceTexts);
-      if (!draft) {
+      const generated = await generateNewsDraft(cluster, sourceTexts);
+      if (!generated) {
         errors.push(`IA: aucun brouillon publiable pour « ${cluster.title.slice(0, 80)} »`);
         continue;
       }
+      const { draft, model: aiModel } = generated;
 
       const category = normalizeNewsCategory(draft.category || guessNewsCategory(draft.title));
       const titleNormalized = normalizeTitle(draft.title);
@@ -324,7 +325,7 @@ export async function collectNews(options: {
         topic_key: buildTopicKey(draft.title),
         content_hash: buildContentHash(draft.title, draft.content),
         title_normalized: titleNormalized,
-        ai_model: process.env.NEWS_AI_MODEL || process.env.GEMINI_MODEL || 'gemini-flash-latest',
+        ai_model: aiModel,
         ai_confidence: draft.confidence,
         seen_ids: seenIds,
         seo_title: draft.seo_title ?? null,

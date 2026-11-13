@@ -220,6 +220,12 @@ async function callOpenAiCompatible(
   }
 }
 
+export interface NewsDraftResult {
+  draft: AiNewsDraft;
+  /** Modèle qui a réellement produit le brouillon (traçabilité). */
+  model: string;
+}
+
 /**
  * Un seul appel IA par sujet retenu. Le repli éventuel n'intervient que si le
  * fournisseur principal échoue techniquement (pas de nouvel essai métier).
@@ -227,38 +233,42 @@ async function callOpenAiCompatible(
 export async function generateNewsDraft(
   cluster: NewsCluster,
   sources: SourceText[],
-): Promise<AiNewsDraft | null> {
+): Promise<NewsDraftResult | null> {
   if (sources.length === 0) return null;
   const prompt = buildPrompt(cluster, sources);
   const allowedUrls = sources.map((source) => source.url);
 
+  let model = process.env.NEWS_AI_MODEL || process.env.GEMINI_MODEL || 'gemini-flash-latest';
   let raw = await callGemini(prompt);
 
   if (!raw) {
+    model = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
     raw = await callOpenAiCompatible(
       {
         name: 'groq',
         url: 'https://api.groq.com/openai/v1/chat/completions',
         key: process.env.GROQ_API_KEY,
-        model: process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
+        model,
       },
       prompt,
     );
   }
 
   if (!raw) {
+    model = process.env.CEREBRAS_MODEL || 'llama3.1-8b';
     raw = await callOpenAiCompatible(
       {
         name: 'cerebras',
         url: 'https://api.cerebras.ai/v1/chat/completions',
         key: process.env.CEREBRAS_API_KEY,
-        model: process.env.CEREBRAS_MODEL || 'llama3.1-8b',
+        model,
       },
       prompt,
     );
   }
 
-  return normalizeDraft(raw, allowedUrls);
+  const draft = normalizeDraft(raw, allowedUrls);
+  return draft ? { draft, model } : null;
 }
 
 export type { SourceText };
