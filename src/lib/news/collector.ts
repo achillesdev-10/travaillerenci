@@ -24,6 +24,8 @@ export interface CollectionResult {
   aiCalls: number;
   durationMs: number;
   errors: string[];
+  /** Durées par phase (ms), pour diagnostiquer la limite de 60 s de la fonction. */
+  timings?: Record<string, number>;
 }
 
 async function mapLimit<T, R>(
@@ -85,6 +87,10 @@ export async function collectNews(options: {
   let clusterCount = 0;
   let articlesCreated = 0;
   let aiCalls = 0;
+  const timings: Record<string, number> = {};
+  const addTiming = (phase: string, since: number) => {
+    timings[phase] = (timings[phase] ?? 0) + (Date.now() - since);
+  };
 
   if (!NewsRepository.isAvailable()) {
     return {
@@ -175,6 +181,7 @@ export async function collectNews(options: {
       await NewsRepository.remainingQuota().catch(() => 0),
     );
 
+    let phaseStart = Date.now();
     // 4 flux en parallèle : la phase réseau dominait la durée du run (AIP ~10 s).
     const fetched = await mapLimit(sources, 4, async (source) => {
       try {
@@ -227,6 +234,8 @@ export async function collectNews(options: {
       }
     });
 
+    addTiming('feeds', phaseStart);
+    phaseStart = Date.now();
     const allItems = fetched.flat();
     itemsFetched = allItems.length;
 
@@ -248,12 +257,15 @@ export async function collectNews(options: {
       if (seenId) claimed.push({ item, seenId });
     }
     itemsNew = claimed.length;
+    addTiming('claims', phaseStart);
+    phaseStart = Date.now();
 
     const clusters = clusterNewsItems(
       claimed.map((entry) => entry.item),
       Math.max(settings.max_candidates * 2, 10),
     ).filter((cluster) => citationSources(cluster.items).length > 0);
     clusterCount = clusters.length;
+    addTiming('cluster', phaseStart);
 
     const maxToCreate = Math.min(
       settings.max_new_articles_per_run,
@@ -274,6 +286,7 @@ export async function collectNews(options: {
       const citation = citationSources(cluster.items);
       if (citation.length === 0) continue;
 
+      let itemStart = Date.now();
       const sourceTexts: SourceText[] = await Promise.all(
         citation.slice(0, 2).map(async (item) => {
           const fullText = await fetchArticleText(item.url).catch(() => null);
@@ -287,6 +300,8 @@ export async function collectNews(options: {
       );
 
       if (sourceTexts.every((source) => source.text.trim().length < 80)) continue;
+      addTiming('text', itemStart);
+      itemStart = Date.now();
 
       aiCalls += 1;
       const generated = await generateNewsDraft(cluster, sourceTexts);
@@ -294,6 +309,8 @@ export async function collectNews(options: {
         errors.push(`IA: aucun brouillon publiable pour « ${cluster.title.slice(0, 80)} »`);
         continue;
       }
+      addTiming('ai', itemStart);
+      itemStart = Date.now();
       const { draft, model: aiModel } = generated;
 
       const category = normalizeNewsCategory(draft.category || guessNewsCategory(draft.title));
@@ -337,6 +354,8 @@ export async function collectNews(options: {
         return null;
       });
 
+      addTiming('persist', itemStart);
+
       if (createdId) {
         articlesCreated += 1;
         quota -= 1;
@@ -379,6 +398,7 @@ export async function collectNews(options: {
       aiCalls,
       durationMs: Date.now() - started,
       errors,
+      timings,
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
