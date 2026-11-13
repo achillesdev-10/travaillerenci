@@ -16,6 +16,9 @@ import { NewsRepository } from '@/lib/news/repository';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
+// Supabase est hébergé en eu-central-1 : exécuter la collecte à Francfort évite
+// un aller-retour transatlantique sur chaque requête base (une par item réclamé).
+export const preferredRegion = 'fra1';
 
 function readSecret(): string | null {
   return process.env.NEWS_PIPELINE_SECRET || process.env.CRON_SECRET || null;

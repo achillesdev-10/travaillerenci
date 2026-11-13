@@ -175,7 +175,8 @@ export async function collectNews(options: {
       await NewsRepository.remainingQuota().catch(() => 0),
     );
 
-    const fetched = await mapLimit(sources, 2, async (source) => {
+    // 4 flux en parallèle : la phase réseau dominait la durée du run (AIP ~10 s).
+    const fetched = await mapLimit(sources, 4, async (source) => {
       try {
         const feed = await fetchFeed(source.feed_url, {
           etag: source.etag,
