@@ -149,7 +149,7 @@ export async function readTextCapped(
 
 export async function fetchFeed(
   url: string,
-  options: { etag?: string | null; lastModified?: string | null } = {},
+  options: { etag?: string | null; lastModified?: string | null; timeoutMs?: number } = {},
 ): Promise<{ status: number; xml: string; etag: string | null; lastModified: string | null }> {
   const headers: Record<string, string> = {
     'User-Agent': USER_AGENT,
@@ -160,7 +160,7 @@ export async function fetchFeed(
 
   const response = await fetch(url, {
     headers,
-    signal: AbortSignal.timeout(14_000),
+    signal: AbortSignal.timeout(options.timeoutMs ?? 14_000),
     cache: 'no-store',
     redirect: 'follow',
   });

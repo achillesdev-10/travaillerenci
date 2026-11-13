@@ -182,12 +182,18 @@ export async function collectNews(options: {
     );
 
     let phaseStart = Date.now();
-    // 4 flux en parallèle : la phase réseau dominait la durée du run (AIP ~10 s).
+    // Budget réseau global : une source lente (AIP répond en 5 à 16 s et ignore
+    // les requêtes conditionnelles) ne doit pas consommer le run à elle seule.
+    const feedsStartedAt = Date.now();
+    const FEEDS_BUDGET_MS = 10_000;
+    // 4 flux en parallèle : la phase réseau dominait la durée du run.
     const fetched = await mapLimit(sources, 4, async (source) => {
       try {
+        const budget = Math.max(2_000, FEEDS_BUDGET_MS - (Date.now() - feedsStartedAt));
         const feed = await fetchFeed(source.feed_url, {
           etag: source.etag,
           lastModified: source.last_modified,
+          timeoutMs: budget,
         });
 
         if (feed.status === 304) {
