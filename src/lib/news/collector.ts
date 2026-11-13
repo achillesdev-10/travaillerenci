@@ -250,8 +250,16 @@ export async function collectNews(options: {
       uniqueItems.push(item);
     }
 
+    // On ne réclame que de quoi former les sujets du run : réclamer tous les
+    // items coûtait un appel base par item pour un quota de 5 articles/jour.
+    const claimCandidates = [...uniqueItems]
+      .sort(
+        (a, b) => (Date.parse(b.published_at ?? '') || 0) - (Date.parse(a.published_at ?? '') || 0),
+      )
+      .slice(0, Math.max(settings.max_candidates * 2, 12));
+
     const claimed: Array<{ item: RssItem; seenId: number }> = [];
-    for (const item of uniqueItems) {
+    for (const item of claimCandidates) {
       if (Date.now() > deadline) break;
       const seenId = await NewsRepository.claimItem(item).catch(() => null);
       if (seenId) claimed.push({ item, seenId });
@@ -277,6 +285,9 @@ export async function collectNews(options: {
     for (const cluster of clusters) {
       if (articlesCreated >= maxToCreate) break;
       if (Date.now() > deadline) break;
+      // Un appel IA peut prendre ~15 s : inutile de le lancer si la fonction
+      // risque d'être coupée (60 s) avant la fin de l'écriture en base.
+      if (deadline - Date.now() < 12_000) break;
       if (quota <= 0 || aiCalls >= aiRemaining) break;
 
       const uniqueTitle = normalizeTitle(cluster.title);
@@ -289,7 +300,10 @@ export async function collectNews(options: {
       let itemStart = Date.now();
       const sourceTexts: SourceText[] = await Promise.all(
         citation.slice(0, 2).map(async (item) => {
-          const fullText = await fetchArticleText(item.url).catch(() => null);
+          // Un résumé RSS déjà détaillé suffit : la page distante est le poste
+          // le plus lent quand un site répond mal (robots.txt puis HTML).
+          const rich = (item.summary ?? '').trim().length >= 600;
+          const fullText = rich ? null : await fetchArticleText(item.url).catch(() => null);
           return {
             name: item.source_name,
             url: item.url,
