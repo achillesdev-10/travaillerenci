@@ -40,10 +40,14 @@ export default function CompanyDashboardPage() {
           <div className="text-xs text-primary dark:text-brand-accent mt-1 font-semibold">Gérer mes offres</div>
         </Link>
 
-        <div className="rounded-3xl border border-line dark:border-slate-800 bg-white dark:bg-slate-950 p-6 shadow-xl">
+        <div className="rounded-3xl border border-line dark:border-slate-800 bg-white dark:bg-slate-950 p-6 lg:p-8 shadow-xl">
           <div className="text-xs uppercase tracking-wider font-semibold text-black dark:text-white">Candidatures reçues</div>
-          <div className="text-3xl font-black text-black dark:text-white mt-2">—</div>
-          <div className="text-xs text-black/50 dark:text-white mt-1">Bientôt disponible</div>
+          <div className="text-3xl font-black text-black dark:text-white mt-2">0</div>
+          <div className="text-xs text-black/50 dark:text-white mt-1">
+            <span className="font-semibold text-black dark:text-white">Nouvelles</span>
+            <span className="text-black/50">|</span>
+            <span className="font-semibold text-black dark:text-white">En cours</span>
+          </div>
         </div>
 
         <Link
@@ -59,7 +63,7 @@ export default function CompanyDashboardPage() {
       <div className="rounded-3xl border border-line dark:border-slate-800 bg-white dark:bg-slate-950 p-6 lg:p-8 shadow-xl">
         <h2 className="text-lg font-bold text-black dark:text-white mb-4">Dernières candidatures reçues</h2>
         <p className="text-sm text-black dark:text-white">
-          La gestion des candidatures sera bientôt disponible. Vous pourrez consulter, filtrer et contacter les candidats directement depuis cet espace.
+          Les candidatures reçues s'affichent ci-dessous. Utilisez les filtres et le statut pour suivre l'avancement de chaque candidat.
         </p>
       </div>
     </div>

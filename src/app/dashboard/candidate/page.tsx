@@ -10,6 +10,7 @@ import RecommendationsSection from '@/components/dashboard/RecommendationsSectio
 import SavedItemsSection from '@/components/dashboard/SavedItemsSection';
 import AlertsSection from '@/components/dashboard/AlertsSection';
 import NotificationsSection from '@/components/dashboard/NotificationsSection';
+import CandidaturesSection from '@/components/dashboard/CandidaturesSection';
 import AvatarUpload from '@/components/dashboard/AvatarUpload';
 
 /** Actions rapides — accès en un clic depuis le dashboard. */
@@ -225,7 +226,12 @@ export default function CandidateDashboardPage() {
             <section aria-label="Notifications récentes">
               <NotificationsSection />
             </section>
-          </div>
+
+          {/* Mes candidatures */}
+          <section id="candidatures" aria-label="Mes candidatures" className="scroll-mt-24">
+            <CandidaturesSection />
+          </section>
+        </div>
 
           {/* Colonne latérale (1/3) */}
           <div className="space-y-6">

@@ -19,7 +19,9 @@ export type AdminNotificationType =
   | 'new_report'
   | 'new_recruiter_pending'
   | 'new_comment_reported'
-  | 'system';
+  | 'system'
+  | 'new_application'
+  | 'status_update';
 
 export interface AdminNotification {
   id: string;
