@@ -58,7 +58,7 @@ export function normalizeUrl(rawUrl: string): string {
       }
     }
     url.hostname = url.hostname.toLowerCase();
-    let value = url.toString().replace(/\/$/, '');
+    const value = url.toString().replace(/\/$/, '');
     return value;
   } catch {
     return rawUrl.trim();
