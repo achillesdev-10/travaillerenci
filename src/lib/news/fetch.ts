@@ -98,7 +98,7 @@ export async function isAllowedByRobots(url: string): Promise<boolean> {
 
     const response = await fetch(`${origin}/robots.txt`, {
       headers: { 'User-Agent': USER_AGENT, Accept: 'text/plain' },
-      signal: AbortSignal.timeout(3000),
+      signal: AbortSignal.timeout(2000),
       cache: 'no-store',
     });
 
@@ -191,7 +191,7 @@ export async function fetchArticleText(url: string): Promise<string | null> {
         Accept: 'text/html,application/xhtml+xml',
         'Accept-Language': 'fr-FR,fr;q=0.9',
       },
-      signal: AbortSignal.timeout(6000),
+      signal: AbortSignal.timeout(5000),
       cache: 'no-store',
       redirect: 'follow',
     });
