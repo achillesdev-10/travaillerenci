@@ -110,6 +110,20 @@ function ensureSchema(db: DatabaseSyncInstance) {
 }
 
 
+function valuesAreEqual(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (a == null || b == null) return false;
+  if (typeof a !== typeof b) return false;
+  if (typeof a === 'string' || typeof a === 'number' || typeof a === 'boolean') {
+    return a === b;
+  }
+  try {
+    return JSON.stringify(a) === JSON.stringify(b);
+  } catch {
+    return false;
+  }
+}
+
 function normalizeSettings(raw: Record<string, unknown>): PlatformSettings {
   const defaults = { ...DEFAULT_SETTINGS };
   const result = { ...defaults };
@@ -155,7 +169,7 @@ export class PlatformSettingsService {
     }
   }
 
-  /** Met à jour un ou plusieurs settings (merge avec les existants). */
+  /** Met à jour un ou plusieurs settings (ne met à jour que les clés réellement modifiées). */
   static async update(updates: Partial<PlatformSettings>): Promise<PlatformSettings> {
     if (isSupabaseConfigured()) return this.updateSupabase(updates);
 
@@ -163,17 +177,24 @@ export class PlatformSettingsService {
     if (!db) return this.getAll();
 
     const current = await this.getAll();
-    const merged = { ...current, ...updates };
-
     const now = new Date().toISOString();
 
-    for (const [key, value] of Object.entries(merged)) {
-      db.prepare(
-        'INSERT INTO platform_settings (key, value, updated_at) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at'
-      ).run([key, JSON.stringify(value), now]);
+    // Ne met à jour que les clés dont la valeur a changé
+    const keysToUpdate: Array<{ key: string; value: string }> = [];
+
+    for (const [key, newValue] of Object.entries(updates)) {
+      const currentValue = current[key as keyof PlatformSettings];
+      if (valuesAreEqual(currentValue, newValue)) continue;
+      keysToUpdate.push({ key, value: JSON.stringify(newValue) });
     }
 
-    return merged;
+    for (const { key, value } of keysToUpdate) {
+      db.prepare(
+        'INSERT INTO platform_settings (key, value, updated_at) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at'
+      ).run([key, value, now]);
+    }
+
+    return { ...current, ...updates };
   }
 
   // -- Supabase --
@@ -199,21 +220,29 @@ export class PlatformSettingsService {
     if (!supabase) return this.getAll();
 
     const current = await this.getAllSupabase();
-    const merged = { ...current, ...updates };
     const now = new Date().toISOString();
 
-    const rows = Object.entries(merged).map(([key, value]) => ({
-      key,
-      value: JSON.stringify(value),
-      updated_at: now,
-    }));
+    // Ne met à jour que les clés dont la valeur a changé
+    const rows: Array<{ key: string; value: string; updated_at: string }> = [];
 
-    try {
-      await supabase.from('platform_settings').upsert(rows, { onConflict: 'key' });
-    } catch (err) {
-      console.error('[platformSettingsService] Supabase upsert error:', err);
+    for (const [key, newValue] of Object.entries(updates)) {
+      const currentValue = current[key as keyof PlatformSettings];
+      if (valuesAreEqual(currentValue, newValue)) continue;
+      rows.push({
+        key,
+        value: JSON.stringify(newValue),
+        updated_at: now,
+      });
     }
 
-    return merged;
+    if (rows.length > 0) {
+      try {
+        await supabase.from('platform_settings').upsert(rows, { onConflict: 'key' });
+      } catch (err) {
+        console.error('[platformSettingsService] Supabase upsert error:', err);
+      }
+    }
+
+    return { ...current, ...updates };
   }
 }

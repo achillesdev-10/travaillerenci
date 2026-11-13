@@ -32,8 +32,20 @@ type DatabaseSyncInstance = {
 
 let cachedDb: DatabaseSyncInstance | null | undefined;
 
+// Sur Vercel le FS est en lecture seule : inutile d'importer node:sqlite et
+// de tenter une ouverture. Le repli mémoire prend le relais.
+let cachedVotes: { votes: number[]; at: number } | null = null;
+const VOTES_CACHE_MS = 15_000;
+const GET_CACHE_HEADERS = {
+  'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=600',
+};
+
 async function getDb(): Promise<DatabaseSyncInstance | null> {
   if (cachedDb !== undefined) return cachedDb;
+  if (process.env.VERCEL) {
+    cachedDb = null;
+    return null;
+  }
   try {
     const mod = (await import('node:sqlite')) as unknown as {
       DatabaseSync: new (path: string) => DatabaseSyncInstance;
@@ -95,8 +107,16 @@ function clientIp(req: Request): string {
 
 export async function GET(req: Request) {
   void req;
+  const now = Date.now();
+  if (cachedVotes && now - cachedVotes.at < VOTES_CACHE_MS) {
+    return NextResponse.json(
+      { ...POLL, votes: cachedVotes.votes },
+      { headers: GET_CACHE_HEADERS },
+    );
+  }
   const votes = await readVotes();
-  return NextResponse.json({ ...POLL, votes });
+  cachedVotes = { votes, at: now };
+  return NextResponse.json({ ...POLL, votes }, { headers: GET_CACHE_HEADERS });
 }
 
 export async function POST(req: Request) {
@@ -128,5 +148,6 @@ export async function POST(req: Request) {
   }
 
   const votes = await readVotes();
+  cachedVotes = { votes, at: Date.now() };
   return NextResponse.json({ ok: true, ...POLL, votes });
 }

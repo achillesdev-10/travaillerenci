@@ -1,23 +1,24 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import type { NextRequest } from 'next/server';
 import { requireAdminApi } from '@/lib/adminSession';
 import {
-  getAdminDashboardData,
+  getScraperHealth,
   getScraperRunHistory,
   triggerScraperRun,
 } from "../../../../lib/admin-dashboard";
 
 export const runtime = "nodejs";
 
+/** État du scraper uniquement (polling 10 s côté client) — pas le dashboard. */
 export async function GET(request: NextRequest) {
   const auth = await requireAdminApi(request);
   if (auth.error) return auth.error;
-  const [payload, runHistory] = await Promise.all([
-    getAdminDashboardData(),
+  const [scraperHealth, runHistory] = await Promise.all([
+    getScraperHealth(),
     getScraperRunHistory(10),
   ]);
-  return NextResponse.json({ ...payload, runHistory });
+  return NextResponse.json({ scraperHealth, runHistory });
 }
 
 export async function POST(request: NextRequest) {
@@ -27,6 +28,7 @@ export async function POST(request: NextRequest) {
     const scraperHealth = await triggerScraperRun();
 
     revalidatePath("/cz7tk");
+    revalidateTag("admin-dashboard", "max");
 
     // Notification admin si échec (fire-and-forget)
     if (scraperHealth.status === "error") {

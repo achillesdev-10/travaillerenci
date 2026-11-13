@@ -11,11 +11,11 @@ import type { BlogPostFilters } from '@/types/blog';
 import type { ArticleFilters } from '@/types/article';
 import type { EntreprendreArticleFilters } from '@/types/entreprendre';
 
-const LIST_REVALIDATE = 120;
+const LIST_REVALIDATE = 300;
 /**
- * TTL long : variante utilisée par des pages ISR 24 h (/jobs/[id] → articles
- * liés). Sans elle, une entrée revalidate=120 fixerait la revalidation
- * effective de TOUTE la page à 120 s (minimum de l'arbre). La fraîcheur est
+ * TTL long : variante utilisée par des pages ISR 24 h (/jobs/[id] -> articles
+ * liés). Sans elle, une entrée revalidate=300 fixerait la revalidation
+ * effective de TOUTE la page à 300 s (minimum de l'arbre). La fraîcheur est
  * assurée par revalidateTag('blog') à chaque publication (revalidateBlogSurfaces).
  */
 const LIST_REVALIDATE_1D = 86400;

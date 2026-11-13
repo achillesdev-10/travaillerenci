@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getCachedJobs } from '@/lib/cachedContent';
-import { getCachedJobVivier } from '@/lib/cachedJobVivier';
+import { getCachedJobSeoChips } from '@/lib/cachedJobVivier';
 import SearchBar from '@/components/jobs/SearchBar';
 import CompactJobCard from '@/components/home/CompactJobCard';
 import type { JobOfferSchema } from '@/types';
@@ -10,7 +10,6 @@ import { cn } from '@/lib/utils';
 import {
   CITY_SEO,
   METIER_SEO,
-  landingChipHref,
   type JobSeoActivity,
 } from '@/lib/jobSeo';
 
@@ -81,7 +80,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
   // Vivier borné (500) pour calculer l'éligibilité des pages SEO villes/
   // métiers — même requête que la page landing, afin de reproduire à
   // l'identique sa garde-fou anti-404 (§12).
-  const [{ rows: jobs, total }, chipVivier] = await Promise.all([
+  const [{ rows: jobs, total }, seoChips] = await Promise.all([
     getCachedJobs({
       // Seuls les emplois et stages (dépôt unifié) apparaissent sur /jobs —
       // les bourses (scholarship) et concours (exam) ont leurs propres pages.
@@ -97,7 +96,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
       offset: (page - 1) * PAGE_SIZE,
       fields: 'card',
     }),
-    getCachedJobVivier(chipActivity === 'stages' ? 'stages' : 'jobs'),
+    getCachedJobSeoChips(chipActivity),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -294,11 +293,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
               {CITY_SEO.map((city) => (
                 <Link
                   key={city.slug}
-                  href={landingChipHref(chipVivier, {
-                    activity: chipActivity,
-                    citySlug: city.slug,
-                    metierSlug: null,
-                  })}
+                  href={seoChips.cities[city.slug]}
                   className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                 >
                   {city.name}
@@ -314,11 +309,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
               {METIER_SEO.map((metier) => (
                 <Link
                   key={metier.slug}
-                  href={landingChipHref(chipVivier, {
-                    activity: chipActivity,
-                    citySlug: null,
-                    metierSlug: metier.slug,
-                  })}
+                  href={seoChips.metiers[metier.slug]}
                   className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                 >
                   {metier.label}

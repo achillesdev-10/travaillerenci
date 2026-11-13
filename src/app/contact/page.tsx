@@ -2,8 +2,8 @@ import Link from 'next/link';
 import ContactForm from '@/components/contact/ContactForm';
 import { SITE_CONFIG } from '@/lib/constants';
 
-export const dynamic = 'force-dynamic';
-
+// Page statique : le formulaire appelle /api/reports cA'tAc client, aucun
+// rendu serveur par visite n'est nAcessaire.
 export const metadata = {
   title: 'Nous contacter — TravaillerenCi',
   description:

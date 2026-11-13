@@ -1,13 +1,13 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getCachedJobs } from '@/lib/cachedContent';
-import { getCachedJobVivier } from '@/lib/cachedJobVivier';
+import { getCachedJobSeoChips } from '@/lib/cachedJobVivier';
 import SearchBar from '@/components/jobs/SearchBar';
 import CompactJobCard from '@/components/home/CompactJobCard';
 import type { JobOfferSchema } from '@/types';
 import { getSiteUrl } from '@/lib/site';
 import { cn } from '@/lib/utils';
-import { CITY_SEO, METIER_SEO, landingChipHref } from '@/lib/jobSeo';
+import { CITY_SEO, METIER_SEO } from '@/lib/jobSeo';
 
 export const metadata: Metadata = {
   title: "Offres de stage en Côte d'Ivoire — stages en entreprise à Abidjan",
@@ -58,7 +58,7 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
   // Vivier borné (500) pour calculer l'éligibilité des pages SEO villes/
   // métiers — même requête que la page landing, afin de reproduire à
   // l'identique sa garde-fou anti-404 (§12).
-  const [{ rows: stages, total }, chipVivier] = await Promise.all([
+  const [{ rows: stages, total }, seoChips] = await Promise.all([
     getCachedJobs({
       category: 'internship',
       keyword,
@@ -70,7 +70,7 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
       offset: (page - 1) * PAGE_SIZE,
       fields: 'card',
     }),
-    getCachedJobVivier('stages'),
+    getCachedJobSeoChips('stages'),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -254,11 +254,7 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
               {CITY_SEO.map((cityItem) => (
                 <Link
                   key={cityItem.slug}
-                  href={landingChipHref(chipVivier, {
-                    activity: 'stages',
-                    citySlug: cityItem.slug,
-                    metierSlug: null,
-                  })}
+                  href={seoChips.cities[cityItem.slug]}
                   className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                 >
                   {cityItem.name}
@@ -274,11 +270,7 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
               {METIER_SEO.map((metierItem) => (
                 <Link
                   key={metierItem.slug}
-                  href={landingChipHref(chipVivier, {
-                    activity: 'stages',
-                    citySlug: null,
-                    metierSlug: metierItem.slug,
-                  })}
+                  href={seoChips.metiers[metierItem.slug]}
                   className="inline-flex items-center rounded-full border border-line bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition-all hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                 >
                   {metierItem.label}

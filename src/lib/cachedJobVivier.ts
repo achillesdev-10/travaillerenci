@@ -2,6 +2,7 @@ import 'server-only';
 import { unstable_cache } from 'next/cache';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import type { JobOfferSchema } from '@/types';
+import { CITY_SEO, METIER_SEO, landingChipHref, type JobSeoActivity } from '@/lib/jobSeo';
 
 export type JobVivierScope = 'jobs' | 'stages' | 'both';
 
@@ -46,6 +47,47 @@ async function loadVivier(scope: JobVivierScope): Promise<JobOfferSchema[]> {
  * publication / modification (revalidateJobSurfaces).
  */
 export const getCachedJobVivier = unstable_cache(loadVivier, ['job-vivier'], {
+  revalidate: 86400,
+  tags: ['job-offers', 'job-vivier'],
+});
+
+export interface JobSeoChips {
+  /** slug de ville -> href de la page SEO (ou /jobs si non Acligible) */
+  cities: Record<string, string>;
+  /** slug de mActier -> href de la page SEO (ou /jobs si non Acligible) */
+  metiers: Record<string, string>;
+}
+
+async function loadSeoChips(activity: JobSeoActivity): Promise<JobSeoChips> {
+  const vivier = await loadVivier(activity === 'stages' ? 'stages' : 'jobs');
+  const cities: Record<string, string> = {};
+  const metiers: Record<string, string> = {};
+
+  for (const city of CITY_SEO) {
+    cities[city.slug] = landingChipHref(vivier, {
+      activity,
+      citySlug: city.slug,
+      metierSlug: null,
+    });
+  }
+  for (const metier of METIER_SEO) {
+    metiers[metier.slug] = landingChipHref(vivier, {
+      activity,
+      citySlug: null,
+      metierSlug: metier.slug,
+    });
+  }
+
+  return { cities, metiers };
+}
+
+/**
+ * Liens de maillage villes/mActiers prAcalculAcs une seule fois par verticale.
+ * Sans ce cache, /jobs et /stages recalculent `landingChipHref` (qui filtre le
+ * vivier de 500 offres) A� chaque requA�te, soit plusieurs milliers de
+ * comparaisons de chaA�nes par vue.
+ */
+export const getCachedJobSeoChips = unstable_cache(loadSeoChips, ['job-seo-chips'], {
   revalidate: 86400,
   tags: ['job-offers', 'job-vivier'],
 });

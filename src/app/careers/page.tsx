@@ -1,7 +1,6 @@
 import { SITE_CONFIG } from '@/lib/constants';
 
-export const dynamic = 'force-dynamic';
-
+// Page 100 % statique : prAcrendue au build, servie par le CDN.
 export const metadata = {
   title: "Carrières chez TravaillerenCi",
   description:

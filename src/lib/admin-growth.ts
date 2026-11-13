@@ -309,28 +309,48 @@ async function growthFromSupabase(): Promise<AdminGrowthStats> {
 
   try {
     const weekAgo = new Date(Date.now() - WEEK_MS).toISOString();
-    const [usersRes, profilesRes, alertsRes, savesRes, viewedRes, publishedRes, visitsRes] =
-      await Promise.all([
-        supabase.from("users").select("id,created_at"),
-        supabase
-          .from("candidate_profiles")
-          .select(
-            "user_id,city,diploma,sectors,job_title,experience_level,skills,contract_types,phone,bio,resume_url,created_at,updated_at,users(email)",
-          ),
-        supabase.from("alerts").select("id").eq("active", true),
-        supabase
-          .from("saved_items")
-          .select("item_id")
-          .in("item_type", ["job", "internship"]),
-        supabase
-          .from("job_offers")
-          .select("id,title,clicks_count")
-          .eq("status", "published")
-          .order("clicks_count", { ascending: false })
-          .limit(50),
-        supabase.from("job_offers").select("company").eq("status", "published"),
-        supabase.from("site_visits").select("source,path").limit(5000),
-      ]);
+    const [
+      usersCountRes,
+      newUsersCountRes,
+      profilesRes,
+      alertsCountRes,
+      savesRes,
+      viewedRes,
+      publishedRes,
+      visitsRes,
+    ] = await Promise.all([
+      // Compteurs : `head: true` = aucune ligne téléchargée.
+      supabase.from("users").select("id", { count: "exact", head: true }),
+      supabase
+        .from("users")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", weekAgo),
+      // Pas de jointure `users(email)` : l'email est un critère toujours
+      // rempli pour un profil rattaché à un compte, et le transmettre
+      // revient à exporter des données personnelles pour rien.
+      supabase
+        .from("candidate_profiles")
+        .select(
+          "user_id,city,diploma,sectors,job_title,experience_level,skills,contract_types,phone,bio,resume_url,updated_at",
+        ),
+      supabase
+        .from("alerts")
+        .select("id", { count: "exact", head: true })
+        .eq("active", true),
+      supabase
+        .from("saved_items")
+        .select("item_id")
+        .in("item_type", ["job", "internship"]),
+      supabase
+        .from("job_offers")
+        .select("id,title,clicks_count")
+        .eq("status", "published")
+        .order("clicks_count", { ascending: false })
+        .limit(50),
+      supabase.from("job_offers").select("company").eq("status", "published"),
+      // Échantillon borné (2 000) suffisant pour la répartition des sources.
+      supabase.from("site_visits").select("source,path").limit(2000),
+    ]);
 
     // Colonnes `source` absente (migration 0031 non appliquée) → repli `path`.
     let visitRows = (visitsRes.error ? [] : visitsRes.data || []) as Array<{
@@ -338,22 +358,22 @@ async function growthFromSupabase(): Promise<AdminGrowthStats> {
       path?: string | null;
     }>;
     if (visitsRes.error) {
-      const fallback = await supabase.from("site_visits").select("path").limit(5000);
+      const fallback = await supabase.from("site_visits").select("path").limit(2000);
       visitRows = (fallback.data || []) as Array<{ source?: string | null; path?: string | null }>;
     }
 
-    const users = (usersRes.data || []) as Array<{ id: string; created_at: string }>;
     const profiles = (profilesRes.data || []) as any[];
-    const totalUsers = users.length;
-    const newUsersThisWeek = users.filter((u) => u.created_at >= weekAgo).length;
+    const totalUsers = numberFromUnknown(usersCountRes.count);
+    const newUsersThisWeek = numberFromUnknown(newUsersCountRes.count);
 
     let completedProfiles = 0;
     let profilesCompletedThisWeek = 0;
     let totalResumes = 0;
     for (const row of profiles) {
-      const email = row.users?.email ?? null;
       const percent = computeProfileCompletion({
-        email,
+        // Sentinelle : l'email est toujours renseigné sur un profil rattaché
+        // à un compte. Évite d'exporter la colonne email depuis Supabase.
+        email: row.user_id ? "compte" : null,
         city: row.city || null,
         jobTitle: row.job_title || null,
         sectors: row.sectors || [],
@@ -410,7 +430,7 @@ async function growthFromSupabase(): Promise<AdminGrowthStats> {
       completedProfiles,
       profilesCompletedThisWeek,
       totalResumes,
-      activeAlerts: (alertsRes.data || []).length,
+      activeAlerts: numberFromUnknown(alertsCountRes.count),
       totalSavedItems: saves.length,
       publishedOffers: publishedRes.error ? 0 : (publishedRes.data || []).length,
       companies: publishedRes.error

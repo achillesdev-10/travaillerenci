@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { requireAdminApi } from '@/lib/adminSession';
 import { revalidateEntreprendreSurfaces } from '@/lib/revalidateContent';
+import { revalidateTag } from 'next/cache';
 import { EntreprendreArticleService } from '@/services/entreprendreService';
 import type {
   EntreprendreArticleInsert,
@@ -80,6 +81,7 @@ export async function PATCH(
     }
 
     revalidateEntreprendreSurfaces([updated.slug]);
+    revalidateTag("admin-dashboard", "max");
     return NextResponse.json({ ok: true, article: updated });
   } catch (err) {
     console.error('PATCH /api/admin/entreprendre/[id] error:', err);
@@ -111,6 +113,7 @@ export async function DELETE(
     }
 
     revalidateEntreprendreSurfaces([existing?.slug]);
+    revalidateTag("admin-dashboard", "max");
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('DELETE /api/admin/entreprendre/[id] error:', err);

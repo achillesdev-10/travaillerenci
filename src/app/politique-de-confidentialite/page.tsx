@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+// Page statique : prAcrendue au build.
 
 export default function PolitiqueConfidentialitePage() {
   return (

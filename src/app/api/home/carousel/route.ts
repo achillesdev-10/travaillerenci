@@ -11,6 +11,6 @@ export type { CarouselSlide } from '@/lib/homeCarousel';
 // (les titres des opportunités sont alors présents dans le HTML brut).
 // -----------------------------------------------------------------------------
 export async function GET() {
-  const { slides } = await buildCarouselSlides({ withOgImages: true, maxSlides: 8 });
+  const { slides } = await buildCarouselSlides({ withOgImages: false, maxSlides: 8 });
   return NextResponse.json({ slides });
 }

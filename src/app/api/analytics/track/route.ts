@@ -6,7 +6,7 @@ import {
   isSupabaseConfigured,
 } from "@/lib/supabase";
 import { getSessionUser } from "@/lib/userSession";
-import { recordEvent } from "@/services/analyticsService";
+import { recordEvent, recordEvents, type AnalyticsEventInput } from "@/services/analyticsService";
 import { isAnalyticsEvent, type AnalyticsEventName } from "@/lib/analyticsEvents";
 import { normalizeSource } from "@/lib/trafficSource";
 import { getClientIp, isRateLimited } from "@/lib/rateLimit";
@@ -14,6 +14,9 @@ import { getClientIp, isRateLimited } from "@/lib/rateLimit";
 const DB_PATH = path.join(process.cwd(), "data", "travaillerenci.sqlite3");
 
 export const dynamic = "force-dynamic";
+
+/** Taille max d'une requête groupée (visites + événements). */
+const MAX_BATCH = 50;
 
 /** Shape minimal de node:sqlite.DatabaseSync (import dynamique ci-dessous). */
 type SqliteDb = {
@@ -24,6 +27,8 @@ type SqliteDb = {
   };
   close(): void;
 };
+
+type VisitInput = { path: string; source: string };
 
 function ensureTable(db: SqliteDb) {
   db.exec(`
@@ -56,16 +61,23 @@ function hashIp(ip: string) {
  *  Import DYNAMIQUE de node:sqlite : ce module n'existe que dans le runtime
  *  Node 22+ ; un import statique casse le build/bundling (module natif) et
  *  chargerait le runtime SQLite sur chaque invocation en production, où ce
- *  chemin n'est utilisé que comme fallback en cas d'échec Supabase. */
-async function trackInSqlite(pagePath: string, source: string, userAgent: string, ip: string) {
+ *  chemin n'est utilisé que comme fallback en cas d'échec Supabase.
+ *  Sur Vercel, le système de fichiers est en lecture seule : on évite
+ *  d'importer node:sqlite et de tenter une écriture vouée à l'échec. */
+async function trackManyInSqlite(visits: VisitInput[], userAgent: string, ip: string) {
+  if (visits.length === 0) return true;
+  if (process.env.VERCEL) return false;
   try {
     const { DatabaseSync } = await import("node:sqlite");
     mkdirSync(path.dirname(DB_PATH), { recursive: true });
     const db = new DatabaseSync(DB_PATH) as unknown as SqliteDb;
     ensureTable(db);
-    db.prepare(
+    const insert = db.prepare(
       "INSERT INTO site_visits (path, source, ip_hash, user_agent) VALUES (?, ?, ?, ?)",
-    ).run(pagePath, source, hashIp(ip), userAgent.slice(0, 255));
+    );
+    for (const visit of visits) {
+      insert.run(visit.path, visit.source, hashIp(ip), userAgent.slice(0, 255));
+    }
     db.close();
     return true;
   } catch {
@@ -74,32 +86,94 @@ async function trackInSqlite(pagePath: string, source: string, userAgent: string
 }
 
 /** Écriture Supabase (production, FS en lecture seule). */
-async function trackInSupabase(pagePath: string, source: string, userAgent: string, ip: string) {
+async function trackManyInSupabase(visits: VisitInput[], userAgent: string, ip: string) {
+  if (visits.length === 0) return true;
   const supabase = getSupabaseClient();
   if (!supabase) return false;
 
-  const { error } = await supabase.from("site_visits").insert({
-    path: pagePath,
-    source,
+  const rows = visits.map((visit) => ({
+    path: visit.path,
+    source: visit.source,
     ip_hash: hashIp(ip),
     user_agent: userAgent.slice(0, 255),
-  });
+  }));
 
-  // Échec réel (ex: table absente avant migration 0006) → on laisse le
-  // fallback SQLite enregistrer la visite en local (utile en dev).
+  const { error } = await supabase.from("site_visits").insert(rows);
   if (!error) return true;
 
   // Migration 0031 non appliquée : colonne `source` inconnue → on réessaie
-  // sans elle plutôt que de perdre la visite.
+  // sans elle plutôt que de perdre les visites.
   if (/source|column/i.test(error.message || "")) {
-    const retry = await supabase.from("site_visits").insert({
-      path: pagePath,
-      ip_hash: hashIp(ip),
-      user_agent: userAgent.slice(0, 255),
-    });
+    const retry = await supabase.from("site_visits").insert(
+      rows.map((row) => ({
+        path: row.path,
+        ip_hash: row.ip_hash,
+        user_agent: row.user_agent,
+      })),
+    );
     return !retry.error;
   }
   return false;
+}
+
+async function storeVisits(visits: VisitInput[], userAgent: string, ip: string) {
+  if (visits.length === 0) return true;
+  if (isSupabaseConfigured()) {
+    const ok = await trackManyInSupabase(visits, userAgent, ip);
+    if (ok) return true;
+    return trackManyInSqlite(visits, userAgent, ip);
+  }
+  return trackManyInSqlite(visits, userAgent, ip);
+}
+
+/** Requête groupée envoyée par analyticsClient.ts (visites + événements). */
+async function handleBatch(raw: unknown[], userAgent: string, ip: string) {
+  const items = raw.slice(0, MAX_BATCH);
+  const visits: VisitInput[] = [];
+  const events: AnalyticsEventInput[] = [];
+
+  for (const item of items) {
+    if (!item || typeof item !== "object") continue;
+    const entry = item as Record<string, unknown>;
+
+    if (entry.kind === "event" || isAnalyticsEvent(entry.event)) {
+      if (!isAnalyticsEvent(entry.event)) continue;
+      const event = entry.event as AnalyticsEventName;
+      const pagePath = String(entry.path || "/").slice(0, 500);
+      if (pagePath.startsWith("/cz7tk")) continue;
+      events.push({
+        event,
+        label: typeof entry.label === "string" ? entry.label.slice(0, 200) : null,
+        path: pagePath,
+      });
+      continue;
+    }
+
+    const pagePath = String(entry.path || "/").slice(0, 500);
+    if (pagePath.startsWith("/cz7tk")) continue;
+    visits.push({ path: pagePath, source: normalizeSource(entry.source) });
+  }
+
+  if (visits.length === 0 && events.length === 0) {
+    return NextResponse.json({ tracked: false, batch: true });
+  }
+
+  const session = events.length > 0 ? await getSessionUser() : null;
+  if (session?.userId) {
+    for (const event of events) event.userId = session.userId;
+  }
+
+  const [visitsOk, eventsOk] = await Promise.all([
+    storeVisits(visits, userAgent, ip),
+    events.length > 0 ? recordEvents(events) : Promise.resolve(true),
+  ]);
+
+  return NextResponse.json({
+    tracked: visitsOk || eventsOk,
+    batch: true,
+    visits: visitsOk ? visits.length : 0,
+    events: eventsOk ? events.length : 0,
+  });
 }
 
 export async function POST(request: Request) {
@@ -113,16 +187,23 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json().catch(() => ({}));
+    const userAgent = request.headers.get("user-agent") || "";
+    if (/bot|crawl|spider|slurp|lighthouse/i.test(userAgent)) {
+      return NextResponse.json({ tracked: false, bot: true });
+    }
+
+    const ip = request.headers.get("x-forwarded-for") || "127.0.0.1";
+
+    // ── Mode groupé : un seul POST pour toutes les visites/événements ──────
+    if (Array.isArray(body.batch)) {
+      return handleBatch(body.batch, userAgent, ip);
+    }
+
     const pagePath = String(body.path || "/");
 
     // Ignore admin routes or bots if desired
     if (pagePath.startsWith("/cz7tk")) {
       return NextResponse.json({ tracked: false });
-    }
-
-    const userAgent = request.headers.get("user-agent") || "";
-    if (/bot|crawl|spider|slurp|lighthouse/i.test(userAgent)) {
-      return NextResponse.json({ tracked: false, bot: true });
     }
 
     // ── Événements produits (§22) : job_view, job_save, signup… ────────────
@@ -137,22 +218,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ tracked: ok, event: body.event });
     }
 
-    const ip = request.headers.get("x-forwarded-for") || "127.0.0.1";
     // Source de trafic (§23) : utm_source / domaine d'origine / direct.
     const source = normalizeSource(body.source);
-
-    // Supabase (production) → SQLite (local / dev, ex: avant migration 0006)
-    if (isSupabaseConfigured()) {
-      const ok = await trackInSupabase(pagePath, source, userAgent, ip);
-      if (ok) {
-        return NextResponse.json({ tracked: true });
-      }
-      // Fallback : si l'écriture Supabase échoue réellement, on tente SQLite.
-      const fallbackOk = await trackInSqlite(pagePath, source, userAgent, ip);
-      return NextResponse.json({ tracked: fallbackOk });
-    }
-
-    const ok = await trackInSqlite(pagePath, source, userAgent, ip);
+    const ok = await storeVisits([{ path: pagePath, source }], userAgent, ip);
     return NextResponse.json({ tracked: ok });
   } catch (err) {
     return NextResponse.json({ tracked: false, error: String(err) }, { status: 500 });

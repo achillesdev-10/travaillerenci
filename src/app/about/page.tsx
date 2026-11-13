@@ -1,8 +1,7 @@
 import Link from 'next/link';
 import { SITE_CONFIG } from '@/lib/constants';
 
-export const dynamic = 'force-dynamic';
-
+// Page 100 % statique (aucune donnAce utilisateur) : prAcrendue au build.
 export const metadata = {
   title: "Qui sommes-nous ? — TravaillerenCi",
   description:

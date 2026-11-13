@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import type { NextRequest } from 'next/server';
 import { requireAdminApi } from '@/lib/adminSession';
 import { revalidateJobSurfaces } from '@/lib/revalidateContent';
@@ -39,12 +40,15 @@ export async function POST(request: NextRequest) {
     }
 
     const ids = body.ids.map((id) => String(id));
-    const [result, payload] = await Promise.all([
-      applyBulkAction(body.action, ids),
-      getAdminDashboardData(),
-    ]);
+
+    // Séquentiel : le dashboard doit refléter l'action qui vient d'être
+    // appliquée (le cache est invalidé avant la relecture).
+    const result = await applyBulkAction(body.action, ids);
 
     revalidateJobSurfaces(ids);
+    revalidateTag("admin-dashboard", "max");
+
+    const payload = await getAdminDashboardData();
 
     return NextResponse.json({
       ...payload,

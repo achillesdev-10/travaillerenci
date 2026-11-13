@@ -9,6 +9,29 @@ interface PollData {
 }
 
 const STORAGE_KEY = 'travaillerenci_poll_2026';
+const POLL_CACHE_KEY = 'travaillerenci_poll_cache';
+const POLL_CACHE_TTL = 5 * 60 * 1000;
+
+function readCachedPoll(): PollData | null {
+  try {
+    const raw = sessionStorage.getItem(POLL_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { data?: PollData; at?: number };
+    if (!parsed?.data || !parsed.at) return null;
+    if (Date.now() - parsed.at > POLL_CACHE_TTL) return null;
+    return parsed.data;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedPoll(data: PollData): void {
+  try {
+    sessionStorage.setItem(POLL_CACHE_KEY, JSON.stringify({ data, at: Date.now() }));
+  } catch {
+    /* noop */
+  }
+}
 
 function uid(): string {
   try {
@@ -29,11 +52,18 @@ export default function PollWidget() {
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const load = useCallback(async () => {
+    const cached = readCachedPoll();
+    if (cached) {
+      setPoll(cached);
+      setLoading(false);
+      return;
+    }
     try {
       const res = await fetch('/api/home/poll');
       if (res.ok) {
         const data = (await res.json()) as PollData;
         setPoll(data);
+        writeCachedPoll(data);
       }
     } catch {
       /* noop */
@@ -116,6 +146,7 @@ export default function PollWidget() {
       if (res.ok) {
         const data = (await res.json()) as PollData;
         setPoll(data);
+        writeCachedPoll(data);
         setVoted(option);
         try {
           localStorage.setItem(STORAGE_KEY, String(option));

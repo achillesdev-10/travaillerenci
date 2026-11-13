@@ -56,11 +56,14 @@ export default function NotificationCenter() {
     }
   }, []);
 
-  // Fetch on mount and every 60 seconds
+  // Fetch on mount then every 2 minutes, uniquement quand l'onglet est visible.
+  // CPU Vercel : évite de réveiller une fonction admin en arrière-plan.
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 60000);
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') fetchNotifications();
+    }, 120000);
     return () => clearInterval(interval);
   }, [fetchNotifications]);
 

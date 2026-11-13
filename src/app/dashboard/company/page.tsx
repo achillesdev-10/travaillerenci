@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import EmailVerificationBanner from '@/components/dashboard/EmailVerificationBanner';
 
-export const dynamic = "force-dynamic";
+// Page statique : l'authentification est gAcrec par le proxy et les donnAces
+// utilisateur sont chargAces cA'tAc client. Aucun rendu serveur par visite.
 
 export default function CompanyDashboardPage() {
   return (

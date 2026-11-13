@@ -72,8 +72,16 @@ async function getDb(): Promise<DatabaseSyncInstance | null> {
 
 /** Écrit un événement. Retourne false en cas d'échec (jamais d'exception remontée). */
 export async function recordEvent(input: AnalyticsEventInput): Promise<boolean> {
-  const { event, label = null, path = null, userId = null, ipHash = null, userAgent = null } = input;
-  const once = ONCE_PER_USER_EVENTS.has(event);
+  return recordEvents([input]);
+}
+
+/**
+ * Écrit plusieurs événements en un seul appel (batch client).
+ * Un seul insert Supabase au lieu d'un par événement : moins d'invocations
+ * de fonction et moins d'aller-retours réseau, donc beaucoup moins de CPU.
+ */
+export async function recordEvents(inputs: AnalyticsEventInput[]): Promise<boolean> {
+  if (inputs.length === 0) return true;
   const now = new Date().toISOString();
 
   try {
@@ -81,27 +89,53 @@ export async function recordEvent(input: AnalyticsEventInput): Promise<boolean> 
       const supabase = getSupabaseClient();
       if (!supabase) return false;
 
-      if (once && userId) {
-        const { data: existing } = await supabase
+      // Déduplication intra-batch des événements « une fois par utilisateur ».
+      const seenOnce = new Set<string>();
+      let rows = inputs.filter((input) => {
+        if (!ONCE_PER_USER_EVENTS.has(input.event) || !input.userId) return true;
+        const key = `${input.userId}:${input.event}`;
+        if (seenOnce.has(key)) return false;
+        seenOnce.add(key);
+        return true;
+      });
+
+      // Déduplication vis-à-vis de la base : une requête par utilisateur.
+      const onceByUser = new Map<string, Set<AnalyticsEventName>>();
+      for (const input of rows) {
+        if (!ONCE_PER_USER_EVENTS.has(input.event) || !input.userId) continue;
+        const set = onceByUser.get(input.userId) ?? new Set<AnalyticsEventName>();
+        set.add(input.event);
+        onceByUser.set(input.userId, set);
+      }
+      for (const [userId, events] of onceByUser) {
+        const { data } = await supabase
           .from('analytics_events')
-          .select('id')
-          .eq('event', event)
+          .select('event')
           .eq('user_id', userId)
-          .limit(1);
-        if (Array.isArray(existing) && existing.length > 0) return true; // déjà enregistré
+          .in('event', [...events]);
+        if (Array.isArray(data) && data.length > 0) {
+          const already = new Set(data.map((d) => String(d.event)));
+          rows = rows.filter(
+            (r) => !(r.userId === userId && already.has(r.event)),
+          );
+        }
       }
 
-      const { error } = await supabase.from('analytics_events').insert({
-        event,
-        label,
-        path,
-        user_id: userId,
-        ip_hash: ipHash,
-        user_agent: userAgent ? userAgent.slice(0, 255) : null,
-        created_at: now,
-      });
+      if (rows.length === 0) return true;
+
+      const { error } = await supabase.from('analytics_events').insert(
+        rows.map(({ event, label = null, path = null, userId = null, ipHash = null, userAgent = null }) => ({
+          event,
+          label,
+          path,
+          user_id: userId,
+          ip_hash: ipHash,
+          user_agent: userAgent ? userAgent.slice(0, 255) : null,
+          created_at: now,
+        })),
+      );
       if (error) {
-        console.error('recordEvent supabase error:', error.message);
+        console.error('recordEvents supabase error:', error.message);
         return false;
       }
       return true;
@@ -110,28 +144,31 @@ export async function recordEvent(input: AnalyticsEventInput): Promise<boolean> 
     const db = await getDb();
     if (!db) return false;
 
-    if (once && userId) {
-      const existing = db
-        .prepare('SELECT id FROM analytics_events WHERE event = $event AND user_id = $userId LIMIT 1')
-        .get({ $event: event, $userId: userId });
-      if (existing) return true; // déjà enregistré
-    }
-
-    db.prepare(
+    const insert = db.prepare(
       `INSERT INTO analytics_events (event, label, path, user_id, ip_hash, user_agent, created_at)
        VALUES ($event, $label, $path, $userId, $ipHash, $userAgent, $now)`,
-    ).run({
-      $event: event,
-      $label: label,
-      $path: path,
-      $userId: userId,
-      $ipHash: ipHash,
-      $userAgent: userAgent ? userAgent.slice(0, 255) : null,
-      $now: now,
-    });
+    );
+    const exists = db.prepare(
+      'SELECT id FROM analytics_events WHERE event = $event AND user_id = $userId LIMIT 1',
+    );
+
+    for (const { event, label = null, path = null, userId = null, ipHash = null, userAgent = null } of inputs) {
+      if (ONCE_PER_USER_EVENTS.has(event) && userId) {
+        if (exists.get({ $event: event, $userId: userId })) continue;
+      }
+      insert.run({
+        $event: event,
+        $label: label,
+        $path: path,
+        $userId: userId,
+        $ipHash: ipHash,
+        $userAgent: userAgent ? userAgent.slice(0, 255) : null,
+        $now: now,
+      });
+    }
     return true;
   } catch (err) {
-    console.error('recordEvent error:', err);
+    console.error('recordEvents error:', err);
     return false;
   }
 }

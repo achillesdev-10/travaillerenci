@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { resolveTrafficSource } from "@/lib/trafficSource";
-import { isLikelyBot } from "@/lib/analyticsClient";
+import { trackPageView } from "@/lib/analyticsClient";
 
 /**
  * Source de trafic (§23) : calculée UNE fois par chargement de page, sur la
@@ -36,10 +36,8 @@ export default function AnalyticsTracker() {
     }
 
     // Perf CPU : pas d'invocation /api/analytics/track pour les robots
-    // connus (la route garde son garde-fou serveur en profondeur).
-    if (isLikelyBot()) {
-      return;
-    }
+    // connus (géré aussi dans analyticsClient, défense en profondeur).
+    // La visite est regroupée avec les événements de la page en un seul POST.
 
     // CPU Vercel : une seule visite envoyée par page ET par session navigateur.
     // Les re-navigations internes (retour arrière, A/R entre listes et fiches)
@@ -53,14 +51,8 @@ export default function AnalyticsTracker() {
       // la visite normalement plutôt que de perdre la mesure.
     }
 
-    // Fire and forget non-blocking tracking call
-    fetch("/api/analytics/track", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ path: pathname, source: trafficSource() }),
-    }).catch(() => {
-      // Ignore tracking errors
-    });
+    // Envoi groupé non bloquant (visite + événements en attente).
+    trackPageView(pathname, trafficSource());
   }, [pathname]);
 
   return null;

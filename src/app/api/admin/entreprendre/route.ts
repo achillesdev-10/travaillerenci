@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { requireAdminApi } from '@/lib/adminSession';
 import { revalidateEntreprendreSurfaces } from '@/lib/revalidateContent';
+import { revalidateTag } from 'next/cache';
 import { EntreprendreArticleService } from '@/services/entreprendreService';
 import type {
   EntreprendreArticleInsert,
@@ -106,6 +107,7 @@ export async function POST(request: NextRequest) {
     }
 
     revalidateEntreprendreSurfaces([created.slug]);
+    revalidateTag("admin-dashboard", "max");
     return NextResponse.json({ ok: true, article: created }, { status: 201 });
   } catch (err) {
     console.error('POST /api/admin/entreprendre error:', err);

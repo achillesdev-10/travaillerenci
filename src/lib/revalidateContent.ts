@@ -16,6 +16,7 @@ export function revalidateJobSurfaces(jobIds: Array<string | null | undefined> =
   revalidatePath('/stages');
   revalidatePath('/jobs/today');
   revalidatePath('/bourses');
+  revalidatePath('/publier-offre');
   revalidatePath('/[landing]', 'page');
 
   for (const id of unique(jobIds)) {

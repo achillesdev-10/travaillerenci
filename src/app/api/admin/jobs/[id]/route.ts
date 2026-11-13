@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { requireAdminApi } from '@/lib/adminSession';
 import { revalidateJobSurfaces } from '@/lib/revalidateContent';
+import { revalidateTag } from 'next/cache';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import type { JobContractType, JobOfferSchemaInsert, JobOfferSchemaStatus } from '@/types';
 import { VALID_SECTOR_SLUGS } from '@/lib/sectorClassifier';
@@ -132,6 +133,7 @@ export async function PATCH(
     }
 
     revalidateJobSurfaces([id]);
+    revalidateTag("admin-dashboard", "max");
     return NextResponse.json({ ok: true, job: updated });
   } catch (err) {
     console.error('PATCH /api/admin/jobs/[id] error:', err);
@@ -172,6 +174,7 @@ export async function DELETE(
     }
 
     revalidateJobSurfaces([id]);
+    revalidateTag("admin-dashboard", "max");
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('DELETE /api/admin/jobs/[id] error:', err);

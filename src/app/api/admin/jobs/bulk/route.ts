@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { requireAdminApi } from '@/lib/adminSession';
 import { revalidateJobSurfaces } from '@/lib/revalidateContent';
+import { revalidateTag } from 'next/cache';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 
 export async function POST(request: NextRequest) {
@@ -38,6 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     revalidateJobSurfaces(ids);
+    revalidateTag("admin-dashboard", "max");
 
     return NextResponse.json({ ok: true, count: ids.length });
   } catch (err) {

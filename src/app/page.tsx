@@ -24,7 +24,11 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 60;
+// ISR 5 min : la home est aussi invalidAce immAcédiatement A� chaque
+// publication (revalidatePath('/') dans revalidateJobSurfaces/ExamSurfaces).
+// L'ancienne valeur (60 s) provoquait jusqu'A� ~1 440 rAcgAcnAcrations/jour,
+// le poste de coA�t CPU le plus lourd en pAcriode de trafic continu.
+export const revalidate = 300;
 
 // Major cities in Côte d'Ivoire for job discovery by location
 const CITIES = [

@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync, openSync, closeSync
 import path from "node:path";
 import { spawn, execSync } from "node:child_process";
 import { DatabaseSync } from "node:sqlite";
+import { unstable_cache } from "next/cache";
 import {
   getSupabaseClient,
   isSupabaseConfigured,
@@ -748,6 +749,59 @@ export async function getScraperRunHistory(limit = 10): Promise<ScraperRunRecord
   }
 }
 
+/**
+ * État courant du scraper — lecture légère (1 ligne) SANS charger tout le
+ * dashboard. Utilisée par le polling de /api/admin/scraper, qui rafraîchit
+ * l'état toutes les 10 s : appeler `getAdminDashboardData()` y téléchargeait
+ * toutes les offres et les statistiques de croissance à chaque tick.
+ */
+export async function getScraperHealth(): Promise<ScraperHealth> {
+  const supabase = isSupabaseConfigured() ? getSupabaseClient() : null;
+
+  if (supabase) {
+    const { data: log } = await supabase
+      .from("scraper_logs")
+      .select("status,offers_added,message,started_at")
+      .order("started_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!log) {
+      return {
+        status: "idle",
+        lastRunAt: null,
+        offersAdded: null,
+        message: "Aucune exécution enregistrée pour le moment.",
+      };
+    }
+
+    return {
+      status: normaliseRunStatus(log.status),
+      lastRunAt: asIsoDate(log.started_at),
+      offersAdded:
+        log.offers_added === null || log.offers_added === undefined
+          ? null
+          : numberFromUnknown(log.offers_added),
+      message: log.message ? String(log.message) : null,
+    };
+  }
+
+  const db = openDatabase();
+  if (!db) {
+    return readStoredScraperHealth();
+  }
+
+  try {
+    return getScraperHealthFromDatabase(db) ?? readStoredScraperHealth();
+  } finally {
+    try {
+      db.close();
+    } catch {
+      // ignore
+    }
+  }
+}
+
 function computeHealthScore(
   scraperHealth: ScraperHealth,
   sourceHealth: Record<string, SourceHealthStats>,
@@ -938,7 +992,7 @@ async function getEntreprendreStatsFromSupabase(): Promise<EntreprendreDashboard
   }
 }
 
-export async function getAdminDashboardData(pendingReports = 0): Promise<AdminDashboardData> {
+async function computeAdminDashboardData(pendingReports = 0): Promise<AdminDashboardData> {
   // Stats de croissance (inscrits, profils complétés, alertes, top offres).
   const growth = await getGrowthStats();
 
@@ -1078,6 +1132,26 @@ export async function getAdminDashboardData(pendingReports = 0): Promise<AdminDa
     healthScore,
     entreprendreStats,
   };
+}
+
+/**
+ * Cache 60 s du dashboard (données + maintenance automatique). Le dashboard
+ * admin et sa route API déclenchaient auparavant, à chaque chargement :
+ * toutes les offres, toutes les visites (5 000 lignes), tous les utilisateurs,
+ * tous les profils candidat, tous les éléments sauvegardés + 3 UPDATE/DELETE
+ * de maintenance. Le tag `admin-dashboard` est invalidé après une action
+ * admin (bulk, scraper) pour un rafraîchissement immédiat.
+ */
+const getCachedAdminDashboardData = unstable_cache(
+  computeAdminDashboardData,
+  ["admin-dashboard-data"],
+  { revalidate: 60, tags: ["admin-dashboard"] },
+);
+
+export function getAdminDashboardData(
+  pendingReports = 0,
+): Promise<AdminDashboardData> {
+  return getCachedAdminDashboardData(pendingReports);
 }
 
 function getOfferTableMeta(db: SqliteDb) {

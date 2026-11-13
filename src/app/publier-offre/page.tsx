@@ -3,7 +3,9 @@ import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import PublishOfferForm from './PublishOfferForm';
 import type { JobOfferSchema } from '@/types';
 
-export const revalidate = 60;
+// ISR 1 h : page marketing quasi statique, fraA�chie par revalidatePath
+// A� chaque publication d'offre (voir revalidateJobSurfaces).
+export const revalidate = 3600;
 
 export const metadata = {
   title: 'Publier une offre — TravaillerenCi',

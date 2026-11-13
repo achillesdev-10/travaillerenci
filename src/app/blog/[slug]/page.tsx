@@ -15,7 +15,11 @@ import { ShareClickTracker } from '@/components/analytics/EventTracker';
 import { articleSector } from '@/lib/relatedContent';
 import { METIER_SEO, landingForOffer } from '@/lib/jobSeo';
 
-export const dynamic = 'force-dynamic';
+// ISR : un article publiAc ne change qu'A� la marge. La fraArcheur est
+// assurAce par revalidateBlogSurfaces() (tag `blog` + revalidatePath du slug).
+// Effet de bord bAcnAcfique : incrementViewCount() n'est plus exAccutAc A� chaque
+// visite mais uniquement lors d'une rAcgAcnAcration (au plus 1 fois / heure).
+export const revalidate = 3600;
 
 const getPost = cache((slug: string) => BlogService.getBySlug(slug));
 

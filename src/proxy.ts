@@ -14,27 +14,33 @@ import {
 } from '@/lib/sessionFlag';
 
 /**
- *  TravaillerenCi — proxy.ts
+ *  TravaillerenCi �?" proxy.ts
  *
- *  Next.js 16 a renommé la convention `middleware.ts` (dépréciée) en `proxy.ts`.
+ *  Next.js 16 a renommAc la convention `middleware.ts` (dAcprAcciAce) en `proxy.ts`.
+ *  IMPORTANT (Fluid CPU Vercel) : en Next.js 16 le proxy s'exAcute TOUJOURS en
+ *  runtime Node.js et chaque dAcclenchement est facturAc en Fluid Active CPU.
+ *  Le matcher est donc volontairement limitAc aux surfaces qui ont besoin de
+ *  la garde (admin, dashboard, pages d'auth) : les pages publiques statiques
+ *  et ISR sont servies par le CDN SANS invoquer de fonction Node.
  *
  *  Ce proxy valide la signature ET l'expiration du jeton de session admin :
- *  — Routes pages  /cz7tk/*     → redirect 307 vers /cz7tk/login
- *  — Routes API     /api/admin/*    → 401 JSON (les fetch clients gèrent 401)
- *  — Exception      /api/admin/session → laissé ouvert (login/logout)
- *  — Sessions        /dashboard/*    → 307 vers /login?next=… sans session
- *  — Déjà connecté   /login, /register, /reset-password (sans ?token=)
- *                    → 307 vers le dashboard (ou le ?next= sûr)
+ *  �?" Routes pages  /cz7tk/*     �+' redirect 307 vers /cz7tk/login
+ *  �?" Routes API     /api/admin/*    �+' 401 JSON (les fetch clients gA"rent 401)
+ *  �?" Exception      /api/admin/session �+' laissAc ouvert (login/logout)
+ *  �?" Sessions        /dashboard/*    �+' 307 vers /login?next=�?� sans session
+ *  �?" DAcjA� connectAc   /login, /register, /reset-password (sans ?token=)
+ *                    �+' 307 vers le dashboard (ou le ?next= sA�r)
  *
- *  Le bypass « pas de vérification en dev » est supprimé : les routes admin
- *  sont toujours protégées, y compris en développement.
+ *  Le bypass A� pas de vAcrification en dev A� est supprimAc : les routes admin
+ *  sont toujours protAcgAces, y compris en dAcveloppement.
  *
  *  Perf CPU : il synchronise aussi le drapeau NON sensible `te_session`
- *  avec le cookie de session httpOnly (`travaillerenci_session`) — le client
- *  n'appelle /api/auth/me que si ce drapeau existe, cf. clientAuth.ts.
- *  La couverture des sessions posées avant l'introduction du drapeau est
- *  assurée au premier chargement de page ; le cookie httpOnly n'est jamais
- *  touché et aucune donnée utilisateur ne transite dans le drapeau.
+ *  avec le cookie de session httpOnly (`travaillerenci_session`) sur les
+ *  routes matchAces. Le drapeau est dAcjA� posAc A� la connexion
+ *  (login/register/Google) et supprimAc A� la dAcconnexion : la majoritAc des
+ *  visiteurs anonymes des pages publiques n'a donc plus besoin du proxy.
+ *  Le cookie httpOnly n'est jamais touchAc et aucune donnAce utilisateur ne
+ *  transite dans le drapeau.
  */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -185,12 +191,13 @@ function safeAuthAwareNext(raw: string | null, role: string | undefined): string
 
 export const config = {
   matcher: [
-    // Pages publiques (la majorité du trafic) : uniquement pour la
-    // synchronisation du drapeau, ZÉRO crypto pour les visiteurs sans cookies.
-    '/((?!api/|_next/static|_next/image|favicon|icons/|manifest\\.|sitemap\\.|robots\\.|sw\\.js).*)',
-    // Surfaces protégées existantes : garde admin / dashboard / auth.
+    // Surfaces protAcgAces / sensibles : garde admin, dashboard et auth.
+    // Aucune page publique ici : elles restent servies par le CDN (statique
+    // ou ISR) et n'exAccutent plus de fonction Node A� chaque visite.
+    '/cz7tk',
     '/cz7tk/:path*',
     '/api/admin/:path*',
+    '/dashboard',
     '/dashboard/:path*',
     '/login',
     '/register',

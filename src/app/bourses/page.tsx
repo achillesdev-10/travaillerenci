@@ -29,7 +29,10 @@ export const metadata = {
   },
 };
 
-export const dynamic = 'force-dynamic';
+// ISR : la liste change rarement et les donnAces sont dAcjA� en Data Cache.
+// 10 min + invalidation immAcédiate par revalidateJobSurfaces() A� chaque
+// publication / modification d'une bourse (tag `job-offers`).
+export const revalidate = 600;
 
 export default async function BoursesPage() {
   // Les bourses dont la date limite est dépassée ne sont pas présentées comme

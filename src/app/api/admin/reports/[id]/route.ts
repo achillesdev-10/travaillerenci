@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { requireAdminApi } from '@/lib/adminSession';
+import { revalidateTag } from 'next/cache';
 import { ReportService, REPORT_STATUSES, type ReportStatus } from '@/services/reportService';
 
 export const runtime = 'nodejs';
@@ -43,6 +44,7 @@ export async function PATCH(
     if (!updated) {
       return NextResponse.json({ error: 'Signalement introuvable.' }, { status: 404 });
     }
+    revalidateTag("admin-dashboard", "max");
     return NextResponse.json({ ok: true, report: updated });
   } catch (err) {
     console.error('PATCH /api/admin/reports/[id] error:', err);
