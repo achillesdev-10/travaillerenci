@@ -55,10 +55,7 @@ async function getDb(): Promise<DatabaseSyncInstance | null> {
   }
 }
 
-/** Miroir SQLite de la table `articles`. */
-function ensureSchema(db: DatabaseSyncInstance) {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS articles (
+const SQLITE_ARTICLE_COLUMNS = `
       id              TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) || '-4' || substr(lower(hex(randomblob(2))),2) || '-' || substr('89ab',abs(random()) % 4 + 1, 1) || substr(lower(hex(randomblob(2))),2) || '-' || lower(hex(randomblob(6)))),
       title           TEXT NOT NULL,
       slug            TEXT NOT NULL UNIQUE,
@@ -75,27 +72,125 @@ function ensureSchema(db: DatabaseSyncInstance) {
       published_at    TEXT,
       created_at      TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at      TEXT NOT NULL DEFAULT (datetime('now')),
-      CONSTRAINT articles_status_check CHECK (status IN ('draft','published','archived')),
-      CONSTRAINT articles_category_check CHECK (category IN ('emploi','formation','concours','economie','carriere','guide'))
+      review_deadline TEXT,
+      auto_publish    INTEGER NOT NULL DEFAULT 0,
+      admin_action    TEXT,
+      admin_action_at TEXT,
+      rejection_reason TEXT,
+      validation_error TEXT,
+      validation_checks TEXT,
+      sources         TEXT,
+      source_count    INTEGER NOT NULL DEFAULT 0,
+      topic_key       TEXT,
+      content_hash    TEXT,
+      title_normalized TEXT,
+      ai_model        TEXT,
+      ai_confidence   REAL,
+      manually_edited INTEGER NOT NULL DEFAULT 0,
+      published_by    TEXT,
+      view_count      INTEGER NOT NULL DEFAULT 0,
+      archived_at     TEXT,
+      last_error_at   TEXT,
+      CONSTRAINT articles_status_check CHECK (status IN ('draft','pending_review','published','archived','rejected')),
+      CONSTRAINT articles_category_check CHECK (category IN ('emploi','formation','concours','economie','carriere','guide','societe','technologie','afrique','entrepreneuriat','opportunites'))`;
+
+/** Miroir SQLite de la table `articles`. */
+function ensureSchema(db: DatabaseSyncInstance) {
+  db.exec(`CREATE TABLE IF NOT EXISTS articles (${SQLITE_ARTICLE_COLUMNS}\n    );`);
+
+  // Migration des bases locales créées avant le pipeline automatisé :
+  // SQLite ne sait pas modifier une contrainte CHECK → reconstruction.
+  const table = db
+    .prepare(`SELECT sql FROM sqlite_master WHERE type='table' AND name='articles'`)
+    .get() as { sql?: string } | undefined;
+  const schemaSql = table?.sql || '';
+  const legacy =
+    !schemaSql.includes('review_deadline') ||
+    !schemaSql.includes('pending_review') ||
+    !schemaSql.includes('societe');
+
+  if (legacy) {
+    const existing = (db.prepare(`PRAGMA table_info(articles)`).all() as Array<{ name: string }>).map(
+      (column) => column.name,
     );
-  `);
+    const desired = [
+      'id', 'title', 'slug', 'excerpt', 'content', 'category', 'source_url',
+      'cover_image', 'author', 'status', 'seo_title', 'seo_description',
+      'seo_keywords', 'published_at', 'created_at', 'updated_at', 'review_deadline',
+      'auto_publish', 'admin_action', 'admin_action_at', 'rejection_reason',
+      'validation_error', 'validation_checks', 'sources', 'source_count',
+      'topic_key', 'content_hash', 'title_normalized', 'ai_model', 'ai_confidence',
+      'manually_edited', 'published_by', 'view_count', 'archived_at', 'last_error_at',
+    ];
+    const common = desired.filter((column) => existing.includes(column));
+    db.exec(`ALTER TABLE articles RENAME TO articles_legacy;`);
+    db.exec(`CREATE TABLE articles (${SQLITE_ARTICLE_COLUMNS}\n    );`);
+    db.exec(
+      `INSERT INTO articles (${common.join(',')}) SELECT ${common.join(',')} FROM articles_legacy;`,
+    );
+    db.exec(`DROP TABLE articles_legacy;`);
+  }
+
   db.exec(`CREATE INDEX IF NOT EXISTS idx_articles_status ON articles (status);`);
   db.exec(`CREATE INDEX IF NOT EXISTS idx_articles_category ON articles (category);`);
   db.exec(`CREATE INDEX IF NOT EXISTS idx_articles_slug ON articles (slug);`);
   db.exec(
     `CREATE INDEX IF NOT EXISTS idx_articles_published_at ON articles (published_at DESC);`,
   );
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_articles_review_deadline ON articles (status, review_deadline);`,
+  );
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_articles_view_count ON articles (view_count DESC);`);
 }
 
 // ---------------------------------------------------------------------------
 // Normalisation des lignes
 // ---------------------------------------------------------------------------
 const ARTICLE_FULL_COLUMNS =
-  'id,title,slug,excerpt,content,category,source_url,cover_image,author,status,seo_title,seo_description,seo_keywords,published_at,created_at,updated_at';
+  'id,title,slug,excerpt,content,category,source_url,cover_image,author,status,seo_title,seo_description,seo_keywords,published_at,created_at,updated_at,review_deadline,auto_publish,admin_action,admin_action_at,rejection_reason,validation_error,validation_checks,sources,source_count,topic_key,content_hash,title_normalized,ai_model,ai_confidence,manually_edited,published_by,view_count,archived_at';
 
 /** Toutes les colonnes sauf `content` (listes publiques et similaires). */
 const ARTICLE_CARD_COLUMNS =
-  'id,title,slug,excerpt,category,source_url,cover_image,author,status,seo_title,seo_description,seo_keywords,published_at,created_at,updated_at';
+  'id,title,slug,excerpt,category,source_url,cover_image,author,status,seo_title,seo_description,seo_keywords,published_at,created_at,updated_at,review_deadline,auto_publish,admin_action,sources,source_count,ai_model,ai_confidence,manually_edited,published_by,view_count,archived_at';
+
+function safeJsonArray(value: unknown): Article['sources'] {
+  if (Array.isArray(value)) return value as Article['sources'];
+  if (typeof value === 'string' && value.trim()) {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+function safeJsonObject(value: unknown): Record<string, unknown> | undefined {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+  if (typeof value === 'string' && value.trim()) {
+    try {
+      const parsed = JSON.parse(value);
+      return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+  return undefined;
+}
+
+function toBoolean(value: unknown): boolean | undefined {
+  if (value === undefined || value === null) return undefined;
+  return Boolean(value);
+}
+
+function toNumber(value: unknown): number | undefined {
+  if (value === undefined || value === null || value === '') return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
 
 function rowToArticle(row: any): Article {
   return {
@@ -115,28 +210,29 @@ function rowToArticle(row: any): Article {
     published_at: row.published_at || null,
     created_at: row.created_at,
     updated_at: row.updated_at,
+    review_deadline: row.review_deadline || null,
+    auto_publish: toBoolean(row.auto_publish),
+    admin_action: row.admin_action || null,
+    admin_action_at: row.admin_action_at || null,
+    rejection_reason: row.rejection_reason || null,
+    validation_error: row.validation_error || null,
+    validation_checks: safeJsonObject(row.validation_checks),
+    sources: safeJsonArray(row.sources),
+    source_count: toNumber(row.source_count),
+    topic_key: row.topic_key || null,
+    content_hash: row.content_hash || null,
+    title_normalized: row.title_normalized || null,
+    ai_model: row.ai_model || null,
+    ai_confidence: toNumber(row.ai_confidence) ?? null,
+    manually_edited: toBoolean(row.manually_edited),
+    published_by: (row.published_by as Article['published_by']) || null,
+    view_count: toNumber(row.view_count) ?? 0,
+    archived_at: row.archived_at || null,
   };
 }
 
 function rowToArticleFromSupabase(row: any): Article {
-  return {
-    id: row.id,
-    title: row.title,
-    slug: row.slug,
-    excerpt: row.excerpt || '',
-    content: row.content || '',
-    category: (row.category as ArticleCategory) || 'emploi',
-    source_url: row.source_url || null,
-    cover_image: row.cover_image || null,
-    author: row.author || 'TravaillerenCi',
-    status: (row.status as ArticleStatus) || 'draft',
-    seo_title: row.seo_title || null,
-    seo_description: row.seo_description || null,
-    seo_keywords: row.seo_keywords || null,
-    published_at: row.published_at || null,
-    created_at: row.created_at,
-    updated_at: row.updated_at,
-  };
+  return rowToArticle(row);
 }
 
 // ---------------------------------------------------------------------------
@@ -180,7 +276,9 @@ export class ArticleService {
     }
 
     const whereSql = clauses.length > 0 ? `WHERE ${clauses.join(' AND ')}` : '';
-    const orderSafe = ['published_at', 'created_at', 'title'].includes(order_by!)
+    const orderSafe = ['published_at', 'created_at', 'title', 'view_count', 'review_deadline'].includes(
+      order_by!,
+    )
       ? order_by!
       : 'published_at';
     const dirSafe = order_dir === 'asc' ? 'ASC' : 'DESC';
@@ -232,16 +330,27 @@ export class ArticleService {
     const now = new Date().toISOString();
     const id = globalThis.crypto?.randomUUID?.() || slugify(`${title}-${now}`);
 
+    const status = data.status || 'draft';
     const res = db
       .prepare(
         `INSERT INTO articles (
           id, title, slug, excerpt, content, category, source_url, cover_image,
           author, status, seo_title, seo_description, seo_keywords,
-          published_at, created_at, updated_at
+          published_at, created_at, updated_at,
+          review_deadline, auto_publish, admin_action, admin_action_at,
+          rejection_reason, validation_error, validation_checks, sources,
+          source_count, topic_key, content_hash, title_normalized,
+          ai_model, ai_confidence, manually_edited, published_by,
+          view_count, archived_at
         ) VALUES (
           $id, $title, $slug, $excerpt, $content, $category, $source_url, $cover_image,
           $author, $status, $seo_title, $seo_description, $seo_keywords,
-          $published_at, $created_at, $updated_at
+          $published_at, $created_at, $updated_at,
+          $review_deadline, $auto_publish, $admin_action, $admin_action_at,
+          $rejection_reason, $validation_error, $validation_checks, $sources,
+          $source_count, $topic_key, $content_hash, $title_normalized,
+          $ai_model, $ai_confidence, $manually_edited, $published_by,
+          $view_count, $archived_at
         )`,
       )
       .run({
@@ -254,13 +363,33 @@ export class ArticleService {
         $source_url: data.source_url || null,
         $cover_image: data.cover_image || null,
         $author: data.author || 'TravaillerenCi',
-        $status: data.status || 'draft',
+        $status: status,
         $seo_title: data.seo_title || null,
         $seo_description: data.seo_description || null,
         $seo_keywords: data.seo_keywords || null,
-        $published_at: data.status === 'published' ? now : null,
+        $published_at: data.published_at || (status === 'published' ? now : null),
         $created_at: now,
         $updated_at: now,
+        $review_deadline: data.review_deadline || null,
+        $auto_publish: data.auto_publish ? 1 : 0,
+        $admin_action: data.admin_action || null,
+        $admin_action_at: data.admin_action_at || null,
+        $rejection_reason: data.rejection_reason || null,
+        $validation_error: data.validation_error || null,
+        $validation_checks: data.validation_checks
+          ? JSON.stringify(data.validation_checks)
+          : null,
+        $sources: data.sources?.length ? JSON.stringify(data.sources) : null,
+        $source_count: data.source_count ?? data.sources?.length ?? 0,
+        $topic_key: data.topic_key || null,
+        $content_hash: data.content_hash || null,
+        $title_normalized: data.title_normalized || null,
+        $ai_model: data.ai_model || null,
+        $ai_confidence: data.ai_confidence ?? null,
+        $manually_edited: data.manually_edited ? 1 : 0,
+        $published_by: data.published_by || (status === 'published' ? 'admin' : null),
+        $view_count: data.view_count ?? 0,
+        $archived_at: data.archived_at || null,
       });
 
     return res.changes > 0 ? this.getById(id) : null;
@@ -275,20 +404,41 @@ export class ArticleService {
     const existing = await this.getById(id);
     if (!existing) return null;
 
+    const allowed = new Set([
+      'title', 'slug', 'excerpt', 'content', 'category', 'source_url', 'cover_image',
+      'author', 'status', 'seo_title', 'seo_description', 'seo_keywords', 'published_at',
+      'review_deadline', 'auto_publish', 'admin_action', 'admin_action_at',
+      'rejection_reason', 'validation_error', 'validation_checks', 'sources',
+      'source_count', 'topic_key', 'content_hash', 'title_normalized', 'ai_model',
+      'ai_confidence', 'manually_edited', 'published_by', 'view_count', 'archived_at',
+      'last_error_at',
+    ]);
+
     const fields: string[] = [];
     const params: Record<string, unknown> = { $id: id };
     let idx = 0;
 
     for (const [key, value] of Object.entries(patch)) {
-      if (value === undefined) continue;
+      if (value === undefined || !allowed.has(key)) continue;
       const paramName = `$v${idx++}`;
+      fields.push(`${key} = ${paramName}`);
       if (key === 'slug' && typeof value === 'string') {
-        fields.push(`slug = ${paramName}`);
         params[paramName] = slugify(value);
+      } else if (key === 'sources' || key === 'validation_checks') {
+        params[paramName] = value ? JSON.stringify(value) : null;
+      } else if (typeof value === 'boolean') {
+        params[paramName] = value ? 1 : 0;
       } else {
-        fields.push(`${key} = ${paramName}`);
         params[paramName] = value;
       }
+    }
+
+    if (patch.status === 'published' && !existing.published_at) {
+      fields.push(`published_at = $publishedAt`);
+      params.$publishedAt = new Date().toISOString();
+    }
+    if (patch.status === 'pending_review') {
+      fields.push(`published_at = NULL`);
     }
 
     if (fields.length === 0) return existing;
@@ -344,7 +494,9 @@ export class ArticleService {
       if (list.length > 0) query = query.in('status', list);
     }
 
-    const orderSafe = ['published_at', 'created_at', 'title'].includes(order_by!)
+    const orderSafe = ['published_at', 'created_at', 'title', 'view_count', 'review_deadline'].includes(
+      order_by!,
+    )
       ? order_by!
       : 'published_at';
     query = query.order(orderSafe, { ascending: order_dir !== 'desc' });
@@ -381,6 +533,7 @@ export class ArticleService {
     if (!title) return null;
 
     const id = globalThis.crypto?.randomUUID?.();
+    const status = input.status || 'draft';
     const payload: Record<string, unknown> = {
       id,
       title,
@@ -391,11 +544,29 @@ export class ArticleService {
       source_url: input.source_url || null,
       cover_image: input.cover_image || null,
       author: input.author || 'TravaillerenCi',
-      status: input.status || 'draft',
+      status,
       seo_title: input.seo_title || null,
       seo_description: input.seo_description || null,
       seo_keywords: input.seo_keywords || null,
-      published_at: input.status === 'published' ? new Date().toISOString() : null,
+      published_at: input.published_at || (status === 'published' ? new Date().toISOString() : null),
+      review_deadline: input.review_deadline || null,
+      auto_publish: input.auto_publish ?? false,
+      admin_action: input.admin_action || null,
+      admin_action_at: input.admin_action_at || null,
+      rejection_reason: input.rejection_reason || null,
+      validation_error: input.validation_error || null,
+      validation_checks: input.validation_checks ?? {},
+      sources: input.sources ?? [],
+      source_count: input.source_count ?? input.sources?.length ?? 0,
+      topic_key: input.topic_key || null,
+      content_hash: input.content_hash || null,
+      title_normalized: input.title_normalized || null,
+      ai_model: input.ai_model || null,
+      ai_confidence: input.ai_confidence ?? null,
+      manually_edited: input.manually_edited ?? false,
+      published_by: input.published_by || (status === 'published' ? 'admin' : null),
+      view_count: input.view_count ?? 0,
+      archived_at: input.archived_at || null,
     };
 
     const { data: inserted, error: insertError } = await supabase
@@ -416,12 +587,31 @@ export class ArticleService {
     const existing = await this.getByIdSupabase(id);
     if (!existing) return null;
 
+    const allowed = new Set([
+      'title', 'slug', 'excerpt', 'content', 'category', 'source_url', 'cover_image',
+      'author', 'status', 'seo_title', 'seo_description', 'seo_keywords', 'published_at',
+      'review_deadline', 'auto_publish', 'admin_action', 'admin_action_at',
+      'rejection_reason', 'validation_error', 'validation_checks', 'sources',
+      'source_count', 'topic_key', 'content_hash', 'title_normalized', 'ai_model',
+      'ai_confidence', 'manually_edited', 'published_by', 'view_count', 'archived_at',
+      'last_error_at',
+    ]);
+
     const payload: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(patch)) {
-      if (value === undefined) continue;
+      if (value === undefined || !allowed.has(key)) continue;
       payload[key] = key === 'slug' ? slugify(String(value)) : value;
     }
+
+    if (patch.status === 'published' && !existing.published_at) {
+      payload.published_at = new Date().toISOString();
+    }
+    if (patch.status === 'pending_review') {
+      payload.published_at = null;
+    }
+
     if (Object.keys(payload).length === 0) return existing;
+    payload.updated_at = new Date().toISOString();
 
     const { data, error } = await supabase
       .from('articles')

@@ -7,29 +7,30 @@ import { getCachedArticles } from '@/lib/cachedContent';
 import CoverImage from '@/components/content/CoverImage';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
 import ShareButton from '@/components/ShareButton';
+import ArticleViewPing from '@/components/content/ArticleViewPing';
 import { formatDate, formatRelativeTime, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
+import { NEWS_CATEGORY_LABELS } from '@/lib/news/categories';
+import type { ArticleCategory } from '@/types/article';
 
-export const revalidate = 3600;
+export const revalidate = 300;
 
 const getArticle = cache((slug: string) => ArticleService.getBySlug(slug));
 
-const CATEGORY_LABELS: Record<string, string> = {
-  emploi: 'Emploi',
-  formation: 'Formation',
-  concours: 'Concours',
-  economie: 'Économie',
-  carriere: 'Carrière',
-  guide: 'Guide',
-};
+const CATEGORY_LABELS: Record<ArticleCategory, string> = NEWS_CATEGORY_LABELS;
 
-const CATEGORY_COLORS: Record<string, string> = {
-  emploi: 'bg-primary/10 text-primary dark:text-brand-accent',
-  formation: 'bg-primary/10 text-primary dark:text-brand-accent',
-  concours: 'bg-primary/10 text-primary dark:text-brand-accent',
-  economie: 'bg-primary/10 text-primary dark:text-brand-accent',
-  carriere: 'bg-primary/10 text-primary dark:text-brand-accent',
-  guide: 'bg-primary/10 text-primary dark:text-brand-accent',
+const CATEGORY_COLORS: Record<ArticleCategory, string> = {
+  emploi: 'bg-orange-500/10 text-orange-700',
+  formation: 'bg-orange-500/10 text-orange-700',
+  concours: 'bg-orange-500/10 text-orange-700',
+  economie: 'bg-orange-500/10 text-orange-700',
+  carriere: 'bg-orange-500/10 text-orange-700',
+  guide: 'bg-orange-500/10 text-orange-700',
+  societe: 'bg-orange-500/10 text-orange-700',
+  technologie: 'bg-orange-500/10 text-orange-700',
+  afrique: 'bg-orange-500/10 text-orange-700',
+  entrepreneuriat: 'bg-orange-500/10 text-orange-700',
+  opportunites: 'bg-orange-500/10 text-orange-700',
 };
 
 interface PageProps {
@@ -39,7 +40,7 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const article = await getArticle(slug);
-  if (!article) {
+  if (!article || (article.status !== 'published' && article.status !== 'archived')) {
     return {
       title: 'Article introuvable',
       robots: { index: false, follow: false },
@@ -55,6 +56,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: article.seo_title || `${article.title} | TravaillerEnCi`,
     description: desc,
     keywords: article.seo_keywords || undefined,
+    robots:
+      article.status === 'published'
+        ? undefined
+        : { index: false, follow: true },
     alternates: {
       canonical: `${getSiteUrl()}/actualites/${article.slug}`,
     },
@@ -83,7 +88,9 @@ export default async function ArticleDetailPage({ params }: PageProps) {
   const { slug } = await params;
   const article = await getArticle(slug);
 
-  if (!article) {
+  // Seuls les articles publiés ou archivés sont publics : un brouillon, un
+  // article en attente de validation ou rejeté reste réservé au dashboard.
+  if (!article || (article.status !== 'published' && article.status !== 'archived')) {
     notFound();
   }
 
@@ -132,6 +139,10 @@ export default async function ArticleDetailPage({ params }: PageProps) {
   });
   const similar = related.filter((a) => a.id !== article.id).slice(0, 3);
 
+  const citedSources = (article.sources ?? []).filter(
+    (source) => source.allowed_for_citation !== false && source.url,
+  );
+
   return (
     <main className="flex-1 min-h-screen bg-white dark:bg-slate-950 transition-colors">
       <script
@@ -142,6 +153,14 @@ export default async function ArticleDetailPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
+      <ArticleViewPing slug={article.slug} />
+
+      {article.status !== 'published' && (
+        <div className="border-b border-amber-200 bg-amber-50 px-4 py-2.5 text-center text-[12.5px] font-medium text-amber-800">
+          Article archivé — conservé pour référence. Les informations peuvent
+          avoir évolué depuis sa publication.
+        </div>
+      )}
 
       {/* ===== HERO ===== */}
       <section className="bg-primary/5 dark:bg-primary/10 border-b border-line dark:border-slate-800">
@@ -223,30 +242,79 @@ export default async function ArticleDetailPage({ params }: PageProps) {
               </div>
             </div>
 
-            {/* Source link */}
-            {article.source_url && (
-              <div className="mt-6 bg-white dark:bg-slate-900 rounded-2xl border border-line dark:border-slate-800 shadow-sm p-5">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary dark:text-brand-accent flex items-center justify-center shrink-0">
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            {/* Sources */}
+            {(citedSources.length > 0 || article.source_url) && (
+              <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-600">
+                    <svg
+                      className="h-5 w-5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
                       <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                       <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                     </svg>
                   </div>
-                  <div>
-                    <p className="text-sm font-bold text-black dark:text-white">Source originale</p>
-                    <a
-                      href={article.source_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-primary dark:text-brand-accent hover:underline inline-flex items-center gap-1"
-                    >
-                      Consulter la source
-                      <svg className="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M7 17L17 7" />
-                        <path d="M7 7h10v10" />
-                      </svg>
-                    </a>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-slate-900">
+                      Sources & vérification
+                    </p>
+                    <p className="mt-1 text-[12.5px] leading-relaxed text-slate-600">
+                      Article original rédigé par la rédaction à partir des
+                      sources ci-dessous.
+                    </p>
+                    <ul className="mt-3 space-y-2">
+                      {citedSources.length > 0 ? (
+                        citedSources.map((source, index) => (
+                          <li key={`${source.url}-${index}`}>
+                            <a
+                              href={source.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-orange-700 hover:underline"
+                            >
+                              {source.name}
+                              {source.published_at && (
+                                <span className="font-normal text-slate-500">
+                                  ·{' '}
+                                  {formatDate(source.published_at)}
+                                </span>
+                              )}
+                              <svg
+                                className="h-3.5 w-3.5 opacity-70"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                aria-hidden="true"
+                              >
+                                <path d="M7 17L17 7" />
+                                <path d="M7 7h10v10" />
+                              </svg>
+                            </a>
+                          </li>
+                        ))
+                      ) : (
+                        <li>
+                          <a
+                            href={article.source_url!}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[12.5px] font-medium text-orange-700 hover:underline"
+                          >
+                            Consulter la source originale
+                          </a>
+                        </li>
+                      )}
+                    </ul>
                   </div>
                 </div>
               </div>
