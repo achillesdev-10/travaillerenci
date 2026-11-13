@@ -87,6 +87,7 @@ export async function collectNews(options: {
   let clusterCount = 0;
   let articlesCreated = 0;
   let aiCalls = 0;
+  let sourceErrors = 0;
   const timings: Record<string, number> = {};
   const addTiming = (phase: string, since: number) => {
     timings[phase] = (timings[phase] ?? 0) + (Date.now() - since);
@@ -229,6 +230,9 @@ export async function collectNews(options: {
         return parsed;
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
+        // Un flux injoignable reste tracé, mais ne fait pas échouer la collecte
+        // tant que d'autres sources ont répondu.
+        sourceErrors += 1;
         errors.push(`${source.id}: ${message}`);
         await NewsRepository.updateSourceHealth(source.id, {
           last_fetched_at: new Date().toISOString(),
@@ -382,14 +386,16 @@ export async function collectNews(options: {
       }
     }
 
+    const blockingErrors = errors.length - sourceErrors;
+
     if (runId != null) {
       await NewsRepository.finishRun(runId, {
         status:
           articlesCreated > 0
-            ? errors.length > 0
+            ? blockingErrors > 0
               ? 'partial'
               : 'success'
-            : errors.length > 0
+            : blockingErrors > 0
               ? 'error'
               : 'success',
         items_fetched: itemsFetched,
@@ -405,10 +411,10 @@ export async function collectNews(options: {
     return {
       status:
         articlesCreated > 0
-          ? errors.length > 0
+          ? blockingErrors > 0
             ? 'partial'
             : 'success'
-          : errors.length > 0
+          : blockingErrors > 0
             ? 'error'
             : 'success',
       itemsFetched,
