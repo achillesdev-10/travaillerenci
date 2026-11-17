@@ -228,6 +228,12 @@ async function main() {
   console.log('\n8. Suivi du statut');
   const sent = await ApplicationService.updateStatusForUser(created.data.id, USER_A, 'sent');
   assert(sent.ok && sent.data.status === 'sent', 'passage à sent');
+  assert(sent.ok && sent.changed === true, 'premier passage à sent = changement réel');
+  const sentAgain = await ApplicationService.updateStatusForUser(created.data.id, USER_A, 'sent');
+  assert(
+    sentAgain.ok && sentAgain.changed === false,
+    'statut déjà posé = aucun changement (pas de double événement)',
+  );
   const response = await ApplicationService.updateStatusForUser(
     created.data.id,
     USER_A,
@@ -459,6 +465,34 @@ async function main() {
     events.some((event) => event.event === 'application_confirmed' && event.userId === USER_A),
     'application_confirmed émis au marquage envoyé',
   );
+
+  // Statut déjà posé : la réponse reste 200 mais aucun nouvel événement.
+  const noopEvents: string[] = [];
+  const noopHandler = createApplicationsHandlers({
+    ...baseDeps,
+    getSessionUser: async () => session('candidate'),
+    getJob: async () => job() as never,
+    record: async () => ({ ok: false, reason: 'db_error' }),
+    list: async () => ({ ok: true, data: [] }),
+    updateStatus: async () => ({
+      ok: true,
+      data: { ...created.data, status: 'sent' as const },
+      changed: false,
+    }),
+    recordEvent: async (event) => {
+      noopEvents.push(event.event);
+      return true;
+    },
+  });
+  const noopRes = await noopHandler.PATCH(
+    new Request('http://localhost/api/applications', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ application_id: created.data.id, status: 'sent' }),
+    }),
+  );
+  assertEqual(noopRes.status, 200, 'PATCH sans changement = 200');
+  assertEqual(noopEvents, [], 'aucun événement analytics sur un statut déjà posé');
 
   // 11. API : PATCH propriétaire uniquement.
   console.log('\n11. API PATCH');

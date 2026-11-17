@@ -74,7 +74,15 @@ export type ApplicationFailure =
   | 'db_error';
 
 export type ApplicationResult<T> =
-  | { ok: true; data: T }
+  | {
+      ok: true;
+      data: T;
+      /**
+       * `false` pour une mise à jour de statut sans effet (statut déjà posé).
+       * Permet à l'API de ne pas compter deux fois le même événement analytics.
+       */
+      changed?: boolean;
+    }
   | { ok: false; reason: ApplicationFailure; message?: string };
 
 export interface RecordApplicationInput {
@@ -365,20 +373,22 @@ async function updateSqlite(
   }
   const now = new Date().toISOString();
   try {
+    // `status <> $status` évite de réécrire updated_at et de recompter
+    // l'événement analytics quand le statut est déjà celui demandé.
     const result = db
       .prepare(
         `UPDATE applications
             SET status = $status, updated_at = $now
-          WHERE id = $id AND user_id = $userId`,
+          WHERE id = $id AND user_id = $userId AND status <> $status`,
       )
       .run({ $id: id, $userId: userId, $status: status, $now: now });
-
-    if (result.changes === 0) return { ok: false, reason: 'not_found' };
 
     const row = db
       .prepare(`${SELECT_WITH_JOB} WHERE a.id = $id AND a.user_id = $userId`)
       .get({ $id: id, $userId: userId });
-    return { ok: true, data: mapSqliteRow(row) };
+    if (!row) return { ok: false, reason: 'not_found' };
+
+    return { ok: true, data: mapSqliteRow(row), changed: result.changes > 0 };
   } catch (err) {
     console.error('applicationService.update SQLite error:', err);
     return { ok: false, reason: 'db_error', message: errorMessage(err) };
@@ -451,11 +461,13 @@ async function updateSupabase(
   if (!supabase) {
     return { ok: false, reason: 'db_error', message: 'Supabase non configuré.' };
   }
+  // `neq` évite une écriture sans effet (et un double comptage analytics).
   const { data, error } = await supabase
     .from('applications')
     .update({ status, updated_at: new Date().toISOString() })
     .eq('id', id)
     .eq('user_id', userId)
+    .neq('status', status)
     .select(SUPABASE_SELECT)
     .maybeSingle();
 
@@ -464,8 +476,23 @@ async function updateSupabase(
     console.error('applicationService.update Supabase error:', error);
     return { ok: false, reason: 'db_error', message: error.message };
   }
-  if (!data) return { ok: false, reason: 'not_found' };
-  return { ok: true, data: mapSupabaseRow(data) };
+  if (data) return { ok: true, data: mapSupabaseRow(data), changed: true };
+
+  // Aucune ligne modifiée : introuvable, ou statut déjà identique.
+  const { data: existing, error: existingError } = await supabase
+    .from('applications')
+    .select(SUPABASE_SELECT)
+    .eq('id', id)
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (existingError) {
+    if (isMissingSchemaError(existingError)) return { ok: false, reason: 'migration_required' };
+    console.error('applicationService.update Supabase read error:', existingError);
+    return { ok: false, reason: 'db_error', message: existingError.message };
+  }
+  if (!existing) return { ok: false, reason: 'not_found' };
+  return { ok: true, data: mapSupabaseRow(existing), changed: false };
 }
 
 export const ApplicationService = {

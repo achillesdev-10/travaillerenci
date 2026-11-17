@@ -48,6 +48,17 @@ test.describe('Boutons postuler — mobile (390px)', () => {
     await expectNoHorizontalOverflow(page);
   });
 
+  // Plage Android demandée par l'audit : 360 à 430 px, panneau ouvert inclus.
+  for (const width of [360, 430]) {
+    test(`aucun débordement horizontal à ${width}px (panneau ouvert)`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await openFirstJob(page);
+      await expectNoHorizontalOverflow(page);
+      await openApplyPanel(page);
+      await expectNoHorizontalOverflow(page);
+    });
+  }
+
   test('le CTA compact « Postuler » reste dans l’écran', async ({ page }) => {
     await openFirstJob(page);
 

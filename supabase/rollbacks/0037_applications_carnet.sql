@@ -7,7 +7,33 @@
 --
 --  ATTENTION : à n'exécuter qu'après avoir remis le code applicatif précédent
 --  (sinon l'API /api/applications ne trouvera plus user_id/applied_at).
+--
+--  GARDE-FOU (audit 1.1) : les candidatures créées par le carnet n'ont pas de
+--  candidate_id legacy (uniquement user_id). Supprimer user_id les laisserait
+--  orphelines, invisibles du candidat et de tout futur code. Le rollback refuse
+--  donc de s'exécuter s'il en existe. Exportez-les d'abord, puis forcez :
+--      SET app.force_carnet_rollback = 'on';
+--      \i supabase/rollbacks/0037_applications_carnet.sql
 -- ============================================================================
+
+BEGIN;
+
+DO $$
+DECLARE
+    carnet_rows INTEGER;
+BEGIN
+    SELECT count(*) INTO carnet_rows
+      FROM public.applications
+     WHERE user_id IS NOT NULL
+       AND candidate_id IS NULL;
+
+    IF carnet_rows > 0
+       AND coalesce(current_setting('app.force_carnet_rollback', true), '') <> 'on' THEN
+        RAISE EXCEPTION
+            'Rollback 0037 refusé : % candidature(s) du carnet perdraient leur rattachement utilisateur. Exportez-les, puis relancez avec SET app.force_carnet_rollback = ''on''.',
+            carnet_rows;
+    END IF;
+END $$;
 
 DROP POLICY IF EXISTS applications_backend_only ON public.applications;
 
@@ -28,3 +54,5 @@ ALTER TABLE public.applications
 -- Restaure le défaut historique observé dans 0002.
 ALTER TABLE public.applications
     ALTER COLUMN status SET DEFAULT 'pending';
+
+COMMIT;

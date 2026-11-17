@@ -366,7 +366,8 @@ export function createApplicationsHandlers(overrides: Partial<ApplicationsDeps> 
       const result = await deps.updateStatus(applicationId, session.userId, status);
       if (!result.ok) return dbFailure(result);
 
-      if (status === 'sent') {
+      // Un statut déjà posé n'est pas recompté (result.changed === false).
+      if (result.changed !== false && status === 'sent') {
         track(
           deps,
           'application_confirmed',
@@ -374,7 +375,7 @@ export function createApplicationsHandlers(overrides: Partial<ApplicationsDeps> 
           result.data.job_id,
           buildJobPath(result.data.job_id),
         );
-      } else if (status === 'response_received') {
+      } else if (result.changed !== false && status === 'response_received') {
         track(
           deps,
           'application_response_received',

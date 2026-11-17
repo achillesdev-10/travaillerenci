@@ -39,8 +39,12 @@ __pycache__/
 .vercel
 
 # Secrets temporaires fournis à l'agent (ne jamais commiter)
+# Les variantes avec point initial et/ou suffixe .txt existent aussi sur disque.
 .vercel-token
+.vercel-token.txt
 vercel-secrets.txt
+.vercel-secrets.txt
+*-secrets.txt
 
 # IDE
 .idea/
