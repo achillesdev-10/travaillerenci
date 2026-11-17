@@ -1,219 +1,351 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { formatDate } from '@/lib/utils';
+import { cn, formatDate } from '@/lib/utils';
+import { trackEvent } from '@/lib/analyticsClient';
+import {
+  buildJobPath,
+  buildMailtoHref,
+  normalizeApplyEmail,
+  normalizeHttpUrl,
+  statusLabel,
+  statusTone,
+  type ApplicationRecord,
+  type CandidateUpdatableStatus,
+} from '@/lib/applicationRules';
 
-interface ApplicationSummary {
-  id: string;
-  job_id: string;
-  candidate_id: string;
-  status: 'submitted' | 'reviewing' | 'shortlisted' | 'interview' | 'rejected' | 'hired';
-  applied_at: string;
-  candidate_name: string | null;
-  candidate_avatar: string | null;
-  job_title: string | null;
-  company_name: string | null;
-}
+type Filter = 'all' | 'to_finalize' | 'sent' | 'response_received' | 'closed';
 
-const STATUS_LABELS: Record<ApplicationSummary['status'], string> = {
-  submitted: 'Envoyée',
-  reviewing: 'En cours d\'examen',
-  shortlisted: 'Présélectionné',
-  interview: 'Entretien',
-  rejected: 'Refusée',
-  hired: 'Engagée',
-};
-
-const STATUS_COLORS: Record<ApplicationSummary['status'], string> = {
-  submitted: 'bg-primary/10 text-primary dark:bg-brand/15 dark:text-brand-accent',
-  reviewing: 'bg-orange-500/10 border-orange-500/30 text-orange-400 dark:text-orange-300',
-  shortlisted: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 dark:text-emerald-300',
-  interview: 'bg-blue-500/10 border-blue-500/30 text-blue-400 dark:text-blue-300',
-  rejected: 'bg-rose-500/10 border-rose-500/30 text-rose-400 dark:text-rose-300',
-  hired: 'bg-green-500/10 border-green-500/30 text-green-400 dark:text-green-300',
-};
-
-const STATUS_ORDER: ApplicationSummary['status'][] = [
-  'submitted',
-  'reviewing',
-  'shortlisted',
-  'interview',
-  'rejected',
-  'hired',
+const FILTERS: Array<{ value: Filter; label: string }> = [
+  { value: 'all', label: 'Toutes' },
+  { value: 'to_finalize', label: 'À finaliser' },
+  { value: 'sent', label: 'Envoyées' },
+  { value: 'response_received', label: 'Réponses' },
+  { value: 'closed', label: 'Clôturées' },
 ];
 
+function filterGroup(status: string): Filter {
+  if (status === 'pending' || status === 'to_finalize') return 'to_finalize';
+  if (status === 'submitted' || status === 'sent') return 'sent';
+  if (status === 'response_received') return 'response_received';
+  if (status === 'closed' || status === 'rejected' || status === 'hired') return 'closed';
+  return 'sent';
+}
+
+function isFinalizable(status: string): boolean {
+  return status === 'to_finalize' || status === 'pending';
+}
+
 export default function CandidaturesSection() {
-  const [applications, setApplications] = useState<ApplicationSummary[]>([]);
+  const [applications, setApplications] = useState<ApplicationRecord[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<Filter>('all');
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch('/api/applications', {
-        cache: 'no-store',
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setApplications(data.applications || []);
-        setError(null);
-      } else {
-        const errData = await res.json();
-        setError(errData.error || 'Erreur lors du chargement');
+      const res = await fetch('/api/applications', { cache: 'no-store' });
+      const data = (await res.json().catch(() => ({}))) as {
+        applications?: ApplicationRecord[];
+        error?: string;
+      };
+      if (!res.ok) {
+        setError(data.error || 'Erreur lors du chargement de votre carnet.');
+        return;
       }
-    } catch (err) {
-      setError('Impossible de charger les candidatures');
-      console.error('CandidaturesSection error:', err);
+      setApplications(data.applications ?? []);
+      setError(null);
+    } catch {
+      setError('Impossible de charger vos candidatures pour le moment.');
     } finally {
       setLoaded(true);
     }
   }, []);
 
   useEffect(() => {
-    load();
+    // Chargement initial du carnet (fetch externe, setState après await).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void load();
   }, [load]);
+
+  const sorted = useMemo(
+    () =>
+      [...applications].sort(
+        (a, b) =>
+          new Date(b.applied_at || b.created_at).getTime() -
+          new Date(a.applied_at || a.created_at).getTime(),
+      ),
+    [applications],
+  );
+
+  const visible = useMemo(
+    () =>
+      filter === 'all'
+        ? sorted
+        : sorted.filter((app) => filterGroup(app.status) === filter),
+    [filter, sorted],
+  );
+
+  const counts = useMemo(() => {
+    const result: Record<Filter, number> = {
+      all: sorted.length,
+      to_finalize: 0,
+      sent: 0,
+      response_received: 0,
+      closed: 0,
+    };
+    for (const app of sorted) result[filterGroup(app.status)] += 1;
+    return result;
+  }, [sorted]);
+
+  async function updateStatus(app: ApplicationRecord, status: CandidateUpdatableStatus) {
+    if (updatingId) return;
+    setUpdatingId(app.id);
+    setError(null);
+    try {
+      const res = await fetch('/api/applications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ application_id: app.id, status }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        application?: ApplicationRecord;
+        error?: string;
+      };
+      if (!res.ok) {
+        setError(data.error || 'Impossible de mettre à jour cette candidature.');
+        return;
+      }
+      if (data.application) {
+        setApplications((prev) =>
+          prev.map((item) => (item.id === data.application!.id ? data.application! : item)),
+        );
+      }
+    } catch {
+      setError('Erreur réseau : le statut n’a pas été mis à jour.');
+    } finally {
+      setUpdatingId(null);
+    }
+  }
 
   if (!loaded) {
     return (
-      <div className="py-10 text-center text-sm text-black/50">
-        Chargement…
-      </div>
-    );
-  }
-
-  // Trier par date (les plus récentes d'abord)
-  const sorted = [...applications].sort(
-    (a, b) => new Date(b.applied_at).getTime() - new Date(a.applied_at).getTime()
-  );
-
-  if (sorted.length === 0) {
-    return (
-      <div className="py-6 text-center">
-        <div className="mx-auto mb-4 w-14 h-14 rounded-2xl bg-brand-soft text-primary dark:bg-brand/15 dark:text-brand-accent flex items-center justify-center">
-          <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16" />
-            <path d="M2 7l1 12a2 2 0 0 0 2 2h4" />
-            <path d="M2 7l1 12a2 2 0 0 1 2 2h10" />
-            <path d="M6 7h4" />
-            <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-          </svg>
+      <div className="rounded-3xl border border-line bg-white p-8 dark:border-slate-800 dark:bg-slate-950">
+        <div className="h-5 w-40 animate-pulse rounded bg-surface dark:bg-slate-800" />
+        <div className="mt-4 space-y-3">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="h-24 animate-pulse rounded-2xl bg-surface dark:bg-slate-900"
+            />
+          ))}
         </div>
-        <p className="text-sm text-black dark:text-white mt-4">
-          Aucune candidature pour le moment. Les candidatures apparaîtront ici
-          dès que vous postulerez à des offres.
-        </p>
       </div>
     );
   }
-
-  // Regrouper par statut pour l'affichage
-  const grouped = sorted.reduce(
-    (acc, app) => {
-      const status = app.status as ApplicationSummary['status'];
-      if (!acc[status]) acc[status] = [];
-      acc[status].push(app);
-      return acc;
-    },
-    {} as Record<ApplicationSummary['status'], ApplicationSummary[]>
-  );
 
   return (
-    <div className="rounded-3xl border border-line dark:border-slate-800 bg-white dark:bg-slate-950 p-6 sm:p-8">
-      <div className="mb-6 flex items-center justify-between gap-4">
+    <section
+      id="candidatures"
+      className="rounded-3xl border border-line bg-white p-5 dark:border-slate-800 dark:bg-slate-950 sm:p-8"
+    >
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold font-[var(--font-display)] text-black dark:text-white">
-            Mes candidatures
+          <h2 className="font-[var(--font-display)] text-lg font-bold text-black dark:text-white">
+            Mon carnet de candidatures
           </h2>
-          <p className="text-xs text-black dark:text-white mt-1">
-            Suivez l'état de vos candidatures et recevez des notifications
-            lorsque l'entreprise apporte une mise à jour.
+          <p className="mt-1 max-w-xl text-xs leading-relaxed text-black/60 dark:text-white/70">
+            TravaillerEnCi n’envoie pas vos candidatures. Retrouvez ici celles que
+            vous avez commencées, puis finalisez-les chez l’employeur.
           </p>
         </div>
-        <span className="shrink-0 rounded-full bg-brand-soft text-primary dark:bg-brand/15 dark:text-brand-accent px-3 py-1 text-[11px] font-bold">
+        <span className="shrink-0 rounded-full bg-brand-soft px-3 py-1 text-[11px] font-bold text-primary dark:bg-brand/15 dark:text-brand-accent">
           {sorted.length} candidature{sorted.length !== 1 ? 's' : ''}
         </span>
       </div>
 
       {error ? (
-        <div className="py-4 text-sm text-rose-500 dark:text-rose-300 mb-4">
-          {error}
+        <div
+          role="alert"
+          className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs font-semibold text-rose-700 dark:text-rose-300"
+        >
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={() => void load()}
+            className="rounded-lg border border-rose-500/30 px-3 py-1.5 font-bold transition-colors hover:bg-rose-500/10"
+          >
+            Réessayer
+          </button>
         </div>
       ) : null}
 
-      <div className="space-y-5">
-        {STATUS_ORDER.map((status) => {
-          const group = grouped[status] || [];
-          if (group.length === 0) return null;
+      {sorted.length > 0 ? (
+        <div className="-mx-1 mb-4 flex gap-1.5 overflow-x-auto px-1 pb-1">
+          {FILTERS.map((item) => (
+            <button
+              key={item.value}
+              type="button"
+              onClick={() => setFilter(item.value)}
+              aria-pressed={filter === item.value}
+              className={cn(
+                'shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-bold transition-all',
+                filter === item.value
+                  ? 'border-primary bg-primary text-white'
+                  : 'border-line bg-white text-black hover:border-primary/40 dark:border-slate-700 dark:bg-slate-900 dark:text-white',
+              )}
+            >
+              {item.label} ({counts[item.value]})
+            </button>
+          ))}
+        </div>
+      ) : null}
 
-          return (
-            <div key={status} className="rounded-xl border border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-bold text-black dark:text-white">
-                  {STATUS_LABELS[status]} {group.length}
-                </h3>
-              </div>
+      {sorted.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-line px-5 py-10 text-center dark:border-slate-700">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-soft text-primary dark:bg-brand/15 dark:text-brand-accent">
+            <svg
+              className="h-7 w-7"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M9 18a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h5l5 5v9a2 2 0 0 1-2 2h-1" />
+              <path d="M9 18H7a2 2 0 0 0-2 2 2 2 0 0 0 2 2h10a2 2 0 0 0 2-2 2 2 0 0 0-2-2" />
+            </svg>
+          </div>
+          <p className="text-sm font-semibold text-black dark:text-white">
+            Votre carnet est vide
+          </p>
+          <p className="mx-auto mt-1 max-w-sm text-xs text-black/60 dark:text-white/70">
+            Depuis une offre, cliquez sur « Postuler » : la candidature sera
+            enregistrée ici avant votre redirection vers l’employeur.
+          </p>
+          <Link
+            href="/jobs"
+            className="mt-4 inline-flex rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-primary-dark"
+          >
+            Parcourir les offres
+          </Link>
+        </div>
+      ) : visible.length === 0 ? (
+        <p className="rounded-2xl border border-dashed border-line p-6 text-center text-sm text-black/60 dark:border-slate-700 dark:text-white/70">
+          Aucune candidature dans cette catégorie.
+        </p>
+      ) : (
+        <ul className="space-y-3">
+          {visible.map((app) => {
+            const external = normalizeHttpUrl(app.job_apply_link, 2000);
+            const email = normalizeApplyEmail(app.job_apply_email);
+            const jobPath = buildJobPath(app.job_id);
+            const busy = updatingId === app.id;
 
-              <ul className="space-y-3 max-h-80 overflow-y-auto">
-                {group.map((app) => (
-                  <li
-                    key={app.id}
-                    className="group flex items-center gap-3 rounded-xl border border-line dark:border-slate-800 bg-white dark:bg-slate-950 p-3.5 sm:p-4 transition-all hover:border-primary/25 hover:shadow-md"
+            return (
+              <li
+                key={app.id}
+                className="rounded-2xl border border-line bg-white p-3.5 transition-colors hover:border-primary/25 dark:border-slate-800 dark:bg-slate-950 sm:p-4"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <Link
+                      href={jobPath}
+                      className="block truncate text-sm font-bold text-black transition-colors hover:text-primary dark:text-white dark:hover:text-brand-accent"
+                    >
+                      {app.job_title || 'Offre sans titre'}
+                    </Link>
+                    <p className="mt-0.5 truncate text-xs text-black/60 dark:text-white/70">
+                      {app.company || 'Entreprise inconnue'}
+                    </p>
+                    <p className="mt-1 text-[11px] text-black/50 dark:text-white/50">
+                      Enregistrée le {formatDate(app.applied_at || app.created_at)}
+                    </p>
+                  </div>
+                  <span
+                    className={cn(
+                      'shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold',
+                      statusTone(app.status),
+                    )}
                   >
-                    <div className="flex-shrink-0 rounded-2xl bg-gradient-to-br from-primary to-brand-accent w-10 h-10 flex items-center justify-center">
-                      <svg
-                        className="w-5 h-5"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                        <circle cx="9" cy="7" r="4" />
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 4.37a4 4 0 0 1 0 3.48m0-4.37a4 4 0 0 1 0-3.48m-12 8a4 4 0 0 1 7.92 0" />
-                        <line x1="18" y1="15" x2="18" y2="21" />
-                        <line x1="12" y1="9" x2="12" y2="15" />
-                      </svg>
-                    </div>
+                    {statusLabel(app.status)}
+                  </span>
+                </div>
 
-                    <div className="flex-1 min-w-0">
-                      <div className="font-bold text-[14px] text-black dark:text-white truncate group-hover:text-primary transition-colors">
-                        {app.job_title || 'Offre sans titre'}
-                      </div>
-                      <div className="text-[12px] text-black dark:text-white truncate mt-0.5">
-                        {app.company_name || 'Entreprise inconnue'}
-                      </div>
-                      <div className="text-[11px] text-black/50 mt-1">
-                        Envoyée le {formatDate(app.applied_at)}
-                      </div>
-                    </div>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  {isFinalizable(app.status) && external ? (
+                    <a
+                      href={external}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() =>
+                        trackEvent('application_external_redirect', {
+                          label: app.job_id,
+                          path: '/dashboard/candidate',
+                        })
+                      }
+                      className="inline-flex items-center justify-center rounded-xl bg-primary px-3 py-2 text-[11px] font-bold text-white transition-colors hover:bg-primary-dark"
+                    >
+                      Finaliser sur le site
+                    </a>
+                  ) : isFinalizable(app.status) && email ? (
+                    <a
+                      href={buildMailtoHref(email, app.job_title || 'Offre', app.company)}
+                      className="inline-flex items-center justify-center rounded-xl bg-primary px-3 py-2 text-[11px] font-bold text-white transition-colors hover:bg-primary-dark"
+                    >
+                      Finaliser par email
+                    </a>
+                  ) : (
+                    <Link
+                      href={jobPath}
+                      className="inline-flex items-center justify-center rounded-xl border border-line px-3 py-2 text-[11px] font-bold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:text-white"
+                    >
+                      Voir l’offre
+                    </Link>
+                  )}
 
+                  {isFinalizable(app.status) ? (
                     <button
                       type="button"
-                      disabled={true}
-                      aria-label="Voir les détails"
-                      className="shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-xl text-gray-400 dark:text-gray-600 hover:text-primary hover:bg-primary/10 transition-all disabled:opacity-50"
+                      disabled={busy}
+                      onClick={() => void updateStatus(app, 'sent')}
+                      className="inline-flex items-center justify-center rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 text-[11px] font-bold text-primary transition-colors hover:bg-primary/10 disabled:opacity-50 dark:text-brand-accent"
                     >
-                      <svg
-                        className="w-4.5 h-4.5"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M18 6L6 18M6 6l12 12" />
-                      </svg>
+                      {busy ? '…' : 'J’ai postulé'}
                     </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          );
-        })}
-      </div>
-    </div>
+                  ) : null}
+
+                  {app.status === 'sent' || app.status === 'submitted' || app.status === 'reviewing' || app.status === 'shortlisted' || app.status === 'interview' ? (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => void updateStatus(app, 'response_received')}
+                      className="inline-flex items-center justify-center rounded-xl border border-line px-3 py-2 text-[11px] font-bold text-black transition-colors hover:border-primary/40 hover:text-primary disabled:opacity-50 dark:border-slate-700 dark:text-white"
+                    >
+                      Réponse reçue
+                    </button>
+                  ) : null}
+
+                  {app.status !== 'closed' ? (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => void updateStatus(app, 'closed')}
+                      className="inline-flex items-center justify-center rounded-xl px-2.5 py-2 text-[11px] font-semibold text-black/50 transition-colors hover:text-rose-600 disabled:opacity-50 dark:text-white/50 dark:hover:text-rose-300"
+                    >
+                      Clôturer
+                    </button>
+                  ) : null}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
   );
 }

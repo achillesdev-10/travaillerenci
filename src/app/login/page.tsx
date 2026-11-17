@@ -6,6 +6,7 @@ import Link from "next/link";
 import PasswordInput from "@/components/auth/PasswordInput";
 import { apiForgotPassword, apiLogin } from "@/lib/authApi";
 import { fetchCurrentUser } from "@/lib/clientAuth";
+import { safeInternalPath } from "@/lib/applicationRules";
 import { isGoogleAuthVisible } from "@/lib/config";
 
 export default function LoginPage() {
@@ -15,6 +16,7 @@ export default function LoginPage() {
   const [roleOverride, setRoleOverride] = useState<"candidate" | "company">("candidate");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [registerHref, setRegisterHref] = useState("/register");
 
   // « Mot de passe oublié » : formulaire de demande de réinitialisation.
   const [showForgot, setShowForgot] = useState(false);
@@ -41,6 +43,17 @@ export default function LoginPage() {
     setError(messages[param] ?? "Une erreur est survenue.");
     // Nettoie l'URL pour ne pas réafficher l'erreur après un refresh.
     window.history.replaceState({}, "", window.location.pathname);
+  }, []);
+
+  // Conserve la destination d'origine vers l'inscription (offre, dashboard…).
+  // Lecture unique de l'URL au montage : pas de source React alternative.
+  useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
+    const raw = new URLSearchParams(window.location.search).get("next");
+    const safe = safeInternalPath(raw, "");
+    if (safe) setRegisterHref(`/register?next=${encodeURIComponent(safe)}`);
+    if (safe.startsWith("/dashboard/company")) setRoleOverride("company");
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 
   // Déjà connecté → pas de formulaire de connexion (garde-fou complémentaire
@@ -73,30 +86,31 @@ export default function LoginPage() {
   }
 
   function redirectToDashboard(role?: "candidate" | "company") {
-    // Si on vient d'un dashboard protégé (redirection ?next=...), on y revient.
-    if (typeof window !== "undefined") {
-      const next = new URLSearchParams(window.location.search).get("next");
-      if (next && next.startsWith("/") && !next.startsWith("//")) {
-        router.push(next);
-        return;
-      }
-    }
     // Le rôle réel vient de la base (réponse du serveur), pas du bouton
     // présélectionné — c'est la source de vérité.
     const effectiveRole = role ?? roleOverride;
-    router.push(effectiveRole === "candidate" ? "/dashboard/candidate" : "/dashboard/company");
+    const fallback =
+      effectiveRole === "candidate" ? "/dashboard/candidate" : "/dashboard/company";
+    // Si on vient d'une offre ou d'un dashboard protégé (?next=...), on y
+    // revient. safeInternalPath rejette les open-redirects.
+    const raw =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("next")
+        : null;
+    router.push(safeInternalPath(raw, fallback));
   }
 
   function googleAuthHref(): string {
-    // On conserve le ?next= existant (protection anti-open-redirect)
-    // pour ramener l'utilisateur vers sa destination initiale.
-    let next = "/dashboard/candidate";
-    if (typeof window !== "undefined") {
-      const param = new URLSearchParams(window.location.search).get("next");
-      if (param && param.startsWith("/") && !param.startsWith("//")) {
-        next = param;
-      }
-    }
+    // On conserve le ?next= existant (validé) pour ramener l'utilisateur vers
+    // sa destination initiale après le SSO.
+    const raw =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("next")
+        : null;
+    const next = safeInternalPath(
+      raw,
+      roleOverride === "candidate" ? "/dashboard/candidate" : "/dashboard/company",
+    );
     return `/api/auth/google?role=${roleOverride}&next=${encodeURIComponent(next)}`;
   }
 
@@ -340,7 +354,7 @@ export default function LoginPage() {
 
             <div className="text-center text-xs text-black dark:text-white">
               Pas encore de compte ?{" "}
-              <Link href="/register" className="text-primary font-bold hover:underline">
+              <Link href={registerHref} className="text-primary font-bold hover:underline">
                 S'inscrire
               </Link>
             </div>

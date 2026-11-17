@@ -9,6 +9,7 @@ import { fetchCurrentUser, logoutCurrentUser, type StoredUser } from '@/lib/clie
 import { isGoogleAuthVisible } from '@/lib/config';
 import { REGIONS_CI, SECTORS } from '@/lib/constants';
 import { DIPLOMA_FILTERS } from '@/lib/examConstants';
+import { safeInternalPath } from '@/lib/applicationRules';
 import { cn } from '@/lib/utils';
 
 type Role = 'candidate' | 'company';
@@ -38,6 +39,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
   // formulaire embarqué de /candidates et une session posée après le rendu.
   const [sessionUser, setSessionUser] = useState<StoredUser | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
+  const [loginHref, setLoginHref] = useState('/login');
 
   useEffect(() => {
     let cancelled = false;
@@ -49,6 +51,17 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  // Lien « Se connecter » : conserver la destination d'origine. Lecture URL
+  // unique au montage, pas d'alternative React.
+  useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
+    if (typeof window === 'undefined') return;
+    const raw = new URLSearchParams(window.location.search).get('next');
+    const safe = safeInternalPath(raw, '');
+    if (safe) setLoginHref(`/login?next=${encodeURIComponent(safe)}`);
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 
   /** Déconnexion puis rechargement : le formulaire (et l'en-tête) réapparaissent. */
@@ -92,13 +105,20 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
     return Math.min(score, 4);
   }
 
+  /** Ramène vers l'offre d'origine (?next=) après inscription, sinon dashboard. */
+  function nextDestination(forRole: Role = role): string {
+    const fallback = forRole === 'company' ? '/dashboard/company' : '/dashboard/candidate';
+    if (typeof window === 'undefined') return fallback;
+    const raw = new URLSearchParams(window.location.search).get('next');
+    return safeInternalPath(raw, fallback);
+  }
+
   function redirectToDashboard() {
-    router.push(role === 'candidate' ? '/dashboard/candidate' : '/dashboard/company');
+    router.push(nextDestination());
   }
 
   function googleAuthHref(): string {
-    const next =
-      role === 'company' ? '/dashboard/company' : '/dashboard/candidate';
+    const next = nextDestination();
     return `/api/auth/google?role=${role}&next=${encodeURIComponent(next)}`;
   }
 
@@ -145,7 +165,9 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
   // Déjà connecté → pas de formulaire d'inscription : on oriente vers l'espace
   // personnel (ou vers une autre session si l'utilisateur veut en changer).
   if (sessionChecked && sessionUser) {
-    const home = sessionUser.role === 'company' ? '/dashboard/company' : '/dashboard/candidate';
+    const home = nextDestination(
+      sessionUser.role === 'company' ? 'company' : 'candidate',
+    );
     return (
       <div
         className="w-full max-w-md space-y-5 rounded-3xl border border-line dark:border-slate-800 bg-white dark:bg-slate-900 p-8 shadow-2xl text-center"
@@ -498,7 +520,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
 
       <div className="text-center text-xs text-black dark:text-white">
         Vous avez déjà un compte ?{' '}
-        <Link href="/login" className="text-primary font-bold hover:underline">
+        <Link href={loginHref} className="text-primary font-bold hover:underline">
           Se connecter
         </Link>
       </div>

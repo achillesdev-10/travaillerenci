@@ -18,7 +18,7 @@ export default function CompanyDashboardPage() {
             Tableau de Bord Recruteur
           </h1>
           <p className="text-sm text-black dark:text-white mt-1">
-            Publiez vos offres d'emploi, gérez les candidatures reçues et trouvez vos futurs talents en Côte d'Ivoire.
+            Publiez vos offres d'emploi et trouvez vos futurs talents en Côte d'Ivoire.
           </p>
         </div>
 
@@ -41,12 +41,11 @@ export default function CompanyDashboardPage() {
         </Link>
 
         <div className="rounded-3xl border border-line dark:border-slate-800 bg-white dark:bg-slate-950 p-6 lg:p-8 shadow-xl">
-          <div className="text-xs uppercase tracking-wider font-semibold text-black dark:text-white">Candidatures reçues</div>
-          <div className="text-3xl font-black text-black dark:text-white mt-2">0</div>
-          <div className="text-xs text-black/50 dark:text-white mt-1">
-            <span className="font-semibold text-black dark:text-white">Nouvelles</span>
-            <span className="text-black/50">|</span>
-            <span className="font-semibold text-black dark:text-white">En cours</span>
+          <div className="text-xs uppercase tracking-wider font-semibold text-black dark:text-white">Candidatures</div>
+          <div className="text-3xl font-black text-black dark:text-white mt-2">—</div>
+          <div className="text-xs text-black/50 dark:text-white mt-1 leading-relaxed">
+            Les candidatures se finalisent sur votre site ou par email. Le suivi
+            recruteur interne arrive dans un prochain sprint.
           </div>
         </div>
 
@@ -61,9 +60,11 @@ export default function CompanyDashboardPage() {
       </div>
 
       <div className="rounded-3xl border border-line dark:border-slate-800 bg-white dark:bg-slate-950 p-6 lg:p-8 shadow-xl">
-        <h2 className="text-lg font-bold text-black dark:text-white mb-4">Dernières candidatures reçues</h2>
-        <p className="text-sm text-black dark:text-white">
-          Les candidatures reçues s'affichent ci-dessous. Utilisez les filtres et le statut pour suivre l'avancement de chaque candidat.
+        <h2 className="text-lg font-bold text-black dark:text-white mb-4">Suivi des candidatures</h2>
+        <p className="text-sm text-black dark:text-white leading-relaxed">
+          TravaillerEnCi ne reçoit pas les candidatures : les candidats les
+          finalisent directement sur votre site ou par email. Le carnet de suivi
+          côté candidat est disponible dans son espace personnel.
         </p>
       </div>
     </div>

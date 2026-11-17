@@ -14,6 +14,7 @@ import JobExpiryBanner from '@/components/jobs/JobExpiryBanner';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
 import SafetyNotice from '@/components/content/SafetyNotice';
 import SaveButton from '@/components/saved/SaveButton';
+import ApplyPanel from '@/components/jobs/ApplyPanel';
 import PWAInstallCTA from '@/components/concours/PWAInstallCTA';
 import type { JobOfferSchema } from '@/types';
 import { formatDate, truncate } from '@/lib/utils';
@@ -379,7 +380,7 @@ export default async function JobDetailPage({ params }: PageProps) {
           </div>
 
           <div className="hidden sm:block mt-6">
-            <ApplyBox job={job} variant="horizontal" />
+            <ApplyPanel job={job} variant="horizontal" autoOpen />
           </div>
         </div>
       </section>
@@ -534,10 +535,10 @@ export default async function JobDetailPage({ params }: PageProps) {
           {/* Colonne droite — CTA desktop + méta */}
           <aside className="lg:col-span-1 order-1 lg:order-2 space-y-5 lg:sticky lg:top-24 lg:self-start">
             <div className="sm:hidden">
-              <ApplyBox job={job} variant="vertical" />
+              <ApplyPanel job={job} variant="vertical" />
             </div>
             <div className="hidden lg:block">
-              <ApplyBox job={job} variant="vertical" />
+              <ApplyPanel job={job} variant="vertical" />
             </div>
 
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-line dark:border-slate-800 shadow-sm p-5 text-sm">
@@ -583,7 +584,7 @@ export default async function JobDetailPage({ params }: PageProps) {
         className="lg:hidden sticky bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t border-line dark:border-slate-800 px-3 py-3 safe-bottom"
         style={{ bottom: 'calc(4rem + 1px + env(safe-area-inset-bottom))' }}
       >
-        <ApplyBox job={job} variant="compact" />
+        <ApplyPanel job={job} variant="compact" />
       </div>
     </main>
   );
@@ -592,141 +593,6 @@ export default async function JobDetailPage({ params }: PageProps) {
 // =============================================================================
 //  SOUS-COMPOSANTS
 // =============================================================================
-
-function ApplyBox({
-  job,
-  variant,
-}: {
-  job: JobOfferSchema;
-  variant: 'horizontal' | 'vertical' | 'compact';
-}) {
-  const hasLink = Boolean(job.apply_link);
-  const hasEmail = Boolean(job.apply_email);
-
-  if (variant === 'compact') {
-    return (
-      <div className="flex items-stretch gap-2 min-w-0">
-        {hasEmail ? (
-          <a
-            data-apply={job.id}
-            href={`mailto:${job.apply_email}?subject=${encodeURIComponent(`Candidature : ${job.title} (TravaillerEnCi)`)}`}
-            className="flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 px-3 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-[13px] shadow-md shadow-primary/25 active:scale-[0.99] transition-all truncate"
-          >
-            <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="5" width="18" height="14" rx="2" />
-              <path d="m3 7 9 6 9-6" />
-            </svg>
-            Email
-          </a>
-        ) : null}
-        {hasLink ? (
-          <a
-            data-apply={job.id}
-            href={job.apply_link!}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 px-3 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-[13px] shadow-md shadow-primary/25 active:scale-[0.99] transition-all truncate"
-          >
-            <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-            </svg>
-            Postuler
-          </a>
-        ) : null}
-      </div>
-    );
-  }
-
-  if (variant === 'horizontal') {
-    return (
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded-2xl border border-line dark:border-slate-800 p-3 sm:p-4 shadow-sm">
-        <div className="text-[13px] sm:text-sm text-black dark:text-white flex-1">
-          Prêt à postuler ? Choisissez votre méthode :
-        </div>
-        <ApplyActions job={job} />
-      </div>
-    );
-  }
-
-  return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-line dark:border-slate-800  p-5">
-      <div className="flex items-center gap-2 mb-4">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary dark:text-brand-accent flex items-center justify-center">
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20 7h-3a2 2 0 0 1-2-2V2" />
-            <path d="M9 18a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h5l5 5v9a2 2 0 0 1-2 2h-1" />
-            <path d="M9 18H7a2 2 0 0 0-2 2 2 2 0 0 0 2 2h10a2 2 0 0 0 2-2 2 2 0 0 0-2-2" />
-          </svg>
-        </div>
-        <div>
-          <div className="font-bold text-black dark:text-white">Postuler maintenant</div>
-          <div className="text-xs text-black dark:text-white">1 à 2 minutes</div>
-        </div>
-      </div>
-      <ApplyActions job={job} />
-      <p className="mt-4 text-[11px] text-black dark:text-white leading-relaxed">
-        En postulant, vous acceptez que vos informations soient transmises à {job.company}.
-        TravaillerEnCi n'est pas l'employeur et ne participe pas au processus de recrutement.
-      </p>
-    </div>
-  );
-}
-
-function ApplyActions({ job }: { job: JobOfferSchema }) {
-  const hasLink = Boolean(job.apply_link);
-  const hasEmail = Boolean(job.apply_email);
-
-  return (
-    <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 w-full min-w-0">
-      {hasLink ? (
-        <a
-          data-apply={job.id}
-          href={job.apply_link!}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-[13px] sm:text-sm shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.99] transition-all w-full min-w-0 truncate"
-        >
-          <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M5 12h14" />
-            <path d="m12 5 7 7-7 7" />
-          </svg>
-          <span className="truncate">Postuler à l'offre</span>
-          <svg className="w-3.5 h-3.5 shrink-0 opacity-80 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M7 17L17 7" />
-            <path d="M7 7h10v10" />
-          </svg>
-        </a>
-      ) : hasEmail ? (
-        <a
-          data-apply={job.id}
-          href={`mailto:${job.apply_email}?subject=${encodeURIComponent(`Candidature : ${job.title} (TravaillerEnCi)`)}`}
-          className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-[13px] sm:text-sm shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.99] transition-all w-full min-w-0 truncate"
-        >
-          <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="5" width="18" height="14" rx="2" />
-            <path d="m3 7 9 6 9-6" />
-          </svg>
-          <span className="truncate">Postuler par email</span>
-        </a>
-      ) : null}
-
-      {hasLink && hasEmail ? (
-        <a
-          data-apply={job.id}
-          href={`mailto:${job.apply_email}?subject=${encodeURIComponent(`Candidature : ${job.title} (TravaillerEnCi)`)}`}
-          className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-line dark:border-slate-700 hover:bg-brand-soft dark:hover:bg-slate-700 text-black dark:text-white font-semibold text-[13px] sm:text-sm transition-all w-full min-w-0 truncate"
-        >
-          <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="5" width="18" height="14" rx="2" />
-            <path d="m3 7 9 6 9-6" />
-          </svg>
-          <span className="truncate">Postuler par email</span>
-        </a>
-      ) : null}
-    </div>
-  );
-}
 
 function MetaRow({
   label,

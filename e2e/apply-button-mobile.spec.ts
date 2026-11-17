@@ -1,125 +1,113 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+import { expectNoHorizontalOverflow, waitForHydration } from './helpers';
 
 /**
- * Tests E2E : vérifier que les boutons "Postuler" ne débordent pas
- * sur mobile (viewport iPhone 12 — 390×844).
+ * Tests E2E : panneau « Postuler » sur mobile (viewport iPhone 12 — 390×844).
+ * On vérifie le CTA compact sticky, l'ouverture du panneau et l'absence de
+ * débordement horizontal, y compris avec le panneau ouvert.
  */
 
 const MOBILE_VIEWPORT = { width: 390, height: 844 };
 
+async function openFirstJob(page: Page): Promise<string> {
+  await waitForHydration(page, '/jobs');
+  const link = page.locator('a[href^="/jobs/"]').first();
+  await link.waitFor({ state: 'attached', timeout: 15_000 });
+  const href = await link.getAttribute('href');
+  const jobId = href?.split('/jobs/')?.[1];
+  expect(jobId).toBeTruthy();
+
+  await waitForHydration(page, `/jobs/${jobId}`);
+  return jobId!;
+}
+
+function mobileApplyBar(page: Page) {
+  return page.locator('div.sticky.bottom-0.z-40');
+}
+
+function applyTrigger(page: Page) {
+  return mobileApplyBar(page).getByRole('button', { name: /Postuler/i }).first();
+}
+
+async function openApplyPanel(page: Page) {
+  const trigger = applyTrigger(page);
+  await expect(trigger).toBeVisible();
+  await trigger.click();
+  const dialog = page.getByRole('dialog', { name: 'Postuler à cette offre' });
+  await expect(dialog).toBeVisible();
+  return dialog;
+}
+
 test.describe('Boutons postuler — mobile (390px)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize(MOBILE_VIEWPORT);
+  });
+
   test('pas de scroll horizontal sur une page offre (aucun élément ne déborde)', async ({ page }) => {
-    await page.setViewportSize(MOBILE_VIEWPORT);
-    // On récupère un ID d'offre depuis la page /jobs
-    await page.goto('/jobs', { waitUntil: 'domcontentloaded' });
-    const link = page.locator('a[href^="/jobs/"]').first();
-    await link.waitFor({ state: 'attached', timeout: 15_000 });
-    const href = await link.getAttribute('href');
-    const jobId = href?.split('/jobs/')?.[1];
-    expect(jobId).toBeTruthy();
-
-    await page.goto(`/jobs/${jobId}`, { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(2000);
-
-    const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
-    const clientWidth = await page.evaluate(() => document.documentElement.clientWidth);
-    expect(scrollWidth).toBeLessThanOrEqual(clientWidth + 2);
+    await openFirstJob(page);
+    await expectNoHorizontalOverflow(page);
   });
 
-  test('le bouton "Postuler par email" dans ApplyActions n\'a pas de débordement', async ({ page }) => {
-    await page.setViewportSize(MOBILE_VIEWPORT);
-    await page.goto('/jobs', { waitUntil: 'domcontentloaded' });
-    const link = page.locator('a[href^="/jobs/"]').first();
-    await link.waitFor({ state: 'attached', timeout: 15_000 });
-    const href = await link.getAttribute('href');
-    const jobId = href?.split('/jobs/')?.[1];
+  test('le CTA compact « Postuler » reste dans l’écran', async ({ page }) => {
+    await openFirstJob(page);
 
-    await page.goto(`/jobs/${jobId}`, { waitUntil: 'domcontentloaded' });
-
-    const emailBtn = page.getByRole('link', { name: /Postuler par email/i }).first();
-    if (await emailBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
-      const bbox = await emailBtn.boundingBox();
-      expect(bbox).not.toBeNull();
-      expect(bbox!.x).toBeGreaterThanOrEqual(-2);
-      expect(bbox!.x + bbox!.width).toBeLessThanOrEqual(MOBILE_VIEWPORT.width + 2);
-    }
+    const trigger = applyTrigger(page);
+    await expect(trigger).toBeVisible();
+    const bbox = await trigger.boundingBox();
+    expect(bbox).not.toBeNull();
+    expect(bbox!.x).toBeGreaterThanOrEqual(-2);
+    expect(bbox!.x + bbox!.width).toBeLessThanOrEqual(MOBILE_VIEWPORT.width + 2);
   });
 
-  test('le bouton "Postuler à l\'offre" n\'a pas de débordement', async ({ page }) => {
-    await page.setViewportSize(MOBILE_VIEWPORT);
-    await page.goto('/jobs', { waitUntil: 'domcontentloaded' });
-    const link = page.locator('a[href^="/jobs/"]').first();
-    await link.waitFor({ state: 'attached', timeout: 15_000 });
-    const href = await link.getAttribute('href');
-    const jobId = href?.split('/jobs/')?.[1];
+  test('le panneau s’ouvre et propose les actions de candidature', async ({ page }) => {
+    const jobId = await openFirstJob(page);
+    const dialog = await openApplyPanel(page);
 
-    await page.goto(`/jobs/${jobId}`, { waitUntil: 'domcontentloaded' });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByText('TravaillerEnCi ne transmet pas votre candidature')).toBeVisible();
 
-    const applyBtn = page.getByRole('link', { name: /Postuler à l'offre/i }).first();
-    if (await applyBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
-      const bbox = await applyBtn.boundingBox();
-      expect(bbox).not.toBeNull();
-      expect(bbox!.x).toBeGreaterThanOrEqual(-2);
-      expect(bbox!.x + bbox!.width).toBeLessThanOrEqual(MOBILE_VIEWPORT.width + 2);
-    }
+    const registerLink = dialog.getByRole('link', { name: /Créer mon compte/i });
+    const registerHref = await registerLink.getAttribute('href');
+    expect(registerHref).toBeTruthy();
+    const next = new URL(registerHref!, 'http://localhost').searchParams.get('next');
+    expect(next).toBe(`/jobs/${jobId}?postuler=1`);
+
+    await expect(dialog.getByRole('link', { name: /J.ai déjà un compte/i })).toBeVisible();
+    await expect(dialog.getByRole('button', { name: /Fermer/i })).toBeVisible();
   });
 
-  test('la barre sticky bottom existe et contient des boutons', async ({ page }) => {
-    await page.setViewportSize(MOBILE_VIEWPORT);
-    await page.goto('/jobs', { waitUntil: 'domcontentloaded' });
-    const link = page.locator('a[href^="/jobs/"]').first();
-    await link.waitFor({ state: 'attached', timeout: 15_000 });
-    const href = await link.getAttribute('href');
-    const jobId = href?.split('/jobs/')?.[1];
+  test('la barre sticky contient des boutons sans débordement', async ({ page }) => {
+    await openFirstJob(page);
 
-    await page.goto(`/jobs/${jobId}`, { waitUntil: 'domcontentloaded' });
+    const bar = mobileApplyBar(page);
+    await expect(bar).toBeVisible();
+    const barBBox = await bar.boundingBox();
+    expect(barBBox).not.toBeNull();
+    expect(barBBox!.x).toBeGreaterThanOrEqual(-2);
+    expect(barBBox!.x + barBBox!.width).toBeLessThanOrEqual(MOBILE_VIEWPORT.width + 2);
 
-    // La barre sticky bottom : div avec sticky + bottom-0 + z-40
-    const stickyBar = page.locator('div.sticky.bottom-0.z-40');
-    if (await stickyBar.isVisible({ timeout: 5000 }).catch(() => false)) {
-      const barBBox = await stickyBar.boundingBox();
-      expect(barBBox).not.toBeNull();
-      // La barre ne doit pas dépasser la largeur de l'écran
-      expect(barBBox!.x).toBeGreaterThanOrEqual(-2);
-      expect(barBBox!.x + barBBox!.width).toBeLessThanOrEqual(MOBILE_VIEWPORT.width + 2);
-
-      // Les boutons dans la barre ne doivent pas déborder
-      const buttons = stickyBar.locator('a');
-      const count = await buttons.count();
-      for (let i = 0; i < count; i++) {
-        const bbox = await buttons.nth(i).boundingBox();
-        if (bbox) {
-          expect(bbox.x).toBeGreaterThanOrEqual(-2);
-          expect(bbox.x + bbox.width).toBeLessThanOrEqual(MOBILE_VIEWPORT.width + 2);
-        }
+    const buttons = bar.getByRole('button');
+    expect(await buttons.count()).toBeGreaterThan(0);
+    for (let i = 0; i < (await buttons.count()); i++) {
+      const bbox = await buttons.nth(i).boundingBox();
+      if (bbox) {
+        expect(bbox.x).toBeGreaterThanOrEqual(-2);
+        expect(bbox.x + bbox.width).toBeLessThanOrEqual(MOBILE_VIEWPORT.width + 2);
       }
     }
   });
 
-  test('les boutons ApplyActions ont la classe truncate pour éviter le débordement texte', async ({ page }) => {
-    await page.setViewportSize(MOBILE_VIEWPORT);
-    await page.goto('/jobs', { waitUntil: 'domcontentloaded' });
-    const link = page.locator('a[href^="/jobs/"]').first();
-    await link.waitFor({ state: 'attached', timeout: 15_000 });
-    const href = await link.getAttribute('href');
-    const jobId = href?.split('/jobs/')?.[1];
+  test('le panneau ouvert ne crée pas de débordement horizontal', async ({ page }) => {
+    await openFirstJob(page);
+    await openApplyPanel(page);
+    await expectNoHorizontalOverflow(page);
+  });
 
-    await page.goto(`/jobs/${jobId}`, { waitUntil: 'domcontentloaded' });
+  test('un seul panneau s’ouvre au retour ?postuler=1', async ({ page }) => {
+    const jobId = await openFirstJob(page);
+    await waitForHydration(page, `/jobs/${jobId}?postuler=1`);
 
-    // Vérifier que les liens de postulation ont truncate ou min-w-0
-    const applyLinks = page.locator('a[href*="mailto:"], a[href*="apply"]').filter({ hasText: /Postuler|Email/ });
-    const count = await applyLinks.count();
-    for (let i = 0; i < count; i++) {
-      const hasOverflowProtection = await applyLinks.nth(i).evaluate((el) => {
-        return (
-          el.classList.contains('truncate') ||
-          el.classList.contains('min-w-0') ||
-          el.classList.contains('overflow-hidden') ||
-          window.getComputedStyle(el).overflow === 'hidden' ||
-          window.getComputedStyle(el).textOverflow === 'ellipsis'
-        );
-      });
-      expect(hasOverflowProtection).toBe(true);
-    }
+    await expect(page.getByRole('dialog', { name: 'Postuler à cette offre' })).toBeVisible();
+    await expect(page.getByRole('dialog')).toHaveCount(1);
   });
 });

@@ -44,6 +44,10 @@ const REQUIRED = [
   'cv_upload',
   'alert_create',
   'application_click',
+  'application_started',
+  'application_external_redirect',
+  'application_confirmed',
+  'application_response_received',
 ];
 for (const name of REQUIRED) {
   assert(isAnalyticsEvent(name), `événement requis présent : ${name}`);

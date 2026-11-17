@@ -28,6 +28,9 @@ export default defineConfig([
     // .venv…) ne doivent jamais être lintés.
     "scraper/**",
     "data/**",
+    // Sorties Playwright (supprimées/recréées entre les runs).
+    "test-results/**",
+    "playwright-report/**",
   ]),
 
   // Règles projet (préserver les conventions existantes)
