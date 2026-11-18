@@ -522,6 +522,30 @@ async function main() {
   );
   assertEqual(invalidStatusPatch.status, 400, 'PATCH statut entreprise refusé = 400');
 
+  // Identifiant malformé : même 404 que SQLite, sans requête base (Supabase
+  // renverrait sinon une erreur de cast UUID propre à PostgREST).
+  let malformedLookup = false;
+  const malformedHandler = createApplicationsHandlers({
+    ...baseDeps,
+    getSessionUser: async () => session('candidate'),
+    getJob: async () => job() as never,
+    record: async () => ({ ok: false, reason: 'db_error' }),
+    list: async () => ({ ok: true, data: [] }),
+    updateStatus: async () => {
+      malformedLookup = true;
+      return { ok: false, reason: 'not_found' };
+    },
+  });
+  const malformedPatch = await malformedHandler.PATCH(
+    new Request('http://localhost/api/applications', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ application_id: 'pas-un-uuid', status: 'sent' }),
+    }),
+  );
+  assertEqual(malformedPatch.status, 404, 'PATCH identifiant malformé = 404');
+  assert(!malformedLookup, 'identifiant malformé rejeté sans requête base');
+
   // Nettoyage.
   __resetApplicationServiceForTests();
   try {

@@ -86,6 +86,10 @@ const defaultDeps: ApplicationsDeps = {
 
 const RATE_WINDOW_MS = 10 * 60 * 1000;
 
+// applications.id est un UUID. Sans ce garde-fou, Supabase (PostgREST) renvoie
+// une erreur de cast 22P02 là où SQLite renvoie simplement « introuvable ».
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 function unauthorized(message: string) {
   return NextResponse.json({ error: message }, { status: 401 });
 }
@@ -352,6 +356,11 @@ export function createApplicationsHandlers(overrides: Partial<ApplicationsDeps> 
 
       if (!applicationId) {
         return NextResponse.json({ error: 'ID de candidature requis.' }, { status: 400 });
+      }
+      if (!UUID_PATTERN.test(applicationId)) {
+        // Même réponse que SQLite pour un identifiant inconnu : pas de requête
+        // base, donc pas de 500 spécifique à Supabase.
+        return NextResponse.json({ error: 'Candidature introuvable.' }, { status: 404 });
       }
       if (!isCandidateUpdatableStatus(status)) {
         return NextResponse.json(
