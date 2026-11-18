@@ -136,6 +136,8 @@ jobs:
   # critical apparaît (les moderate restantes sont tolérées — voir la note
   # sur minimatch dans le rapport d'audit). `npm audit` lit uniquement
   # package-lock.json : pas de node_modules à installer ici.
+  # scripts/audit-check.mjs applique le même seuil high/critical avec des
+  # exceptions datées et justifiées (voir le fichier).
   # ==========================================================================
   audit:
     runs-on: ubuntu-latest
@@ -150,4 +152,4 @@ jobs:
           node-version: 22
 
       - name: Audit des dépendances (échec si high ou critical)
-        run: npm audit --audit-level=high
+        run: npm run audit:ci

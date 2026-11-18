@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
+    "audit:ci": "node scripts/audit-check.mjs",
     "db:setup": "tsx scripts/sqlite-setup.ts",
     "db:reset": "tsx scripts/sqlite-setup.ts --reset",
     "db:seed": "echo \"Plus de seed : les contenus proviennent du scraper (python scraper/scraper.py)\"",
