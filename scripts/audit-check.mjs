@@ -53,7 +53,7 @@ function findAllowance(id) {
 function isAllowed(id) {
   const entry = findAllowance(id);
   if (!entry) return false;
-  const expired = todayIso() > entry.expires;
+  const expired = todayIso() >= entry.expires;
   if (expired) {
     console.error(
       `[audit] L'exception ${id} a expiré le ${entry.expires} : revue obligatoire.`,
