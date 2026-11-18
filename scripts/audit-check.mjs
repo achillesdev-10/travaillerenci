@@ -27,11 +27,14 @@
  *   - le registre npm ne renvoie plus cet avis, OU
  *   - une version corrigée de picomatch est publiée et installable.
  * La date d'expiration force la revue même si personne ne pense à le faire.
+ *
+ * Tests : tests/auditCheck.test.ts (aucun accès réseau, npm audit simulé).
  */
 
 import { spawnSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
 
-const ALLOWED_ADVISORIES = [
+export const ALLOWED_ADVISORIES = [
   {
     id: 'GHSA-fc5q-39xc-vjpf',
     reason:
@@ -40,29 +43,34 @@ const ALLOWED_ADVISORIES = [
   },
 ];
 
-const BLOCKING_SEVERITIES = new Set(['high', 'critical']);
+export const BLOCKING_SEVERITIES = new Set(['high', 'critical']);
 
-function todayIso() {
+export function todayIso() {
   return new Date().toISOString().slice(0, 10);
 }
 
-function findAllowance(id) {
-  return ALLOWED_ADVISORIES.find((entry) => entry.id === id);
+export function findAllowance(id, allowed = ALLOWED_ADVISORIES) {
+  return allowed.find((entry) => entry.id === id);
 }
 
-function isAllowed(id) {
-  const entry = findAllowance(id);
-  if (!entry) return false;
-  const expired = todayIso() >= entry.expires;
-  if (expired) {
-    console.error(
-      `[audit] L'exception ${id} a expiré le ${entry.expires} : revue obligatoire.`,
-    );
-  }
-  return !expired;
+/**
+ * 'allowed' tant que today < expires ; 'expired' dès le début de la date
+ * d'expiration (today >= expires) ; 'unknown' si l'avis n'est pas listé.
+ */
+export function allowanceStatus(
+  id,
+  { allowed = ALLOWED_ADVISORIES, today = todayIso() } = {},
+) {
+  const entry = findAllowance(id, allowed);
+  if (!entry) return 'unknown';
+  return today < entry.expires ? 'allowed' : 'expired';
 }
 
-function advisoryId(via) {
+export function isAllowed(id, options = {}) {
+  return allowanceStatus(id, options) === 'allowed';
+}
+
+export function advisoryId(via) {
   if (via && typeof via === 'object' && via.url) {
     return via.url.split('/').filter(Boolean).pop();
   }
@@ -72,35 +80,33 @@ function advisoryId(via) {
   return null;
 }
 
-function main() {
-  const command = 'npm audit --json';
-  const result = spawnSync(command, {
-    encoding: 'utf8',
-    shell: true,
-  });
+function emptyOutcome(reason, extra = {}) {
+  return {
+    ok: false,
+    reason,
+    blocking: [],
+    ignored: 0,
+    advisories: new Map(),
+    expiredAdvisories: new Set(),
+    meta: {},
+    ...extra,
+  };
+}
 
-  if (result.error) {
-    console.error(`[audit] Impossible d'exécuter npm audit : ${result.error.message}`);
-    process.exit(1);
+export function evaluateReport(report, options = {}) {
+  const { allowed = ALLOWED_ADVISORIES, today = todayIso() } = options;
+  const opts = { allowed, today };
+
+  if (!report || typeof report !== 'object' || Array.isArray(report)) {
+    return emptyOutcome('invalid-report');
   }
-
-  let report;
-  try {
-    report = JSON.parse(result.stdout);
-  } catch {
-    console.error('[audit] Sortie npm audit illisible (ni JSON ni rapport exploitable).');
-    if (result.stdout) console.error(result.stdout.trim());
-    if (result.stderr) console.error(result.stderr.trim());
-    process.exit(1);
-  }
-
   if (report.error) {
-    console.error(`[audit] npm audit a échoué : ${JSON.stringify(report.error)}`);
-    process.exit(1);
+    return emptyOutcome('audit-error', { message: report.error });
   }
 
   const vulnerabilities = report.vulnerabilities ?? {};
   const names = Object.keys(vulnerabilities);
+  const expiredAdvisories = new Set();
 
   const resolved = new Map();
   function isFullyExplained(name, stack = new Set()) {
@@ -122,7 +128,11 @@ function main() {
       } else {
         const id = advisoryId(via);
         const severity = via?.severity ?? vuln.severity;
-        if (BLOCKING_SEVERITIES.has(severity) && !(id && isAllowed(id))) {
+        if (!BLOCKING_SEVERITIES.has(severity)) continue;
+
+        const status = id ? allowanceStatus(id, opts) : 'unknown';
+        if (status === 'expired') expiredAdvisories.add(id);
+        if (status !== 'allowed') {
           explained = false;
           break;
         }
@@ -146,54 +156,105 @@ function main() {
     }
   }
 
-  const advisoryObjects = new Map();
+  const advisories = new Map();
   for (const vuln of Object.values(vulnerabilities)) {
     for (const via of vuln.via ?? []) {
-      if (typeof via !== 'object') continue;
+      if (typeof via !== 'object' || via === null) continue;
       const id = advisoryId(via);
-      if (id) advisoryObjects.set(id, via);
+      if (id) advisories.set(id, via);
     }
   }
 
-  const meta = report.metadata?.vulnerabilities ?? {};
+  return {
+    ok: blocking.length === 0,
+    reason: blocking.length === 0 ? 'ok' : 'blocking',
+    blocking,
+    ignored,
+    advisories,
+    expiredAdvisories,
+    meta: report.metadata?.vulnerabilities ?? {},
+  };
+}
+
+export function evaluateCommand(result, options = {}) {
+  if (!result || result.error) {
+    return emptyOutcome('spawn-error', {
+      message: result?.error?.message ?? "npm audit n'a pas pu être exécuté",
+    });
+  }
+  if (typeof result.stdout !== 'string' || result.stdout.trim() === '') {
+    return emptyOutcome('invalid-json', { raw: result.stdout ?? '' });
+  }
+
+  let report;
+  try {
+    report = JSON.parse(result.stdout);
+  } catch {
+    return emptyOutcome('invalid-json', { raw: result.stdout });
+  }
+
+  return evaluateReport(report, options);
+}
+
+function printOutcome(outcome, today) {
+  if (outcome.reason === 'spawn-error') {
+    console.error(`[audit] Impossible d'exécuter npm audit : ${outcome.message}`);
+    return;
+  }
+  if (outcome.reason === 'invalid-json') {
+    console.error('[audit] Sortie npm audit illisible (ni JSON ni rapport exploitable).');
+    if (outcome.raw) console.error(outcome.raw.trim());
+    return;
+  }
+  if (outcome.reason === 'audit-error') {
+    console.error(`[audit] npm audit a échoué : ${JSON.stringify(outcome.message)}`);
+    return;
+  }
+  if (outcome.reason === 'invalid-report') {
+    console.error('[audit] Rapport npm audit invalide (objet attendu).');
+    return;
+  }
+
+  const { meta } = outcome;
   console.log(
     `[audit] Rapport npm : ${meta.total ?? 0} vulnérabilité(s) ` +
       `(high: ${meta.high ?? 0}, critical: ${meta.critical ?? 0}).`,
   );
 
-  for (const [id, advisory] of advisoryObjects) {
-    const allowance = findAllowance(id);
-    if (allowance) {
-      const active = isAllowed(id);
-      console.log(
-        `[audit] Exception ${active ? 'active' : 'EXPIRÉE'} : ${id} — ${advisory.title}`,
-      );
-      console.log(`[audit]   Justification : ${allowance.reason}`);
-      console.log(`[audit]   Expire le : ${allowance.expires}`);
-    }
+  for (const [id, advisory] of outcome.advisories) {
+    const entry = findAllowance(id);
+    if (!entry) continue;
+    const status = allowanceStatus(id, { today });
+    console.log(
+      `[audit] Exception ${status === 'allowed' ? 'active' : 'EXPIRÉE'} : ` +
+        `${id} — ${advisory.title}`,
+    );
+    console.log(`[audit]   Justification : ${entry.reason}`);
+    console.log(`[audit]   Expire le : ${entry.expires}`);
   }
 
   console.log(
-    `[audit] ${ignored} vulnérabilité(s) high/critical couverte(s) par une exception datée.`,
+    `[audit] ${outcome.ignored} vulnérabilité(s) high/critical couverte(s) ` +
+      'par une exception datée.',
   );
 
-  if (blocking.length > 0) {
+  if (outcome.blocking.length > 0) {
     console.error(
-      `[audit] ÉCHEC : ${blocking.length} vulnérabilité(s) high/critical non couverte(s) :`,
+      `[audit] ÉCHEC : ${outcome.blocking.length} vulnérabilité(s) ` +
+        'high/critical non couverte(s) :',
     );
-    for (const entry of blocking) {
+    for (const entry of outcome.blocking) {
       console.error(`  - ${entry.name} (${entry.severity}, plage ${entry.range})`);
     }
-    process.exit(1);
+    return;
   }
 
-  if (ignored === 0) {
-    const stale = ALLOWED_ADVISORIES.filter((entry) => !advisoryObjects.has(entry.id));
-    for (const entry of stale) {
-      console.log(
-        `[audit] Exception devenue inutile (${entry.id}) : à retirer de scripts/audit-check.mjs.`,
-      );
-    }
+  const stale = ALLOWED_ADVISORIES.filter((entry) => !outcome.advisories.has(entry.id));
+  for (const entry of stale) {
+    console.log(
+      `[audit] Exception devenue inutile (${entry.id}) : ` +
+        'à retirer de scripts/audit-check.mjs.',
+    );
   }
 
   console.log(
@@ -201,4 +262,20 @@ function main() {
   );
 }
 
-main();
+export function run() {
+  const today = todayIso();
+  const result = spawnSync('npm audit --json', {
+    encoding: 'utf8',
+    shell: true,
+  });
+  const outcome = evaluateCommand(result, { today });
+  printOutcome(outcome, today);
+  process.exit(outcome.ok ? 0 : 1);
+}
+
+const isDirectRun =
+  Boolean(process.argv[1]) && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (isDirectRun) {
+  run();
+}
