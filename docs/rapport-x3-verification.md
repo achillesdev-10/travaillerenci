@@ -26,12 +26,13 @@
 
 ## 4. Migration 0038
 - Fichier : `supabase/migrations/0038_service_role_privileges.sql`
-- Commitée sur la branche actuelle
 - Idempotente : vérifie les privilèges existants avant GRANT
 -Permissions : SELECT/INSERT/UPDATE/DELETE sur toutes tables `public` + GRANT sur séquences
 - Rollback inclus (révoque tous les DML)
+- **Appliquée sur staging** le 2026-11-18 via Supabase Management API
+- Fichier commitée sur la branche et reflète le même contenu que ce qui a été appliqué
 - Jamais appliqué en production
-- **Résultat : CRÉÉE, COMMITÉE, VÉRIFIÉE**
+- **Résultat : CRÉÉE, COMMITÉE, APPLIÉE SUR STAGING**
 
 ## 5. Flux complet du carnet
 Flux testé en configuration staging :
