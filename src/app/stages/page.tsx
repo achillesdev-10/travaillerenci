@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { Fragment } from 'react';
 import { getCachedJobs } from '@/lib/cachedContent';
+import { getSessionUser } from '@/lib/userSession';
+import JobsSignupCard from '@/components/jobs/JobsSignupCard';
 import { getCachedJobSeoChips } from '@/lib/cachedJobVivier';
 import SearchBar from '@/components/jobs/SearchBar';
 import CompactJobCard from '@/components/home/CompactJobCard';
@@ -58,7 +61,8 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
   // Vivier borné (500) pour calculer l'éligibilité des pages SEO villes/
   // métiers — même requête que la page landing, afin de reproduire à
   // l'identique sa garde-fou anti-404 (§12).
-  const [{ rows: stages, total }, seoChips] = await Promise.all([
+  const [sessionUser, { rows: stages, total }, seoChips] = await Promise.all([
+    getSessionUser(),
     getCachedJobs({
       category: 'internship',
       keyword,
@@ -160,8 +164,11 @@ export default async function StagesPage({ searchParams }: StagesPageProps) {
 
         {stages.length > 0 ? (
           <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
-            {stages.map((stage) => (
-              <CompactJobCard key={stage.id} job={stage as JobOfferSchema} />
+            {stages.map((stage, index) => (
+              <Fragment key={stage.id}>
+                <CompactJobCard job={stage as JobOfferSchema} />
+                {!sessionUser && index === 5 ? <JobsSignupCard nextPath="/stages" /> : null}
+              </Fragment>
             ))}
           </div>
         ) : (
