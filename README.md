@@ -356,7 +356,7 @@ Référence complète : voir `.env.example`.
 
 ### Boucle de rétention candidat (comptes, sauvegardes, alertes)
 - **Authentification réelle** : email + mot de passe (scrypt), sessions httpOnly 30 j, vérification d'email par lien (24 h), OAuth Google. Le dashboard `/dashboard` est protégé par middleware.
-- **Mini-profil candidat** (table `candidate_profiles`) : ville, diplôme, secteurs d'intérêt, téléphone WhatsApp — renseigné optionnellement à l'inscription, complétable depuis `/dashboard/candidate` (migrations 0014 & 0015).
+- **Mini-profil candidat** (table `candidate_profiles`) : ville, diplôme, secteurs d'intérêt, téléphone WhatsApp — complété depuis `/dashboard/candidate` après l'inscription, pour ne demander que deux champs au départ (migrations 0014 & 0015).
 - **Sauvegardes** (table `saved_items`, migration 0016) : bouton étoile sur les fiches et cartes des 4 verticales ; liste groupée dans le dashboard ; non connecté → redirection `/login?next=…` puis retour à la fiche.
 - **Alertes candidat** (table `alerts` + `alert_digest_log`, migration 0017) : critères (types de contenu, ville, diplôme, secteur), canal (email / WhatsApp / les deux), fréquence (immédiat / quotidien), lien de désinscription unique dans chaque notification.
 - **Digest automatique** : `python scraper/alert_digest.py` tourne dans le workflow `auto-publish.yml` après chaque cycle de publication (toutes les 15 min). Il compare les contenus nouvellement publiés aux alertes actives et envoie une notification **groupée** — déduplication via `alert_digest_log`, 1 envoi/jour max en fréquence quotidienne. Sans `RESEND_API_KEY` ni WhatsApp configurés, le script ne fait que journaliser.
