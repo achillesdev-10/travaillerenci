@@ -3,9 +3,15 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import CoverImage from '@/components/content/CoverImage';
 import SearchBar from '@/components/jobs/SearchBar';
-import { getCachedJobs, getCachedExams, getCachedPosts } from '@/lib/cachedContent';
+import {
+  getCachedJobs,
+  getCachedExams,
+  getCachedPosts,
+  getCachedArticles,
+} from '@/lib/cachedContent';
 import type { JobOfferSchema } from '@/types';
 import NewsTicker, { type TickerItem } from '@/components/home/NewsTicker';
+import ActualitesTicker from '@/components/home/ActualitesTicker';
 import HomeCarousel from '@/components/home/HomeCarousel';
 import PollWidget from '@/components/home/PollWidgetLazy';
 import OffersGrid from '@/components/home/OffersGrid';
@@ -13,6 +19,7 @@ import ForumSection from '@/components/home/ForumSection';
 import SocialLinks from '@/components/layout/SocialLinks';
 import { buildCarouselSlides } from '@/lib/homeCarousel';
 import { IMAGES, LOCAL_IMAGES } from '@/lib/images';
+import { NEWS_CATEGORY_LABELS } from '@/lib/news/categories';
 import { getSiteUrl } from '@/lib/site';
 
 export const metadata: Metadata = {
@@ -203,7 +210,7 @@ export default async function HomePage() {
   // vers /jobs?q=… (recherche canonique du site, cf. JSON-LD SearchAction).
   // Motivation : toute lecture de `searchParams` rendait la page dynamique
   // et re-rendait tout le HTML à chaque visite (quota CPU 94 %).
-  const [jobs, examRows, blogRows, bourseRows] = await Promise.all([
+  const [jobs, examRows, blogRows, bourseRows, articleRows] = await Promise.all([
     getCachedJobs({
       status: 'published',
       limit: 60,
@@ -230,6 +237,13 @@ export default async function HomePage() {
       status: 'published',
       limit: 4,
       order_by: 'created_at',
+      order_dir: 'desc',
+      fields: 'card',
+    }),
+    getCachedArticles({
+      status: 'published',
+      limit: 8,
+      order_by: 'published_at',
       order_dir: 'desc',
       fields: 'card',
     }),
@@ -281,6 +295,13 @@ export default async function HomePage() {
     })),
   ];
 
+  const actualiteTickerItems = articleRows.rows.slice(0, 8).map((article) => ({
+    id: article.id,
+    title: article.title,
+    href: `/actualites/${article.slug}`,
+    category: NEWS_CATEGORY_LABELS[article.category] ?? 'Actualité',
+  }));
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
@@ -312,13 +333,17 @@ export default async function HomePage() {
       {/* ======================================================================== */}
       <NewsTicker items={tickerItems} />
       {/* ======================================================================== */}
-      {/*   HERO — Mobile-first : texte lisible, peu de padding vertical            */}
+      {/*   BANDEAU ACTUALITÉS — petits titres défilants                            */}
       {/* ======================================================================== */}
-      <section className="relative overflow-hidden bg-white dark:bg-slate-950 pt-10 pb-10 sm:pt-16 sm:pb-14 border-b border-line dark:border-slate-800">
+      <ActualitesTicker items={actualiteTickerItems} />
+      {/* ======================================================================== */}
+      {/*   HERO — compact, fond coloré doux                                        */}
+      {/* ======================================================================== */}
+      <section className="relative overflow-hidden border-b border-line bg-brand-soft/50 pt-6 pb-6 sm:pt-10 sm:pb-10 dark:border-slate-800 dark:bg-slate-900">
         <div className="container mx-auto px-4 relative z-10 max-w-5xl">
           <div className="max-w-3xl mx-auto">
             <div className="text-center animate-fade-in-up">
-              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary dark:text-brand-accent px-3.5 py-1.5 rounded-full text-[12px] sm:text-sm font-semibold mb-4 sm:mb-5">
+              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary dark:text-brand-accent px-3 py-1 rounded-full text-[11px] sm:text-xs font-semibold mb-3">
                 <span className="relative flex h-2 w-2 shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
@@ -326,18 +351,14 @@ export default async function HomePage() {
                 Plateforme 100% ivoirienne
               </div>
 
-              <h1 className="text-[28px] leading-[1.15] sm:text-4xl lg:text-[44px] xl:text-5xl font-extrabold mb-3 sm:mb-5 font-[var(--font-display)] text-black dark:text-white">
+              <h1 className="text-[24px] leading-[1.15] sm:text-4xl lg:text-[42px] font-extrabold mb-2 sm:mb-3 font-[var(--font-display)] text-black dark:text-white">
                 TravaillerEn<span className="text-primary">Ci</span>
-                <span className="block text-black dark:text-white text-[22px] sm:text-3xl lg:text-[32px] mt-1 sm:mt-2">
+                <span className="block text-black dark:text-white text-[19px] sm:text-2xl lg:text-[28px] mt-0.5 sm:mt-1">
                   Trouvez un job qui <span className="text-primary">vaut le coup</span>
                 </span>
               </h1>
 
-              <p className="text-[15px] sm:text-lg text-black dark:text-white max-w-2xl mx-auto leading-relaxed">
-                <strong className="text-black dark:text-white">
-                  TravaillerEnCi vous aide à trouver des opportunités professionnelles en Côte
-                  d&apos;Ivoire.
-                </strong>{' '}
+              <p className="text-[13.5px] sm:text-base text-black/75 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
                 Des <strong className="text-black dark:text-white">offres vérifiées</strong>, des
                 entreprises de confiance, et zéro spam. Postulez simplement — on s&apos;occupe du
                 reste.
@@ -347,7 +368,7 @@ export default async function HomePage() {
                   recherche, alertes, CV, profil candidat. */}
               <ul
                 aria-label="Ce que vous pouvez faire sur TravaillerEnCi"
-                className="mt-4 flex flex-wrap items-center justify-center gap-2"
+                className="mt-3 flex flex-wrap items-center justify-center gap-1.5"
               >
                 {[
                   { label: 'Offres', href: '/jobs' },
@@ -369,10 +390,10 @@ export default async function HomePage() {
               </ul>
 
               {/* CTA principal — de visiteur à compte (§18) */}
-              <div className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-3">
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:mt-5 sm:gap-3">
                 <Link
                   href="/register"
-                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-primary-dark"
+                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-[13px] font-bold text-white transition-colors hover:bg-primary-dark sm:px-5 sm:py-3 sm:text-sm"
                 >
                   Créer mon profil
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -382,13 +403,13 @@ export default async function HomePage() {
                 </Link>
                 <Link
                   href="/jobs"
-                  className="inline-flex items-center gap-2 rounded-xl border border-line bg-white px-5 py-3 text-sm font-bold text-black transition-colors hover:border-primary/50 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                  className="inline-flex items-center gap-2 rounded-xl border border-line bg-white px-4 py-2.5 text-[13px] font-bold text-black transition-colors hover:border-primary/50 hover:text-primary sm:px-5 sm:py-3 sm:text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                 >
                   Voir les offres
                 </Link>
                 <Link
                   href="/jobs/today"
-                  className="inline-flex items-center gap-2 rounded-xl border border-line bg-white px-5 py-3 text-sm font-bold text-black transition-colors hover:border-primary/50 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                  className="inline-flex items-center gap-2 rounded-xl border border-line bg-white px-4 py-2.5 text-[13px] font-bold text-black transition-colors hover:border-primary/50 hover:text-primary sm:px-5 sm:py-3 sm:text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                 >
                   Offres du jour
                 </Link>
@@ -399,10 +420,10 @@ export default async function HomePage() {
           {/* Barre de recherche pleine largeur — rendue dans le HTML initial
               (pas de Suspense : la barre est l'élément LCP et ne doit pas
               dépendre de l'hydratation pour s'afficher) */}
-          <div className="mt-8 sm:mt-10 max-w-2xl mx-auto">
+          <div className="mt-5 sm:mt-7 max-w-2xl mx-auto">
             <SearchBar targetPath="/jobs" />
 
-            <div className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-3 sm:gap-5 text-[12px] sm:text-sm text-black dark:text-white">
+            <div className="mt-4 sm:mt-5 flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-[11px] sm:text-xs text-black dark:text-white">
               <Stat
                 icon={
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-brand">
@@ -435,9 +456,41 @@ export default async function HomePage() {
       </section>
 
       {/* ======================================================================== */}
+      {/*   OFFRE À LA UNE — juste après la recherche : les offres tout de suite    */}
+      {/* ======================================================================== */}
+      <section className="container mx-auto px-4 pt-7 sm:pt-10 pb-8 sm:pb-10 max-w-6xl">
+        <div className="flex items-end justify-between gap-3 mb-4 sm:mb-6">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-black dark:text-white font-[var(--font-display)]">
+              Dernières offres
+            </h2>
+            <p className="text-sm text-black dark:text-white mt-1">
+              Les dernières opportunités publiées sur TravaillerenCi
+            </p>
+          </div>
+          <Link
+            href="/jobs"
+            className="shrink-0 inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-primary hover:gap-2 transition-all"
+          >
+            Tout voir
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
+          </Link>
+        </div>
+
+        {jobsList.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <OffersGrid jobs={jobsList as JobOfferSchema[]} />
+        )}
+      </section>
+
+      {/* ======================================================================== */}
       {/*   CHIFFRES CLÉS — compteurs réels issus de la BDD                      */}
       {/* ======================================================================== */}
-      <section className="container mx-auto px-4 py-8 sm:py-10 max-w-6xl">
+      <section className="container mx-auto px-4 pb-8 sm:pb-10 max-w-6xl">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <HomeStat
             value={totalKnown}
@@ -606,43 +659,6 @@ export default async function HomePage() {
       </section>
 
       {/* ======================================================================== */}
-      {/*   FORUM / Q&A — Questions de la communauté                              */}
-      {/* ======================================================================== */}
-      <ForumSection />
-
-      {/* ======================================================================== */}
-      {/*   OFFRE À LA UNE — grille 2 colonnes dès le mobile                        */}
-      {/* ======================================================================== */}
-      <section className="container mx-auto px-4 pb-10 sm:pb-14 max-w-6xl mt-12 sm:mt-16 pt-10 sm:pt-12 border-t border-line dark:border-slate-800">
-        <div className="flex items-end justify-between gap-3 mb-4 sm:mb-6">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-black dark:text-white font-[var(--font-display)]">
-              Dernières offres
-            </h2>
-            <p className="text-sm text-black dark:text-white mt-1">
-              Les dernières opportunités publiées sur TravaillerenCi
-            </p>
-          </div>
-          <Link
-            href="/jobs"
-            className="shrink-0 inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-primary hover:gap-2 transition-all"
-          >
-            Tout voir
-            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M5 12h14" />
-              <path d="m12 5 7 7-7 7" />
-            </svg>
-          </Link>
-        </div>
-
-        {jobsList.length === 0 ? (
-          <EmptyState />
-        ) : (
-          <OffersGrid jobs={jobsList as JobOfferSchema[]} />
-        )}
-      </section>
-
-      {/* ======================================================================== */}
       {/*   DERNIERS ARTICLES DU BLOG — 2 colonnes dès le mobile                    */}
       {/* ======================================================================== */}
       {blogRows.rows.length > 0 && (
@@ -694,6 +710,11 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* ======================================================================== */}
+      {/*   FORUM / Q&A — questions de la communauté (bas de page)                 */}
+      {/* ======================================================================== */}
+      <ForumSection />
 
       {/* ======================================================================== */}
       {/*   SUIVEZ-NOUS — réseaux sociaux du moment                                */}

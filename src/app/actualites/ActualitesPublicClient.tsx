@@ -8,7 +8,7 @@ import { formatDateShort, formatRelativeTime } from '@/lib/utils';
 import type { Article, ArticleCategory } from '@/types/article';
 import { NEWS_CATEGORY_LABELS, NEWS_CATEGORIES } from '@/lib/news/categories';
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 9;
 
 function normalize(value: string): string {
   return value
@@ -23,7 +23,7 @@ function categoryLabel(category: ArticleCategory): string {
 
 function CategoryBadge({ category }: { category: ArticleCategory }) {
   return (
-    <span className="inline-flex items-center rounded-full bg-orange-500/10 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wide text-orange-700">
+    <span className="inline-flex items-center rounded-full bg-orange-500/10 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wide text-orange-700 dark:bg-orange-500/15 dark:text-orange-300">
       {categoryLabel(category)}
     </span>
   );
@@ -31,7 +31,7 @@ function CategoryBadge({ category }: { category: ArticleCategory }) {
 
 function ArticleMeta({ article }: { article: Article }) {
   return (
-    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-slate-500">
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-slate-500 dark:text-slate-400">
       <span>{formatRelativeTime(article.published_at || article.created_at)}</span>
       <span aria-hidden="true">•</span>
       <span className="truncate">{article.author}</span>
@@ -49,9 +49,9 @@ function ArticleCard({ article }: { article: Article }) {
   return (
     <Link
       href={`/actualites/${article.slug}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition-all duration-200 hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-lg hover:shadow-orange-100/60"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition-all duration-200 hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-lg hover:shadow-orange-100/60 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-orange-500/40 dark:hover:shadow-black/40"
     >
-      <div className="relative h-36 overflow-hidden bg-slate-100 sm:h-44">
+      <div className="relative h-40 overflow-hidden bg-slate-100 sm:h-44 dark:bg-slate-800">
         <CoverImage
           src={article.cover_image || IMAGES.blog}
           alt={article.title}
@@ -63,15 +63,15 @@ function ArticleCard({ article }: { article: Article }) {
       </div>
       <div className="flex flex-1 flex-col p-4">
         <ArticleMeta article={article} />
-        <h3 className="mt-2 line-clamp-2 font-[var(--font-display)] text-[15px] font-bold leading-snug text-slate-900 group-hover:text-orange-600 sm:text-base">
+        <h3 className="mt-2 line-clamp-2 font-[var(--font-display)] text-[15px] font-bold leading-snug text-slate-900 group-hover:text-orange-600 sm:text-base dark:text-white dark:group-hover:text-orange-400">
           {article.title}
         </h3>
         {article.excerpt && (
-          <p className="mt-1.5 line-clamp-2 flex-1 text-[12.5px] leading-relaxed text-slate-600 sm:text-sm">
+          <p className="mt-1.5 line-clamp-2 flex-1 text-[12.5px] leading-relaxed text-slate-600 sm:text-sm dark:text-slate-300">
             {article.excerpt}
           </p>
         )}
-        <span className="mt-3 inline-flex items-center gap-1.5 text-[12px] font-semibold text-orange-600">
+        <span className="mt-3 inline-flex items-center gap-1.5 text-[12px] font-semibold text-orange-600 dark:text-orange-400">
           Lire l&apos;article
           <svg
             className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
@@ -126,21 +126,21 @@ export default function ActualitesPublicClient({
   };
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-slate-50 transition-colors dark:bg-slate-950">
       {/* Bandeau défilant */}
-      <div className="border-b border-orange-100 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2">
+      <div className="border-b border-orange-100 bg-white dark:border-slate-800 dark:bg-slate-900">
+        <div className="mx-auto flex max-w-6xl items-center gap-3 px-3 py-2 sm:px-4">
           <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-orange-500 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
             <span className="h-1.5 w-1.5 animate-ticker-pulse rounded-full bg-white" />
             En direct
           </span>
           <div className="relative flex-1 overflow-hidden">
-            <div className="animate-marquee flex w-max items-center gap-8 whitespace-nowrap text-[12.5px] text-slate-600">
+            <div className="animate-marquee flex w-max items-center gap-8 whitespace-nowrap text-[12.5px] text-slate-600 dark:text-slate-300">
               {[...ticker, ...ticker].map((article, index) => (
                 <Link
                   key={`${article.id}-${index}`}
                   href={`/actualites/${article.slug}`}
-                  className="hover:text-orange-600"
+                  className="hover:text-orange-600 dark:hover:text-orange-400"
                 >
                   {article.title}
                 </Link>
@@ -151,48 +151,48 @@ export default function ActualitesPublicClient({
       </div>
 
       {/* En-tête éditorial */}
-      <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+      <section className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+        <div className="mx-auto max-w-6xl px-3 py-6 sm:px-4 sm:py-10">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-orange-600">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-orange-600 dark:text-orange-400">
                 TravaillerEnCi · Actualités
               </p>
-              <h1 className="mt-2 font-[var(--font-display)] text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+              <h1 className="mt-2 font-[var(--font-display)] text-2xl font-extrabold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
                 L&apos;actualité qui éclaire votre carrière
               </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 sm:mt-3 sm:text-base dark:text-slate-300">
                 Emploi, formation, économie et opportunités en Côte d&apos;Ivoire
                 et en Afrique — vérifié, hiérarchisé et mis à jour en continu.
               </p>
             </div>
-            <div className="grid grid-cols-3 gap-4 text-center sm:text-right">
+            <div className="grid grid-cols-3 gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-center sm:gap-4 sm:border-0 sm:bg-transparent sm:p-0 sm:text-right dark:border-slate-800 dark:bg-slate-950/50 sm:dark:bg-transparent">
               <div>
-                <div className="text-2xl font-extrabold text-orange-600">{articles.length}</div>
-                <div className="text-[11px] uppercase tracking-wide text-slate-500">Articles</div>
+                <div className="text-xl font-extrabold text-orange-600 sm:text-2xl dark:text-orange-400">{articles.length}</div>
+                <div className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-[11px] dark:text-slate-400">Articles</div>
               </div>
               <div>
-                <div className="text-2xl font-extrabold text-orange-600">
+                <div className="text-xl font-extrabold text-orange-600 sm:text-2xl dark:text-orange-400">
                   {new Set(articles.map((article) => article.category)).size}
                 </div>
-                <div className="text-[11px] uppercase tracking-wide text-slate-500">Rubriques</div>
+                <div className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-[11px] dark:text-slate-400">Rubriques</div>
               </div>
               <div>
-                <div className="text-2xl font-extrabold text-orange-600">
+                <div className="text-xl font-extrabold text-orange-600 sm:text-2xl dark:text-orange-400">
                   {articles[0] ? formatDateShort(articles[0].published_at || articles[0].created_at) : '—'}
                 </div>
-                <div className="text-[11px] uppercase tracking-wide text-slate-500">Dernière MAJ</div>
+                <div className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-[11px] dark:text-slate-400">Dernière MAJ</div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <div className="mx-auto max-w-6xl px-4 py-8">
+      <div className="mx-auto max-w-6xl px-3 py-6 sm:px-4 sm:py-8">
         {/* Recherche + filtres */}
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="relative w-full lg:max-w-md">
-            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400 dark:text-slate-500">
               <svg
                 className="h-4 w-4"
                 viewBox="0 0 24 24"
@@ -213,7 +213,7 @@ export default function ActualitesPublicClient({
               onChange={(event) => resetPage(() => setKeyword(event.target.value))}
               placeholder="Rechercher une actualité..."
               aria-label="Rechercher une actualité"
-              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm text-slate-900 outline-none transition focus:border-orange-300 focus:ring-2 focus:ring-orange-100"
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm text-slate-900 outline-none transition focus:border-orange-300 focus:ring-2 focus:ring-orange-100 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-400 dark:focus:border-orange-500"
             />
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1">
@@ -222,8 +222,8 @@ export default function ActualitesPublicClient({
               onClick={() => resetPage(() => setCategory('all'))}
               className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12px] font-semibold transition ${
                 category === 'all'
-                  ? 'bg-orange-500 text-white shadow-sm shadow-orange-200'
-                  : 'border border-slate-200 bg-white text-slate-600 hover:border-orange-200 hover:text-orange-600'
+                  ? 'bg-orange-500 text-white shadow-sm shadow-orange-200 dark:shadow-orange-900/40'
+                  : 'border border-slate-200 bg-white text-slate-600 hover:border-orange-200 hover:text-orange-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-orange-500/50 dark:hover:text-orange-400'
               }`}
             >
               Tout
@@ -235,8 +235,8 @@ export default function ActualitesPublicClient({
                 onClick={() => resetPage(() => setCategory(item.value))}
                 className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12px] font-semibold transition ${
                   category === item.value
-                    ? 'bg-orange-500 text-white shadow-sm shadow-orange-200'
-                    : 'border border-slate-200 bg-white text-slate-600 hover:border-orange-200 hover:text-orange-600'
+                    ? 'bg-orange-500 text-white shadow-sm shadow-orange-200 dark:shadow-orange-900/40'
+                    : 'border border-slate-200 bg-white text-slate-600 hover:border-orange-200 hover:text-orange-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-orange-500/50 dark:hover:text-orange-400'
                 }`}
               >
                 {item.label}
@@ -246,11 +246,11 @@ export default function ActualitesPublicClient({
         </div>
 
         {filtered.length === 0 ? (
-          <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center sm:p-16">
-            <h2 className="font-[var(--font-display)] text-lg font-bold text-slate-900">
+          <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center sm:p-16 dark:border-slate-700 dark:bg-slate-900">
+            <h2 className="font-[var(--font-display)] text-lg font-bold text-slate-900 dark:text-white">
               Aucune actualité trouvée
             </h2>
-            <p className="mt-2 text-sm text-slate-600">
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
               Essayez un autre mot-clé ou une autre rubrique.
             </p>
             <button
@@ -263,14 +263,14 @@ export default function ActualitesPublicClient({
           </div>
         ) : (
           <>
-            {/* Une + carrousel */}
-            <div className="mt-6 grid gap-5 lg:grid-cols-[1.35fr_1fr]">
+            {/* Une + sélection */}
+            <div className="mt-5 grid gap-4 sm:mt-6 sm:gap-5 lg:grid-cols-[1.35fr_1fr]">
               {featured && (
                 <Link
                   href={`/actualites/${featured.slug}`}
-                  className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-900 shadow-sm"
+                  className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-900 shadow-sm dark:border-slate-800"
                 >
-                  <div className="relative h-64 w-full sm:h-80 lg:h-full lg:min-h-[380px]">
+                  <div className="relative h-60 w-full sm:h-80 lg:h-full lg:min-h-[380px]">
                     <CoverImage
                       src={featured.cover_image || IMAGES.blog}
                       alt={featured.title}
@@ -301,35 +301,35 @@ export default function ActualitesPublicClient({
                 </Link>
               )}
 
-              <div className="rounded-2xl border border-slate-200 bg-white p-4">
+              <div className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4 dark:border-slate-800 dark:bg-slate-900">
                 <div className="mb-3 flex items-center justify-between">
-                  <h2 className="font-[var(--font-display)] text-sm font-bold uppercase tracking-wide text-slate-900">
+                  <h2 className="font-[var(--font-display)] text-sm font-bold uppercase tracking-wide text-slate-900 dark:text-white">
                     À ne pas manquer
                   </h2>
-                  <span className="text-[11px] text-slate-500">Sélection</span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">Sélection</span>
                 </div>
-                <div className="flex snap-x gap-3 overflow-x-auto pb-2">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {highlights.map((article) => (
                     <Link
                       key={article.id}
                       href={`/actualites/${article.slug}`}
-                      className="group w-[210px] shrink-0 snap-start overflow-hidden rounded-xl border border-slate-100"
+                      className="group flex overflow-hidden rounded-xl border border-slate-100 bg-white transition hover:border-orange-200 hover:shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:hover:border-orange-500/40"
                     >
-                      <div className="relative h-24 overflow-hidden bg-slate-100">
+                      <div className="relative h-20 w-20 shrink-0 overflow-hidden bg-slate-100 sm:h-24 sm:w-24 dark:bg-slate-800">
                         <CoverImage
                           src={article.cover_image || IMAGES.blog}
                           alt={article.title}
                           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                         />
                       </div>
-                      <div className="p-3">
-                        <span className="text-[10px] font-bold uppercase tracking-wide text-orange-600">
+                      <div className="min-w-0 flex-1 p-2.5">
+                        <span className="text-[10px] font-bold uppercase tracking-wide text-orange-600 dark:text-orange-400">
                           {categoryLabel(article.category)}
                         </span>
-                        <h3 className="mt-1 line-clamp-2 text-[12.5px] font-semibold leading-snug text-slate-900 group-hover:text-orange-600">
+                        <h3 className="mt-0.5 line-clamp-2 text-[12px] font-semibold leading-snug text-slate-900 group-hover:text-orange-600 sm:text-[12.5px] dark:text-white dark:group-hover:text-orange-400">
                           {article.title}
                         </h3>
-                        <p className="mt-1 text-[10.5px] text-slate-500">
+                        <p className="mt-1 text-[10.5px] text-slate-500 dark:text-slate-400">
                           {formatRelativeTime(article.published_at || article.created_at)}
                         </p>
                       </div>
@@ -343,14 +343,14 @@ export default function ActualitesPublicClient({
             <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_300px]">
               <section>
                 <div className="mb-4 flex items-center justify-between">
-                  <h2 className="font-[var(--font-display)] text-lg font-bold text-slate-900">
+                  <h2 className="font-[var(--font-display)] text-lg font-bold text-slate-900 dark:text-white">
                     Dernières actualités
                   </h2>
-                  <span className="text-[11.5px] text-slate-500">
+                  <span className="text-[11.5px] text-slate-500 dark:text-slate-400">
                     {filtered.length} article{filtered.length > 1 ? 's' : ''}
                   </span>
                 </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {latest.map((article) => (
                     <ArticleCard key={article.id} article={article} />
                   ))}
@@ -365,7 +365,7 @@ export default function ActualitesPublicClient({
                       type="button"
                       onClick={() => setPage(Math.max(1, safePage - 1))}
                       disabled={safePage === 1}
-                      className="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
                     >
                       ← Précédent
                     </button>
@@ -383,7 +383,7 @@ export default function ActualitesPublicClient({
                       }, [])
                       .map((value, index) =>
                         value === -1 ? (
-                          <span key={`gap-${index}`} className="px-1 text-slate-400">
+                          <span key={`gap-${index}`} className="px-1 text-slate-400 dark:text-slate-500">
                             …
                           </span>
                         ) : (
@@ -394,8 +394,8 @@ export default function ActualitesPublicClient({
                             aria-current={value === safePage ? 'page' : undefined}
                             className={`rounded-xl px-3.5 py-2 text-sm font-semibold ${
                               value === safePage
-                                ? 'bg-orange-500 text-white shadow-sm shadow-orange-200'
-                                : 'border border-slate-200 bg-white text-slate-700 hover:border-orange-200 hover:text-orange-600'
+                                ? 'bg-orange-500 text-white shadow-sm shadow-orange-200 dark:shadow-orange-900/40'
+                                : 'border border-slate-200 bg-white text-slate-700 hover:border-orange-200 hover:text-orange-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-orange-500/50 dark:hover:text-orange-400'
                             }`}
                           >
                             {value}
@@ -406,7 +406,7 @@ export default function ActualitesPublicClient({
                       type="button"
                       onClick={() => setPage(Math.min(totalPages, safePage + 1))}
                       disabled={safePage === totalPages}
-                      className="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
                     >
                       Suivant →
                     </button>
@@ -415,8 +415,8 @@ export default function ActualitesPublicClient({
               </section>
 
               <aside className="space-y-5">
-                <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                  <h2 className="font-[var(--font-display)] text-sm font-bold uppercase tracking-wide text-slate-900">
+                <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+                  <h2 className="font-[var(--font-display)] text-sm font-bold uppercase tracking-wide text-slate-900 dark:text-white">
                     Les plus lus
                   </h2>
                   <ol className="mt-3 space-y-3">
@@ -426,14 +426,14 @@ export default function ActualitesPublicClient({
                           href={`/actualites/${article.slug}`}
                           className="group flex gap-3"
                         >
-                          <span className="font-[var(--font-display)] text-2xl font-extrabold leading-none text-orange-200 group-hover:text-orange-400">
+                          <span className="font-[var(--font-display)] text-2xl font-extrabold leading-none text-orange-200 group-hover:text-orange-400 dark:text-orange-500/50 dark:group-hover:text-orange-400">
                             {String(index + 1).padStart(2, '0')}
                           </span>
                           <div>
-                            <h3 className="line-clamp-2 text-[12.5px] font-semibold leading-snug text-slate-800 group-hover:text-orange-600">
+                            <h3 className="line-clamp-2 text-[12.5px] font-semibold leading-snug text-slate-800 group-hover:text-orange-600 dark:text-slate-200 dark:group-hover:text-orange-400">
                               {article.title}
                             </h3>
-                            <p className="mt-0.5 text-[10.5px] text-slate-500">
+                            <p className="mt-0.5 text-[10.5px] text-slate-500 dark:text-slate-400">
                               {article.view_count ?? 0} vues
                             </p>
                           </div>
@@ -441,18 +441,18 @@ export default function ActualitesPublicClient({
                       </li>
                     ))}
                     {mostViewed.length === 0 && (
-                      <li className="text-[12px] text-slate-500">
+                      <li className="text-[12px] text-slate-500 dark:text-slate-400">
                         Les statistiques de lecture apparaîtront bientôt.
                       </li>
                     )}
                   </ol>
                 </div>
 
-                <div className="rounded-2xl border border-orange-100 bg-orange-50 p-5">
-                  <h2 className="font-[var(--font-display)] text-base font-bold text-slate-900">
+                <div className="rounded-2xl border border-orange-100 bg-orange-50 p-5 dark:border-orange-500/30 dark:bg-orange-500/10">
+                  <h2 className="font-[var(--font-display)] text-base font-bold text-slate-900 dark:text-white">
                     Une info à partager ?
                   </h2>
-                  <p className="mt-1.5 text-[12.5px] leading-relaxed text-slate-600">
+                  <p className="mt-1.5 text-[12.5px] leading-relaxed text-slate-600 dark:text-slate-300">
                     Signalez-nous une actualité emploi, formation ou concours
                     vérifiable. La rédaction la traitera en priorité.
                   </p>

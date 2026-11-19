@@ -169,7 +169,7 @@ export default function ProfileSection() {
         return;
       }
       setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
+      setTimeout(() => setSaved(false), 4000);
     } catch {
       setError('Serveur injoignable. Réessayez.');
     } finally {
@@ -214,6 +214,21 @@ export default function ProfileSection() {
           </span>
         ) : null}
       </div>
+
+      {saved ? (
+        <div
+          role="status"
+          aria-live="polite"
+          className="flex items-center gap-3 rounded-2xl border border-brand/40 bg-brand/10 px-4 py-3 text-sm font-semibold text-brand dark:text-brand-accent animate-fade-in-up"
+        >
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand text-white">
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+          </span>
+          Vos informations ont bien été enregistrées.
+        </div>
+      ) : null}
 
       {/* Indicateur de complétion */}
       <div className="rounded-2xl border border-line dark:border-slate-800 bg-brand-soft/50 dark:bg-slate-900/60 p-4">

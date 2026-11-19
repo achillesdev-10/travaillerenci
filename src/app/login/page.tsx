@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import PasswordInput from "@/components/auth/PasswordInput";
 import { apiForgotPassword, apiLogin } from "@/lib/authApi";
-import { fetchCurrentUser } from "@/lib/clientAuth";
+import { fetchCurrentUser, persistCachedUser } from "@/lib/clientAuth";
 import { safeInternalPath } from "@/lib/applicationRules";
 import { isGoogleAuthVisible } from "@/lib/config";
 
@@ -97,7 +97,17 @@ export default function LoginPage() {
       typeof window !== "undefined"
         ? new URLSearchParams(window.location.search).get("next")
         : null;
-    router.push(safeInternalPath(raw, fallback));
+    const destination = safeInternalPath(raw, fallback);
+
+    // Navigation complète (et non router.push) : le routeur Next peut avoir
+    // mis en cache la redirection /dashboard → /login vue avant la connexion,
+    // ce qui laissait la page figée jusqu'à un rafraîchissement manuel. Le
+    // rechargement garantit que le proxy lit le nouveau cookie de session.
+    if (typeof window !== "undefined") {
+      window.location.assign(destination);
+      return;
+    }
+    router.push(destination);
   }
 
   function googleAuthHref(): string {
@@ -134,6 +144,14 @@ export default function LoginPage() {
       }
 
       // Succès : la session (cookie httpOnly) a été posée par le serveur.
+      // On met aussi à jour le cache session pour que le dashboard affiche
+      // immédiatement l'utilisateur, sans attendre /api/auth/me.
+      persistCachedUser({
+        id: result.data.user.id,
+        email: result.data.user.email,
+        name: result.data.user.name,
+        role: result.data.user.role,
+      });
       // Le rôle réel vient de la base (source de vérité), pas du sélecteur.
       redirectToDashboard(result.data.user.role as "candidate" | "company");
     } catch (err: unknown) {

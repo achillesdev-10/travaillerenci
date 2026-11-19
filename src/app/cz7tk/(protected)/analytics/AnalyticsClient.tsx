@@ -63,30 +63,43 @@ function VisitsChart({ data }: { data: AdminAnalyticsData }) {
   }
 
   return (
-    <div className="flex h-32 items-end gap-1 sm:h-48 sm:gap-2.5">
-      {data.visitsByDay.map((point, index) => (
-        <div
-          key={point.date}
-          className="group relative flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1.5"
-        >
-          <div className="relative flex w-full min-w-0 flex-1 items-end">
-            <div
-              className="w-full rounded-t-lg bg-gradient-to-t from-brand to-brand transition-all group-hover:from-brand group-hover:to-brand"
-              style={{ height: `${Math.max(4, (point.visits / max) * 100)}%` }}
-            />
-            <div className="pointer-events-none absolute -top-9 left-1/2 z-10 hidden -translate-x-1/2 whitespace-nowrap rounded-lg border border-white/10 bg-slate-900 px-2.5 py-1 text-[10px] font-semibold text-slate-200 shadow-xl group-hover:block">
-              {point.label} · {point.visits} visite{point.visits > 1 ? "s" : ""}
-            </div>
-          </div>
-          <span
-            className={`text-[10px] font-medium text-slate-500 ${
-              index % 3 !== 0 ? "hidden sm:block" : ""
-            }`}
+    <div>
+      <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400">
+        <span>
+          Total sur la période :{" "}
+          <strong className="font-bold text-white">
+            {data.visitsByDay.reduce((sum, point) => sum + point.visits, 0).toLocaleString("fr-FR")}
+          </strong>{" "}
+          visite(s)
+        </span>
+        <span>Pic journalier : <strong className="font-bold text-white">{max}</strong></span>
+      </div>
+      <div className="flex h-40 items-end gap-1 sm:h-52 sm:gap-2.5">
+        {data.visitsByDay.map((point, index) => (
+          <div
+            key={point.date}
+            className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1.5"
+            title={`${point.label} : ${point.visits} visite${point.visits > 1 ? "s" : ""}`}
           >
-            {point.label}
-          </span>
-        </div>
-      ))}
+            <span className="text-[9px] font-bold tabular-nums leading-none text-slate-200 sm:text-[11px]">
+              {point.visits}
+            </span>
+            <div className="flex w-full min-w-0 flex-1 items-end">
+              <div
+                className="w-full rounded-t-lg bg-gradient-to-t from-brand to-brand"
+                style={{ height: `${Math.max(4, (point.visits / max) * 100)}%` }}
+              />
+            </div>
+            <span
+              className={`text-[9px] font-medium text-slate-500 sm:text-[10px] ${
+                index % 3 !== 0 ? "hidden sm:block" : ""
+              }`}
+            >
+              {point.label}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

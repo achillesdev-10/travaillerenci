@@ -143,16 +143,6 @@ export default function CVPreview({ cvData }: CVPreviewProps) {
               )}
             </div>
           </section>
-
-          <div className="mt-7 rounded-xl border border-[#fed7aa] bg-[#fff7ed] p-3">
-            <p className="text-[8px] font-extrabold uppercase tracking-[0.14em] text-[#9a3412]">
-              Conseil
-            </p>
-            <p className="mt-1 text-[9px] leading-relaxed text-[#7c2d12]">
-              Adaptez votre accroche et vos expériences à chaque offre pour retenir
-              l&apos;attention du recruteur.
-            </p>
-          </div>
         </aside>
 
         <div className="min-w-0 flex-1">

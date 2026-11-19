@@ -150,6 +150,11 @@ export default function CandidateDashboardPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Offres sauvegardées — mises en avant tout en haut du dashboard */}
+        <section id="favoris" aria-label="Mes offres sauvegardées" className="scroll-mt-24">
+          <SavedItemsSection />
+        </section>
+
         {/* Alerte : compte migré sans mot de passe → définir un mot de passe */}
         {user?.needs_password_reset ? (
           <div className="rounded-3xl border border-brand/40 bg-brand-soft dark:bg-slate-900 dark:border-brand/30 p-6 lg:p-8 shadow-xl flex flex-col lg:flex-row gap-8">
@@ -215,11 +220,6 @@ export default function CandidateDashboardPage() {
             {/* Profil d'alerte */}
             <section id="profil" aria-label="Mon profil d'alerte" className="scroll-mt-24">
               <ProfileSection />
-            </section>
-
-            {/* Offres sauvegardées */}
-            <section id="favoris" aria-label="Mes offres sauvegardées" className="scroll-mt-24">
-              <SavedItemsSection />
             </section>
 
             {/* Notifications récentes */}
