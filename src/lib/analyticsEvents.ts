@@ -24,6 +24,14 @@ export const ANALYTICS_EVENTS = [
   'search',
   'share',
   'newsletter_subscribe',
+  'register_view',
+  'signup_start',
+  'signup_error',
+  'google_signup_click',
+  'cta_click',
+  'cv_started',
+  'cv_export',
+  'onboarding_step',
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENTS)[number];
