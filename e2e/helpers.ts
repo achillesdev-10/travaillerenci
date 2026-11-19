@@ -23,19 +23,13 @@ export async function waitForHydration(page: Page, path: string): Promise<void> 
 }
 
 /** Inscription candidat via l'UI → session active + redirection dashboard. */
-export async function registerCandidate(
-  page: Page,
-  name = 'Test E2E',
-): Promise<{ email: string; password: string }> {
+export async function registerCandidate(page: Page): Promise<{ email: string; password: string }> {
   const email = uniqueEmail();
 
   await waitForHydration(page, '/register');
-  await page.getByPlaceholder('Koffi Kouadio').fill(name);
   await page.getByPlaceholder('vous@exemple.ci').first().fill(email);
 
-  const passwords = page.getByPlaceholder('••••••••');
-  await passwords.nth(0).fill(E2E_PASSWORD);
-  await passwords.nth(1).fill(E2E_PASSWORD);
+  await page.getByPlaceholder('••••••••').fill(E2E_PASSWORD);
 
   await page.getByRole('button', { name: /S.inscrire/ }).click();
   await page.waitForURL('**/dashboard/candidate', { timeout: 30_000 });

@@ -110,14 +110,11 @@ test.describe('Accessibilité (§27)', () => {
   test("message d'erreur annoncé par role=alert (inscription)", async ({ page }) => {
     await waitForHydration(page, '/register');
 
-    await page.getByPlaceholder('Koffi Kouadio').fill('Test A11y');
     await page.getByPlaceholder('vous@exemple.ci').first().fill('a11y-test@test.ci');
-    const passwords = page.getByPlaceholder('••••••••');
-    await passwords.nth(0).fill('MotDePasse1!');
-    await passwords.nth(1).fill('MotDePasse2!'); // ne correspond pas
+    await page.getByPlaceholder('••••••••').fill('123'); // trop court
     await page.getByRole('button', { name: /S.inscrire/ }).click();
 
-    const alert = page.locator('[role="alert"]').filter({ hasText: /ne correspondent/i });
+    const alert = page.locator('[role="alert"]').filter({ hasText: /au moins 6/i });
     await expect(alert).toBeVisible({ timeout: 10_000 });
   });
 

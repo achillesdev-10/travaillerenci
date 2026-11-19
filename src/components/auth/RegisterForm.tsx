@@ -7,11 +7,8 @@ import PasswordInput from '@/components/auth/PasswordInput';
 import { apiRegister } from '@/lib/authApi';
 import { fetchCurrentUser, logoutCurrentUser, type StoredUser } from '@/lib/clientAuth';
 import { isGoogleAuthVisible } from '@/lib/config';
-import { REGIONS_CI, SECTORS } from '@/lib/constants';
-import { DIPLOMA_FILTERS } from '@/lib/examConstants';
 import { safeInternalPath } from '@/lib/applicationRules';
 import { trackEvent } from '@/lib/analyticsClient';
-import { cn } from '@/lib/utils';
 
 type Role = 'candidate' | 'company';
 
@@ -25,13 +22,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
   const [role, setRole] = useState<Role>(defaultRole);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [name, setName] = useState('');
   const [companyName, setCompanyName] = useState('');
-  // Mini-profil optionnel (critères d'alertes) — candidats uniquement.
-  const [profileCity, setProfileCity] = useState('');
-  const [profileDiploma, setProfileDiploma] = useState('');
-  const [profileSectors, setProfileSectors] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -83,10 +74,15 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
     window.location.reload();
   }
 
-  function toggleSector(slug: string) {
-    setProfileSectors((prev) =>
-      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug],
-    );
+  /** Nom affiché dérivé de l'email : complété ensuite depuis le tableau de bord. */
+  function candidateNameFromEmail(value: string): string {
+    const local = value.split('@')[0] ?? '';
+    const cleaned = local.replace(/[._-]+/g, ' ').trim();
+    if (!cleaned) return 'Candidat';
+    return cleaned
+      .split(/\s+/)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   }
 
   /** Validation simple : email bien formé + mot de passe d'au moins 6 caractères. */
@@ -98,11 +94,8 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
     if (password.length < 6) {
       return 'Le mot de passe doit contenir au moins 6 caractères.';
     }
-    if (!confirmPassword) {
-      return 'Veuillez confirmer votre mot de passe.';
-    }
-    if (confirmPassword !== password) {
-      return 'Les deux mots de passe ne correspondent pas.';
+    if (role === 'company' && !companyName.trim()) {
+      return "Veuillez renseigner le nom de l'entreprise.";
     }
     return null;
   }
@@ -150,16 +143,9 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
     try {
       const result = await apiRegister({
         email,
-        name: role === 'candidate' ? name : companyName,
+        name: role === 'candidate' ? candidateNameFromEmail(email) : companyName.trim(),
         password,
         role,
-        ...(role === 'candidate'
-          ? {
-              city: profileCity || undefined,
-              diploma: profileDiploma || undefined,
-              sectors: profileSectors.length > 0 ? profileSectors : undefined,
-            }
-          : {}),
       });
 
       if (!result.ok) {
@@ -228,89 +214,45 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
         >
           Travailleren<span className="text-black dark:text-white">Ci</span>
         </Link>
-        <h2 className="text-xl font-bold text-black dark:text-white">Créer un compte</h2>
-        <p className="text-xs text-black dark:text-white">
-          Rejoignez la première plateforme d’emploi en Côte d’Ivoire
+        <h2 className="text-xl font-bold text-black dark:text-white">
+          {role === 'candidate' ? 'Créer un compte candidat' : 'Créer un compte entreprise'}
+        </h2>
+        <p className="text-sm text-black/70 dark:text-slate-300">
+          {role === 'candidate'
+            ? 'Deux champs suffisent. C’est gratuit.'
+            : 'Publiez vos offres et recevez des candidatures.'}
         </p>
       </div>
 
       {error ? (
         <div
           role="alert"
-          className="rounded-2xl bg-rose-500/10 border border-rose-500/30 p-4 text-xs text-rose-600 dark:text-rose-300"
+          className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-600 dark:text-rose-300"
         >
           {error}
         </div>
       ) : null}
 
-      <div className="space-y-3">
-        <span
-          id="register-role-label"
-          className="block text-xs font-bold text-black dark:text-white uppercase tracking-widest"
-        >
-          Je souhaite :
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface px-3 py-2.5 dark:border-slate-800 dark:bg-slate-950">
+        <span className="text-sm font-semibold text-black dark:text-white">
+          {role === 'candidate' ? 'Compte candidat' : 'Compte entreprise'}
         </span>
-        <div
-          role="group"
-          aria-labelledby="register-role-label"
-          className="grid grid-cols-2 gap-3"
+        <button
+          type="button"
+          onClick={() => {
+            setRole(role === 'candidate' ? 'company' : 'candidate');
+            setError(null);
+          }}
+          className="min-h-9 rounded-lg px-2 text-sm font-bold text-primary hover:underline dark:text-brand-accent"
         >
-          <button
-            type="button"
-            onClick={() => setRole('candidate')}
-            aria-pressed={role === 'candidate'}
-            className={`rounded-2xl border p-4 text-left transition-all ${
-              role === 'candidate'
-                ? 'border-primary bg-primary/10 text-primary dark:text-white shadow-lg shadow-primary/10'
-                : 'border-line dark:border-slate-800 bg-surface dark:bg-slate-950 text-black dark:text-white hover:border-line dark:hover:border-slate-700'
-            }`}
-          >
-            <div className="font-bold text-sm">Candidat</div>
-            <div className="text-[11px] text-black dark:text-white mt-0.5">
-              Je cherche un emploi ou un stage
-            </div>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setRole('company')}
-            aria-pressed={role === 'company'}
-            className={`rounded-2xl border p-4 text-left transition-all ${
-              role === 'company'
-                ? 'border-primary bg-primary/10 text-primary dark:text-white shadow-lg shadow-primary/10'
-                : 'border-line dark:border-slate-800 bg-surface dark:bg-slate-950 text-black dark:text-white hover:border-line dark:hover:border-slate-700'
-            }`}
-          >
-            <div className="font-bold text-sm">Entreprise</div>
-            <div className="text-[11px] text-black dark:text-white mt-0.5">
-              Je recrute des talents
-            </div>
-          </button>
-        </div>
+          {role === 'candidate' ? 'Vous recrutez ?' : 'Je cherche un emploi'}
+        </button>
       </div>
 
-      <form onSubmit={handleRegister} className="space-y-4 pt-2">
-        {role === 'candidate' ? (
+      <form onSubmit={handleRegister} className="space-y-4">
+        {role === 'company' ? (
           <div>
-            <label htmlFor="register-name" className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1">
-              Nom complet
-            </label>
-            <input
-              id="register-name"
-              type="text"
-              required
-              placeholder="Koffi Kouadio"
-              value={name}
-              onChange={(e) => {
-                markSignupStart();
-                setName(e.target.value);
-              }}
-              className="w-full rounded-2xl border border-line dark:border-slate-800 bg-surface dark:bg-slate-950 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
-            />
-          </div>
-        ) : (
-          <div>
-            <label htmlFor="register-company" className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1">
+            <label htmlFor="register-company" className="mb-1.5 block text-sm font-semibold text-black dark:text-white">
               Nom de l’entreprise
             </label>
             <input
@@ -323,13 +265,13 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
                 markSignupStart();
                 setCompanyName(e.target.value);
               }}
-              className="w-full rounded-2xl border border-line dark:border-slate-800 bg-surface dark:bg-slate-950 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
+              className="w-full rounded-2xl border border-line bg-surface px-4 py-3 text-base text-black focus:border-primary focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
             />
           </div>
-        )}
+        ) : null}
 
         <div>
-          <label htmlFor="register-email" className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1">
+          <label htmlFor="register-email" className="mb-1.5 block text-sm font-semibold text-black dark:text-white">
             Email professionnel ou personnel
           </label>
           <input
@@ -342,7 +284,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
               markSignupStart();
               setEmail(e.target.value);
             }}
-            className="w-full rounded-2xl border border-line dark:border-slate-800 bg-surface dark:bg-slate-950 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
+            className="w-full rounded-2xl border border-line bg-surface px-4 py-3 text-base text-black focus:border-primary focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
           />
         </div>
 
@@ -373,7 +315,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
                 ))}
               </div>
               <p
-                className={`mt-1 text-[10px] font-semibold ${
+                className={`mt-1 text-xs font-semibold ${
                   passwordStrength(password) <= 2
                     ? 'text-amber-600 dark:text-amber-400'
                     : 'text-brand dark:text-brand-accent'
@@ -387,123 +329,16 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
           )}
         </div>
 
-        <PasswordInput
-          label="Confirmer le mot de passe"
-          value={confirmPassword}
-          onChange={setConfirmPassword}
-          autoComplete="new-password"
-        />
-        {confirmPassword && confirmPassword !== password ? (
-          <p className="-mt-2 ml-1 text-[11px] font-semibold text-rose-500">
-            Les mots de passe ne correspondent pas.
-          </p>
-        ) : null}
-
-        {/* Mini-profil optionnel — alimente les alertes (voir 3.3) */}
-        {role === 'candidate' && (
-          <details className="rounded-2xl border border-line dark:border-slate-800 bg-surface/60 dark:bg-slate-950/50 p-4 group">
-            <summary className="cursor-pointer list-none text-xs font-bold text-black dark:text-white flex items-center justify-between">
-              <span className="inline-flex items-center gap-1.5">
-                <svg className="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-                </svg>
-                Profil d'alerte (optionnel)
-              </span>
-              <svg className="w-4 h-4 text-black/50 transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                <path d="m6 9 6 6 6-6" />
-              </svg>
-            </summary>
-            <p className="text-[11px] text-black dark:text-white mt-2 mb-3">
-              Renseignez vos critères pour recevoir des alertes personnalisées
-              (emplois, stages, bourses, concours). Complétable à tout moment
-              depuis votre espace.
-            </p>
-            <div className="space-y-3.5">
-              <div>
-                <label
-                  htmlFor="register-city"
-                  className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1"
-                >
-                  Ville
-                </label>
-                <select
-                  id="register-city"
-                  value={profileCity}
-                  onChange={(e) => setProfileCity(e.target.value)}
-                  className="w-full rounded-2xl border border-line dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
-                >
-                  <option value="">Toutes les villes</option>
-                  {REGIONS_CI.map((r) => (
-                    <option key={r.slug} value={r.name}>
-                      {r.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="register-diploma"
-                  className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1"
-                >
-                  Diplôme le plus élevé
-                </label>
-                <select
-                  id="register-diploma"
-                  value={profileDiploma}
-                  onChange={(e) => setProfileDiploma(e.target.value)}
-                  className="w-full rounded-2xl border border-line dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
-                >
-                  <option value="">Sélectionner un diplôme</option>
-                  {DIPLOMA_FILTERS.map((d) => (
-                    <option key={d.value} value={d.value}>
-                      {d.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <span
-                  id="register-sectors-label"
-                  className="block text-[10px] font-bold text-black dark:text-white uppercase tracking-widest mb-1.5 ml-1"
-                >
-                  Secteurs d&apos;intérêt
-                </span>
-                <div
-                  role="group"
-                  aria-labelledby="register-sectors-label"
-                  className="flex flex-wrap gap-1.5"
-                >
-                  {SECTORS.map((s) => (
-                    <button
-                      type="button"
-                      key={s.slug}
-                      onClick={() => toggleSector(s.slug)}
-                      aria-pressed={profileSectors.includes(s.slug)}
-                      className={cn(
-                        'rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all',
-                        profileSectors.includes(s.slug)
-                          ? 'border-primary bg-primary/10 text-primary'
-                          : 'border-line bg-white text-black hover:border-primary/40 dark:border-slate-700 dark:bg-slate-900 dark:text-white',
-                      )}
-                    >
-                      {s.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </details>
-        )}
-
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-2xl bg-primary py-3.5 text-xs font-bold text-white hover:brightness-110 transition-all shadow-lg shadow-primary/20 mt-4 disabled:opacity-50"
+          className="mt-2 w-full rounded-2xl bg-primary py-3.5 text-base font-bold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary-dark disabled:opacity-50"
         >
-          {loading ? 'Création du compte...' : 'S’inscrire'}
+          {loading ? 'Création du compte...' : 'S’inscrire gratuitement'}
         </button>
+        <p className="text-center text-xs text-black/60 dark:text-slate-400">
+          Gratuit, sans carte bancaire.
+        </p>
       </form>
 
       {isGoogleAuthVisible() && (
@@ -525,7 +360,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
               markSignupStart();
               trackEvent('google_signup_click', { label: role });
             }}
-            className="w-full rounded-2xl border border-line dark:border-slate-800 bg-surface dark:bg-slate-950 py-3.5 px-4 text-xs font-bold text-black dark:text-white hover:bg-brand-soft dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-line bg-surface px-4 py-3.5 text-sm font-bold text-black shadow-sm transition-all hover:bg-brand-soft dark:border-slate-800 dark:bg-slate-950 dark:text-white dark:hover:bg-slate-800"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path
