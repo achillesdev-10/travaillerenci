@@ -7,11 +7,9 @@ import {
   getCachedJobs,
   getCachedExams,
   getCachedPosts,
-  getCachedArticles,
 } from '@/lib/cachedContent';
 import type { JobOfferSchema } from '@/types';
 import NewsTicker, { type TickerItem } from '@/components/home/NewsTicker';
-import ActualitesTicker from '@/components/home/ActualitesTicker';
 import HomeCarousel from '@/components/home/HomeCarousel';
 import PollWidget from '@/components/home/PollWidgetLazy';
 import OffersGrid from '@/components/home/OffersGrid';
@@ -19,7 +17,6 @@ import ForumSection from '@/components/home/ForumSection';
 import SocialLinks from '@/components/layout/SocialLinks';
 import { buildCarouselSlides } from '@/lib/homeCarousel';
 import { IMAGES, LOCAL_IMAGES } from '@/lib/images';
-import { NEWS_CATEGORY_LABELS } from '@/lib/news/categories';
 import { getSiteUrl } from '@/lib/site';
 
 export const metadata: Metadata = {
@@ -210,7 +207,7 @@ export default async function HomePage() {
   // vers /jobs?q=… (recherche canonique du site, cf. JSON-LD SearchAction).
   // Motivation : toute lecture de `searchParams` rendait la page dynamique
   // et re-rendait tout le HTML à chaque visite (quota CPU 94 %).
-  const [jobs, examRows, blogRows, bourseRows, articleRows] = await Promise.all([
+  const [jobs, examRows, blogRows, bourseRows] = await Promise.all([
     getCachedJobs({
       status: 'published',
       limit: 60,
@@ -237,13 +234,6 @@ export default async function HomePage() {
       status: 'published',
       limit: 4,
       order_by: 'created_at',
-      order_dir: 'desc',
-      fields: 'card',
-    }),
-    getCachedArticles({
-      status: 'published',
-      limit: 8,
-      order_by: 'published_at',
       order_dir: 'desc',
       fields: 'card',
     }),
@@ -295,12 +285,6 @@ export default async function HomePage() {
     })),
   ];
 
-  const actualiteTickerItems = articleRows.rows.slice(0, 8).map((article) => ({
-    id: article.id,
-    title: article.title,
-    href: `/actualites/${article.slug}`,
-    category: NEWS_CATEGORY_LABELS[article.category] ?? 'Actualité',
-  }));
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -333,10 +317,6 @@ export default async function HomePage() {
       {/* ======================================================================== */}
       <NewsTicker items={tickerItems} />
       {/* ======================================================================== */}
-      {/*   BANDEAU ACTUALITÉS — petits titres défilants                            */}
-      {/* ======================================================================== */}
-      <ActualitesTicker items={actualiteTickerItems} />
-      {/* ======================================================================== */}
       {/*   HERO — compact, fond coloré doux                                        */}
       {/* ======================================================================== */}
       <section className="relative overflow-hidden border-b border-line bg-brand-soft/50 pt-6 pb-6 sm:pt-10 sm:pb-10 dark:border-slate-800 dark:bg-slate-900">
@@ -351,69 +331,14 @@ export default async function HomePage() {
                 Plateforme 100% ivoirienne
               </div>
 
-              <h1 className="text-[24px] leading-[1.15] sm:text-4xl lg:text-[42px] font-extrabold mb-2 sm:mb-3 font-[var(--font-display)] text-black dark:text-white">
-                TravaillerEn<span className="text-primary">Ci</span>
-                <span className="block text-black dark:text-white text-[19px] sm:text-2xl lg:text-[28px] mt-0.5 sm:mt-1">
-                  Trouvez un job qui <span className="text-primary">vaut le coup</span>
-                </span>
+              <h1 className="text-[28px] leading-[1.12] sm:text-4xl lg:text-[46px] font-extrabold mb-2 sm:mb-3 font-[var(--font-display)] text-black dark:text-white">
+                Trouvez un job qui <span className="text-primary">vaut le coup</span>
               </h1>
 
-              <p className="text-[13.5px] sm:text-base text-black/75 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
-                Des <strong className="text-black dark:text-white">offres vérifiées</strong>, des
-                entreprises de confiance, et zéro spam. Postulez simplement — on s&apos;occupe du
-                reste.
+              <p className="text-[15px] sm:text-base text-black/75 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
+                Offres d&apos;emploi, stages, bourses et concours en Côte d&apos;Ivoire, réunis sur
+                une seule plateforme.
               </p>
-
-              {/* Ce que la plateforme fait pour vous (§18) — offres, stages,
-                  recherche, alertes, CV, profil candidat. */}
-              <ul
-                aria-label="Ce que vous pouvez faire sur TravaillerEnCi"
-                className="mt-3 flex flex-wrap items-center justify-center gap-1.5"
-              >
-                {[
-                  { label: 'Offres', href: '/jobs' },
-                  { label: 'Stages', href: '/stages' },
-                  { label: 'Recherche', href: '/jobs' },
-                  { label: 'Alertes emploi', href: '/dashboard/candidate' },
-                  { label: 'Mon CV', href: '/generateur-de-cv' },
-                  { label: 'Profil candidat', href: '/register' },
-                ].map((feature) => (
-                  <li key={feature.label}>
-                    <Link
-                      href={feature.href}
-                      className="inline-flex items-center rounded-full border border-line bg-white px-3 py-1.5 text-[12px] sm:text-[13px] font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-900 dark:text-white"
-                    >
-                      {feature.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-
-              {/* CTA principal — de visiteur à compte (§18) */}
-              <div className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:mt-5 sm:gap-3">
-                <Link
-                  href="/register"
-                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-[13px] font-bold text-white transition-colors hover:bg-primary-dark sm:px-5 sm:py-3 sm:text-sm"
-                >
-                  Créer mon profil
-                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M5 12h14" />
-                    <path d="m12 5 7 7-7 7" />
-                  </svg>
-                </Link>
-                <Link
-                  href="/jobs"
-                  className="inline-flex items-center gap-2 rounded-xl border border-line bg-white px-4 py-2.5 text-[13px] font-bold text-black transition-colors hover:border-primary/50 hover:text-primary sm:px-5 sm:py-3 sm:text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white"
-                >
-                  Voir les offres
-                </Link>
-                <Link
-                  href="/jobs/today"
-                  className="inline-flex items-center gap-2 rounded-xl border border-line bg-white px-4 py-2.5 text-[13px] font-bold text-black transition-colors hover:border-primary/50 hover:text-primary sm:px-5 sm:py-3 sm:text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white"
-                >
-                  Offres du jour
-                </Link>
-              </div>
             </div>
           </div>
 
@@ -423,33 +348,28 @@ export default async function HomePage() {
           <div className="mt-5 sm:mt-7 max-w-2xl mx-auto">
             <SearchBar targetPath="/jobs" />
 
-            <div className="mt-4 sm:mt-5 flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-[11px] sm:text-xs text-black dark:text-white">
-              <Stat
-                icon={
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-brand">
-                    <path d="M20 6 9 17l-5-5" />
+            <div className="mt-4 flex flex-col items-center gap-2 sm:mt-5">
+              <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+                <Link
+                  href="/register"
+                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-primary-dark"
+                >
+                  Créer mon compte gratuitement
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M5 12h14" />
+                    <path d="m12 5 7 7-7 7" />
                   </svg>
-                }
-                label="Offres vérifiées"
-              />
-              <Stat
-                icon={
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-orange-500">
-                    <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z" />
-                  </svg>
-                }
-                label="Réponse rapide"
-              />
-              <Stat
-                icon={
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-primary">
-                    <circle cx="12" cy="12" r="10" />
-                    <circle cx="12" cy="12" r="4" />
-                    <path d="M12 2a15.3 15.3 0 0 1 0 20 15.3 15.3 0 0 1 0-20ZM2 12h20" />
-                  </svg>
-                }
-                label="100% Côte d'Ivoire"
-              />
+                </Link>
+                <Link
+                  href="/jobs"
+                  className="inline-flex items-center gap-2 rounded-xl border border-line bg-white px-5 py-3 text-sm font-bold text-black transition-colors hover:border-primary/50 hover:text-primary dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                >
+                  Voir les offres
+                </Link>
+              </div>
+              <p className="text-xs text-black/60 dark:text-slate-400">
+                Gratuit, sans engagement.
+              </p>
             </div>
           </div>
         </div>
@@ -959,15 +879,6 @@ function HomeStat({
   }
 
   return content;
-}
-
-function Stat({ icon, label }: { icon: ReactNode; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 bg-white dark:bg-slate-900 px-2.5 sm:px-3 py-1.5 rounded-full border border-line dark:border-slate-800 text-black dark:text-white">
-      <span aria-hidden="true">{icon}</span>
-      {label}
-    </span>
-  );
 }
 
 function EmptyState() {

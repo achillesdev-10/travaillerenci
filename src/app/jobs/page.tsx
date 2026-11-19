@@ -1,9 +1,13 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { Fragment } from 'react';
 import { getCachedJobs } from '@/lib/cachedContent';
+import { getSessionUser } from '@/lib/userSession';
 import { getCachedJobSeoChips } from '@/lib/cachedJobVivier';
 import SearchBar from '@/components/jobs/SearchBar';
 import CompactJobCard from '@/components/home/CompactJobCard';
+import JobAlertCta from '@/components/jobs/JobAlertCta';
+import JobsSignupCard from '@/components/jobs/JobsSignupCard';
 import type { JobOfferSchema } from '@/types';
 import { getSiteUrl } from '@/lib/site';
 import { cn } from '@/lib/utils';
@@ -80,7 +84,8 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
   // Vivier borné (500) pour calculer l'éligibilité des pages SEO villes/
   // métiers — même requête que la page landing, afin de reproduire à
   // l'identique sa garde-fou anti-404 (§12).
-  const [{ rows: jobs, total }, seoChips] = await Promise.all([
+  const [sessionUser, { rows: jobs, total }, seoChips] = await Promise.all([
+    getSessionUser(),
     getCachedJobs({
       // Seuls les emplois et stages (dépôt unifié) apparaissent sur /jobs —
       // les bourses (scholarship) et concours (exam) ont leurs propres pages.
@@ -200,15 +205,21 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
         {/* Résultats — ancre ciblée après une recherche depuis la home */}
         <div id="resultats" className="scroll-mt-28 mb-6 flex items-center justify-between">
           <h2 className="text-xl font-bold text-black dark:text-white font-[var(--font-display)]">
-            {total} {total > 1 ? 'offres trouvées' : 'offre trouvée'}
-            {keyword || city || contract ? ' (filtrées)' : ''}
+            {total} {total > 1 ? 'offres trouvAces' : 'offre trouvAce'}
+            {keyword || city || contract ? ' (filtrAces)' : ''}
           </h2>
         </div>
 
+        <JobAlertCta />
+
+
         {jobs.length > 0 ? (
           <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
-            {jobs.map((job) => (
-              <CompactJobCard key={job.id} job={job as JobOfferSchema} />
+            {jobs.map((job, index) => (
+              <Fragment key={job.id}>
+                <CompactJobCard job={job as JobOfferSchema} />
+                {!sessionUser && index === 5 ? <JobsSignupCard nextPath="/jobs" /> : null}
+              </Fragment>
             ))}
           </div>
         ) : (

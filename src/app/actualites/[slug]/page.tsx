@@ -8,6 +8,7 @@ import CoverImage from '@/components/content/CoverImage';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
 import ShareButton from '@/components/ShareButton';
 import ArticleViewPing from '@/components/content/ArticleViewPing';
+import ArticleSignupCta from '@/components/content/ArticleSignupCta';
 import { formatDate, formatRelativeTime, truncate } from '@/lib/utils';
 import { getSiteUrl } from '@/lib/site';
 import { NEWS_CATEGORY_LABELS } from '@/lib/news/categories';
@@ -232,6 +233,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
               <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none text-black dark:text-white leading-relaxed">
                 <SimpleMarkdown text={article.content} />
               </div>
+              <ArticleSignupCta nextPath={`/actualites/${article.slug}`} />
               <div className="mt-6 flex justify-end">
                 <ShareButton
                   title={article.title}

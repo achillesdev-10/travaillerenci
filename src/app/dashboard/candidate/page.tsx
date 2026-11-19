@@ -236,7 +236,7 @@ export default function CandidateDashboardPage() {
           {/* Colonne latérale (1/3) */}
           <div className="space-y-6">
             {/* Alertes personnalisées */}
-            <section aria-label="Mes alertes">
+            <section id="alertes" aria-label="Mes alertes" className="scroll-mt-24">
               <AlertsSection />
             </section>
 

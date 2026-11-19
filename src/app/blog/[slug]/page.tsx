@@ -4,6 +4,7 @@ import { cache } from 'react';
 import Link from 'next/link';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
 import CoverImage from '@/components/content/CoverImage';
+import ArticleSignupCta from '@/components/content/ArticleSignupCta';
 import CompactJobCard from '@/components/home/CompactJobCard';
 import { BlogService } from '@/services/blogService';
 import { getCachedPosts } from '@/lib/cachedContent';
@@ -251,6 +252,7 @@ export default async function BlogArticlePage({
             <div className="mt-6 text-[15px] sm:text-base leading-relaxed text-black dark:text-white">
               <SimpleMarkdown text={post.content} />
             </div>
+            <ArticleSignupCta nextPath={`/blog/${post.slug}`} />
           </div>
         </article>
 

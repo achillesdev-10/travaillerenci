@@ -166,24 +166,7 @@ export default function ActualitesPublicClient({
                 et en Afrique — vérifié, hiérarchisé et mis à jour en continu.
               </p>
             </div>
-            <div className="grid grid-cols-3 gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-center sm:gap-4 sm:border-0 sm:bg-transparent sm:p-0 sm:text-right dark:border-slate-800 dark:bg-slate-950/50 sm:dark:bg-transparent">
-              <div>
-                <div className="text-xl font-extrabold text-orange-600 sm:text-2xl dark:text-orange-400">{articles.length}</div>
-                <div className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-[11px] dark:text-slate-400">Articles</div>
-              </div>
-              <div>
-                <div className="text-xl font-extrabold text-orange-600 sm:text-2xl dark:text-orange-400">
-                  {new Set(articles.map((article) => article.category)).size}
-                </div>
-                <div className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-[11px] dark:text-slate-400">Rubriques</div>
-              </div>
-              <div>
-                <div className="text-xl font-extrabold text-orange-600 sm:text-2xl dark:text-orange-400">
-                  {articles[0] ? formatDateShort(articles[0].published_at || articles[0].created_at) : '—'}
-                </div>
-                <div className="text-[10px] uppercase tracking-wide text-slate-500 sm:text-[11px] dark:text-slate-400">Dernière MAJ</div>
-              </div>
-            </div>
+            
           </div>
         </div>
       </section>

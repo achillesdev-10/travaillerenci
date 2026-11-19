@@ -96,12 +96,10 @@ test.describe('Authentification (§36)', () => {
     page,
   }) => {
     await waitForHydration(page, '/register');
-    await page.getByRole('button', { name: /Entreprise/ }).click();
+    await page.getByRole('button', { name: /Vous recrutez/i }).click();
     await page.getByPlaceholder('MTN Côte d’Ivoire').fill('E2E SARL');
     await page.getByPlaceholder('vous@exemple.ci').first().fill(uniqueEmail('e2e-entreprise'));
-    const passwords = page.getByPlaceholder('••••••••');
-    await passwords.nth(0).fill(E2E_PASSWORD);
-    await passwords.nth(1).fill(E2E_PASSWORD);
+    await page.getByPlaceholder('••••••••').fill(E2E_PASSWORD);
     await page.getByRole('button', { name: /S.inscrire/ }).click();
     await page.waitForURL('**/dashboard/company', { timeout: 30_000 });
 

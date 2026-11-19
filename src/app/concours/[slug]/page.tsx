@@ -6,6 +6,7 @@ import { ExamService } from '@/services/examService';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
 import SafetyNotice from '@/components/content/SafetyNotice';
+import ArticleSignupCta from '@/components/content/ArticleSignupCta';
 import SaveButton from '@/components/saved/SaveButton';
 import ExamViewsTracker from '@/components/exams/ExamViewsTracker';
 import {
@@ -425,6 +426,8 @@ export default async function ConcoursDetailPage({ params }: PageProps) {
                 <SimpleMarkdown text={exam.description_md || exam.seo_description || 'Communiqué en cours de rédaction.'} />
               </div>
             </div>
+
+            <ArticleSignupCta nextPath={`/concours/${exam.slug || exam.id}`} />
 
             {/* Mention anti-arnaque — inscriptions via les canaux officiels */}
             <SafetyNotice
