@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import { LOCAL_IMAGES } from '@/lib/images';
 import type { CVData } from '@/types/cv';
@@ -13,6 +14,8 @@ import {
 } from '@/types/cv';
 import dynamic from 'next/dynamic';
 import { useLocalStorage } from '@/hooks';
+import { fetchCurrentUser } from '@/lib/clientAuth';
+import { trackEvent } from '@/lib/analyticsClient';
 
 const CVFormDynamic = dynamic(() => import('@/components/cv/CVForm'), { ssr: false });
 const CVPreviewDynamic = dynamic(() => import('@/components/cv/CVPreview'), { ssr: false });
@@ -28,7 +31,11 @@ export default function CVGeneratorPage() {
   const [isExporting, setIsExporting] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [toast, setToast] = useState<{ tone: 'success' | 'error'; message: string } | null>(null);
+  const [isGuest, setIsGuest] = useState(false);
+  const [showSignupNudge, setShowSignupNudge] = useState(false);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cvStartedRef = useRef(false);
 
   // Aperçu mobile : mise à l'échelle mesurée (scale-to-fit) pour que le CV A4
   // soit toujours entièrement visible et scrollable, quelle que soit la largeur
@@ -81,6 +88,34 @@ export default function CVGeneratorPage() {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchCurrentUser()
+      .then((current) => {
+        if (!cancelled) setIsGuest(!current);
+      })
+      .catch(() => {
+        if (!cancelled) setIsGuest(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 5000);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
+  const handleCVChange = (next: CVData) => {
+    if (!cvStartedRef.current) {
+      cvStartedRef.current = true;
+      trackEvent('cv_started');
+    }
+    setCVData(next);
+  };
 
   // Recale l'échelle et la hauteur de la zone d'aperçu dès que la largeur du
   // conteneur ou le contenu du CV change (aperçu temps réel mobile + bureau).
@@ -169,6 +204,9 @@ export default function CVGeneratorPage() {
         }
 
         pdf.save(`CV_${cvData.fullName.replace(/\s+/g, '_') || 'travaillerenci'}.pdf`);
+        trackEvent('cv_export');
+        setToast({ tone: 'success', message: 'Votre CV est téléchargé.' });
+        if (isGuest) setShowSignupNudge(true);
       } finally {
         // Restaurer le transform scale d'origine
         element.style.transform = originalTransform;
@@ -178,7 +216,10 @@ export default function CVGeneratorPage() {
       }
     } catch (err) {
       console.error(err);
-      alert('Erreur lors de l\'export PDF. Veuillez réessayer.');
+      setToast({
+        tone: 'error',
+        message: "Impossible de générer le PDF. Veuillez réessayer.",
+      });
     } finally {
       setIsExporting(false);
     }
@@ -206,6 +247,63 @@ export default function CVGeneratorPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      {toast ? (
+        <div
+          role={toast.tone === 'error' ? 'alert' : 'status'}
+          aria-live="polite"
+          className={`fixed left-1/2 top-20 z-[60] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-xl border px-4 py-3 text-sm font-semibold shadow-lg ${
+            toast.tone === 'error'
+              ? 'border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200'
+              : 'border-green-200 bg-green-50 text-green-800 dark:border-green-900 dark:bg-green-950 dark:text-green-200'
+          }`}
+        >
+          {toast.message}
+        </div>
+      ) : null}
+
+      {showSignupNudge ? (
+        <div
+          role="status"
+          className="fixed inset-x-4 bottom-20 z-50 mx-auto max-w-lg rounded-2xl border border-brand/25 bg-white p-4 shadow-2xl dark:border-brand/40 dark:bg-slate-900 lg:bottom-6"
+        >
+          <div className="flex items-start gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-black dark:text-white">
+                Votre CV est téléchargé.
+              </p>
+              <p className="mt-1 text-[13px] text-black/70 dark:text-slate-300">
+                Créez un compte gratuit pour enregistrer vos candidatures et recevoir des alertes.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Link
+                  href="/register?next=%2Fgenerateur-de-cv"
+                  className="rounded-lg bg-primary px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-primary-dark"
+                >
+                  Créer mon compte
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setShowSignupNudge(false)}
+                  className="rounded-lg border border-line px-3 py-2 text-xs font-semibold text-black transition-colors hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:text-white"
+                >
+                  Plus tard
+                </button>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowSignupNudge(false)}
+              aria-label="Fermer"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-black/50 hover:bg-black/5 dark:text-white/60 dark:hover:bg-white/10"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true">
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       <section className="relative overflow-hidden border-b border-line dark:border-slate-800 bg-primary/5 dark:bg-primary/10">
         <div className="container mx-auto px-4 py-10 md:py-14 relative">
           <div className="grid lg:grid-cols-[1fr_420px] lg:items-center gap-8">
@@ -388,7 +486,7 @@ export default function CVGeneratorPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
           <div className={`lg:col-span-5 ${activeTab === 'preview' ? 'hidden lg:block' : ''}`}>
             <div className="lg:sticky lg:top-24 overflow-y-auto max-h-[calc(100vh-8rem)] lg:pr-2 custom-scrollbar">
-              {hydrated && <CVFormDynamic cvData={cvData} onChange={setCVData} />}
+              {hydrated && <CVFormDynamic cvData={cvData} onChange={handleCVChange} />}
 
               {/* Aperçu lettre de motivation — lien vers le mode lettre */}
               <div className="mt-4 rounded-xl border border-brand/20 bg-brand-soft p-4 dark:border-brand/30 dark:bg-brand/10">
