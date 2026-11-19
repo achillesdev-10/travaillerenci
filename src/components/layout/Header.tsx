@@ -209,17 +209,26 @@ export default function Header() {
           </div>
 
           <div className="flex items-center gap-1.5 lg:hidden">
-            <Link
-              href="/publier-offre"
-              aria-label="Publier une offre"
-              title="Publier une offre"
-              className="flex h-11 items-center gap-1.5 rounded-xl bg-brand px-2.5 text-white shadow-card transition-colors hover:bg-brand-strong sm:px-3"
-            >
-              <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-              <span className="hidden text-[13px] font-bold sm:inline">Publier</span>
-            </Link>
+            {!sessionLoading && !user && pathname !== '/register' ? (
+              <Link
+                href="/register"
+                className="flex h-11 items-center rounded-xl bg-brand px-3 text-[13px] font-bold text-white shadow-card transition-colors hover:bg-brand-strong"
+              >
+                S&apos;inscrire
+              </Link>
+            ) : (
+              <Link
+                href="/publier-offre"
+                aria-label="Publier une offre"
+                title="Publier une offre"
+                className="flex h-11 items-center gap-1.5 rounded-xl bg-brand px-2.5 text-white shadow-card transition-colors hover:bg-brand-strong sm:px-3"
+              >
+                <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+                <span className="hidden text-[13px] font-bold sm:inline">Publier</span>
+              </Link>
+            )}
             <button
               type="button"
               onClick={() => setOpen((value) => !value)}
