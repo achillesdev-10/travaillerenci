@@ -4,6 +4,7 @@ import { cache } from 'react';
 import Link from 'next/link';
 import SimpleMarkdown from '@/components/content/SimpleMarkdown';
 import CoverImage from '@/components/content/CoverImage';
+import ArticleSignupCta from '@/components/content/ArticleSignupCta';
 import { EntreprendreArticleService } from '@/services/entreprendreService';
 import { getCachedEntreprendre } from '@/lib/cachedContent';
 import { JobOfferSchemaService } from '@/services/jobOfferSchemaService';
@@ -363,6 +364,8 @@ export default async function EntreprendreArticlePage({
             >
               <SimpleMarkdownWithAnchors content={article.content} />
             </div>
+
+            <ArticleSignupCta nextPath={`/entreprendre/${article.slug}`} />
 
             {/* Encadré "Offres liées" */}
             {relatedJobs.length > 0 && (

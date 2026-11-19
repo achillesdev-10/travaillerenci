@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { Fragment } from 'react';
 import { getCachedJobs } from '@/lib/cachedContent';
+import { getSessionUser } from '@/lib/userSession';
 import { getCachedJobSeoChips } from '@/lib/cachedJobVivier';
 import SearchBar from '@/components/jobs/SearchBar';
 import CompactJobCard from '@/components/home/CompactJobCard';
@@ -81,7 +83,8 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
   // Vivier borné (500) pour calculer l'éligibilité des pages SEO villes/
   // métiers — même requête que la page landing, afin de reproduire à
   // l'identique sa garde-fou anti-404 (§12).
-  const [{ rows: jobs, total }, seoChips] = await Promise.all([
+  const [sessionUser, { rows: jobs, total }, seoChips] = await Promise.all([
+    getSessionUser(),
     getCachedJobs({
       // Seuls les emplois et stages (dépôt unifié) apparaissent sur /jobs —
       // les bourses (scholarship) et concours (exam) ont leurs propres pages.
@@ -211,8 +214,27 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
 
         {jobs.length > 0 ? (
           <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
-            {jobs.map((job) => (
-              <CompactJobCard key={job.id} job={job as JobOfferSchema} />
+            {jobs.map((job, index) => (
+              <Fragment key={job.id}>
+                <CompactJobCard job={job as JobOfferSchema} />
+                {!sessionUser && index === 5 ? (
+                  <aside className="col-span-2 flex flex-col justify-center rounded-2xl border border-brand/25 bg-brand-soft/60 p-5 sm:col-span-1 dark:border-brand/30 dark:bg-brand/10">
+                    <p className="font-[var(--font-display)] text-base font-bold text-ink dark:text-white">
+                      Créez votre compte gratuit
+                    </p>
+                    <p className="mt-1 text-sm text-ink-soft dark:text-slate-300">
+                      Enregistrez vos offres préférées et recevez les nouvelles opportunités par
+                      alerte.
+                    </p>
+                    <Link
+                      href={`/register?next=${encodeURIComponent('/jobs')}`}
+                      className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-primary-dark"
+                    >
+                      S’inscrire gratuitement
+                    </Link>
+                  </aside>
+                ) : null}
+              </Fragment>
             ))}
           </div>
         ) : (
