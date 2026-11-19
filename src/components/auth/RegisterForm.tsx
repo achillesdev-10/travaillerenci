@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import PasswordInput from '@/components/auth/PasswordInput';
@@ -10,6 +10,7 @@ import { isGoogleAuthVisible } from '@/lib/config';
 import { REGIONS_CI, SECTORS } from '@/lib/constants';
 import { DIPLOMA_FILTERS } from '@/lib/examConstants';
 import { safeInternalPath } from '@/lib/applicationRules';
+import { trackEvent } from '@/lib/analyticsClient';
 import { cn } from '@/lib/utils';
 
 type Role = 'candidate' | 'company';
@@ -40,6 +41,13 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
   const [sessionUser, setSessionUser] = useState<StoredUser | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
   const [loginHref, setLoginHref] = useState('/login');
+  const signupStartedRef = useRef(false);
+
+  function markSignupStart() {
+    if (signupStartedRef.current) return;
+    signupStartedRef.current = true;
+    trackEvent('signup_start', { label: role });
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -52,6 +60,11 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!sessionChecked || sessionUser) return;
+    trackEvent('register_view');
+  }, [sessionChecked, sessionUser]);
 
   // Lien « Se connecter » : conserver la destination d'origine. Lecture URL
   // unique au montage, pas d'alternative React.
@@ -126,6 +139,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
     e.preventDefault();
     const validationError = validate();
     if (validationError) {
+      trackEvent('signup_error', { label: 'validation' });
       setError(validationError);
       return;
     }
@@ -149,6 +163,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
       });
 
       if (!result.ok) {
+        trackEvent('signup_error', { label: 'api' });
         setError(result.error);
         return;
       }
@@ -156,6 +171,7 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
       // Succès : la session (cookie httpOnly) a été posée par le serveur.
       redirectToDashboard();
     } catch (err: unknown) {
+      trackEvent('signup_error', { label: 'network' });
       setError(err instanceof Error ? err.message : 'Erreur lors de l’inscription');
     } finally {
       setLoading(false);
@@ -285,7 +301,10 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
               required
               placeholder="Koffi Kouadio"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                markSignupStart();
+                setName(e.target.value);
+              }}
               className="w-full rounded-2xl border border-line dark:border-slate-800 bg-surface dark:bg-slate-950 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
             />
           </div>
@@ -300,7 +319,10 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
               required
               placeholder="MTN Côte d’Ivoire"
               value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
+              onChange={(e) => {
+                markSignupStart();
+                setCompanyName(e.target.value);
+              }}
               className="w-full rounded-2xl border border-line dark:border-slate-800 bg-surface dark:bg-slate-950 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
             />
           </div>
@@ -316,7 +338,10 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
             required
             placeholder="vous@exemple.ci"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              markSignupStart();
+              setEmail(e.target.value);
+            }}
             className="w-full rounded-2xl border border-line dark:border-slate-800 bg-surface dark:bg-slate-950 px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-primary"
           />
         </div>
@@ -325,7 +350,10 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
           <PasswordInput
             label="Mot de passe"
             value={password}
-            onChange={setPassword}
+            onChange={(value) => {
+              markSignupStart();
+              setPassword(value);
+            }}
             autoComplete="new-password"
           />
           {password && (
@@ -493,6 +521,10 @@ export default function RegisterForm({ defaultRole = 'candidate' }: RegisterForm
 
           <a
             href={googleAuthHref()}
+            onClick={() => {
+              markSignupStart();
+              trackEvent('google_signup_click', { label: role });
+            }}
             className="w-full rounded-2xl border border-line dark:border-slate-800 bg-surface dark:bg-slate-950 py-3.5 px-4 text-xs font-bold text-black dark:text-white hover:bg-brand-soft dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
